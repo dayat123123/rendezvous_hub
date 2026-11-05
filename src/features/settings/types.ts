@@ -71,25 +71,20 @@ export type HolidayKind = (typeof holidayKinds)[number]
 
 export type Holiday = { day: string; name: string; kind: HolidayKind }
 
-export const settingsSections = [
-  'accounts',
-  'topics',
-  'quickReplies',
-  'ticketLabels',
-  'hours',
-  'messages',
-  'assignment',
-  'community',
-  'push',
-  'integration',
-  'apiKeys',
-  'appIntegration',
-  'features',
-  'banners',
-  'backup',
-  'alerts',
-] as const
-export type SettingsSection = (typeof settingsSections)[number]
+export const settingsGroups = {
+  service: ['accounts', 'topics', 'quickReplies', 'ticketLabels', 'hours', 'messages', 'assignment'],
+  community: ['community'],
+  integration: ['integration', 'apiKeys', 'push'],
+  system: ['backup', 'alerts'],
+} as const
+export type SettingsGroup = keyof typeof settingsGroups
+export type SettingsSection = (typeof settingsGroups)[SettingsGroup][number]
+
+export const settingsGroupOrder: readonly SettingsGroup[] = ['service', 'community', 'integration', 'system']
+
+export const settingsSections: readonly SettingsSection[] = settingsGroupOrder.flatMap(
+  (group) => settingsGroups[group],
+)
 
 export type IntegrationStatus = {
   url: string

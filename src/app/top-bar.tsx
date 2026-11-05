@@ -61,6 +61,7 @@ type NavTarget =
   | '/'
   | '/dashboard'
   | '/reports'
+  | '/app'
   | '/settings'
   | '/compliance'
   | '/compliance/cases'
@@ -278,7 +279,12 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
             countLabel={t('nav.communityAttention', { count: communityCount })}
           />
         ) : null}
-        {superAdmin ? <NavLink to="/settings" label={t('nav.settings')} /> : null}
+        {superAdmin ? (
+          <>
+            <NavLink to="/app" label={t('nav.app')} />
+            <NavLink to="/settings" label={t('nav.settings')} />
+          </>
+        ) : null}
         {showSystem ? (
           <NavLink
             to="/system"

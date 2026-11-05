@@ -7,6 +7,7 @@ import {
   ClockIcon,
   FileLockIcon,
   FileTextIcon,
+  FlagIcon,
   FolderSearchIcon,
   GaugeIcon,
   HandIcon,
@@ -16,11 +17,13 @@ import {
   ListIcon,
   MessageSquareTextIcon,
   MoonIcon,
+  PanelTopIcon,
   RowsIcon,
   ScrollTextIcon,
   SettingsIcon,
   ShieldCheckIcon,
   ShieldIcon,
+  SmartphoneIcon,
   SquareCheckBigIcon,
   StickyNoteIcon,
   TicketIcon,
@@ -42,6 +45,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/overlay'
 import { Kbd } from '@/components/ui/primitives'
+import { appTabs, type AppTab } from '@/features/app-management/types'
 import { useAgent } from '@/features/auth/hooks'
 import { useSetStatus } from '@/features/presence/hooks'
 import {
@@ -107,10 +111,17 @@ function Section({
   )
 }
 
+const appTabIcons: Record<AppTab, Icon> = {
+  features: FlagIcon,
+  banners: PanelTopIcon,
+  connection: SmartphoneIcon,
+}
+
 type SectionTarget =
   | '/dashboard'
   | '/reports'
   | '/community'
+  | '/app'
   | '/settings'
   | '/compliance'
   | '/compliance/cases'
@@ -187,7 +198,12 @@ function PaletteBody({
         ]
       : []),
     ...(hasNasabah(agent) ? [{ label: t('nav.nasabah'), icon: UsersIcon, to: '/nasabah' as const }] : []),
-    ...(superAdmin ? [{ label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const }] : []),
+    ...(superAdmin
+      ? [
+          { label: t('nav.app'), icon: SmartphoneIcon, to: '/app' as const },
+          { label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const },
+        ]
+      : []),
     ...(superAdmin && !compliance
       ? [{ label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const }]
       : []),
@@ -223,6 +239,14 @@ function PaletteBody({
       icon: section.icon,
       run: () => void navigate({ to: section.to, search: section.search }),
     })),
+    ...(superAdmin
+      ? appTabs.map((tab) => ({
+          id: `nav:/app:${tab}`,
+          label: t('command.appTab', { tab: t(`appManagement.tabs.${tab}`) }),
+          icon: appTabIcons[tab],
+          run: () => void navigate({ to: '/app', search: { tab } }),
+        }))
+      : []),
   ]
 
   const statuses: { id: string; label: string; status: AgentStatus }[] = worker

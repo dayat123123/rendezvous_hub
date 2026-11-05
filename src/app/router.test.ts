@@ -34,4 +34,11 @@ describe('router', () => {
     expect((await open('/system', monitorFixture)).pathname).toBe('/system')
     expect((await open('/system', agentFixture)).pathname).toBe('/')
   })
+
+  it('opens /app to Super Admins only and keeps a known tab from the search param', async () => {
+    const location = await open('/app?tab=banners', monitorFixture)
+    expect(location.pathname).toBe('/app')
+    expect(location.search).toEqual({ tab: 'banners' })
+    expect((await open('/app?tab=features', agentFixture)).pathname).toBe('/')
+  })
 })

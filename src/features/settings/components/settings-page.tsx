@@ -2,16 +2,13 @@ import {
   BellRingIcon,
   CalendarClockIcon,
   DatabaseBackupIcon,
-  FlagIcon,
   KeyRoundIcon,
   MegaphoneIcon,
   MessageSquareTextIcon,
   MessagesSquareIcon,
-  PanelTopIcon,
   PlugZapIcon,
   SirenIcon,
   SlidersHorizontalIcon,
-  SmartphoneIcon,
   TagIcon,
   TagsIcon,
   UsersIcon,
@@ -20,17 +17,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SectionBoundary } from '@/components/states'
-import { AppIntegrationSection } from '@/features/app-integration/components/app-integration-section'
 import { useAgent } from '@/features/auth/hooks'
-import { BannersSection } from '@/features/client-config/components/banners-section'
-import { FeaturesSection } from '@/features/client-config/components/features-section'
 import { IntegrationKeysSection } from '@/features/integration-keys/components/keys-section'
 import { LabelsSection } from '@/features/labels/components/labels-section'
 import { PushSection } from '@/features/push/components/push-section'
 import { PushInactiveBadge } from '@/features/push/components/push-state'
 import { cn } from '@/lib/utils'
 
-import type { SettingsSection } from '../types'
+import { settingsGroupOrder, settingsGroups, type SettingsSection } from '../types'
 import { AccountsSection } from './accounts-section'
 import { AlertsSection } from './alerts-section'
 import { AssignmentSection } from './assignment-section'
@@ -42,24 +36,21 @@ import { MessagesSection } from './messages-section'
 import { QuickRepliesSection } from './quick-replies-section'
 import { TopicsSection } from './topics-section'
 
-const sections: { id: SettingsSection; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 'accounts', icon: UsersIcon },
-  { id: 'topics', icon: TagsIcon },
-  { id: 'quickReplies', icon: MessageSquareTextIcon },
-  { id: 'ticketLabels', icon: TagIcon },
-  { id: 'hours', icon: CalendarClockIcon },
-  { id: 'messages', icon: MessagesSquareIcon },
-  { id: 'assignment', icon: SlidersHorizontalIcon },
-  { id: 'community', icon: MegaphoneIcon },
-  { id: 'push', icon: BellRingIcon },
-  { id: 'integration', icon: PlugZapIcon },
-  { id: 'apiKeys', icon: KeyRoundIcon },
-  { id: 'appIntegration', icon: SmartphoneIcon },
-  { id: 'features', icon: FlagIcon },
-  { id: 'banners', icon: PanelTopIcon },
-  { id: 'backup', icon: DatabaseBackupIcon },
-  { id: 'alerts', icon: SirenIcon },
-]
+const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>> = {
+  accounts: UsersIcon,
+  topics: TagsIcon,
+  quickReplies: MessageSquareTextIcon,
+  ticketLabels: TagIcon,
+  hours: CalendarClockIcon,
+  messages: MessagesSquareIcon,
+  assignment: SlidersHorizontalIcon,
+  community: MegaphoneIcon,
+  integration: PlugZapIcon,
+  apiKeys: KeyRoundIcon,
+  push: BellRingIcon,
+  backup: DatabaseBackupIcon,
+  alerts: SirenIcon,
+}
 
 const content: Record<SettingsSection, () => React.ReactNode> = {
   accounts: () => <AccountsSection />,
@@ -73,9 +64,6 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   push: () => <PushSection />,
   integration: () => <IntegrationSection />,
   apiKeys: () => <IntegrationKeysSection />,
-  appIntegration: () => <AppIntegrationSection />,
-  features: () => <FeaturesSection />,
-  banners: () => <BannersSection />,
   backup: () => <BackupSection />,
   alerts: () => <AlertsSection />,
 }
@@ -92,29 +80,50 @@ export function SettingsPage() {
     <div className="flex h-full flex-col md:flex-row">
       <nav
         aria-label={t('settings.title')}
-        className="flex shrink-0 gap-0.5 overflow-x-auto border-b bg-subtle p-2 md:w-56 md:flex-col md:overflow-x-visible md:border-r md:border-b-0 md:p-3"
+        className="flex shrink-0 gap-0.5 overflow-x-auto border-b bg-subtle p-2 md:w-56 md:flex-col md:overflow-x-hidden md:overflow-y-auto md:border-r md:border-b-0 md:p-3"
       >
         <h1 className="hidden px-2.5 pt-1 pb-3 text-panel font-semibold md:block">{t('settings.title')}</h1>
-        {sections.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            aria-current={section === item.id ? 'page' : undefined}
-            onClick={() => setSection(item.id)}
+        {settingsGroupOrder.map((group, index) => (
+          <div
+            key={group}
+            role="group"
+            aria-labelledby={`settings-group-${group}`}
             className={cn(
-              'inline-flex min-h-8 shrink-0 items-center gap-2.5 rounded-md px-2.5 py-1 text-left text-row whitespace-nowrap text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50',
-              section === item.id && 'bg-selected font-medium text-foreground',
+              'flex shrink-0 items-center gap-0.5 md:flex-col md:items-stretch',
+              index > 0 && 'ml-1 border-l pl-2 md:mt-3 md:ml-0 md:border-l-0 md:pl-0',
             )}
           >
-            <item.icon className="size-4 shrink-0" />
-            {badges[item.id] ? (
-              <span className="flex flex-col items-start gap-1 md:py-0.5">
-                {t(`settings.${item.id}`)} {badges[item.id]}
-              </span>
-            ) : (
-              t(`settings.${item.id}`)
-            )}
-          </button>
+            <h2
+              id={`settings-group-${group}`}
+              className="shrink-0 px-1.5 text-xs font-medium whitespace-nowrap text-muted-foreground md:px-2.5 md:pb-1"
+            >
+              {t(`settings.groups.${group}`)}
+            </h2>
+            {settingsGroups[group].map((id) => {
+              const Icon = icons[id]
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  aria-current={section === id ? 'page' : undefined}
+                  onClick={() => setSection(id)}
+                  className={cn(
+                    'inline-flex min-h-8 shrink-0 items-center gap-2.5 rounded-md px-2.5 py-1 text-left text-row whitespace-nowrap text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50',
+                    section === id && 'bg-selected font-medium text-foreground',
+                  )}
+                >
+                  <Icon className="size-4 shrink-0" />
+                  {badges[id] ? (
+                    <span className="flex flex-col items-start gap-1 md:py-0.5">
+                      {t(`settings.${id}`)} {badges[id]}
+                    </span>
+                  ) : (
+                    t(`settings.${id}`)
+                  )}
+                </button>
+              )
+            })}
+          </div>
         ))}
       </nav>
       <div className="min-h-0 flex-1 overflow-y-auto">

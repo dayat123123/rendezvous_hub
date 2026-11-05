@@ -20,8 +20,8 @@ const panels: Record<SystemTab, () => React.ReactNode> = {
 export function SystemPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const search: { tab?: SystemTab } = useSearch({ strict: false })
-  const tab = search.tab ?? 'status'
+  const search: { tab?: string } = useSearch({ strict: false })
+  const tab: SystemTab = systemTabs.find((item) => item === search.tab) ?? 'status'
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-5 lg:px-6">

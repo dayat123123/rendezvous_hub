@@ -119,6 +119,7 @@ export const id = {
     tickets: 'Layanan Nasabah',
     dashboard: 'Dashboard',
     reports: 'Laporan',
+    app: 'Aplikasi',
     settings: 'Pengaturan',
     attention: '{{count}} tiket perlu perhatian',
     account: 'Akun',
@@ -471,6 +472,7 @@ export const id = {
     nasabahHint:
       'Izin menu Akun Nasabah (data dari API Nasabah), khusus akun berperan CS. Kosong berarti menu tidak tampil.',
     title: 'Pengaturan',
+    groups: { service: 'Layanan CS', community: 'Komunitas', integration: 'Integrasi', system: 'Sistem' },
     accounts: 'Akun CS',
     topics: 'Topik',
     quickReplies: 'Quick reply',
@@ -618,15 +620,13 @@ export const id = {
     integration: 'Integrasi API Nasabah',
     apiKeys: 'API Notifikasi',
     appIntegration: 'Integrasi aplikasi',
-    features: 'Fitur & versi',
-    banners: 'Banner aplikasi',
     backup: 'Backup',
     backupDescription:
       'Tujuan, password enkripsi, jadwal, dan retensi backup database dan file. Hasil backup penuh dan uji restore tampil di sini.',
     alerts: 'Alert',
     alertsDescription:
       'Ke mana alert gangguan sistem dikirim: Telegram dan/atau email. Isi minimal satu kanal, lalu tekan Kirim uji.',
-    community: 'Komunitas',
+    community: 'Aturan persetujuan',
     communityDescription: 'Aturan persetujuan postingan dan notifikasi resmi.',
     fourEyes: 'Aturan empat mata',
     fourEyesHint:
@@ -1519,6 +1519,12 @@ export const id = {
       links_client_only: 'Hanya akun Klien yang bisa ditautkan ke rekening.',
     },
   },
+  appManagement: {
+    title: 'Aplikasi',
+    subtitle: 'Atur apa yang tampil dan berjalan di aplikasi nasabah.',
+    tabsLabel: 'Bagian aplikasi',
+    tabs: { features: 'Fitur & versi', banners: 'Banner & popup', connection: 'Koneksi aplikasi' },
+  },
   command: {
     placeholder: 'Cari tiket, nasabah, atau perintah…',
     label: 'Command palette',
@@ -1530,6 +1536,7 @@ export const id = {
     preferences: 'Tampilan',
     openTicket: 'Buka tiket {{number}}',
     goTo: 'Buka {{section}}',
+    appTab: 'Buka Aplikasi › {{tab}}',
     tab: 'Tab {{tab}}',
     setStatus: 'Status: {{status}}',
     toggleTheme: 'Ganti tema',

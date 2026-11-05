@@ -6,6 +6,7 @@ import {
   redirect,
 } from '@tanstack/react-router'
 
+import { isAppTab, type AppTab } from '@/features/app-management/types'
 import {
   communityTabs,
   moderationQueues,
@@ -96,6 +97,18 @@ const settingsRoute = createRoute({
   component: lazyRouteComponent(
     withStrings(() => import('@/features/settings/components/settings-page'), 'platform', 'labels'),
     'SettingsPage',
+  ),
+})
+
+const appRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/app',
+  beforeLoad: superAdminOnly,
+  validateSearch: (search: Record<string, unknown>): { tab?: AppTab } =>
+    isAppTab(search.tab) ? { tab: search.tab } : {},
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/app-management/components/app-page'), 'platform'),
+    'AppPage',
   ),
 })
 
@@ -256,6 +269,7 @@ const routeTree = rootRoute.addChildren([
   dashboardRoute,
   reportsRoute,
   analyticsRoute,
+  appRoute,
   settingsRoute,
   complianceRoute,
   complianceCasesRoute,

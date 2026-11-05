@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { monitorFixture } from '@/test/fixtures'
+import { agentFixture, monitorFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
 
 import { useOverlays } from '../bus'
@@ -59,5 +59,24 @@ describe('CommandPalette', () => {
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
 
     expect(screen.getByRole('option', { name: 'Buka Kesehatan sistem' })).toBeInTheDocument()
+  })
+
+  it('lists Aplikasi and each of its tabs for Super Admins', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
+
+    expect(screen.getByRole('option', { name: 'Buka Aplikasi' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Buka Aplikasi › Fitur & versi' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Buka Aplikasi › Koneksi aplikasi' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('option', { name: 'Buka Aplikasi › Banner & popup' }))
+
+    expect(navigate).toHaveBeenCalledWith({ to: '/app', search: { tab: 'banners' } })
+  })
+
+  it('keeps Aplikasi out of the palette for CS agents', () => {
+    renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, agentFixture)
+
+    expect(screen.queryByRole('option', { name: /Aplikasi/ })).not.toBeInTheDocument()
   })
 })

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 
 import i18n, { switchLanguage, type Language } from '@/i18n'
 import { logger } from '@/lib/logger'
+import { isStaleBuildError, reloadForNewBuild } from '@/lib/stale-build'
 import { readLocal, writeLocal } from '@/lib/storage'
 
 export type Theme = 'system' | 'light' | 'dark'
@@ -63,6 +64,7 @@ export const usePreferences = create<Preferences>((set) => ({
     writeLocal('language', language)
     set({ language })
     switchLanguage(language).catch((error: unknown) => {
+      if (isStaleBuildError(error) && reloadForNewBuild()) return
       logger.warn('Language change failed', error)
       writeLocal('language', asLanguage(i18n.language))
       set({ language: asLanguage(i18n.language) })

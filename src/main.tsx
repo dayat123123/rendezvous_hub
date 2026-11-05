@@ -8,7 +8,10 @@ import { App } from '@/app/app'
 import { ConfigError } from '@/app/config-error'
 import { readEnv } from '@/config/env'
 import { prepareLanguage } from '@/i18n'
+import { watchStaleBuild } from '@/lib/stale-build'
 import { initSupabase } from '@/lib/supabase'
+
+watchStaleBuild()
 
 const container = document.getElementById('root')
 if (!container) throw new Error('Element #root is missing')

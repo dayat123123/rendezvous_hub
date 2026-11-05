@@ -122,6 +122,7 @@ export const en: Translation = {
     tickets: 'Customer service',
     dashboard: 'Dashboard',
     reports: 'Reports',
+    app: 'App',
     settings: 'Settings',
     attention: '{{count}} tickets need attention',
     account: 'Account',
@@ -474,6 +475,7 @@ export const en: Translation = {
     nasabahHint:
       'Permissions for the Customer accounts menu (data from the Customer API), CS-role accounts only. Empty means the menu is hidden.',
     title: 'Settings',
+    groups: { service: 'CS service', community: 'Community', integration: 'Integrations', system: 'System' },
     accounts: 'CS accounts',
     topics: 'Topics',
     quickReplies: 'Quick replies',
@@ -620,15 +622,13 @@ export const en: Translation = {
     integration: 'Customer API integration',
     apiKeys: 'Notification API',
     appIntegration: 'App integration',
-    features: 'Features & versions',
-    banners: 'App banners',
     backup: 'Backup',
     backupDescription:
       'Destination, encryption password, schedule, and retention for database and file backups. Full backup and restore test results appear here.',
     alerts: 'Alerts',
     alertsDescription:
       'Where system alerts are delivered: Telegram and/or email. Fill in at least one channel, then press Send test.',
-    community: 'Community',
+    community: 'Approval rules',
     communityDescription: 'Approval rules for official posts and notifications.',
     fourEyes: 'Four-eyes rule',
     fourEyesHint:
@@ -1523,6 +1523,12 @@ export const en: Translation = {
       links_client_only: 'Only client logins can be linked to accounts.',
     },
   },
+  appManagement: {
+    title: 'App',
+    subtitle: 'Control what appears and runs in the customer app.',
+    tabsLabel: 'App sections',
+    tabs: { features: 'Features & versions', banners: 'Banners & popups', connection: 'App connection' },
+  },
   command: {
     placeholder: 'Search tickets, customers, or commands…',
     label: 'Command palette',
@@ -1534,6 +1540,7 @@ export const en: Translation = {
     preferences: 'Appearance',
     openTicket: 'Open ticket {{number}}',
     goTo: 'Go to {{section}}',
+    appTab: 'Go to App › {{tab}}',
     tab: '{{tab}} tab',
     setStatus: 'Status: {{status}}',
     toggleTheme: 'Switch theme',

@@ -71,8 +71,29 @@ describe('TopBar', () => {
     expect(screen.getByText('Mode pantau')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^Ubah status/ })).not.toBeInTheDocument()
     expect(screen.queryByText(/^Aktif \d+\/\d+$/)).not.toBeInTheDocument()
-    expect(navLinks()).toEqual(['Layanan Nasabah', 'Dashboard', 'Laporan', 'Komunitas', 'Pengaturan'])
+    expect(navLinks()).toEqual([
+      'Layanan Nasabah',
+      'Dashboard',
+      'Laporan',
+      'Komunitas',
+      'Aplikasi',
+      'Pengaturan',
+    ])
     expect(screen.getByRole('link', { name: 'Komunitas' })).toHaveAttribute('href', '/community')
+  })
+
+  it('shows Aplikasi right before Pengaturan to Super Admins only', () => {
+    const { unmount } = renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
+    expect(screen.getByRole('link', { name: 'Aplikasi' })).toHaveAttribute('href', '/app')
+    const links = navLinks()
+    expect(links.indexOf('Aplikasi')).toBe(links.indexOf('Pengaturan') - 1)
+    unmount()
+
+    for (const roles of [['cs_agent'], ['compliance'], ['community']]) {
+      const view = renderWithProviders(<TopBar attention={0} caseAttention={0} />, { ...agentFixture, roles })
+      expect(screen.queryByRole('link', { name: 'Aplikasi' })).not.toBeInTheDocument()
+      view.unmount()
+    }
   })
 
   it('places Akun Nasabah and Komunitas before Pengaturan for CS accounts with customer access', () => {
@@ -87,6 +108,7 @@ describe('TopBar', () => {
       'Laporan',
       'Akun Nasabah',
       'Komunitas',
+      'Aplikasi',
       'Pengaturan',
     ])
   })
@@ -108,6 +130,7 @@ describe('TopBar', () => {
       'Dashboard',
       'Laporan',
       'Komunitas',
+      'Aplikasi',
       'Pengaturan',
       'Kesehatan sistem',
     ])

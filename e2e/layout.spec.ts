@@ -27,3 +27,10 @@ test('pengaturan Super Admin muat di semua resolusi', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Akun CS' })).toBeVisible()
   await checkLayout(page, 'pengaturan')
 })
+
+test('aplikasi Super Admin muat di semua resolusi', async ({ page }) => {
+  await signIn(page, 'Adi')
+  await page.getByRole('link', { name: 'Aplikasi' }).click()
+  await expect(page.getByRole('tab', { name: 'Fitur & versi', selected: true })).toBeVisible()
+  await checkLayout(page, 'aplikasi')
+})
