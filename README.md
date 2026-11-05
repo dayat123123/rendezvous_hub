@@ -1,137 +1,217 @@
-# Rendezvous Hub (web CS, React)
+<div align="center">
 
-Rendezvous Hub adalah konsol customer service OLT untuk CS, Super Admin, dan Kepatuhan, sekaligus satu-satunya web CS. React 19 + TypeScript, dibangun Vite menjadi SPA statis dan disajikan nginx non-root. Backend: Supabase (`cs_api`, GoTrue, Realtime, Storage) dan Edge Function `cs-admin`.
+# Rendezvous Hub
 
-Web CS tidak mengambil data bisnis dari OLT. Profil, order, transaksi dana, dan perangkat nasabah tetap milik aplikasi nasabah, jadi panel info nasabah hanya menampilkan identitas nasabah dari data tiket, riwayat tiket (`customer_history`), dan catatan internal (`notes`).
+**Web back office untuk layanan nasabah, kepatuhan, dan komunitas Rendezvous Online Trading**
 
-Rencana dan keputusan: [docs/PROMPT-CS-CONSOLE-REACT.md](../../docs/PROMPT-CS-CONSOLE-REACT.md), [docs/cs-console-audit.md](../../docs/cs-console-audit.md), paritas dengan console Flutter: [docs/cs-console-parity.md](../../docs/cs-console-parity.md). Tampilan: [docs/PROMPT-CS-UI-POLISH.md](../../docs/PROMPT-CS-UI-POLISH.md) dan [docs/cs-ui-audit.md](../../docs/cs-ui-audit.md).
+Tiket & chat CS · Super Admin · Kepatuhan · Komunitas · Akun Nasabah
 
-## Peran
+[![ci](https://github.com/dayat123123/rendezvous_hub/actions/workflows/ci.yml/badge.svg)](https://github.com/dayat123123/rendezvous_hub/actions/workflows/ci.yml)
+![Image](https://img.shields.io/badge/image-olt--social%2Fcs--console%3A0.1.1-0f766e)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![Node](https://img.shields.io/badge/Node-24.22-5FA04E?logo=nodedotjs&logoColor=white)
+![Lisensi](https://img.shields.io/badge/lisensi-proprietary-lightgrey)
 
-| Peran                          | Di web CS                                                                                                                            |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| CS (`cs_agent`)                | Status kerja dan batas tiket aktif, ambil tiket, balas nasabah, catatan internal, tunggu nasabah, lepas, transfer, selesaikan        |
-| Super Admin (`cs_super_admin`) | Memantau tanpa menangani tiket, dashboard, laporan, dan pengaturan                                                                   |
-| Kepatuhan (`compliance`)       | Ringkasan, register kasus pengaduan dan penipuan, jejak audit, dan kebijakan (lihat [kepatuhan.md](../../docs/cs-chat/kepatuhan.md)) |
+</div>
 
-Super Admin menggantikan peran supervisor dan admin CS yang lama. Super Admin bekerja dalam mode pantau: top bar menampilkan "Mode pantau" sebagai ganti status kerja dan jumlah tiket aktif. Super Admin membaca semua tiket hanya-baca (tab Semua aktif dan Terbuka), membaca dan menambah catatan internal, mengubah prioritas tiket aktif, dan lewat "Pindahkan ke…" membagikan tiket terbuka atau memindahkan tiket aktif ke CS. Super Admin tidak mengambil, membalas, melepas, mentransfer, menunggu nasabah, atau menyelesaikan tiket, dan tidak pernah menerima tiket. Pengaturan berisi akun CS (tambah, ubah, nonaktifkan, reset password), topik, quick reply, jam layanan dan libur, pesan otomatis, penugasan dan alert, **Integrasi OLT** (API key notifEngine/bot resmi: izin, akun resmi bot, IP/CIDR, batas per menit, nonaktif sementara, cabut dengan alasan, statistik per key dan per hari, panduan curl; key hanya ditampilkan sekali dan tidak disimpan di cache), serta **Fitur & versi** (kill switch fitur sosial dengan alasan dan ketik konfirmasi, feature flag, versi minimum aplikasi per platform). Menu **Analitik** berisi DAU/WAU/MAU, stickiness, kohort retensi mingguan, konten, saham terpopuler, event aplikasi, dan ketukan order dari fitur sosial. Akun yang juga berperan CS tetap bekerja sebagai CS dan mendapat semua menu Super Admin.
+---
 
-Kepatuhan tidak menangani tiket dan tidak punya status kerja; login dan keluar tidak mengubah status. Akun yang hanya berperan Kepatuhan langsung masuk ke Ringkasan. Menu:
+Rendezvous Hub adalah aplikasi web internal untuk staf OLT: CS, Super Admin, Kepatuhan, dan tim Komunitas. React 19 + TypeScript dibangun Vite menjadi SPA statis dan disajikan nginx non-root (image `olt-social/cs-console`). Backend-nya server sosial di monorepo [`chat_service_supabase`](https://github.com/dayat123123/chat_service_supabase): Supabase (`cs_api`, GoTrue, Realtime, Storage), Edge Function `cs-admin`, dan layanan Go seperti `nasabah-gateway`.
 
-- **Ringkasan**: pengaduan aktif, jatuh tempo ≤ 1 hari kerja, lewat tenggat, ketepatan waktu 30 hari, penipuan aktif, kasus selesai yang belum ditinjau, serta sinyal keamanan (laporan CS palsu dan CS yang mencoba meminta PIN/OTP/password). Banner muncul bila ada kebijakan yang belum dikonfirmasi.
-- **Kasus**: register pengaduan dan penipuan dengan filter jenis, keadaan, periode, dan pencarian, plus ekspor CSV. Panel detail berisi transkrip (pesan + catatan internal), riwayat kejadian, tinjauan (Sesuai / Perlu tindak lanjut / Pelanggaran, append-only), perpanjangan tenggat sekali sebelum lewat (nasabah langsung diberi tahu), dan unduh transkrip `.txt` yang sidik SHA-256-nya dicatat di audit log. Membuka detail kasus tercatat sebagai akses data nasabah.
-- **Jejak Audit**: audit log append-only dengan filter periode, aksi, dan pencarian, halaman bertahap, ekspor CSV (maksimal 5.000 baris).
-- **Kebijakan**: konfirmasi atau ubah tenggat pengaduan, perpanjangan tenggat, dan retensi chat, beserta riwayat perubahan.
-- **Kata terlarang**: daftar kata atau frasa yang disensor atau diblokir di post, komentar, polling, dan chat aplikasi nasabah. Cari, saring per aksi, tambah, ubah aksi, hapus, unduh Excel, dan import Excel (`.xlsx` atau `.csv`, kolom A kata, kolom B sensor/blokir, maksimal 1.000 baris) dengan pratinjau baris baru, aksi berubah, duplikat, dan tidak valid. Template berisi sheet petunjuk. Maksimal 2.000 kata; semua perubahan tercatat di Jejak Audit.
-- **Kebijakan konten**: aksi dan cakupan per kategori, masa akun baru, domain diblokir (domain/kata kunci) dan domain tepercaya, frasa promosi dan istilah pengecualian, ambang moderasi gambar (tahan ≤ blokir), pengaturan anti-manipulasi saham, dan uji teks terhadap aturan yang berlaku (lihat [docs/content-safety.md](../../docs/content-safety.md)).
+> **Batas tanggung jawab.** Hub tidak mengambil data bisnis dari OLT. Profil, order, transaksi dana, dan perangkat nasabah tetap milik aplikasi nasabah. Panel info nasabah hanya menampilkan identitas dari data tiket, riwayat tiket (`customer_history`), dan catatan internal (`notes`). Data Online ID di menu Akun Nasabah datang dari csAdmin lewat `nasabah-gateway`.
 
-Menu **Akun Nasabah** (data nasabah online dari csAdmin lewat `nasabah-gateway`, letaknya sebelum Pengaturan) khusus akun berperan CS: Super Admin memberi izin per akun CS di Pengaturan → Akun CS. Ringkasan di atas tab menampilkan jumlah Online ID dan pengajuan yang menunggu. Tab yang tampil mengikuti izin: Online ID (cari, lihat, rekening tertaut, ajukan buat/ubah/hapus, reset password/PIN, ubah status cepat dengan alasan, penanda data belum lengkap), Approval (setujui/tolak pengajuan CS lain; pengajuan sendiri hanya dengan izin approve sendiri), dan Pembukaan rekening (kirim email satu per satu atau beberapa sekaligus). Lihat [docs/nasabah/README.md](../../docs/nasabah/README.md).
+## Daftar isi
 
-Menu **Komunitas** mengikuti izin komunitas per staf. Moderasi berisi antrean Laporan, Konten ditahan, Gambar ditahan (gambar buram sampai dibuka, loloskan atau hapus dengan alasan), Indikasi manipulasi (bukti, tinjau atau tolak dengan catatan), dan Banding (peninjau harus berbeda dari pemberi keputusan awal). Panel pengguna menampilkan riwayat edit konten dan aksi toleransi nol (CSAM) dengan dua tahap konfirmasi. Tab Room saham mengatur slow mode dan pesan yang disematkan.
+- [Fitur per menu](#fitur-per-menu)
+- [Prasyarat](#prasyarat)
+- [Menjalankan untuk pengembangan](#menjalankan-untuk-pengembangan)
+- [Skrip npm](#skrip-npm)
+- [Konfigurasi runtime](#konfigurasi-runtime)
+- [Deploy](#deploy)
+- [Struktur folder](#struktur-folder)
+- [Tampilan](#tampilan)
+- [Keamanan](#keamanan)
+- [Tes dan CI](#tes-dan-ci)
+- [Dokumentasi terkait](#dokumentasi-terkait)
 
-## Login dan password
+## Fitur per menu
 
-- Login cukup email + password, tanpa TOTP. Web CS hanya bisa diakses dari IP yang diizinkan (LAN kantor atau VPN). Faktor TOTP lama yang masih terdaftar di akun diabaikan.
-- Akun dengan password sementara (akun baru atau setelah reset) wajib mengganti password sebelum masuk ruang kerja.
-- Super Admin mereset password lupa lewat Pengaturan → Akun CS → "Reset password". Setelah konfirmasi, Edge Function `cs-admin` (`POST /functions/v1/cs-admin/agents/{id}/reset-password`) membuat password sementara baru yang hanya ditampilkan sekali dengan tombol salin, dan password lama langsung tidak berlaku. Tombol ini tidak ada untuk akun nonaktif (aktifkan dulu) dan untuk akun sendiri.
+Menu di bar atas mengikuti peran dan izin akun. Satu akun bisa punya beberapa peran; menunya digabung. Panduan pemakaian untuk staf ada di [docs/panduan-hub.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan-hub.md) monorepo.
 
-## Menjalankan
+| Menu                             | Peran                    | Isi                                                                                                                                                                                                                                  |
+| -------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Layanan Nasabah**              | CS, Super Admin (pantau) | Status kerja dan batas tiket aktif, ambil tiket, chat realtime dengan lampiran (gambar 5 MB, PDF 10 MB), catatan internal, label, quick reply, tunggu nasabah, lepas, transfer, selesaikan, rating, Kinerja saya                     |
+| **Dashboard** dan **Laporan**    | Super Admin              | Pantauan tiket dan CS secara langsung, laporan per periode, per CS, dan per nasabah, ekspor                                                                                                                                          |
+| **Akun Nasabah**                 | CS dengan izin           | Online ID dari csAdmin: cari, lihat, rekening tertaut, ajukan buat/ubah/hapus, reset password/PIN, Approval, Pembukaan rekening                                                                                                      |
+| **Komunitas**                    | Sesuai 5 izin Komunitas  | Akun resmi, postingan dan pengumuman resmi (empat mata, jadwal, sematan), kampanye notifikasi, moderasi (laporan, konten/gambar ditahan, manipulasi, banding), room saham, Analitik                                                  |
+| **Pengaturan**                   | Super Admin              | Akun staf, topik, quick reply, label, jam layanan dan libur, pesan otomatis, penugasan dan alert, push notification, integrasi API Nasabah, API notifikasi, integrasi aplikasi, fitur dan versi (kill switch), banner, backup, alert |
+| **Kesehatan sistem** (`/system`) | Super Admin              | Status layanan, alert terbuka, restart otomatis. Disembunyikan dari navigasi; dibuka lewat alamat                                                                                                                                    |
+| **Kepatuhan**                    | Kepatuhan                | Ringkasan, Kasus (pengaduan dan penipuan, tinjauan, perpanjangan tenggat, transkrip bersidik SHA-256), Jejak Audit, Kebijakan, Kata terlarang (import Excel), Kebijakan konten, Dokumen hukum, Bukti                                 |
 
-Prasyarat: stack dev dengan OLT dummy dan akun staf dev.
+Super Admin bekerja dalam **mode pantau**: membaca semua tiket, menambah catatan, mengubah prioritas, dan membagikan atau memindahkan tiket ke CS, tetapi tidak membalas nasabah dan tidak pernah menerima tiket.
 
-```bash
-make up DUMMY_OLT=1          # Windows: .\make.ps1 up -DummyOlt
-make cs-staff                # akun Nadia, Bima, Laras (CS), Sinta dan Adi (Super Admin), Kirana (Kepatuhan)
-make cs-console-react        # container nginx -> http://localhost:8085
+## Prasyarat
+
+- **Node.js 24** (≥ 24.12; CI dan image memakai `24.22.2`). `.npmrc` mengaktifkan `engine-strict`, jadi `npm ci` menolak Node yang lebih lama.
+- Untuk menjalankan terhadap backend: checkout monorepo [`chat_service_supabase`](https://github.com/dayat123123/chat_service_supabase) **bersebelahan** dengan repo ini, serta Docker dengan Compose v2.24+.
+
+```text
+<folder kerja>/
+  chat_service_supabase/   backend: stack Docker, migrasi, layanan Go
+  rendezvous_community/    library Flutter untuk aplikasi nasabah
+  rendezvous_hub/          repo ini
 ```
 
-Email dan password akun dev ada di `scripts/cs-demo/runtime/staff.json` (tidak di-commit).
+```bash
+git clone https://github.com/dayat123123/chat_service_supabase.git
+git clone https://github.com/dayat123123/rendezvous_community.git
+git clone https://github.com/dayat123123/rendezvous_hub.git
+```
 
-Pengembangan dengan hot reload (Node ≥ 24.12):
+Lokasi monorepo bisa diubah dengan env `MONOREPO_DIR` (relatif ke repo ini atau absolut; bawaan `../chat_service_supabase`). Lokasi ini dipakai untuk membaca `docker/secrets/anon_key` (server dev Vite, E2E), `docker/secrets/service_role_key` (`gen:types`), dan `scripts/cs-demo/runtime/staff.json` (akun staf E2E). Dari sisi monorepo, lokasi Hub diatur dengan `HUB=<path>` (make) atau `HUB_DIR` di `docker/.env`.
+
+## Menjalankan untuk pengembangan
+
+Siapkan stack dev di monorepo (Windows: `.\make.ps1 <target>`):
 
 ```bash
-cd apps/cs-console-react
+cd ../chat_service_supabase
+make gen-secrets
+make up DUMMY_OLT=1          # Windows: .\make.ps1 up -DummyOlt
+make cs-staff                # akun Nadia, Bima, Laras (CS), Sinta dan Adi (Super Admin), Kirana (Kepatuhan)
+make cs-console-react        # image dibangun dari repo ini -> http://localhost:8085
+```
+
+Email dan password akun dev ada di `chat_service_supabase/scripts/cs-demo/runtime/staff.json` (tidak di-commit).
+
+Hot reload dengan server dev Vite:
+
+```bash
 npm ci
 npm run dev                  # http://localhost:5175, API http://localhost:8000
 ```
 
-`/env.js` di server dev dibuat dari `docker/secrets/anon_key` (atau env `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_ENV`).
+`/env.js` di server dev dibuat dari `$MONOREPO_DIR/docker/secrets/anon_key`, atau dari env `SUPABASE_URL`, `SUPABASE_ANON_KEY`, dan `APP_ENV` bila diisi.
 
 ## Skrip npm
 
-| Skrip                              | Isi                                                                             |
-| ---------------------------------- | ------------------------------------------------------------------------------- |
-| `dev` / `build` / `preview`        | Vite (dev 5175, preview 4175)                                                   |
-| `typecheck`                        | `tsc` aplikasi + konfigurasi/E2E                                                |
-| `lint` / `format` / `format:check` | ESLint (type-checked, 0 warning) dan Prettier                                   |
-| `lint:tokens`                      | Tolak warna hex, kelas warna Tailwind mentah, radius > 12px, bayangan non-token |
-| `test`                             | Vitest + Testing Library + MSW                                                  |
-| `e2e`                              | Playwright terhadap stack dev (`E2E_BASE_URL`, default `http://localhost:8085`) |
-| `size:check`                       | Bundle awal ≤ 300 KB gzip                                                       |
-| `license:check`                    | Tolak GPL/AGPL/LGPL/SSPL; runtime wajib permisif                                |
-| `gen:types`                        | Tipe `cs_api` dari pg-meta (dev) ke `src/types/database.ts`                     |
-| `ci`                               | Semua di atas kecuali E2E                                                       |
+| Skrip                              | Isi                                                                                                |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `dev` / `build` / `preview`        | Vite (dev 5175, preview 4175)                                                                      |
+| `typecheck`                        | `tsc` aplikasi + konfigurasi/E2E                                                                   |
+| `lint` / `format` / `format:check` | ESLint (type-checked, 0 warning) dan Prettier                                                      |
+| `lint:tokens`                      | Tolak warna hex, kelas warna Tailwind mentah, radius > 12px, bayangan non-token                    |
+| `test`                             | Vitest + Testing Library + MSW                                                                     |
+| `e2e`                              | Playwright terhadap stack dev (`E2E_BASE_URL`, bawaan `http://localhost:8085`)                     |
+| `size:check`                       | Bundle awal ≤ 300 KB gzip                                                                          |
+| `license:check`                    | Tolak GPL/AGPL/LGPL/SSPL; dependensi runtime wajib permisif                                        |
+| `gen:types`                        | Tipe `cs_api` dari pg-meta stack dev ke `src/types/database.ts`                                    |
+| `ci`                               | `lint`, `lint:tokens`, `format:check`, `typecheck`, `test`, `build`, `size:check`, `license:check` |
 
-`make test-cs-console` menjalankan `npm run ci` di container Node; `make e2e-cs-console` menjalankan E2E.
+Sebelum push, jalankan `npm ci && npm run ci`. Dari monorepo, `make test-cs-console` (Windows: `.\make.ps1 test-cs-console`) menjalankan hal yang sama di container `node:24.22.2-alpine`, jadi tidak perlu Node di host.
+
+E2E (stack dev harus sudah jalan):
+
+```bash
+E2E_BASE_URL=http://localhost:8085 npx playwright test
+# atau dari monorepo: make e2e-cs-console
+```
+
+Backend membatasi 5 tiket per jam per nasabah. Setiap skenario memakai nasabah OLT dummy yang berbeda, jadi suite penuh bisa dijalankan 5 kali per jam. Di lokal Playwright memakai Chrome yang terpasang (`channel: 'chrome'`); di CI memakai Chromium bawaan Playwright.
 
 ## Konfigurasi runtime
 
-Image yang sama untuk semua lingkungan. Saat container start, `docker/15-cs-console.envsh` menulis `/env.js` dan CSP dari:
+Image yang sama dipakai di semua lingkungan dan tidak ada konfigurasi yang ditanam saat build. Saat container start, `docker/15-cs-console.envsh` menulis `/env.js` dan CSP dari env container:
 
-| Env                                               | Isi                                                                                                        |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `SUPABASE_URL`                                    | Origin API untuk browser, tanpa path (dev `http://localhost:8000`, produksi `https://<CS_CONSOLE_DOMAIN>`) |
-| `SUPABASE_ANON_KEY` atau `SUPABASE_ANON_KEY_FILE` | Hanya anon key. Kunci service role tidak pernah ada di browser                                             |
-| `APP_ENV`                                         | `production` (default), `staging`, `development`. Halaman uji `/__perf` mati di produksi                   |
+| Env                                               | Isi                                                                                                                |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `SUPABASE_URL`                                    | Origin API untuk browser staf, tanpa path (dev `http://localhost:8000`, produksi `https://<CS_CONSOLE_DOMAIN>`)    |
+| `PUBLIC_API_URL`                                  | Origin API publik aplikasi nasabah (`SUPABASE_PUBLIC_URL`), dipakai untuk URL gambar banner dan panduan integrasi  |
+| `SUPABASE_ANON_KEY` atau `SUPABASE_ANON_KEY_FILE` | Hanya anon key (compose memakai secret `/run/secrets/anon_key`). Kunci service role tidak pernah sampai ke browser |
+| `APP_ENV`                                         | `production` (bawaan), `staging`, `development`. Halaman `/dev/ui` dan `/__perf` hanya aktif di `development`      |
+
+Nilainya diisi oleh compose monorepo (`docker/compose.yml` dan overlay `compose.dev.yml`, `compose.cs.yml`, `stack.cluster.yml`), bukan oleh repo ini.
+
+## Deploy
+
+Hub tidak di-deploy sendiri. Monorepo membangun image `olt-social/cs-console:0.1.1` dari checkout repo ini (`build.context: ${HUB_DIR:-../../rendezvous_hub}`, relatif terhadap `docker/`):
+
+```bash
+make cs-console-react                        # dev; Windows: .\make.ps1 cs-console-react
+make up PROFILE=single CS=1                  # produksi satu server; Windows: .\make.ps1 up -Profile single -Cs
+```
+
+- Produksi butuh `CS_CONSOLE_DOMAIN` dan `VPN_SOURCE_RANGES` di `docker/.env` monorepo.
+- Server produksi menyimpan clone repo ini di `$HOME/rendezvous_hub`, dipasang oleh `scripts/server-install.sh` monorepo dengan deploy key tersendiri. Bila lokasinya berbeda, isi `HUB_DIR` di `docker/.env`.
+- Update: `git pull` di repo ini, lalu `make up PROFILE=single CS=1` di monorepo (image dibangun ulang).
+- Profil cluster memakai `${REGISTRY}/olt-social/cs-console:0.1.1` dari registry.
+- Bila tag image dinaikkan, ubah juga tag di `docker/compose.yml` dan `docker/stack.cluster.yml` monorepo.
+
+Detail: [docs/PRODUCTION.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/PRODUCTION.md) dan [docs/server-install.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/server-install.md).
+
+## Struktur folder
+
+```text
+src/
+  app/          shell, router (TanStack Router), workspace (dimuat setelah login), top bar
+  features/     satu folder per fitur (api.ts, hooks.ts, types.ts, components/):
+                auth, account, presence, tickets, conversation, customer, labels, command, supervisor,
+                reports, settings, notifications, push, nasabah, community, analytics, compliance,
+                content-policy, legal, integration-keys, app-integration, client-config, system, perf, dev-ui
+  lib/          supabase, realtime (manajer channel), tabs (BroadcastChannel), time (WIB), preferences, errors
+  components/   ui/ (shadcn/Radix), badges, states (empty/error/skeleton/error boundary)
+  i18n/         id (bawaan) dan en; teks fitur besar dimuat lazy bersama rutenya
+  styles/       token desain (globals.css)
+e2e/            Playwright; support/ membaca akun staf dan anon key dari monorepo
+docker/         nginx.conf, template server + header keamanan, skrip env runtime
+scripts/        token-lint, bundle-size, license-check, precompress, gen-types
+public/         favicon, robots.txt, theme.js, suara notifikasi
+```
 
 ## Tampilan
 
-- Semua warna, tipografi, radius, bayangan, gerak, dan kepadatan adalah token di `src/styles/globals.css` (`:root`/`.light` terang, `.dark` gelap netral tanpa rona biru). Palet bawaan Tailwind dimatikan (`--color-*: initial`), jadi kelas seperti `bg-blue-500` tidak menghasilkan CSS, dan `npm run lint:tokens` menolaknya di CI.
-- Tema default terang. Pilihan Terang/Gelap/Ikuti sistem ada di menu avatar dan diterapkan sebelum render pertama oleh `public/theme.js`.
-- Status memakai titik/garis berwarna (`bg-signal-*`); teks status memakai varian yang lolos WCAG AA (`text-success`, `text-warning`, `text-danger`, `text-info`).
-- Halaman acuan `/dev/ui` (hanya `APP_ENV=development`, tanpa login) menampilkan token dan semua komponen utama dalam kedua tema.
-
-## Struktur
-
-```
-src/
-  app/          shell, router (TanStack Router), workspace (dimuat setelah login), top bar
-  features/     auth, presence, tickets, conversation, customer, command, supervisor, reports, settings, notifications, perf
-                (masing-masing api.ts, hooks.ts, types.ts, components/)
-  lib/          supabase, realtime (manajer channel), tabs (BroadcastChannel), time (WIB), preferences, errors
-  components/   ui/ (shadcn/Radix), badges, states (empty/error/skeleton/error boundary)
-  i18n/         id (default) dan en; teks fitur besar (platform, policy, moderation) dimuat lazy bersama rutenya
-```
+- Semua warna, tipografi, radius, bayangan, gerak, dan kepadatan adalah token di `src/styles/globals.css` (terang dan gelap). Palet bawaan Tailwind dimatikan, jadi kelas seperti `bg-blue-500` tidak menghasilkan CSS dan `npm run lint:tokens` menolaknya.
+- Tema bawaan terang. Pilihan Terang/Gelap/Ikuti sistem ada di menu avatar dan diterapkan sebelum render pertama oleh `public/theme.js`.
+- Halaman acuan `/dev/ui` (hanya `APP_ENV=development`, tanpa login) menampilkan token dan komponen utama dalam kedua tema.
 
 ## Keamanan
 
+- **Hanya jaringan kantor atau VPN.** Login cukup email + password, jadi di produksi Hub dan API agen berada di satu domain (`CS_CONSOLE_DOMAIN`) yang hanya menerima IP di `VPN_SOURCE_RANGES` (Traefik ipAllowList di monorepo). Jangan membuka Hub ke internet.
 - Header nginx: CSP ketat (`script-src 'self'`, `connect-src` hanya origin API), HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy`, COOP/CORP, `X-Robots-Tag: noindex`. Hanya GET/HEAD.
 - Container non-root (uid 101), filesystem read-only + tmpfs, `cap_drop: ALL`, batas CPU/memori/pids, healthcheck `/healthz`.
-- Login email + password tanpa TOTP, jadi akses dibatasi jaringan (LAN kantor atau VPN). Password sementara wajib diganti saat login pertama dan setelah reset. Sesi GoTrue per tab (`sessionStorage` dengan kunci per tab), jadi login, logout, dan refresh token di satu tab tidak menyentuh akun lain di tab lain. Logout otomatis setelah 30 menit tidak aktif, cache/draf/data yang ditampilkan dibersihkan saat keluar.
-- Isi pesan selalu plain text; tautan `rel="noopener noreferrer"` dan konfirmasi bila di luar situs bantuan; lampiran lewat signed URL 120 detik: gambar dengan watermark nama CS, PDF sebagai kartu file yang dibuka di tab baru. Composer menerima gambar (5 MB) dan PDF (10 MB); video, voice note, dan file Office ditolak dengan pesan yang jelas.
-- Log produksi tanpa token dan tanpa isi pesan. Zod berjalan `jitless` sehingga tidak ada `eval`.
+- Password sementara wajib diganti saat login pertama dan setelah reset. Sesi GoTrue per tab (`sessionStorage` dengan kunci per tab), jadi beberapa akun bisa dibuka di tab berbeda pada satu browser. Logout otomatis setelah tidak aktif; cache, draf, dan data yang ditampilkan dibersihkan saat keluar.
+- Isi pesan selalu plain text; lampiran lewat signed URL 120 detik, dan gambar diberi watermark nama CS.
+- Log produksi tanpa token dan tanpa isi pesan. Zod berjalan `jitless`, jadi tidak ada `eval`.
 
-## Tes
+## Tes dan CI
 
-- Unit: logika (quick reply, aturan data rahasia, cache pesan, pengelompokan baris, filter tiket, tab per peran, parser realtime, CSV, rentang laporan, jam layanan) dan komponen (composer, gelembung pesan, panel info nasabah, top bar, daftar tiket, dan percakapan untuk CS dan mode pantau Super Admin, login tanpa TOTP dengan ganti password wajib, reset password akun), klien data nasabah (`customer_history`, `notes`) dengan MSW.
-- E2E (`e2e/`): login email + password (password salah ditolak), rebutan klaim dua CS, chat + lampiran + tanda dibaca + panel info nasabah (identitas, riwayat tiket, catatan), lepas/transfer/selesai, non-pemilik hanya-baca, putus-sambung tanpa duplikat, Super Admin mode pantau (hanya-baca), bagikan tiket terbuka + pindahkan, alur Kepatuhan (tinjauan, perpanjang tenggat, unduh transkrip bersidik, jejak audit) dan audit kontras halaman Kepatuhan, tangkapan layar terang/gelap termasuk `/dev/ui` (`e2e-artifacts/screens`), uji kinerja 1000 tiket + 5000 pesan.
-- Kualitas tampilan: kontras WCAG AA dengan axe (`@axe-core/playwright`) di kedua tema, serta tata letak 1366×768, 1920×1080, dan 2560×1440 tanpa scroll horizontal atau teks terpotong (`e2e/a11y.spec.ts`, `e2e/layout.spec.ts`, dan langkah percakapan di `e2e/visual.spec.ts`).
-- Backend membatasi 5 tiket per jam per nasabah. Setiap skenario memakai nasabah OLT dummy yang berbeda, jadi suite penuh bisa dijalankan 5 kali per jam.
-- Uji kinerja menjalankan Chrome tanpa batas vsync agar fps mencerminkan kerja per frame (target ≥ 60 fps, p95 ≤ 16,7 ms).
+- **Unit** (Vitest + Testing Library + MSW): logika tiket, quick reply, aturan data rahasia, cache pesan, parser realtime, CSV, rentang laporan, jam layanan, serta komponen utama untuk CS, Super Admin, Kepatuhan, dan Komunitas.
+- **E2E** (`e2e/`, Playwright terhadap stack dev): login, rebutan klaim dua CS, chat + lampiran + tanda dibaca, lepas/transfer/selesai, non-pemilik hanya-baca, putus-sambung tanpa duplikat, multi-tab, mode pantau Super Admin, alur Kepatuhan, kontras WCAG AA (axe) di kedua tema, tata letak 1366×768 sampai 2560×1440, tangkapan layar (`e2e-artifacts/screens`), dan uji kinerja 1000 tiket + 5000 pesan.
 
-CI: [.github/workflows/cs-console-react.yml](../../.github/workflows/cs-console-react.yml) (verifikasi, image + Trivy, E2E dengan stack dev).
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)):
 
-## Produksi
+| Job       | Isi                                                                                                                |
+| --------- | ------------------------------------------------------------------------------------------------------------------ |
+| `verify`  | Node 24.22.2, `npm ci`, `npm run ci`                                                                               |
+| `image`   | Build image nginx, Trivy image (OS + library) dan Trivy fs (dependensi, rahasia, konfigurasi)                      |
+| `secrets` | gitleaks atas seluruh riwayat git (`.gitleaks.toml`)                                                               |
+| `e2e`     | Manual (`workflow_dispatch`, input `e2e`): checkout monorepo dengan secret `MONOREPO_TOKEN`, stack dev, Playwright |
 
-```bash
-# docker/.env: CS_CONSOLE_DOMAIN=cs.domain-anda, VPN_SOURCE_RANGES=192.168.1.0/24 (LAN kantor atau VPN)
-make up PROFILE=single CS=1      # Windows: .\make.ps1 up -Profile single -Cs
-```
+## Dokumentasi terkait
 
-Web CS dan API agen berada di satu domain (tanpa CORS) yang hanya menerima IP di `VPN_SOURCE_RANGES` (`docker/compose.cs.yml`, `docker/volumes/traefik/cs.yml`). Profil cluster memakai image `${REGISTRY}/olt-social/cs-console:0.1.1`. Lihat [docs/PRODUCTION.md](../../docs/PRODUCTION.md).
+Dokumen desain dan keputusan tetap di monorepo `chat_service_supabase`:
+
+- [docs/panduan-hub.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan-hub.md): panduan staf
+- [docs/cs-chat/README.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/cs-chat/README.md): chat customer care (tiket, claim, rating)
+- [docs/cs-chat/kepatuhan.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/cs-chat/kepatuhan.md): menu Kepatuhan
+- [docs/nasabah/README.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/nasabah/README.md): menu Akun Nasabah
+- [docs/content-safety.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/content-safety.md): kebijakan konten
+- [docs/PROMPT-CS-CONSOLE-REACT.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/PROMPT-CS-CONSOLE-REACT.md) dan [docs/cs-ui-audit.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/cs-ui-audit.md): rencana dan audit tampilan
+
+Riwayat git repo ini berasal dari `apps/cs-console-react` di monorepo, dipisah dengan `git subtree split` pada 5 Nov 2026.
 
 ## Catatan
 
 - React Compiler tidak dipakai, jadi aturan lint `react-hooks/incompatible-library` dimatikan.
 - Lisensi: semua dependensi runtime permisif. `lightningcss` (MPL-2.0) hanya alat build Tailwind dan tidak ikut ke bundle. Font Inter memakai OFL-1.1.
-- Console Flutter lama (`apps/cs-console`) sudah dihapus.

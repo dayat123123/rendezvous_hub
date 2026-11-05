@@ -6,3 +6,6 @@ test-results
 e2e/.auth
 *.local
 e2e-artifacts
+*.tsbuildinfo
+.env
+.env.*

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { join, resolve } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -9,7 +10,9 @@ import { defineConfig } from 'vitest/config'
 
 function runtimeEnv(): Plugin {
   const body = () => {
-    const keyFile = fileURLToPath(new URL('../../docker/secrets/anon_key', import.meta.url))
+    const hubRoot = fileURLToPath(new URL('.', import.meta.url))
+    const monorepo = resolve(hubRoot, process.env.MONOREPO_DIR ?? '../chat_service_supabase')
+    const keyFile = join(monorepo, 'docker/secrets/anon_key')
     const anonKey =
       process.env.SUPABASE_ANON_KEY ?? (existsSync(keyFile) ? readFileSync(keyFile, 'utf8').trim() : '')
     const env = {

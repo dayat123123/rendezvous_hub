@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = fileURLToPath(new URL('../../../../', import.meta.url))
+const hubRoot = fileURLToPath(new URL('../../', import.meta.url))
+const root = resolve(hubRoot, process.env.MONOREPO_DIR ?? '../chat_service_supabase')
 
 export const apiUrl = process.env.E2E_API_URL ?? 'http://localhost:8000'
 export const oltUrl = process.env.E2E_OLT_URL ?? 'http://localhost:8090'

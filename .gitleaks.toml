@@ -1,0 +1,13 @@
+title = "rendezvous_hub"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Kunci, token, dan JWT palsu di data uji"
+paths = ['''\.test\.tsx?$''']
+
+[[allowlists]]
+description = "Alfabet karakter pembuat password sementara, bukan rahasia"
+regexTarget = "line"
+regexes = ['''passwordAlphabet\s*=''']

@@ -1,0 +1,6 @@
+# Scripts and configs that run in Linux containers (nginx, Node) must stay LF even on a Windows checkout.
+* text=auto eol=lf
+*.wav binary
+*.png binary
+*.ico binary
+*.woff2 binary

@@ -1,8 +1,11 @@
 import { readFileSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const api = process.env.SUPABASE_URL ?? 'http://localhost:8000'
-const keyFile = fileURLToPath(new URL('../../../docker/secrets/service_role_key', import.meta.url))
+const hubRoot = fileURLToPath(new URL('..', import.meta.url))
+const monorepo = resolve(hubRoot, process.env.MONOREPO_DIR ?? '../chat_service_supabase')
+const keyFile = join(monorepo, 'docker/secrets/service_role_key')
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? readFileSync(keyFile, 'utf8').trim()
 const target = fileURLToPath(new URL('../src/types/database.ts', import.meta.url))
 
