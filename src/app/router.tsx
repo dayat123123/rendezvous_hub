@@ -6,7 +6,6 @@ import {
   redirect,
 } from '@tanstack/react-router'
 
-import { isAppTab, type AppTab } from '@/features/app-management/types'
 import {
   communityTabs,
   moderationQueues,
@@ -15,6 +14,7 @@ import {
 } from '@/features/community/types'
 import { policyTabs, type PolicyTab } from '@/features/content-policy/types'
 import { caseStates, type CaseState } from '@/features/compliance/types'
+import { isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
 import { systemTabs, type SystemTab } from '@/features/system/types'
 import {
   canOpenCommunity,
@@ -100,16 +100,31 @@ const settingsRoute = createRoute({
   ),
 })
 
-const appRoute = createRoute({
+const featuresCampaignsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/features',
+  beforeLoad: superAdminOnly,
+  validateSearch: (search: Record<string, unknown>): { tab?: FeaturesCampaignsTab } =>
+    isFeaturesCampaignsTab(search.tab) ? { tab: search.tab } : {},
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/features-campaigns/components/features-campaigns-page'), 'platform'),
+    'FeaturesCampaignsPage',
+  ),
+})
+
+const legacyAppRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/app',
-  beforeLoad: superAdminOnly,
-  validateSearch: (search: Record<string, unknown>): { tab?: AppTab } =>
-    isAppTab(search.tab) ? { tab: search.tab } : {},
-  component: lazyRouteComponent(
-    withStrings(() => import('@/features/app-management/components/app-page'), 'platform'),
-    'AppPage',
-  ),
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({ tab: text(search.tab) }),
+  beforeLoad: ({ context, search }) => {
+    superAdminOnly({ context })
+    if (search.tab === 'connection') throw redirect({ to: '/settings', replace: true })
+    throw redirect({
+      to: '/features',
+      search: isFeaturesCampaignsTab(search.tab) ? { tab: search.tab } : {},
+      replace: true,
+    })
+  },
 })
 
 const complianceRoute = createRoute({
@@ -269,7 +284,8 @@ const routeTree = rootRoute.addChildren([
   dashboardRoute,
   reportsRoute,
   analyticsRoute,
-  appRoute,
+  featuresCampaignsRoute,
+  legacyAppRoute,
   settingsRoute,
   complianceRoute,
   complianceCasesRoute,

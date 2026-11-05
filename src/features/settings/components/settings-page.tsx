@@ -9,6 +9,7 @@ import {
   PlugZapIcon,
   SirenIcon,
   SlidersHorizontalIcon,
+  SmartphoneIcon,
   TagIcon,
   TagsIcon,
   UsersIcon,
@@ -17,6 +18,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SectionBoundary } from '@/components/states'
+import { AppIntegrationSection } from '@/features/app-integration/components/app-integration-section'
 import { useAgent } from '@/features/auth/hooks'
 import { IntegrationKeysSection } from '@/features/integration-keys/components/keys-section'
 import { LabelsSection } from '@/features/labels/components/labels-section'
@@ -46,6 +48,7 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
   assignment: SlidersHorizontalIcon,
   community: MegaphoneIcon,
   integration: PlugZapIcon,
+  appIntegration: SmartphoneIcon,
   apiKeys: KeyRoundIcon,
   push: BellRingIcon,
   backup: DatabaseBackupIcon,
@@ -63,6 +66,7 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   community: () => <CommunitySection />,
   push: () => <PushSection />,
   integration: () => <IntegrationSection />,
+  appIntegration: () => <AppIntegrationSection />,
   apiKeys: () => <IntegrationKeysSection />,
   backup: () => <BackupSection />,
   alerts: () => <AlertsSection />,

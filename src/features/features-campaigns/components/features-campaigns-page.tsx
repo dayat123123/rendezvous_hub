@@ -2,54 +2,52 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import { SectionBoundary } from '@/components/states'
-import { AppIntegrationSection } from '@/features/app-integration/components/app-integration-section'
 import { BannersSection } from '@/features/client-config/components/banners-section'
 import { FeaturesSection } from '@/features/client-config/components/features-section'
 import { cn } from '@/lib/utils'
 
-import { appTabs, isAppTab, type AppTab } from '../types'
+import { featuresCampaignsTabs, isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '../types'
 
-const panels: Record<AppTab, () => React.ReactNode> = {
+const panels: Record<FeaturesCampaignsTab, () => React.ReactNode> = {
   features: () => <FeaturesSection />,
   banners: () => <BannersSection />,
-  connection: () => <AppIntegrationSection />,
 }
 
-export function AppPage() {
+export function FeaturesCampaignsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const search: { tab?: unknown } = useSearch({ strict: false })
-  const tab = isAppTab(search.tab) ? search.tab : 'features'
-  const open = (next: AppTab) => void navigate({ to: '/app', search: { tab: next } })
+  const tab = isFeaturesCampaignsTab(search.tab) ? search.tab : 'features'
+  const open = (next: FeaturesCampaignsTab) => void navigate({ to: '/features', search: { tab: next } })
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 pt-5 lg:px-6">
         <header>
-          <h1 className="text-lg font-semibold">{t('appManagement.title')}</h1>
-          <p className="max-w-3xl text-row text-muted-foreground">{t('appManagement.subtitle')}</p>
+          <h1 className="text-lg font-semibold">{t('featuresCampaigns.title')}</h1>
+          <p className="max-w-3xl text-row text-muted-foreground">{t('featuresCampaigns.subtitle')}</p>
         </header>
         <div
           role="tablist"
-          aria-label={t('appManagement.tabsLabel')}
+          aria-label={t('featuresCampaigns.tabsLabel')}
           className="flex gap-4 overflow-x-auto border-b"
         >
-          {appTabs.map((item) => (
+          {featuresCampaignsTabs.map((item) => (
             <button
               key={item}
-              id={`app-tab-${item}`}
+              id={`features-tab-${item}`}
               type="button"
               role="tab"
               aria-selected={tab === item}
-              aria-controls={`app-panel-${item}`}
+              aria-controls={`features-panel-${item}`}
               tabIndex={tab === item ? 0 : -1}
               onKeyDown={(event) => {
                 if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
-                const index = appTabs.indexOf(item)
-                const next =
-                  appTabs[(index + (event.key === 'ArrowRight' ? 1 : appTabs.length - 1)) % appTabs.length]
+                const index = featuresCampaignsTabs.indexOf(item)
+                const step = event.key === 'ArrowRight' ? 1 : featuresCampaignsTabs.length - 1
+                const next = featuresCampaignsTabs[(index + step) % featuresCampaignsTabs.length]
                 if (!next) return
                 open(next)
-                document.getElementById(`app-tab-${next}`)?.focus()
+                document.getElementById(`features-tab-${next}`)?.focus()
               }}
               onClick={() => open(item)}
               className={cn(
@@ -59,13 +57,13 @@ export function AppPage() {
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              {t(`appManagement.tabs.${item}`)}
+              {t(`featuresCampaigns.tabs.${item}`)}
             </button>
           ))}
         </div>
       </div>
-      <div role="tabpanel" id={`app-panel-${tab}`} aria-labelledby={`app-tab-${tab}`}>
-        <SectionBoundary key={tab} label={`app:${tab}`}>
+      <div role="tabpanel" id={`features-panel-${tab}`} aria-labelledby={`features-tab-${tab}`}>
+        <SectionBoundary key={tab} label={`features:${tab}`}>
           {panels[tab]()}
         </SectionBoundary>
       </div>

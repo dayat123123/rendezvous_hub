@@ -42,7 +42,7 @@ for (const theme of themes) {
       await context.close()
     })
 
-    test('daftar tiket, dashboard, laporan, pengaturan, dan aplikasi', async ({ browser }) => {
+    test('daftar tiket, dashboard, laporan, pengaturan, dan fitur & kampanye', async ({ browser }) => {
       await asStaff(browser, theme, 'Sinta', async (page) => {
         await expect(page.getByRole('region', { name: 'Daftar tiket' })).toBeVisible()
         await audit(page, `tickets-${theme}`)
@@ -55,9 +55,9 @@ for (const theme of themes) {
         await page.getByRole('link', { name: 'Pengaturan' }).click()
         await expect(page.getByRole('heading', { name: 'Akun CS' })).toBeVisible()
         await audit(page, `settings-${theme}`)
-        await page.getByRole('link', { name: 'Aplikasi' }).click()
+        await page.getByRole('link', { name: 'Fitur & Kampanye' }).click()
         await expect(page.getByRole('tab', { name: 'Fitur & versi', selected: true })).toBeVisible()
-        await audit(page, `app-${theme}`)
+        await audit(page, `features-${theme}`)
       })
     })
 

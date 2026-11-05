@@ -76,22 +76,22 @@ describe('TopBar', () => {
       'Dashboard',
       'Laporan',
       'Komunitas',
-      'Aplikasi',
+      'Fitur & Kampanye',
       'Pengaturan',
     ])
     expect(screen.getByRole('link', { name: 'Komunitas' })).toHaveAttribute('href', '/community')
   })
 
-  it('shows Aplikasi right before Pengaturan to Super Admins only', () => {
+  it('shows Fitur & Kampanye right before Pengaturan to Super Admins only', () => {
     const { unmount } = renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
-    expect(screen.getByRole('link', { name: 'Aplikasi' })).toHaveAttribute('href', '/app')
+    expect(screen.getByRole('link', { name: 'Fitur & Kampanye' })).toHaveAttribute('href', '/features')
     const links = navLinks()
-    expect(links.indexOf('Aplikasi')).toBe(links.indexOf('Pengaturan') - 1)
+    expect(links.indexOf('Fitur & Kampanye')).toBe(links.indexOf('Pengaturan') - 1)
     unmount()
 
     for (const roles of [['cs_agent'], ['compliance'], ['community']]) {
       const view = renderWithProviders(<TopBar attention={0} caseAttention={0} />, { ...agentFixture, roles })
-      expect(screen.queryByRole('link', { name: 'Aplikasi' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'Fitur & Kampanye' })).not.toBeInTheDocument()
       view.unmount()
     }
   })
@@ -108,7 +108,7 @@ describe('TopBar', () => {
       'Laporan',
       'Akun Nasabah',
       'Komunitas',
-      'Aplikasi',
+      'Fitur & Kampanye',
       'Pengaturan',
     ])
   })
@@ -130,7 +130,7 @@ describe('TopBar', () => {
       'Dashboard',
       'Laporan',
       'Komunitas',
-      'Aplikasi',
+      'Fitur & Kampanye',
       'Pengaturan',
       'Kesehatan sistem',
     ])

@@ -119,7 +119,7 @@ export const id = {
     tickets: 'Layanan Nasabah',
     dashboard: 'Dashboard',
     reports: 'Laporan',
-    app: 'Aplikasi',
+    featuresCampaigns: 'Fitur & Kampanye',
     settings: 'Pengaturan',
     attention: '{{count}} tiket perlu perhatian',
     account: 'Akun',
@@ -1519,11 +1519,12 @@ export const id = {
       links_client_only: 'Hanya akun Klien yang bisa ditautkan ke rekening.',
     },
   },
-  appManagement: {
-    title: 'Aplikasi',
-    subtitle: 'Atur apa yang tampil dan berjalan di aplikasi nasabah.',
-    tabsLabel: 'Bagian aplikasi',
-    tabs: { features: 'Fitur & versi', banners: 'Banner & popup', connection: 'Koneksi aplikasi' },
+  featuresCampaigns: {
+    title: 'Fitur & Kampanye',
+    subtitle:
+      'Fitur sosial, kill switch, versi minimum aplikasi, serta kampanye banner dan popup untuk nasabah.',
+    tabsLabel: 'Bagian Fitur & Kampanye',
+    tabs: { features: 'Fitur & versi', banners: 'Banner & popup' },
   },
   command: {
     placeholder: 'Cari tiket, nasabah, atau perintah…',
@@ -1536,7 +1537,7 @@ export const id = {
     preferences: 'Tampilan',
     openTicket: 'Buka tiket {{number}}',
     goTo: 'Buka {{section}}',
-    appTab: 'Buka Aplikasi › {{tab}}',
+    featuresCampaignsTab: 'Buka Fitur & Kampanye › {{tab}}',
     tab: 'Tab {{tab}}',
     setStatus: 'Status: {{status}}',
     toggleTheme: 'Ganti tema',

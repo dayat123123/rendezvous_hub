@@ -35,10 +35,34 @@ describe('router', () => {
     expect((await open('/system', agentFixture)).pathname).toBe('/')
   })
 
-  it('opens /app to Super Admins only and keeps a known tab from the search param', async () => {
-    const location = await open('/app?tab=banners', monitorFixture)
-    expect(location.pathname).toBe('/app')
+  it('opens /features to Super Admins only and keeps a known tab from the search param', async () => {
+    const location = await open('/features?tab=banners', monitorFixture)
+    expect(location.pathname).toBe('/features')
     expect(location.search).toEqual({ tab: 'banners' })
-    expect((await open('/app?tab=features', agentFixture)).pathname).toBe('/')
+    expect((await open('/features?tab=features', agentFixture)).pathname).toBe('/')
+  })
+
+  it('redirects the old /app address to Fitur & Kampanye or Pengaturan', async () => {
+    for (const tab of ['features', 'banners'] as const) {
+      const location = await open(`/app?tab=${tab}`, monitorFixture)
+      expect(location.pathname).toBe('/features')
+      expect(location.search).toEqual({ tab })
+    }
+
+    const bare = await open('/app', monitorFixture)
+    expect(bare.pathname).toBe('/features')
+    expect(bare.search).toEqual({})
+
+    const unknown = await open('/app?tab=backup', monitorFixture)
+    expect(unknown.pathname).toBe('/features')
+    expect(unknown.search).toEqual({})
+
+    expect((await open('/app?tab=connection', monitorFixture)).pathname).toBe('/settings')
+  })
+
+  it('keeps the old /app address closed to accounts without Super Admin access', async () => {
+    for (const path of ['/app', '/app?tab=banners', '/app?tab=connection']) {
+      expect((await open(path, agentFixture)).pathname).toBe('/')
+    }
   })
 })

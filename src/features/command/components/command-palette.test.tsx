@@ -61,22 +61,32 @@ describe('CommandPalette', () => {
     expect(screen.getByRole('option', { name: 'Buka Kesehatan sistem' })).toBeInTheDocument()
   })
 
-  it('lists Aplikasi and each of its tabs for Super Admins', async () => {
+  it('lists Fitur & Kampanye and each of its tabs for Super Admins', async () => {
     const user = userEvent.setup()
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
 
-    expect(screen.getByRole('option', { name: 'Buka Aplikasi' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Buka Aplikasi › Fitur & versi' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Buka Aplikasi › Koneksi aplikasi' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Buka Fitur & Kampanye' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Buka Fitur & Kampanye › Fitur & versi' })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Koneksi aplikasi/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Aplikasi/ })).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('option', { name: 'Buka Aplikasi › Banner & popup' }))
+    await user.click(screen.getByRole('option', { name: 'Buka Fitur & Kampanye › Banner & popup' }))
 
-    expect(navigate).toHaveBeenCalledWith({ to: '/app', search: { tab: 'banners' } })
+    expect(navigate).toHaveBeenCalledWith({ to: '/features', search: { tab: 'banners' } })
   })
 
-  it('keeps Aplikasi out of the palette for CS agents', () => {
+  it('opens Fitur & Kampanye on its default tab', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
+
+    await user.click(screen.getByRole('option', { name: 'Buka Fitur & Kampanye' }))
+
+    expect(navigate).toHaveBeenCalledWith({ to: '/features', search: undefined })
+  })
+
+  it('keeps Fitur & Kampanye out of the palette for CS agents', () => {
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, agentFixture)
 
-    expect(screen.queryByRole('option', { name: /Aplikasi/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Fitur & Kampanye/ })).not.toBeInTheDocument()
   })
 })

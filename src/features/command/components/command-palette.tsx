@@ -23,7 +23,7 @@ import {
   SettingsIcon,
   ShieldCheckIcon,
   ShieldIcon,
-  SmartphoneIcon,
+  SlidersHorizontalIcon,
   SquareCheckBigIcon,
   StickyNoteIcon,
   TicketIcon,
@@ -45,8 +45,8 @@ import {
   CommandSeparator,
 } from '@/components/ui/overlay'
 import { Kbd } from '@/components/ui/primitives'
-import { appTabs, type AppTab } from '@/features/app-management/types'
 import { useAgent } from '@/features/auth/hooks'
+import { featuresCampaignsTabs, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
 import { useSetStatus } from '@/features/presence/hooks'
 import {
   agentStatuses,
@@ -111,17 +111,16 @@ function Section({
   )
 }
 
-const appTabIcons: Record<AppTab, Icon> = {
+const featuresCampaignsTabIcons: Record<FeaturesCampaignsTab, Icon> = {
   features: FlagIcon,
   banners: PanelTopIcon,
-  connection: SmartphoneIcon,
 }
 
 type SectionTarget =
   | '/dashboard'
   | '/reports'
   | '/community'
-  | '/app'
+  | '/features'
   | '/settings'
   | '/compliance'
   | '/compliance/cases'
@@ -200,7 +199,7 @@ function PaletteBody({
     ...(hasNasabah(agent) ? [{ label: t('nav.nasabah'), icon: UsersIcon, to: '/nasabah' as const }] : []),
     ...(superAdmin
       ? [
-          { label: t('nav.app'), icon: SmartphoneIcon, to: '/app' as const },
+          { label: t('nav.featuresCampaigns'), icon: SlidersHorizontalIcon, to: '/features' as const },
           { label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const },
         ]
       : []),
@@ -240,11 +239,11 @@ function PaletteBody({
       run: () => void navigate({ to: section.to, search: section.search }),
     })),
     ...(superAdmin
-      ? appTabs.map((tab) => ({
-          id: `nav:/app:${tab}`,
-          label: t('command.appTab', { tab: t(`appManagement.tabs.${tab}`) }),
-          icon: appTabIcons[tab],
-          run: () => void navigate({ to: '/app', search: { tab } }),
+      ? featuresCampaignsTabs.map((tab) => ({
+          id: `nav:/features:${tab}`,
+          label: t('command.featuresCampaignsTab', { tab: t(`featuresCampaigns.tabs.${tab}`) }),
+          icon: featuresCampaignsTabIcons[tab],
+          run: () => void navigate({ to: '/features', search: { tab } }),
         }))
       : []),
   ]

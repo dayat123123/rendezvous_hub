@@ -61,7 +61,7 @@ type NavTarget =
   | '/'
   | '/dashboard'
   | '/reports'
-  | '/app'
+  | '/features'
   | '/settings'
   | '/compliance'
   | '/compliance/cases'
@@ -281,7 +281,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
         ) : null}
         {superAdmin ? (
           <>
-            <NavLink to="/app" label={t('nav.app')} />
+            <NavLink to="/features" label={t('nav.featuresCampaigns')} />
             <NavLink to="/settings" label={t('nav.settings')} />
           </>
         ) : null}

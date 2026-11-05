@@ -122,7 +122,7 @@ export const en: Translation = {
     tickets: 'Customer service',
     dashboard: 'Dashboard',
     reports: 'Reports',
-    app: 'App',
+    featuresCampaigns: 'Features & Campaigns',
     settings: 'Settings',
     attention: '{{count}} tickets need attention',
     account: 'Account',
@@ -1523,11 +1523,12 @@ export const en: Translation = {
       links_client_only: 'Only client logins can be linked to accounts.',
     },
   },
-  appManagement: {
-    title: 'App',
-    subtitle: 'Control what appears and runs in the customer app.',
-    tabsLabel: 'App sections',
-    tabs: { features: 'Features & versions', banners: 'Banners & popups', connection: 'App connection' },
+  featuresCampaigns: {
+    title: 'Features & Campaigns',
+    subtitle:
+      'Social features, kill switch, minimum app versions, and banner and popup campaigns for customers.',
+    tabsLabel: 'Features & Campaigns sections',
+    tabs: { features: 'Features & versions', banners: 'Banners & popups' },
   },
   command: {
     placeholder: 'Search tickets, customers, or commands…',
@@ -1540,7 +1541,7 @@ export const en: Translation = {
     preferences: 'Appearance',
     openTicket: 'Open ticket {{number}}',
     goTo: 'Go to {{section}}',
-    appTab: 'Go to App › {{tab}}',
+    featuresCampaignsTab: 'Go to Features & Campaigns › {{tab}}',
     tab: '{{tab}} tab',
     setStatus: 'Status: {{status}}',
     toggleTheme: 'Switch theme',

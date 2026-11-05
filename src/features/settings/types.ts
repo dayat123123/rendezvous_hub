@@ -74,7 +74,7 @@ export type Holiday = { day: string; name: string; kind: HolidayKind }
 export const settingsGroups = {
   service: ['accounts', 'topics', 'quickReplies', 'ticketLabels', 'hours', 'messages', 'assignment'],
   community: ['community'],
-  integration: ['integration', 'apiKeys', 'push'],
+  integration: ['integration', 'appIntegration', 'apiKeys', 'push'],
   system: ['backup', 'alerts'],
 } as const
 export type SettingsGroup = keyof typeof settingsGroups
