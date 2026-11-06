@@ -78,3 +78,16 @@ export function latestCustomerMessage(messages: ChatMessage[]) {
   }
   return undefined
 }
+
+export const SEEK_PAGES = 20
+
+export type OlderPage = { data?: MessagePages; hasNextPage: boolean; isError: boolean }
+
+export async function seekOlder(fetchOlder: () => Promise<OlderPage>, id: string, maxPages = SEEK_PAGES) {
+  for (let page = 0; page < maxPages; page += 1) {
+    const result = await fetchOlder()
+    if (result.data?.pages.some((items) => items.some((message) => message.id === id))) return true
+    if (result.isError || !result.hasNextPage) return false
+  }
+  return false
+}

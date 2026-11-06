@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { messageFixture } from '@/test/fixtures'
 
@@ -10,6 +10,8 @@ import {
   newestCursor,
   orderedMessages,
   overlapCursor,
+  SEEK_PAGES,
+  seekOlder,
   type MessagePages,
 } from './cache'
 
@@ -140,5 +142,45 @@ describe('horizon catch-up', () => {
     expect(orderedMessages(synced).map((message) => message.id)).toEqual(['a', 'b', 'c'])
     expect(orderedMessages(synced).some((message) => message.local)).toBe(false)
     expect(newestCursor(synced)).toBe(`${stamp(60)}|c`)
+  })
+})
+
+describe('seeking an older message', () => {
+  const history = Array.from({ length: 30 }, (_, index) => [messageFixture({ id: `p${index}` })])
+
+  function fetcher(hasMore = (loaded: number) => loaded < history.length) {
+    let loaded = 0
+    return vi.fn(() => {
+      loaded += 1
+      return Promise.resolve({
+        data: pages(...history.slice(0, loaded)),
+        hasNextPage: hasMore(loaded),
+        isError: false,
+      })
+    })
+  }
+
+  it('loads older pages until the message is found', async () => {
+    const fetchOlder = fetcher()
+    await expect(seekOlder(fetchOlder, 'p3')).resolves.toBe(true)
+    expect(fetchOlder).toHaveBeenCalledTimes(4)
+  })
+
+  it('stops when the history runs out', async () => {
+    const fetchOlder = fetcher((loaded) => loaded < 2)
+    await expect(seekOlder(fetchOlder, 'p9')).resolves.toBe(false)
+    expect(fetchOlder).toHaveBeenCalledTimes(2)
+  })
+
+  it('gives up after the page limit', async () => {
+    const fetchOlder = fetcher()
+    await expect(seekOlder(fetchOlder, 'p25')).resolves.toBe(false)
+    expect(fetchOlder).toHaveBeenCalledTimes(SEEK_PAGES)
+  })
+
+  it('stops on a failed page', async () => {
+    const fetchOlder = vi.fn(() => Promise.resolve({ hasNextPage: true, isError: true }))
+    await expect(seekOlder(fetchOlder, 'p1')).resolves.toBe(false)
+    expect(fetchOlder).toHaveBeenCalledTimes(1)
   })
 })

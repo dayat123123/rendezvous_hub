@@ -172,6 +172,17 @@
   --default-transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 
   --animate-leave: ticket-leave 150ms cubic-bezier(0, 0, 0.2, 1) 1450ms forwards;
+  --animate-flash: message-flash 1400ms cubic-bezier(0, 0, 0.2, 1);
+
+  @keyframes message-flash {
+    0%,
+    35% {
+      background-color: var(--selection);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
 
   @keyframes ticket-leave {
     from {

@@ -1,12 +1,14 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { ArrowDownIcon, LoaderCircleIcon } from 'lucide-react'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDownIcon, LoaderCircleIcon } from 'lucide-react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/states'
 import { Button } from '@/components/ui/button'
 import type { AgentNote } from '@/features/customer/types'
 
+import { compareMessages } from '../cache'
 import { buildRows, type MessageRow } from '../rows'
 import { isStaffMessage, type ChatMessage, type PendingMessage } from '../types'
 import { MessageBubble, NoteMessage, PendingBubble, SystemMessage } from './message-bubble'
@@ -20,6 +22,8 @@ type Props = {
   hasOlder: boolean
   loadingOlder: boolean
   onLoadOlder: () => void
+  onFindOlder?: (id: string) => Promise<boolean>
+  followSignal?: number
   trustedHost: (host: string) => boolean
   onReply?: (message: ChatMessage) => void
   onResend: (pending: PendingMessage) => void
@@ -27,6 +31,15 @@ type Props = {
 }
 
 const NEAR_BOTTOM = 96
+const JUMP_DISTANCE = 300
+const SMOOTH_SCREENS = 2
+const FOLLOW_MS = 10_000
+const FLASH_MS = 1400
+const MAX_BADGE = 99
+
+function incoming(message: ChatMessage, meId: string) {
+  return message.sender_id !== meId && !isStaffMessage(message)
+}
 
 export function MessageList({
   messages,
@@ -37,6 +50,8 @@ export function MessageList({
   hasOlder,
   loadingOlder,
   onLoadOlder,
+  onFindOlder,
+  followSignal = 0,
   trustedHost,
   onReply,
   onResend,
@@ -51,6 +66,15 @@ export function MessageList({
   const lastCount = useRef(0)
   const initialized = useRef(false)
   const [unseen, setUnseen] = useState(0)
+  const [away, setAway] = useState(false)
+  const [highlighted, setHighlighted] = useState<string | null>(null)
+  const [reveal, setReveal] = useState<string | null>(null)
+  const newest = useRef(messages[messages.length - 1])
+  const followed = useRef(followSignal)
+  const followUntil = useRef(0)
+  const seeking = useRef(false)
+  const flashTimer = useRef<number | undefined>(undefined)
+  const badgeId = useId()
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -60,15 +84,31 @@ export function MessageList({
     getItemKey: (index) => rows[index]?.key ?? index,
   })
 
-  const scrollToEnd = useCallback(() => {
-    if (rows.length === 0) return
-    virtualizer.scrollToIndex(rows.length - 1, { align: 'end' })
-    setUnseen(0)
-  }, [rows.length, virtualizer])
+  const distanceToEnd = () => {
+    const element = scrollRef.current
+    return element ? element.scrollHeight - element.scrollTop - element.clientHeight : 0
+  }
+
+  const behaviorFor = useCallback((distance: number): ScrollBehavior => {
+    const element = scrollRef.current
+    if (!element) return 'auto'
+    return Math.abs(distance) > element.clientHeight * SMOOTH_SCREENS ? 'auto' : 'smooth'
+  }, [])
+
+  const scrollToEnd = useCallback(
+    (behavior: ScrollBehavior = 'auto') => {
+      if (rows.length === 0) return
+      virtualizer.scrollToIndex(rows.length - 1, { align: 'end', behavior })
+      setUnseen(0)
+    },
+    [rows.length, virtualizer],
+  )
+
+  const jumpToLatest = () => scrollToEnd(behaviorFor(distanceToEnd()))
 
   const requestOlder = useCallback(() => {
     const element = scrollRef.current
-    if (!element || !hasOlder || loadingOlder || anchor.current) return
+    if (!element || !hasOlder || loadingOlder || anchor.current || seeking.current) return
     const first = virtualizer.getVirtualItems().find((item) => item.end > element.scrollTop)
     const row = first ? rows[first.index] : undefined
     if (first && row)
@@ -92,6 +132,23 @@ export function MessageList({
   }, [loadingOlder, hasOlder, rows.length])
 
   useEffect(() => {
+    if (followSignal === followed.current) return
+    followed.current = followSignal
+    followUntil.current = Date.now() + FOLLOW_MS
+    requestAnimationFrame(() => scrollToEnd())
+  }, [followSignal, scrollToEnd])
+
+  useEffect(() => {
+    const previous = newest.current
+    newest.current = messages[messages.length - 1]
+    if (!previous || atBottom.current) return
+    const count = messages.filter(
+      (message) => compareMessages(message, previous) > 0 && incoming(message, meId),
+    ).length
+    if (count > 0) setUnseen((value) => value + count)
+  }, [messages, meId])
+
+  useEffect(() => {
     const last = rows[rows.length - 1]
     if (!last) return
     if (!initialized.current) {
@@ -106,15 +163,57 @@ export function MessageList({
     lastKey.current = last.key
     lastCount.current = rows.length
     if (!newLast && !grew) return
-    const ownMessage = last.kind === 'pending' || (last.kind === 'message' && last.message.sender_id === meId)
-    if (atBottom.current || (newLast && ownMessage)) requestAnimationFrame(() => scrollToEnd())
-    else if (newLast) setUnseen((count) => count + 1)
+    const ownMessage =
+      newLast && (last.kind === 'pending' || (last.kind === 'message' && last.message.sender_id === meId))
+    const following = newLast && followUntil.current > Date.now()
+    if (following) followUntil.current = 0
+    if (atBottom.current || ownMessage || following) requestAnimationFrame(() => scrollToEnd())
   }, [rows, meId, scrollToEnd, virtualizer])
+
+  useEffect(() => {
+    if (!reveal) return
+    const index = rows.findIndex((row) => row.key === reveal)
+    if (index < 0) return
+    setReveal(null)
+    const element = scrollRef.current
+    const offset = virtualizer.getOffsetForIndex(index, 'center')
+    const distance = element && offset ? offset[0] - element.scrollTop : 0
+    virtualizer.scrollToIndex(index, { align: 'center', behavior: behaviorFor(distance) })
+    window.clearTimeout(flashTimer.current)
+    setHighlighted(reveal)
+    flashTimer.current = window.setTimeout(() => setHighlighted(null), FLASH_MS)
+  }, [reveal, rows, virtualizer, behaviorFor])
+
+  useEffect(() => () => window.clearTimeout(flashTimer.current), [])
+
+  const findOriginal = useRef<(id: string) => Promise<void>>(() => Promise.resolve())
+  useLayoutEffect(() => {
+    findOriginal.current = async (id: string) => {
+      if (seeking.current) return
+      atBottom.current = false
+      if (rows.some((row) => row.key === id)) {
+        setReveal(id)
+        return
+      }
+      seeking.current = true
+      const found = hasOlder && onFindOlder ? await onFindOlder(id).catch(() => false) : false
+      seeking.current = false
+      if (found) {
+        setReveal(id)
+        return
+      }
+      atBottom.current = distanceToEnd() < NEAR_BOTTOM
+      toast.error(t('conversation.replyNotFound'))
+    }
+  })
+  const onQuote = useCallback((id: string) => void findOriginal.current(id), [])
 
   const onScroll = () => {
     const element = scrollRef.current
     if (!element) return
-    atBottom.current = element.scrollHeight - element.scrollTop - element.clientHeight < NEAR_BOTTOM
+    const distance = distanceToEnd()
+    atBottom.current = distance < NEAR_BOTTOM
+    setAway(distance > JUMP_DISTANCE)
     if (atBottom.current && unseen > 0) setUnseen(0)
     if (element.scrollTop < 240) requestOlder()
   }
@@ -151,6 +250,8 @@ export function MessageList({
         read={staff && customerReadAt !== null && customerReadAt >= message.created_at}
         trustedHost={trustedHost}
         onReply={onReply}
+        onQuote={onQuote}
+        highlighted={highlighted === message.id}
       />
     )
   }
@@ -194,15 +295,29 @@ export function MessageList({
           </div>
         )}
       </div>
-      {unseen > 0 ? (
+      {away || unseen > 0 ? (
         <Button
-          size="sm"
+          size="icon"
           variant="outline"
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 shadow-float"
-          onClick={scrollToEnd}
+          className="absolute right-4 bottom-3 size-10 rounded-full bg-popover text-muted-foreground shadow-float hover:text-foreground"
+          aria-label={t('conversation.jumpToLatest')}
+          aria-describedby={unseen > 0 ? badgeId : undefined}
+          onClick={jumpToLatest}
         >
-          <ArrowDownIcon />
-          {t('conversation.newMessages', { count: unseen })}
+          <ChevronDownIcon className="size-5" />
+          {unseen > 0 ? (
+            <>
+              <span
+                aria-hidden="true"
+                className="tabular absolute -top-1.5 -right-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[11px] font-medium text-primary-foreground"
+              >
+                {unseen > MAX_BADGE ? `${MAX_BADGE}+` : unseen}
+              </span>
+              <span id={badgeId} className="sr-only">
+                {t('conversation.newMessages', { count: unseen })}
+              </span>
+            </>
+          ) : null}
         </Button>
       ) : null}
     </div>

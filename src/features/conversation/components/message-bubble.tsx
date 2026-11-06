@@ -118,6 +118,32 @@ type BubbleProps = {
   read: boolean
   trustedHost: (host: string) => boolean
   onReply?: (message: ChatMessage) => void
+  onQuote?: (id: string) => void
+  highlighted?: boolean
+}
+
+function ReplyQuote({ message, onQuote }: { message: ChatMessage; onQuote?: (id: string) => void }) {
+  const { t } = useTranslation()
+  const target = message.reply_to_id
+  const content = (
+    <>
+      <span className="block font-medium">{message.reply_to_sender_username ?? ''}</span>
+      <span className="line-clamp-2">{message.reply_to_body}</span>
+    </>
+  )
+  if (!onQuote || !target) {
+    return <div className="mb-1.5 border-l-2 border-current/40 pl-2 text-xs opacity-80">{content}</div>
+  }
+  return (
+    <button
+      type="button"
+      title={t('conversation.showOriginal')}
+      onClick={() => onQuote(target)}
+      className="mb-1.5 block w-full min-w-0 cursor-pointer rounded-sm border-l-2 border-current/40 pl-2 text-left text-xs opacity-80 outline-none hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50"
+    >
+      {content}
+    </button>
+  )
 }
 
 export const MessageBubble = memo(function MessageBubble({
@@ -128,6 +154,8 @@ export const MessageBubble = memo(function MessageBubble({
   read,
   trustedHost,
   onReply,
+  onQuote,
+  highlighted = false,
 }: BubbleProps) {
   const { t } = useTranslation()
   const name = message.sender_display_name ?? message.sender_username ?? ''
@@ -149,7 +177,9 @@ export const MessageBubble = memo(function MessageBubble({
         'group flex px-(--pane-px)',
         staff ? 'justify-end' : 'justify-start',
         first ? 'pt-3 compact:pt-2' : 'pt-0.5',
+        highlighted && 'animate-flash',
       )}
+      data-highlighted={highlighted || undefined}
     >
       <div className={cn('flex max-w-[68%] min-w-0 flex-col', staff ? 'items-end' : 'items-start')}>
         {first ? (
@@ -165,12 +195,7 @@ export const MessageBubble = memo(function MessageBubble({
               last && (staff ? 'rounded-br-sm' : 'rounded-bl-sm'),
             )}
           >
-            {message.reply_to_body ? (
-              <div className="mb-1.5 border-l-2 border-current/40 pl-2 text-xs opacity-80">
-                <div className="font-medium">{message.reply_to_sender_username ?? ''}</div>
-                <div className="line-clamp-2">{message.reply_to_body}</div>
-              </div>
-            ) : null}
+            {message.reply_to_body ? <ReplyQuote message={message} onQuote={onQuote} /> : null}
             {images.length > 0 ? (
               <div className={cn('mb-1 grid gap-1', images.length > 1 ? 'grid-cols-2' : 'grid-cols-1')}>
                 {images.map((attachment) => (

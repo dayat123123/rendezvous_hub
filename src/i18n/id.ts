@@ -261,6 +261,8 @@ export const id = {
     loadOlder: 'Memuat pesan sebelumnya…',
     jumpToLatest: 'Ke pesan terbaru',
     newMessages: '{{count}} pesan baru',
+    showOriginal: 'Lihat pesan yang dibalas',
+    replyNotFound: 'Pesan yang dibalas tidak ditemukan.',
     sent: 'Terkirim',
     read: 'Dibaca',
     sending: 'Mengirim…',

@@ -17,6 +17,7 @@ import {
   newestCursor,
   orderedMessages,
   overlapCursor,
+  seekOlder,
   type MessagePages,
 } from './cache'
 import { createGapSchedule } from './gap-schedule'
@@ -68,7 +69,12 @@ export function useMessages(roomId: string) {
     staleTime: Infinity,
   })
   const messages = useMemo(() => orderedMessages(query.data), [query.data])
-  return { ...query, messages }
+  const { fetchNextPage } = query
+  const findOlder = useCallback(
+    (id: string) => seekOlder(() => fetchNextPage({ cancelRefetch: false }), id),
+    [fetchNextPage],
+  )
+  return { ...query, messages, findOlder }
 }
 
 export function useMembers(roomId: string) {

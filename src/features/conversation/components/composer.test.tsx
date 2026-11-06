@@ -47,6 +47,7 @@ function setup(agent: AgentProfile = agentFixture) {
   const send = vi.fn<(request: SendRequest) => Promise<SendResult>>(() =>
     Promise.resolve({ status: 'sent', message: messageFixture() }),
   )
+  const onNoteSaved = vi.fn()
   const user = userEvent.setup()
   renderWithProviders(
     <>
@@ -58,12 +59,13 @@ function setup(agent: AgentProfile = agentFixture) {
         send={send}
         onTyping={vi.fn()}
         onStopTyping={vi.fn()}
+        onNoteSaved={onNoteSaved}
       />
       <Toaster />
     </>,
     agent,
   )
-  return { send, user, box: screen.getByRole('textbox', { name: 'Balas' }) }
+  return { send, user, onNoteSaved, box: screen.getByRole('textbox', { name: 'Balas' }) }
 }
 
 const offlineAgent: AgentProfile = { ...agentFixture, status: 'offline' }
@@ -117,7 +119,7 @@ describe('Composer', () => {
   })
 
   it('saves internal notes through the note endpoint', async () => {
-    const { send, user } = setup()
+    const { send, user, onNoteSaved } = setup()
     await user.click(screen.getByRole('tab', { name: /Catatan internal/ }))
     expect(screen.getByText('Tidak terlihat nasabah')).toBeInTheDocument()
     const note = screen.getByRole('textbox', { name: 'Catatan internal' })
@@ -128,6 +130,7 @@ describe('Composer', () => {
         ticketId: ticketFixture().id,
       }),
     )
+    await waitFor(() => expect(onNoteSaved).toHaveBeenCalledTimes(1))
     expect(send).not.toHaveBeenCalled()
   })
 

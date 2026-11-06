@@ -265,6 +265,8 @@ export const en: Translation = {
     loadOlder: 'Loading earlier messages…',
     jumpToLatest: 'Jump to latest',
     newMessages: '{{count}} new messages',
+    showOriginal: 'Show the original message',
+    replyNotFound: 'The original message could not be found.',
     sent: 'Sent',
     read: 'Read',
     sending: 'Sending…',

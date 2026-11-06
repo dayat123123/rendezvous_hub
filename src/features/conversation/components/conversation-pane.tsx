@@ -24,7 +24,15 @@ import { newerActiveTicket } from '@/features/tickets/logic'
 import { emptyLists, type Ticket } from '@/features/tickets/types'
 
 import { latestCustomerMessage } from '../cache'
-import { useMarkRead, useMembers, useMessages, usePending, useRoom, useSendMessage } from '../hooks'
+import {
+  useMarkRead,
+  useMembers,
+  useMessages,
+  usePending,
+  useRoom,
+  useSendMessage,
+  type SendRequest,
+} from '../hooks'
 import type { ChatMessage, PendingMessage } from '../types'
 import { ActionDialog, type TicketAction } from './action-dialogs'
 import { Composer } from './composer'
@@ -153,6 +161,15 @@ function Conversation({
   const topics = useTopics()
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
   const [action, setAction] = useState<TicketAction | null>(null)
+  const [followSignal, setFollowSignal] = useState(0)
+  const follow = useCallback(() => setFollowSignal((value) => value + 1), [])
+  const sendAndFollow = useCallback(
+    (request: SendRequest) => {
+      follow()
+      return send(request)
+    },
+    [follow, send],
+  )
 
   const active = ticket.status === 'claimed' || ticket.status === 'waiting_customer'
   const owner = worker && active && ticket.owner?.id === agent.id
@@ -259,6 +276,8 @@ function Conversation({
           hasOlder={messages.hasNextPage}
           loadingOlder={messages.isFetchingNextPage}
           onLoadOlder={() => void messages.fetchNextPage()}
+          onFindOlder={messages.findOlder}
+          followSignal={followSignal}
           trustedHost={trustedHost}
           onReply={owner ? setReplyTo : undefined}
           onResend={(item) => void resend(item).catch(() => undefined)}
@@ -274,7 +293,8 @@ function Conversation({
           agent={agent}
           replyTo={replyTo}
           onCancelReply={() => setReplyTo(null)}
-          send={send}
+          send={sendAndFollow}
+          onNoteSaved={follow}
           onTyping={room.sendTyping}
           onStopTyping={room.stopTyping}
         />

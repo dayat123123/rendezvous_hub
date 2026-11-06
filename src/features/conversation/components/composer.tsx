@@ -96,9 +96,19 @@ type Props = {
   send: (request: SendRequest) => Promise<SendResult>
   onTyping: () => void
   onStopTyping: () => void
+  onNoteSaved?: () => void
 }
 
-export function Composer({ ticket, agent, replyTo, onCancelReply, send, onTyping, onStopTyping }: Props) {
+export function Composer({
+  ticket,
+  agent,
+  replyTo,
+  onCancelReply,
+  send,
+  onTyping,
+  onStopTyping,
+  onNoteSaved,
+}: Props) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const [mode, setMode] = useState<ComposerMode>('reply')
@@ -212,6 +222,7 @@ export function Composer({ ticket, agent, replyTo, onCancelReply, send, onTyping
       try {
         await conversationApi.addNote(body, { ticketId: ticket.id })
         clearDraft()
+        onNoteSaved?.()
         toast.success(t('composer.noteSaved'))
         if (ticket.customer?.id)
           void client.invalidateQueries({ queryKey: customerKeys.notes(ticket.customer.id) })
@@ -266,6 +277,7 @@ export function Composer({ ticket, agent, replyTo, onCancelReply, send, onTyping
     replyTo,
     setValue,
     guard,
+    onNoteSaved,
   ])
 
   useCommandHandler(
