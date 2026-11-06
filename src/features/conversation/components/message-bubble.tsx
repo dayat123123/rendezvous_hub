@@ -24,15 +24,17 @@ import { clock } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
 import { isDocument, isDocumentFile } from '../media'
+import { systemText } from '../system-text'
 import type { ChatMessage, PendingMessage } from '../types'
 import { AttachmentFile, DocumentLabel } from './attachment-file'
 import { AttachmentImage } from './attachment-image'
 
 export const SystemMessage = memo(function SystemMessage({ message }: { message: ChatMessage }) {
+  const { i18n } = useTranslation()
   return (
     <div className="flex justify-center px-(--pane-px) py-1.5" role="note">
       <p className="max-w-[80%] text-center text-xs text-muted-foreground">
-        {message.body} · <span className="tabular">{clock(message.created_at)}</span>
+        {systemText(message, i18n.language)} · <span className="tabular">{clock(message.created_at)}</span>
       </p>
     </div>
   )
