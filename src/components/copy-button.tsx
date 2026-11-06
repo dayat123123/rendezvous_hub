@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { copyText } from '@/lib/clipboard'
 
 export function CopyButton({
   text,
@@ -26,8 +27,7 @@ export function CopyButton({
         label ? (copied ? `${t('app.copied')}: ${label}` : `${t('app.copy')}: ${label}`) : undefined
       }
       onClick={() =>
-        void navigator.clipboard
-          .writeText(text)
+        void copyText(text)
           .then(() => {
             setCopied(true)
             onCopied?.()

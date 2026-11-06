@@ -5,6 +5,7 @@ import type { ChatMessage } from '@/features/conversation/types'
 import type { AgentNote } from '@/features/customer/types'
 import { toCsv } from '@/features/reports/csv'
 import type { DateRange } from '@/features/reports/types'
+import { sha256Hex as hashBytes } from '@/lib/hash'
 import type { WaitTone } from '@/lib/sla'
 import { format, isoDay, todayInJakarta } from '@/lib/time'
 
@@ -421,9 +422,8 @@ export function transcriptText(
   return `${lines.join('\n')}\n`
 }
 
-export async function sha256Hex(content: string) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content))
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
+export function sha256Hex(content: string) {
+  return hashBytes(new TextEncoder().encode(content))
 }
 
 export function transcriptFileName(ticketNumber: string, sha256: string) {

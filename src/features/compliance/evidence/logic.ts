@@ -1,3 +1,5 @@
+import { sha256Hex } from '@/lib/hash'
+
 import type { BundleFile, EvidenceBundle, EvidenceRow, SignedLink } from './types'
 
 export type RetentionState = 'held' | 'expiring' | 'active'
@@ -16,9 +18,8 @@ export function fileProblem(row: Pick<EvidenceRow, 'files'>) {
   return row.files.missing + row.files.failed > 0
 }
 
-export async function sha256Bytes(data: ArrayBuffer) {
-  const digest = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('')
+export function sha256Bytes(data: ArrayBuffer) {
+  return sha256Hex(data)
 }
 
 export function shortHash(hash: string | null | undefined, length = 12) {

@@ -23,6 +23,7 @@ import { useClearIntegration, useIntegrationStatus, useSaveIntegration, useTestI
 import { csadminConfigBlock, validClientId, validCsadminUrl } from '../logic'
 import type { IntegrationCheck, IntegrationStatus } from '../types'
 import { FieldMessage, QueryContent, SectionFrame, SettingsCard } from './settings-ui'
+import { copyText } from '@/lib/clipboard'
 
 export function IntegrationBadge({ configured, className }: { configured: boolean; className?: string }) {
   const { t } = useTranslation()
@@ -252,8 +253,7 @@ function KeyCard({ status, clientId }: { status: IntegrationStatus; clientId: st
           variant="outline"
           size="sm"
           onClick={() =>
-            void navigator.clipboard
-              .writeText(block)
+            void copyText(block)
               .then(() => setCopied(true))
               .catch(() => setCopied(false))
           }

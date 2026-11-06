@@ -45,6 +45,7 @@ import { cn } from '@/lib/utils'
 import { useAccounts, useAdminOptions, useResetPassword, useSaveAccount } from '../hooks'
 import { isStaffRole, staffRoles, type CreatedAccount, type StaffAccount } from '../types'
 import { ActiveBadge, FieldMessage, FormError, QueryContent, SectionFrame } from './settings-ui'
+import { copyText } from '@/lib/clipboard'
 
 const emailPattern = /^[^\s@]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/
 
@@ -419,8 +420,7 @@ function PasswordDialog({ issued, onClose }: { issued: IssuedPassword | null; on
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const copy = (password: string) => {
-    void navigator.clipboard
-      .writeText(password)
+    void copyText(password)
       .then(() => setCopied(true))
       .catch(() => setCopied(false))
   }
