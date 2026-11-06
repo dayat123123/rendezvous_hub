@@ -50,7 +50,7 @@ const optional = (value: string) => (value.trim() === '' ? null : value.trim())
 function useProblemText(problems: BannerProblems, schemes: string[]) {
   const { t } = useTranslation()
   const list =
-    schemes.length > 0 ? schemes.map((item) => `${item}://`).join(', ') : t('platform.banners.schemes.none')
+    schemes.length > 0 ? schemes.map((item) => `${item}://`).join(', ') : t('platform.banners.schemesNone')
   return {
     title: problems.title
       ? problems.title === 'required'

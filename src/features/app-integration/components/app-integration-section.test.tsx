@@ -1,9 +1,10 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { clientConfigApi } from '@/features/client-config/api'
+import { bannersApi, clientConfigApi } from '@/features/client-config/api'
 import type * as ClientConfigApiModule from '@/features/client-config/api'
+import type { BannerSettings } from '@/features/client-config/types'
 import type * as SupabaseModule from '@/lib/supabase'
 import { monitorFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
@@ -28,7 +29,20 @@ vi.mock('../api', () => ({ appIntegrationApi: { overview: vi.fn() } }))
 
 vi.mock('@/features/client-config/api', async (importOriginal) => {
   const actual = await importOriginal<typeof ClientConfigApiModule>()
-  return { ...actual, clientConfigApi: { ...actual.clientConfigApi, config: vi.fn() } }
+  return {
+    ...actual,
+    clientConfigApi: { ...actual.clientConfigApi, config: vi.fn() },
+    bannersApi: { ...actual.bannersApi, settings: vi.fn(), setLinkSchemes: vi.fn() },
+  }
+})
+
+const schemes = (patch: Partial<BannerSettings> = {}): BannerSettings => ({
+  deep_link_schemes: ['olt'],
+  forbidden_schemes: ['http', 'https', 'javascript', 'vbscript', 'data', 'file', 'intent', 'content'],
+  max_schemes: 5,
+  updated_at: '2026-11-03T03:00:00.000Z',
+  updated_by: { id: 'sinta', name: 'Sinta' },
+  ...patch,
 })
 
 const recent = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString()
@@ -63,6 +77,7 @@ const overview = (patch: Partial<AppIntegrationOverview> = {}): AppIntegrationOv
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(appIntegrationApi.overview).mockResolvedValue(overview())
+  vi.mocked(bannersApi.settings).mockResolvedValue(schemes())
   vi.mocked(clientConfigApi.config).mockResolvedValue({
     kill_switch: { social_enabled: true, reason: null, changed_by: null, changed_at: null },
     flags: [],
@@ -164,5 +179,77 @@ describe('AppIntegrationSection', () => {
     expect(screen.getByText(/Heartbeat terakhir .* \(3 jam lalu\)/)).toBeVisible()
     expect(screen.getByText('Belum ada login nasabah.')).toBeVisible()
     expect(screen.queryByText('Kid terpasang')).not.toBeInTheDocument()
+  })
+  it('explains the app deep link schemes and keeps them locked until Ubah', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AppIntegrationSection />, monitorFixture)
+
+    expect(await screen.findByRole('heading', { name: 'Skema deep link aplikasi' })).toBeVisible()
+    expect(screen.getByText(/olt:\/\/promo\/akhir-tahun membuka halaman promo di aplikasi/)).toBeVisible()
+    expect(screen.getByText(/Bila kosong, tautan banner hanya boleh https:\/\//)).toBeVisible()
+    const input = await screen.findByLabelText('Skema yang diizinkan')
+    expect(input).toHaveValue('olt')
+    expect(input).toBeDisabled()
+    expect(screen.getByText('Banner dan popup boleh memakai tautan https:// dan olt://.')).toBeVisible()
+    expect(screen.getByText(/Diubah .* oleh Sinta/)).toBeVisible()
+
+    await user.click(screen.getByRole('button', { name: 'Ubah Skema deep link aplikasi' }))
+    expect(input).toBeEnabled()
+    expect(input).toHaveFocus()
+    await user.type(input, ', mitra')
+    await user.click(screen.getByRole('button', { name: 'Batal' }))
+    expect(input).toHaveValue('olt')
+    expect(input).toBeDisabled()
+    expect(bannersApi.setLinkSchemes).not.toHaveBeenCalled()
+  })
+
+  it('rejects forbidden schemes and saves the list only after confirmation', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.setLinkSchemes).mockResolvedValue(schemes({ deep_link_schemes: ['mitra', 'olt'] }))
+    renderWithProviders(<AppIntegrationSection />, monitorFixture)
+
+    await user.click(await screen.findByRole('button', { name: 'Ubah Skema deep link aplikasi' }))
+    const input = screen.getByLabelText('Skema yang diizinkan')
+    await user.clear(input)
+    await user.type(input, 'olt, vbscript')
+    await user.click(screen.getByRole('button', { name: 'Simpan' }))
+    expect(screen.getByText('Skema vbscript tidak boleh dipakai sebagai deep link.')).toBeVisible()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+
+    await user.clear(input)
+    await user.type(input, 'a, b, c, d, e, f')
+    await user.click(screen.getByRole('button', { name: 'Simpan' }))
+    expect(screen.getByText('Maksimal 5 skema.')).toBeVisible()
+
+    await user.clear(input)
+    await user.type(input, 'olt, Mitra://')
+    await user.click(screen.getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema deep link aplikasi?' })
+    expect(dialog).toHaveTextContent('https:// atau mitra://, olt://')
+    expect(dialog).toHaveTextContent('tetap tampil, tetapi tanpa tautan dan tombol')
+    expect(bannersApi.setLinkSchemes).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+
+    await waitFor(() => expect(bannersApi.setLinkSchemes).toHaveBeenCalledWith(['mitra', 'olt']))
+    expect(await screen.findByLabelText('Skema yang diizinkan')).toHaveValue('mitra, olt')
+    expect(screen.getByLabelText('Skema yang diizinkan')).toBeDisabled()
+  })
+
+  it('allows clearing every scheme so banners only link to https', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.setLinkSchemes).mockResolvedValue(schemes({ deep_link_schemes: [] }))
+    renderWithProviders(<AppIntegrationSection />, monitorFixture)
+
+    await user.click(await screen.findByRole('button', { name: 'Ubah Skema deep link aplikasi' }))
+    await user.clear(screen.getByLabelText('Skema yang diizinkan'))
+    await user.click(screen.getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema deep link aplikasi?' })
+    expect(dialog).toHaveTextContent('Tautan banner dan popup hanya boleh https://')
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+
+    await waitFor(() => expect(bannersApi.setLinkSchemes).toHaveBeenCalledWith([]))
+    expect(
+      await screen.findByText('Belum ada skema deep link. Tautan banner dan popup hanya boleh https://.'),
+    ).toBeVisible()
   })
 })

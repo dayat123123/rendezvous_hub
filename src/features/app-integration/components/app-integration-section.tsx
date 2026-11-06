@@ -1,12 +1,21 @@
 import { ExternalLinkIcon, EyeIcon, EyeOffIcon, KeyRoundIcon, TriangleAlertIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { Dot } from '@/components/badges'
 import { CopyButton } from '@/components/copy-button'
+import { LockedForm } from '@/components/locked-form'
 import { Button } from '@/components/ui/button'
-import { useClientConfig } from '@/features/client-config/hooks'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useBannerSettings, useClientConfig, useSetLinkSchemes } from '@/features/client-config/hooks'
+import { parseSchemes, schemeProblem } from '@/features/client-config/logic'
+import type { BannerSettings } from '@/features/client-config/types'
 import { QueryContent, SectionFrame, SettingsCard } from '@/features/settings/components/settings-ui'
+import { FieldText } from '@/features/system/components/system-ui'
+import { useLockedEdit } from '@/hooks/use-locked-edit'
+import { bannerErrorText } from '@/lib/error-text'
 import { appEnv } from '@/lib/supabase'
 import { formatNumber, stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
@@ -130,6 +139,108 @@ function ConnectionCard() {
           </a>
         </div>
       </div>
+    </SettingsCard>
+  )
+}
+
+function SchemesForm({ settings }: { settings: BannerSettings }) {
+  const { t } = useTranslation()
+  const id = useId()
+  const save = useSetLinkSchemes()
+  const lock = useLockedEdit()
+  const saved = settings.deep_link_schemes
+  const [text, setText] = useState(saved.join(', '))
+  const [checked, setChecked] = useState(false)
+  const schemes = parseSchemes(text)
+  const problem = schemeProblem(schemes, settings.forbidden_schemes, settings.max_schemes)
+  const blocked = schemes.filter((item) => settings.forbidden_schemes.includes(item)).join(', ')
+  const error =
+    checked && problem
+      ? t(`platform.appIntegration.schemes.problems.${problem}`, {
+          max: settings.max_schemes,
+          schemes: blocked,
+        })
+      : undefined
+  const list = schemes.map((item) => `${item}://`).join(', ')
+  return (
+    <LockedForm
+      lock={lock}
+      name={t('platform.appIntegration.schemes.title')}
+      className="flex max-w-xl flex-col gap-1.5"
+      footerClassName="mt-1.5"
+      confirmTitle={t('platform.appIntegration.schemes.confirmTitle')}
+      confirmBody={
+        schemes.length > 0
+          ? t('platform.appIntegration.schemes.confirmBody', { schemes: list })
+          : t('platform.appIntegration.schemes.confirmEmpty')
+      }
+      saving={save.isPending}
+      canSave={schemes.join(',') !== saved.join(',')}
+      onCheck={() => {
+        setChecked(true)
+        return !problem
+      }}
+      onReset={() => {
+        setText(saved.join(', '))
+        setChecked(false)
+      }}
+      onSave={() =>
+        save.mutateAsync(schemes).then(() => {
+          setChecked(false)
+          toast.success(t('platform.appIntegration.schemes.saved'))
+        })
+      }
+      onError={(failure) => toast.error(bannerErrorText(failure))}
+      status={
+        settings.updated_by?.name && settings.updated_at ? (
+          <span className="text-xs text-muted-foreground">
+            {t('platform.appIntegration.schemes.changed', {
+              time: stamp(settings.updated_at),
+              name: settings.updated_by.name,
+            })}
+          </span>
+        ) : null
+      }
+    >
+      <Label htmlFor={`${id}-schemes`}>{t('platform.appIntegration.schemes.label')}</Label>
+      <Input
+        id={`${id}-schemes`}
+        autoComplete="off"
+        spellCheck={false}
+        placeholder={lock.editing ? 'olt' : t('platform.appIntegration.schemes.none')}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={`${id}-schemes-text`}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+      />
+      <FieldText
+        id={`${id}-schemes-text`}
+        error={error}
+        hint={
+          lock.editing
+            ? t('platform.appIntegration.schemes.hint', { max: settings.max_schemes })
+            : saved.length === 0
+              ? t('platform.appIntegration.schemes.empty')
+              : t('platform.appIntegration.schemes.current', {
+                  schemes: saved.map((item) => `${item}://`).join(', '),
+                })
+        }
+      />
+    </LockedForm>
+  )
+}
+
+function SchemesCard() {
+  const { t } = useTranslation()
+  const settings = useBannerSettings()
+  return (
+    <SettingsCard
+      title={t('platform.appIntegration.schemes.title')}
+      subtitle={t('platform.appIntegration.schemes.subtitle')}
+    >
+      <QueryContent query={settings}>
+        {(data) => <SchemesForm key={data.deep_link_schemes.join(',')} settings={data} />}
+      </QueryContent>
     </SettingsCard>
   )
 }
@@ -264,6 +375,7 @@ export function AppIntegrationSection() {
     <SectionFrame title={t('settings.appIntegration')} description={t('platform.appIntegration.description')}>
       <div className="flex flex-col gap-4">
         <ConnectionCard />
+        <SchemesCard />
         <QueryContent query={overview}>{(data) => <LoginCard data={data} />}</QueryContent>
       </div>
     </SectionFrame>

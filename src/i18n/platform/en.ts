@@ -196,6 +196,11 @@ export const platform: Translated<typeof source> = {
     offTitle: 'Turn off {{feature}}?',
     offBody: 'This feature is hidden for every app user as soon as the app next reads its settings.',
     offAction: 'Turn off',
+    onTitle: 'Turn on {{feature}}?',
+    onBody: 'This feature appears right away for all app users the next time the app reads its settings.',
+    onAction: 'Turn on',
+    lockedHint: 'Press Edit to turn features on or off. Every change is confirmed first.',
+    editingHint: 'Every change is confirmed first and then applies right away. Press Done to lock again.',
     problems: {
       version: 'Use a version like 2.4.0.',
     },
@@ -228,6 +233,11 @@ export const platform: Translated<typeof source> = {
       phraseProblem: 'Type {{phrase}} exactly to continue.',
       disabled: 'Social features turned off',
       enabled: 'Social features turned back on',
+      confirmOffTitle: 'Really turn off social features now?',
+      confirmOffBody:
+        'All customers on every platform immediately lose the ability to post, comment, edit, or send non-CS messages until social features are turned back on. Recorded reason: {{reason}}',
+      confirmOnTitle: 'Really turn social features back on now?',
+      confirmOnBody: 'All customers on every platform can post, comment, and send messages again right away.',
     },
   },
   versions: {
@@ -393,8 +403,9 @@ export const platform: Translated<typeof source> = {
     },
     ratios: { portrait: '4:5 (recommended)', square: '1:1' },
     hints: {
-      link: 'https://… or an app deep link. Allowed schemes: {{schemes}}.',
-      linkNoSchemes: 'https://… only; no deep link schemes are allowed yet.',
+      link: 'https://… or an app deep link. Allowed schemes: {{schemes}}. Super Admins manage schemes in Settings → Integrations → App integration.',
+      linkNoSchemes:
+        'https://… only; no deep link schemes are allowed yet. Super Admins manage schemes in Settings → Integrations → App integration.',
       linkPlaceholder: 'https://… or olt://…',
       cta: 'When empty, the app uses its default label. Only used when there is a link.',
       image: 'JPEG, PNG, or WebP. Cropped to {{ratio}} and shrunk below 2 MB automatically.',
@@ -459,22 +470,7 @@ export const platform: Translated<typeof source> = {
       days: 'Last 7 days',
       day: 'Date',
     },
-    schemes: {
-      title: 'Deep link schemes',
-      subtitle:
-        'Banner links can be https:// or an app deep link using a scheme below, e.g. olt://promo/year-end. Web schemes and dangerous schemes (javascript, data, file, intent, content) cannot be registered.',
-      label: 'Allowed schemes',
-      hint: 'Separate with commas, at most {{max}}. Lowercase letters, digits, +, dot, or -.',
-      save: 'Save schemes',
-      saved: 'Deep link schemes saved',
-      none: 'none yet',
-      changed: 'Changed {{time}} by {{name}}',
-      problems: {
-        count: 'At most {{max}} schemes.',
-        format: 'A scheme starts with a letter and only contains lowercase letters, digits, +, dot, or -.',
-        forbidden: 'The schemes http, https, javascript, data, file, intent, and content cannot be used.',
-      },
-    },
+    schemesNone: 'none yet',
     errors: {
       invalid_title: 'Title is required, 1–80 characters.',
       invalid_body: 'Body can be at most 300 characters.',
@@ -543,6 +539,29 @@ export const platform: Translated<typeof source> = {
     logins24h: 'Customers who logged in, last 24 hours',
     keyHelp:
       'OLT keys are replaced on the server: update docker/secrets/olt_jwks and run make up. This is deliberately not possible from the Hub, because anyone who can replace the key can mint tokens on behalf of customers.',
+    schemes: {
+      title: 'App deep link schemes',
+      subtitle:
+        'Link prefixes that open a page inside the OLT app from a banner or popup, e.g. olt://promo/year-end opens the promo page in the app instead of the browser. Fill in the schemes the OLT app registers (usually set once by the IT team). When empty, banner links can only be https://. Web schemes and dangerous schemes (javascript, data, file, intent, content) are always rejected.',
+      label: 'Allowed schemes',
+      hint: 'Write only the scheme name without ://, separated by commas, at most {{max}}. Starts with a letter; only lowercase letters, digits, +, dot, or -, at most 32 characters.',
+      none: 'No schemes yet',
+      empty: 'No deep link schemes yet. Banner and popup links can only be https://.',
+      current: 'Banners and popups may link to https:// and {{schemes}}.',
+      saved: 'Deep link schemes saved',
+      changed: 'Changed {{time}} by {{name}}',
+      confirmTitle: 'Save the app deep link schemes?',
+      confirmBody:
+        'Banners and popups can only link to https:// or {{schemes}}. Active banners that use a removed scheme stay visible, but without their link and button.',
+      confirmEmpty:
+        'Banner and popup links can only be https://. Active banners that use a deep link stay visible, but without their link and button.',
+      problems: {
+        count: 'At most {{max}} schemes.',
+        format:
+          'A scheme starts with a letter and only contains lowercase letters, digits, +, dot, or -, at most 32 characters.',
+        forbidden: 'The scheme {{schemes}} cannot be used as a deep link.',
+      },
+    },
     ago: {
       now: 'just now',
       minutes: '{{count}} min ago',

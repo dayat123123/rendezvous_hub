@@ -200,6 +200,13 @@ export const platform = {
     offBody:
       'Fitur ini langsung tersembunyi untuk semua pengguna aplikasi saat aplikasi membaca pengaturan berikutnya.',
     offAction: 'Matikan',
+    onTitle: 'Nyalakan {{feature}}?',
+    onBody:
+      'Fitur ini langsung muncul untuk semua pengguna aplikasi saat aplikasi membaca pengaturan berikutnya.',
+    onAction: 'Nyalakan',
+    lockedHint: 'Tekan Ubah untuk menyalakan atau mematikan fitur. Setiap perubahan dikonfirmasi dulu.',
+    editingHint:
+      'Setiap perubahan dikonfirmasi dulu lalu langsung berlaku. Tekan Selesai untuk mengunci lagi.',
     problems: {
       version: 'Format versi seperti 2.4.0.',
     },
@@ -232,6 +239,12 @@ export const platform = {
       phraseProblem: 'Ketik {{phrase}} persis untuk melanjutkan.',
       disabled: 'Fitur sosial dimatikan',
       enabled: 'Fitur sosial dinyalakan kembali',
+      confirmOffTitle: 'Yakin matikan fitur sosial sekarang?',
+      confirmOffBody:
+        'Semua nasabah di semua platform langsung tidak bisa memposting, berkomentar, mengedit, atau mengirim pesan non-CS sampai fitur sosial dinyalakan lagi. Alasan yang dicatat: {{reason}}',
+      confirmOnTitle: 'Yakin nyalakan fitur sosial sekarang?',
+      confirmOnBody:
+        'Semua nasabah di semua platform langsung bisa memposting, berkomentar, dan mengirim pesan lagi.',
     },
   },
   versions: {
@@ -398,8 +411,9 @@ export const platform = {
     },
     ratios: { portrait: '4:5 (disarankan)', square: '1:1' },
     hints: {
-      link: 'https://… atau deep link aplikasi. Skema yang diizinkan: {{schemes}}.',
-      linkNoSchemes: 'Hanya https://…; belum ada skema deep link yang diizinkan.',
+      link: 'https://… atau deep link aplikasi. Skema yang diizinkan: {{schemes}}. Super Admin mengatur skema di Pengaturan → Integrasi → Integrasi aplikasi.',
+      linkNoSchemes:
+        'Hanya https://…; belum ada skema deep link yang diizinkan. Super Admin mengatur skema di Pengaturan → Integrasi → Integrasi aplikasi.',
       linkPlaceholder: 'https://… atau olt://…',
       cta: 'Bila kosong, aplikasi memakai label bawaan. Hanya dipakai bila ada tautan.',
       image: 'JPEG, PNG, atau WebP. Dipotong {{ratio}} dan dikecilkan otomatis sampai di bawah 2 MB.',
@@ -464,22 +478,7 @@ export const platform = {
       days: '7 hari terakhir',
       day: 'Tanggal',
     },
-    schemes: {
-      title: 'Skema deep link',
-      subtitle:
-        'Tautan banner boleh https:// atau deep link aplikasi dengan skema di bawah ini, mis. olt://promo/akhir-tahun. Skema web dan skema berbahaya (javascript, data, file, intent, content) tidak bisa didaftarkan.',
-      label: 'Skema yang diizinkan',
-      hint: 'Pisahkan dengan koma, maksimal {{max}}. Huruf kecil, angka, +, titik, atau -.',
-      save: 'Simpan skema',
-      saved: 'Skema deep link disimpan',
-      none: 'belum ada',
-      changed: 'Diubah {{time}} oleh {{name}}',
-      problems: {
-        count: 'Maksimal {{max}} skema.',
-        format: 'Skema diawali huruf dan hanya berisi huruf kecil, angka, +, titik, atau -.',
-        forbidden: 'Skema http, https, javascript, data, file, intent, dan content tidak boleh dipakai.',
-      },
-    },
+    schemesNone: 'belum ada',
     errors: {
       invalid_title: 'Judul wajib diisi, 1–80 karakter.',
       invalid_body: 'Isi maksimal 300 karakter.',
@@ -549,6 +548,29 @@ export const platform = {
     logins24h: 'Nasabah login 24 jam terakhir',
     keyHelp:
       'Kunci OLT diganti lewat server: perbarui docker/secrets/olt_jwks lalu jalankan make up. Sengaja tidak bisa dari Hub, karena siapa pun yang bisa mengganti kunci bisa membuat token atas nama nasabah.',
+    schemes: {
+      title: 'Skema deep link aplikasi',
+      subtitle:
+        'Awalan tautan yang membuka halaman di dalam aplikasi OLT dari banner atau popup, mis. olt://promo/akhir-tahun membuka halaman promo di aplikasi, bukan di browser. Isi sesuai skema yang didaftarkan aplikasi OLT (biasanya cukup sekali oleh tim IT). Bila kosong, tautan banner hanya boleh https://. Skema web dan skema berbahaya (javascript, data, file, intent, content) selalu ditolak.',
+      label: 'Skema yang diizinkan',
+      hint: 'Tulis nama skemanya saja tanpa ://, pisahkan dengan koma, maksimal {{max}}. Diawali huruf; hanya huruf kecil, angka, +, titik, atau -, maksimal 32 karakter.',
+      none: 'Belum ada skema',
+      empty: 'Belum ada skema deep link. Tautan banner dan popup hanya boleh https://.',
+      current: 'Banner dan popup boleh memakai tautan https:// dan {{schemes}}.',
+      saved: 'Skema deep link disimpan',
+      changed: 'Diubah {{time}} oleh {{name}}',
+      confirmTitle: 'Simpan skema deep link aplikasi?',
+      confirmBody:
+        'Banner dan popup hanya boleh bertaut ke https:// atau {{schemes}}. Banner aktif yang memakai skema yang dihapus tetap tampil, tetapi tanpa tautan dan tombol.',
+      confirmEmpty:
+        'Tautan banner dan popup hanya boleh https://. Banner aktif yang memakai deep link tetap tampil, tetapi tanpa tautan dan tombol.',
+      problems: {
+        count: 'Maksimal {{max}} skema.',
+        format:
+          'Skema diawali huruf dan hanya berisi huruf kecil, angka, +, titik, atau -, maksimal 32 karakter.',
+        forbidden: 'Skema {{schemes}} tidak boleh dipakai sebagai deep link.',
+      },
+    },
     ago: {
       now: 'baru saja',
       minutes: '{{count}} menit lalu',

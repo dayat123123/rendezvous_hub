@@ -3,6 +3,7 @@ import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { LockedForm } from '@/components/locked-form'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -15,6 +16,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { QueryContent, SettingsCard } from '@/features/settings/components/settings-ui'
+import { useLockedEdit } from '@/hooks/use-locked-edit'
 import { errorText } from '@/lib/error-text'
 import { stamp } from '@/lib/time'
 
@@ -118,6 +120,7 @@ function OptionsCard({ channels }: { channels: AlertChannels }) {
   const { t } = useTranslation()
   const ids = useId()
   const save = useSetAlertOptions()
+  const lock = useLockedEdit()
   const [label, setLabel] = useState(channels.label)
   const [url, setUrl] = useState(channels.console_url ?? '')
   const [checked, setChecked] = useState(false)
@@ -127,21 +130,31 @@ function OptionsCard({ channels }: { channels: AlertChannels }) {
   const problem = useProblem()
   return (
     <SettingsCard title={t('system.channels.optionsTitle')} subtitle={t('system.channels.optionsHint')}>
-      <form
+      <LockedForm
+        lock={lock}
+        name={t('system.channels.optionsTitle')}
         className="flex flex-col gap-4"
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault()
+        footerClassName="self-start"
+        confirmTitle={t('system.channels.confirm.optionsTitle')}
+        confirmBody={t('system.channels.confirm.optionsBody')}
+        saving={save.isPending}
+        canSave={dirty}
+        onCheck={() => {
           setChecked(true)
-          if (Object.keys(problems).length > 0) return
-          save
-            .mutateAsync({ label, consoleUrl: url })
-            .then(() => {
-              setChecked(false)
-              toast.success(t('system.channels.saved'))
-            })
-            .catch((error: unknown) => toast.error(errorText(error)))
+          return Object.keys(problems).length === 0
         }}
+        onReset={() => {
+          setLabel(channels.label)
+          setUrl(channels.console_url ?? '')
+          setChecked(false)
+        }}
+        onSave={() =>
+          save.mutateAsync({ label, consoleUrl: url }).then(() => {
+            setChecked(false)
+            toast.success(t('system.channels.saved'))
+          })
+        }
+        onError={(error) => toast.error(errorText(error))}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField
@@ -166,7 +179,7 @@ function OptionsCard({ channels }: { channels: AlertChannels }) {
                 url: `${(url.trim() || window.location.origin).replace(/\/+$/, '')}/system`,
               })}
             />
-            {url.trim() === '' ? (
+            {url.trim() === '' && lock.editing ? (
               <Button
                 type="button"
                 size="xs"
@@ -180,11 +193,7 @@ function OptionsCard({ channels }: { channels: AlertChannels }) {
             ) : null}
           </div>
         </div>
-        <Button type="submit" size="sm" className="self-start" disabled={save.isPending || !dirty}>
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-          {t('app.save')}
-        </Button>
-      </form>
+      </LockedForm>
     </SettingsCard>
   )
 }
@@ -193,6 +202,7 @@ function TelegramCard({ channels }: { channels: AlertChannels }) {
   const { t } = useTranslation()
   const ids = useId()
   const save = useSetTelegram()
+  const lock = useLockedEdit()
   const saved = channels.telegram
   const [enabled, setEnabled] = useState(saved.enabled)
   const [token, setToken] = useState('')
@@ -204,6 +214,11 @@ function TelegramCard({ channels }: { channels: AlertChannels }) {
   const shown = checked ? problems : {}
   const dirty = enabled !== saved.enabled || token !== '' || chatIds.join(',') !== saved.chat_ids.join(',')
   const problem = useProblem()
+  const confirmBody = !enabled
+    ? 'system.channels.confirm.telegramOff'
+    : saved.token_set && token !== ''
+      ? 'system.channels.confirm.telegramToken'
+      : 'system.channels.confirm.telegramBody'
   return (
     <SettingsCard title={t('system.channels.telegram.title')} subtitle={t('system.channels.telegram.hint')}>
       <ol className="flex list-decimal flex-col gap-1 pl-5 text-row text-muted-foreground">
@@ -211,14 +226,27 @@ function TelegramCard({ channels }: { channels: AlertChannels }) {
         <li>{t('system.channels.telegram.steps.group')}</li>
         <li>{t('system.channels.telegram.steps.chat')}</li>
       </ol>
-      <form
+      <LockedForm
+        lock={lock}
+        name={t('system.channels.telegram.title')}
         className="flex flex-col gap-4"
-        noValidate
+        footerClassName="self-start"
         autoComplete="off"
-        onSubmit={(event) => {
-          event.preventDefault()
+        confirmTitle={t('system.channels.confirm.telegramTitle')}
+        confirmBody={t(confirmBody)}
+        saving={save.isPending}
+        canSave={dirty}
+        onCheck={() => {
           setChecked(true)
-          if (Object.keys(problems).length > 0) return
+          return Object.keys(problems).length === 0
+        }}
+        onReset={() => {
+          setEnabled(saved.enabled)
+          setToken('')
+          setChats(saved.chat_ids.join('\n'))
+          setChecked(false)
+        }}
+        onSave={() =>
           save
             .mutateAsync(input)
             .then(() => {
@@ -226,9 +254,9 @@ function TelegramCard({ channels }: { channels: AlertChannels }) {
               setChecked(false)
               toast.success(t('system.channels.saved'))
             })
-            .catch((error: unknown) => toast.error(errorText(error)))
             .finally(() => save.reset())
-        }}
+        }
+        onError={(error) => toast.error(errorText(error))}
       >
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
@@ -266,11 +294,7 @@ function TelegramCard({ channels }: { channels: AlertChannels }) {
             />
           </div>
         </div>
-        <Button type="submit" size="sm" className="self-start" disabled={save.isPending || !dirty}>
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-          {t('app.save')}
-        </Button>
-      </form>
+      </LockedForm>
       <TestButton
         channel="telegram"
         ready={saved.enabled && saved.token_set}
@@ -287,6 +311,7 @@ function EmailCard({ channels }: { channels: AlertChannels }) {
   const { t } = useTranslation()
   const ids = useId()
   const save = useSetEmail()
+  const lock = useLockedEdit()
   const saved = channels.email
   const [enabled, setEnabled] = useState(saved.enabled)
   const [host, setHost] = useState(saved.host ?? '')
@@ -322,16 +347,43 @@ function EmailCard({ channels }: { channels: AlertChannels }) {
     password !== '' ||
     clearPassword
   const problem = useProblem()
+  const confirmBody = !enabled
+    ? 'system.channels.confirm.emailOff'
+    : clearPassword
+      ? 'system.channels.confirm.emailClear'
+      : saved.password_set && password !== ''
+        ? 'system.channels.confirm.emailPassword'
+        : 'system.channels.confirm.emailBody'
+  const reset = () => {
+    setEnabled(saved.enabled)
+    setHost(saved.host ?? '')
+    setPort(saved.port === null ? '' : String(saved.port))
+    setSecurity(saved.security ?? 'starttls')
+    setUsername(saved.username ?? '')
+    setPassword('')
+    setClearPassword(false)
+    setFrom(saved.from ?? '')
+    setTo(saved.to.join('\n'))
+    setChecked(false)
+  }
   return (
     <SettingsCard title={t('system.channels.email.title')} subtitle={t('system.channels.email.hint')}>
-      <form
+      <LockedForm
+        lock={lock}
+        name={t('system.channels.email.title')}
         className="flex flex-col gap-4"
-        noValidate
+        footerClassName="self-start"
         autoComplete="off"
-        onSubmit={(event) => {
-          event.preventDefault()
+        confirmTitle={t('system.channels.confirm.emailTitle')}
+        confirmBody={t(confirmBody)}
+        saving={save.isPending}
+        canSave={dirty}
+        onCheck={() => {
           setChecked(true)
-          if (Object.keys(problems).length > 0) return
+          return Object.keys(problems).length === 0
+        }}
+        onReset={reset}
+        onSave={() =>
           save
             .mutateAsync(input)
             .then(() => {
@@ -340,9 +392,9 @@ function EmailCard({ channels }: { channels: AlertChannels }) {
               setChecked(false)
               toast.success(t('system.channels.saved'))
             })
-            .catch((error: unknown) => toast.error(errorText(error)))
             .finally(() => save.reset())
-        }}
+        }
+        onError={(error) => toast.error(errorText(error))}
       >
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
@@ -372,7 +424,11 @@ function EmailCard({ channels }: { channels: AlertChannels }) {
           />
           <div className="flex min-w-0 flex-col gap-1.5">
             <Label htmlFor={`${ids}-security`}>{t('system.channels.email.security')}</Label>
-            <Select value={security} onValueChange={(value) => setSecurity(value as SmtpSecurity)}>
+            <Select
+              value={security}
+              disabled={!lock.editing}
+              onValueChange={(value) => setSecurity(value as SmtpSecurity)}
+            >
               <SelectTrigger id={`${ids}-security`}>
                 <SelectValue />
               </SelectTrigger>
@@ -408,7 +464,7 @@ function EmailCard({ channels }: { channels: AlertChannels }) {
               error={problem('password', shown.password)}
               hint={clearPassword ? t('system.channels.email.passwordCleared') : undefined}
             />
-            {saved.password_set ? (
+            {saved.password_set && lock.editing ? (
               <Button
                 type="button"
                 size="xs"
@@ -454,11 +510,7 @@ function EmailCard({ channels }: { channels: AlertChannels }) {
             />
           </div>
         </div>
-        <Button type="submit" size="sm" className="self-start" disabled={save.isPending || !dirty}>
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-          {t('app.save')}
-        </Button>
-      </form>
+      </LockedForm>
       <TestButton
         channel="email"
         ready={saved.enabled && saved.host !== null}

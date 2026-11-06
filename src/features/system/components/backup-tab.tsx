@@ -12,6 +12,7 @@ import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { LockedForm } from '@/components/locked-form'
 import { UsageBar } from '@/components/usage-bar'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,7 +25,9 @@ import {
 } from '@/components/ui/controls'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Confirm } from '@/features/nasabah/components/confirm'
 import { QueryContent, SettingsCard } from '@/features/settings/components/settings-ui'
+import { useLockedEdit } from '@/hooks/use-locked-edit'
 import { errorText } from '@/lib/error-text'
 import { durationLabel, formatBytes, formatPercent, stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
@@ -260,6 +263,7 @@ function Summary({ overview }: { overview: BackupOverview }) {
 function Requests({ overview }: { overview: BackupOverview }) {
   const { t } = useTranslation()
   const request = useRequestBackup()
+  const [asking, setAsking] = useState<BackupRequestKind | null>(null)
   const configured = overview.config.configured
   const pending = (kind: BackupRequestKind) => overview.requests.find((item) => item.kind === kind)
   const ask = (kind: BackupRequestKind) =>
@@ -267,6 +271,7 @@ function Requests({ overview }: { overview: BackupOverview }) {
       .mutateAsync(kind)
       .then(() => toast.success(t(`system.backup.requested.${kind}`)))
       .catch((error: unknown) => toast.error(errorText(error)))
+      .finally(() => setAsking(null))
   const buttons: { kind: BackupRequestKind; icon: typeof DatabaseBackupIcon }[] = [
     { kind: 'base', icon: DatabaseBackupIcon },
     { kind: 'restore_test', icon: FlaskConicalIcon },
@@ -280,7 +285,7 @@ function Requests({ overview }: { overview: BackupOverview }) {
             size="sm"
             variant="outline"
             disabled={!configured || request.isPending || pending(kind) !== undefined}
-            onClick={() => ask(kind)}
+            onClick={() => setAsking(kind)}
           >
             {request.isPending && request.variables === kind ? (
               <LoaderCircleIcon className="animate-spin" />
@@ -311,6 +316,15 @@ function Requests({ overview }: { overview: BackupOverview }) {
           ) : null}
         </ul>
       ) : null}
+      <Confirm
+        open={asking !== null}
+        title={asking ? t(`system.backup.confirm.request.${asking}.title`) : ''}
+        body={asking ? t(`system.backup.confirm.request.${asking}.body`) : ''}
+        action={asking ? t(`system.backup.request.${asking}`) : ''}
+        pending={request.isPending}
+        onClose={() => setAsking(null)}
+        onConfirm={() => asking && ask(asking)}
+      />
     </div>
   )
 }
@@ -344,6 +358,7 @@ function TargetCard({ config }: { config: BackupConfig }) {
   const { t } = useTranslation()
   const ids = useId()
   const save = useSetBackupTarget()
+  const lock = useLockedEdit()
   const [form, setForm] = useState<TargetForm>(() => targetOf(config))
   const [secret, setSecret] = useState('')
   const [password, setPassword] = useState('')
@@ -370,32 +385,44 @@ function TargetCard({ config }: { config: BackupConfig }) {
     setAcknowledged(false)
   }
 
-  const submit = () => {
-    setChecked(true)
-    if (Object.keys(problems).length > 0) return
-    save
-      .mutateAsync({ ...input, password: mode === 'locked' ? '' : password })
-      .then(() => {
-        clearSecrets()
-        setChecked(false)
-        toast.success(t('system.backup.targetSaved'))
-      })
-      .catch((error: unknown) => {
-        toast.error(errorText(error))
-      })
-      .finally(() => save.reset())
-  }
-
   return (
     <SettingsCard title={t('system.backup.targetTitle')} subtitle={t('system.backup.targetHint')}>
-      <form
+      <LockedForm
+        lock={lock}
+        name={t('system.backup.targetTitle')}
         className="flex flex-col gap-4"
-        noValidate
         autoComplete="off"
-        onSubmit={(event) => {
-          event.preventDefault()
-          submit()
+        confirmTitle={t('system.backup.confirm.targetTitle')}
+        confirmBody={t(`system.backup.confirm.target.${mode}`)}
+        saveLabel={t('system.backup.saveTarget')}
+        saving={save.isPending}
+        onCheck={() => {
+          setChecked(true)
+          return Object.keys(problems).length === 0
         }}
+        onReset={() => {
+          setForm(targetOf(config))
+          clearSecrets()
+          setChecked(false)
+        }}
+        onSave={() =>
+          save
+            .mutateAsync({ ...input, password: mode === 'locked' ? '' : password })
+            .then(() => {
+              clearSecrets()
+              setChecked(false)
+              toast.success(t('system.backup.targetSaved'))
+            })
+            .finally(() => save.reset())
+        }
+        onError={(error) => toast.error(errorText(error))}
+        status={
+          config.updated_at && config.configured ? (
+            <span className="text-xs text-muted-foreground">
+              {t('system.lastChanged', { time: stamp(config.updated_at), name: config.updated_by ?? '–' })}
+            </span>
+          ) : null
+        }
       >
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1.5 text-row font-medium">{t('system.backup.kind.legend')}</legend>
@@ -559,18 +586,7 @@ function TargetCard({ config }: { config: BackupConfig }) {
           )}
           <p className="text-xs text-muted-foreground">{t('system.backup.password.cannotChange')}</p>
         </section>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" size="sm" disabled={save.isPending}>
-            {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-            {t('system.backup.saveTarget')}
-          </Button>
-          {config.updated_at && config.configured ? (
-            <span className="text-xs text-muted-foreground">
-              {t('system.lastChanged', { time: stamp(config.updated_at), name: config.updated_by ?? '–' })}
-            </span>
-          ) : null}
-        </div>
-      </form>
+      </LockedForm>
     </SettingsCard>
   )
 }
@@ -581,22 +597,27 @@ function weekdayName(day: number, language: string) {
 
 type NumberField = keyof typeof scheduleLimits
 
+type ScheduleForm = Record<keyof BackupScheduleInput, string | boolean>
+
+function scheduleForm(config: BackupConfig): ScheduleForm {
+  const value = scheduleOf(config)
+  return {
+    ...value,
+    offsiteMinutes: String(value.offsiteMinutes),
+    retentionDaily: String(value.retentionDaily),
+    retentionWeekly: String(value.retentionWeekly),
+    retentionMonthly: String(value.retentionMonthly),
+    walDays: String(value.walDays),
+    restoreTestWeekday: String(value.restoreTestWeekday),
+  }
+}
+
 function ScheduleCard({ config }: { config: BackupConfig }) {
   const { t, i18n } = useTranslation()
   const ids = useId()
   const save = useSetBackupSchedule()
-  const [form, setForm] = useState<Record<keyof BackupScheduleInput, string | boolean>>(() => {
-    const value = scheduleOf(config)
-    return {
-      ...value,
-      offsiteMinutes: String(value.offsiteMinutes),
-      retentionDaily: String(value.retentionDaily),
-      retentionWeekly: String(value.retentionWeekly),
-      retentionMonthly: String(value.retentionMonthly),
-      walDays: String(value.walDays),
-      restoreTestWeekday: String(value.restoreTestWeekday),
-    }
-  })
+  const lock = useLockedEdit()
+  const [form, setForm] = useState<ScheduleForm>(() => scheduleForm(config))
   const [checked, setChecked] = useState(false)
   const text = (key: keyof BackupScheduleInput) => String(form[key])
   const number = (key: keyof BackupScheduleInput) =>
@@ -635,21 +656,30 @@ function ScheduleCard({ config }: { config: BackupConfig }) {
 
   return (
     <SettingsCard title={t('system.backup.schedule.title')} subtitle={t('system.backup.schedule.hint')}>
-      <form
+      <LockedForm
+        lock={lock}
+        name={t('system.backup.schedule.title')}
         className="flex flex-col gap-4"
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault()
+        footerClassName="self-start"
+        confirmTitle={t('system.backup.confirm.scheduleTitle')}
+        confirmBody={t('system.backup.confirm.scheduleBody')}
+        saveLabel={t('system.backup.schedule.save')}
+        saving={save.isPending}
+        onCheck={() => {
           setChecked(true)
-          if (Object.keys(problems).length > 0) return
-          save
-            .mutateAsync(input)
-            .then(() => {
-              setChecked(false)
-              toast.success(t('system.backup.schedule.saved'))
-            })
-            .catch((error: unknown) => toast.error(errorText(error)))
+          return Object.keys(problems).length === 0
         }}
+        onReset={() => {
+          setForm(scheduleForm(config))
+          setChecked(false)
+        }}
+        onSave={() =>
+          save.mutateAsync(input).then(() => {
+            setChecked(false)
+            toast.success(t('system.backup.schedule.saved'))
+          })
+        }
+        onError={(error) => toast.error(errorText(error))}
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <TextField
@@ -716,11 +746,7 @@ function ScheduleCard({ config }: { config: BackupConfig }) {
             error={shown.restoreTestTime ? t('system.backup.schedule.timeInvalid') : undefined}
           />
         </fieldset>
-        <Button type="submit" size="sm" className="self-start" disabled={save.isPending}>
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-          {t('system.backup.schedule.save')}
-        </Button>
-      </form>
+      </LockedForm>
     </SettingsCard>
   )
 }

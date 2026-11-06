@@ -143,6 +143,10 @@ describe('PushSection', () => {
     expect(pushApi.setCredentials).not.toHaveBeenCalled()
 
     await user.click(within(review).getByRole('button', { name: 'Simpan kunci' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan kunci Firebase?' })
+    expect(dialog).toHaveTextContent('kunci project olt-prod')
+    expect(pushApi.setCredentials).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan kunci' }))
 
     await waitFor(() => expect(pushApi.setCredentials).toHaveBeenCalledTimes(1))
     const [key, replaceProject] = vi.mocked(pushApi.setCredentials).mock.calls[0]!
@@ -185,12 +189,50 @@ describe('PushSection', () => {
     const { container } = renderWithProviders(<PushSection />, monitorFixture)
     expect(await screen.findByText('Dipakai notifier dan diterima Google.')).toBeInTheDocument()
 
+    await user.click(screen.getByRole('button', { name: 'Ubah Kunci Firebase' }))
     await user.upload(fileInput(container), keyFile('olt-baru'))
     const review = await screen.findByRole('group', { name: 'Periksa sebelum menyimpan' })
     expect(within(review).getByRole('alert')).toHaveTextContent('berbeda dari kunci sekarang (olt-prod)')
     await user.click(within(review).getByRole('button', { name: 'Ganti project dan simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Ganti project Firebase ke olt-baru?' })
+    expect(dialog).toHaveTextContent('Kunci project olt-prod akan diganti')
+    await user.click(within(dialog).getByRole('button', { name: 'Ganti project dan simpan' }))
 
     await waitFor(() => expect(pushApi.setCredentials).toHaveBeenCalledWith(expect.anything(), true))
+  })
+
+  it('keeps an existing key locked until Ubah and replaces it only after confirmation', async () => {
+    const user = userEvent.setup()
+    vi.mocked(pushApi.status).mockResolvedValue(status())
+    vi.mocked(pushApi.setCredentials).mockResolvedValue({ ...credentials, revision: 4 })
+    const { container } = renderWithProviders(<PushSection />, monitorFixture)
+    expect(await screen.findByText('Dipakai notifier dan diterima Google.')).toBeInTheDocument()
+
+    expect(screen.queryByRole('button', { name: 'Ganti kunci' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Hapus kunci' })).not.toBeInTheDocument()
+    expect(fileInput(container)).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Ubah Kunci Firebase' }))
+    expect(screen.getByRole('button', { name: 'Ganti kunci' })).toHaveFocus()
+    expect(fileInput(container)).toBeEnabled()
+    await user.click(screen.getByRole('button', { name: 'Batal' }))
+    expect(screen.queryByRole('button', { name: 'Ganti kunci' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ubah Kunci Firebase' })).toHaveFocus()
+
+    await user.click(screen.getByRole('button', { name: 'Ubah Kunci Firebase' }))
+    await user.upload(fileInput(container), keyFile())
+    const review = await screen.findByRole('group', { name: 'Periksa sebelum menyimpan' })
+    await user.click(within(review).getByRole('button', { name: 'Simpan kunci' }))
+    let dialog = await screen.findByRole('alertdialog', { name: 'Ganti kunci Firebase?' })
+    expect(dialog).toHaveTextContent('Kunci Firebase lama akan diganti. Push ke HP memakai kunci baru')
+    await user.click(within(dialog).getByRole('button', { name: 'Batal' }))
+    expect(pushApi.setCredentials).not.toHaveBeenCalled()
+
+    await user.click(within(review).getByRole('button', { name: 'Simpan kunci' }))
+    dialog = await screen.findByRole('alertdialog', { name: 'Ganti kunci Firebase?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan kunci' }))
+    await waitFor(() => expect(pushApi.setCredentials).toHaveBeenCalledWith(expect.anything(), false))
+    expect(await screen.findByRole('button', { name: 'Ubah Kunci Firebase' })).toBeInTheDocument()
   })
 
   it('shows that the notifier is still loading a new key', async () => {
@@ -230,9 +272,11 @@ describe('PushSection', () => {
     vi.mocked(pushApi.removeCredentials).mockResolvedValue({ removed: true })
     renderWithProviders(<PushSection />, monitorFixture)
 
-    await user.click(await screen.findByRole('button', { name: 'Hapus kunci' }))
+    await user.click(await screen.findByRole('button', { name: 'Ubah Kunci Firebase' }))
+    await user.click(screen.getByRole('button', { name: 'Hapus kunci' }))
     const dialog = await screen.findByRole('alertdialog')
     expect(dialog).toHaveTextContent('dibatalkan setelah 24 jam')
+    expect(pushApi.removeCredentials).not.toHaveBeenCalled()
     await user.click(within(dialog).getByRole('button', { name: 'Hapus kunci' }))
 
     await waitFor(() => expect(pushApi.removeCredentials).toHaveBeenCalledTimes(1))

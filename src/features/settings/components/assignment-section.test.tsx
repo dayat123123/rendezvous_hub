@@ -45,18 +45,55 @@ describe('AssignmentSection auto-close', () => {
 
     const days = await screen.findByLabelText('Batas tanpa rating (hari, 1–30)')
     expect(days).toHaveValue('3')
+    expect(days).toBeDisabled()
     expect(screen.getByText(/Tiket langsung ditutup setelah nasabah memberi rating/)).toBeVisible()
 
+    const card = days.closest('section') as HTMLElement
+    await user.click(within(card).getByRole('button', { name: 'Ubah Tutup tiket selesai' }))
     await user.clear(days)
     await user.type(days, '31')
-    const card = days.closest('section') as HTMLElement
     await user.click(within(card).getByRole('button', { name: 'Simpan' }))
     expect(screen.getByText('Isi angka 1–30')).toBeVisible()
-    expect(settingsApi.setSetting).not.toHaveBeenCalled()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
 
     await user.clear(days)
     await user.type(days, '7')
     await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan batas tutup otomatis?' })
+    expect(dialog).toHaveTextContent('ditutup otomatis setelah 7 hari')
+    expect(settingsApi.setSetting).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
     await waitFor(() => expect(settingsApi.setSetting).toHaveBeenCalledWith('ticket.auto_close_days', 7))
+  })
+})
+
+describe('AssignmentSection mode', () => {
+  it('keeps the mode locked, restores it on cancel, and switches only after confirmation', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AssignmentSection />, monitorFixture)
+
+    const claim = await screen.findByRole('radio', { name: /Ambil tiket \(default\)/ })
+    const auto = screen.getByRole('radio', { name: /Penugasan otomatis/ })
+    expect(claim).toBeChecked()
+    expect(auto).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Ubah Mode penugasan' }))
+    await user.click(auto)
+    expect(auto).toBeChecked()
+    await user.click(screen.getByRole('button', { name: 'Batal' }))
+    expect(claim).toBeChecked()
+    expect(auto).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Ubah Mode penugasan' }))
+    await user.click(auto)
+    const card = auto.closest('section') as HTMLElement
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', {
+      name: 'Ubah mode penugasan ke Penugasan otomatis?',
+    })
+    expect(settingsApi.setSetting).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(settingsApi.setSetting).toHaveBeenCalledWith('assignment.mode', 'auto_assign'))
+    await waitFor(() => expect(screen.getByRole('radio', { name: /Penugasan otomatis/ })).toBeDisabled())
   })
 })

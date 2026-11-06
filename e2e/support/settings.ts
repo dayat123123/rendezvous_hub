@@ -19,10 +19,11 @@ export async function setAssignmentMode(page: Page, mode: RegExp) {
   await openAssignmentSettings(page)
   const radio = page.getByRole('radio', { name: mode })
   if (await radio.isChecked()) return
+  await page.getByRole('button', { name: 'Ubah Mode penugasan' }).click()
   await radio.click()
-  const save = page.getByRole('button', { name: 'Simpan', exact: true }).first()
-  await save.click()
-  await expect(save).toBeDisabled()
+  await page.getByRole('button', { name: 'Simpan', exact: true }).first().click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Simpan', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Ubah Mode penugasan' })).toBeVisible()
 }
 
 export async function asSuperAdmin<T>(browser: Browser, run: (page: Page) => Promise<T>) {

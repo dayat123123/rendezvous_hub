@@ -1,21 +1,19 @@
-import { ChartColumnIcon, LoaderCircleIcon, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
-import { useId, useState } from 'react'
+import { ChartColumnIcon, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Confirm } from '@/features/nasabah/components/confirm'
 import { QueryContent, SectionFrame, SettingsCard } from '@/features/settings/components/settings-ui'
-import { FieldText, ToneBadge } from '@/features/system/components/system-ui'
+import { ToneBadge } from '@/features/system/components/system-ui'
 import { bannerErrorText } from '@/lib/error-text'
 import { formatNumber, stamp } from '@/lib/time'
 
-import { useBanners, useBannerSettings, useDeleteBanner, useSetLinkSchemes } from '../hooks'
-import { ctrText, parseSchemes, schemeProblem } from '../logic'
-import type { AppBanner, BannerSettings, BannerStatus } from '../types'
+import { useBanners, useBannerSettings, useDeleteBanner } from '../hooks'
+import { ctrText } from '../logic'
+import type { AppBanner, BannerStatus } from '../types'
 import { BannerDialog } from './banner-dialog'
 import { BannerStatsDialog } from './banner-stats-dialog'
 
@@ -200,81 +198,13 @@ function BannersTable({ banners }: { banners: AppBanner[] }) {
   )
 }
 
-function SchemesForm({ settings }: { settings: BannerSettings }) {
-  const { t } = useTranslation()
-  const id = useId()
-  const save = useSetLinkSchemes()
-  const [text, setText] = useState(settings.deep_link_schemes.join(', '))
-  const [checked, setChecked] = useState(false)
-  const schemes = parseSchemes(text)
-  const problem = schemeProblem(schemes, settings.forbidden_schemes, settings.max_schemes)
-  const error =
-    checked && problem
-      ? t(`platform.banners.schemes.problems.${problem}`, { max: settings.max_schemes })
-      : undefined
-  return (
-    <SettingsCard
-      title={t('platform.banners.schemes.title')}
-      subtitle={t('platform.banners.schemes.subtitle')}
-    >
-      <form
-        className="flex max-w-xl flex-col gap-1.5"
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault()
-          setChecked(true)
-          if (problem) return
-          save
-            .mutateAsync(schemes)
-            .then((next) => {
-              setText(next.deep_link_schemes.join(', '))
-              toast.success(t('platform.banners.schemes.saved'))
-            })
-            .catch((failure: unknown) => toast.error(bannerErrorText(failure)))
-        }}
-      >
-        <Label htmlFor={`${id}-schemes`}>{t('platform.banners.schemes.label')}</Label>
-        <div className="flex flex-wrap gap-2">
-          <Input
-            id={`${id}-schemes`}
-            className="min-w-0 flex-1"
-            placeholder="olt"
-            aria-invalid={error ? true : undefined}
-            aria-describedby={`${id}-schemes-text`}
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-          />
-          <Button type="submit" variant="outline" disabled={save.isPending}>
-            {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-            {t('platform.banners.schemes.save')}
-          </Button>
-        </div>
-        <FieldText
-          id={`${id}-schemes-text`}
-          error={error}
-          hint={t('platform.banners.schemes.hint', { max: settings.max_schemes })}
-        />
-        {settings.updated_by?.name && settings.updated_at ? (
-          <p className="text-xs text-muted-foreground">
-            {t('platform.banners.schemes.changed', {
-              time: stamp(settings.updated_at),
-              name: settings.updated_by.name,
-            })}
-          </p>
-        ) : null}
-      </form>
-    </SettingsCard>
-  )
-}
-
 export function BannersSection() {
   const { t } = useTranslation()
   const banners = useBanners()
-  const settings = useBannerSettings()
+  useBannerSettings()
   return (
     <SectionFrame title={t('platform.banners.pageTitle')} description={t('platform.banners.pageDescription')}>
       <QueryContent query={banners}>{(data) => <BannersTable banners={data} />}</QueryContent>
-      <QueryContent query={settings}>{(data) => <SchemesForm settings={data} />}</QueryContent>
     </SectionFrame>
   )
 }

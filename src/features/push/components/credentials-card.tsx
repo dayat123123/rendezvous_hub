@@ -8,13 +8,15 @@ import {
   TriangleAlertIcon,
   UploadIcon,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { EditButton } from '@/components/locked-form'
 import { Button } from '@/components/ui/button'
 import { Confirm } from '@/features/nasabah/components/confirm'
 import { SettingsCard } from '@/features/settings/components/settings-ui'
+import { useLockedEdit } from '@/hooks/use-locked-edit'
 import { errorText } from '@/lib/error-text'
 import { toApiError } from '@/lib/errors'
 import { stamp } from '@/lib/time'
@@ -150,20 +152,47 @@ function Review({
   )
 }
 
+function confirmText(chosen: Chosen, current: PushCredentials | null) {
+  if (!current) return { title: 'push.key.confirmFirstTitle', body: 'push.key.confirmFirstBody' } as const
+  if (current.project_id !== chosen.key.project_id) {
+    return { title: 'push.key.confirmProjectTitle', body: 'push.key.confirmProjectBody' } as const
+  }
+  return { title: 'push.key.confirmReplaceTitle', body: 'push.key.confirmReplaceBody' } as const
+}
+
 export function CredentialsCard({ status }: { status: PushStatus }) {
   const { t } = useTranslation()
   const save = useSetPushCredentials()
   const remove = useRemovePushCredentials()
+  const lock = useLockedEdit()
   const fileInput = useRef<HTMLInputElement>(null)
+  const editButton = useRef<HTMLButtonElement>(null)
+  const replaceButton = useRef<HTMLButtonElement>(null)
+  const previous = useRef(lock.editing)
   const [dragging, setDragging] = useState(false)
   const [checking, setChecking] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [chosen, setChosen] = useState<Chosen | null>(null)
+  const [replaceProject, setReplaceProject] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const current = status.credentials
+  const open = current === null || lock.editing
+
+  useEffect(() => {
+    if (previous.current === lock.editing) return
+    previous.current = lock.editing
+    if (lock.editing) replaceButton.current?.focus()
+    else editButton.current?.focus()
+  }, [lock.editing])
+
+  const relock = () => {
+    setChosen(null)
+    setProblem(null)
+    lock.setEditing(false)
+  }
 
   const choose = async (file: File | undefined) => {
-    if (!file || checking) return
+    if (!file || checking || !open) return
     setProblem(null)
     setChosen(null)
     setChecking(true)
@@ -176,16 +205,18 @@ export function CredentialsCard({ status }: { status: PushStatus }) {
     }
   }
 
-  const submit = (replaceProject: boolean) => {
+  const submit = () => {
     if (!chosen) return
     setProblem(null)
     save
       .mutateAsync({ key: chosen.key, replaceProject })
       .then(() => {
-        setChosen(null)
+        lock.setConfirming(false)
+        relock()
         toast.success(t('push.key.saved'))
       })
       .catch((error: unknown) => {
+        lock.setConfirming(false)
         const e = toApiError(error)
         if (e.code === 'invalid_push_credentials' && keyProblems.includes(e.detail as KeyProblem)) {
           setProblem(t(`push.key.problems.${e.detail as KeyProblem}`))
@@ -197,19 +228,24 @@ export function CredentialsCard({ status }: { status: PushStatus }) {
       })
   }
 
+  const confirm = chosen ? confirmText(chosen, current) : null
+
   return (
     <SettingsCard title={t('push.key.title')} subtitle={t('push.key.subtitle')}>
       <div
         className={cn(
-          'flex flex-col gap-3 rounded-lg border border-dashed p-3 transition-colors',
+          'flex flex-col gap-3 rounded-lg border p-3 transition-colors',
+          open && 'border-dashed',
           dragging && 'border-primary bg-primary/5',
         )}
         onDragOver={(event) => {
+          if (!open) return
           event.preventDefault()
           setDragging(true)
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => {
+          if (!open) return
           event.preventDefault()
           setDragging(false)
           void choose(event.dataTransfer.files[0])
@@ -223,6 +259,7 @@ export function CredentialsCard({ status }: { status: PushStatus }) {
           className="sr-only"
           tabIndex={-1}
           aria-hidden="true"
+          disabled={!open}
           onChange={(event) => {
             void choose(event.target.files?.[0])
             event.target.value = ''
@@ -233,12 +270,16 @@ export function CredentialsCard({ status }: { status: PushStatus }) {
             chosen={chosen}
             current={current}
             saving={save.isPending}
-            onSave={submit}
+            onSave={(otherProject) => {
+              setReplaceProject(otherProject)
+              lock.setConfirming(true)
+            }}
             onCancel={() => setChosen(null)}
           />
-        ) : (
+        ) : open ? (
           <div className="flex flex-wrap items-center gap-2">
             <Button
+              ref={replaceButton}
               size="sm"
               variant={current ? 'outline' : 'default'}
               disabled={checking}
@@ -248,13 +289,25 @@ export function CredentialsCard({ status }: { status: PushStatus }) {
               {current ? t('push.key.replace') : t('push.key.choose')}
             </Button>
             {current ? (
-              <Button size="sm" variant="ghost" onClick={() => setConfirmRemove(true)}>
-                <Trash2Icon />
-                {t('push.key.remove')}
-              </Button>
+              <>
+                <Button size="sm" variant="ghost" onClick={() => setConfirmRemove(true)}>
+                  <Trash2Icon />
+                  {t('push.key.remove')}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={relock}>
+                  {t('app.cancel')}
+                </Button>
+              </>
             ) : null}
             <span className="text-xs text-muted-foreground">{t('push.key.drop')}</span>
           </div>
+        ) : (
+          <EditButton
+            ref={editButton}
+            name={t('push.key.title')}
+            className="self-start"
+            onClick={() => lock.setEditing(true)}
+          />
         )}
         {problem ? (
           <p role="alert" className="flex items-start gap-2 text-row text-destructive">
@@ -269,6 +322,19 @@ export function CredentialsCard({ status }: { status: PushStatus }) {
         <li>{t('push.key.app')}</li>
       </ul>
       <Confirm
+        open={lock.confirming && confirm !== null}
+        title={confirm && chosen ? t(confirm.title, { project: chosen.key.project_id }) : ''}
+        body={
+          confirm && chosen
+            ? t(confirm.body, { project: chosen.key.project_id, current: current?.project_id ?? '-' })
+            : ''
+        }
+        action={replaceProject ? t('push.key.saveOtherProject') : t('push.key.save')}
+        pending={save.isPending}
+        onClose={() => lock.setConfirming(false)}
+        onConfirm={submit}
+      />
+      <Confirm
         open={confirmRemove}
         title={t('push.key.removeTitle')}
         body={t('push.key.removeBody', { hours: status.ttl_hours })}
@@ -281,6 +347,7 @@ export function CredentialsCard({ status }: { status: PushStatus }) {
             .mutateAsync()
             .then(() => {
               setConfirmRemove(false)
+              relock()
               toast.success(t('push.key.removed'))
             })
             .catch((error: unknown) => {

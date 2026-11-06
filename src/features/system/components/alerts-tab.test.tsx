@@ -49,6 +49,12 @@ function card(name: string) {
   return screen.getByRole('heading', { name }).closest('section')!
 }
 
+async function confirm(user: ReturnType<typeof userEvent.setup>, title: string, text?: string) {
+  const dialog = await screen.findByRole('alertdialog', { name: title })
+  if (text) expect(dialog).toHaveTextContent(text)
+  await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -70,13 +76,19 @@ describe('AlertsTab', () => {
     await screen.findByRole('heading', { name: 'Telegram' })
     const telegram = card('Telegram')
     expect(within(telegram).getByText(/@BotFather/)).toBeInTheDocument()
+    expect(within(telegram).getByRole('switch', { name: 'Kirim alert ke Telegram' })).toBeDisabled()
+    expect(within(telegram).getByLabelText('Token bot')).toBeDisabled()
+    await user.click(within(telegram).getByRole('button', { name: 'Ubah Telegram' }))
     await user.click(within(telegram).getByRole('switch', { name: 'Kirim alert ke Telegram' }))
     await user.click(within(telegram).getByRole('button', { name: 'Simpan' }))
     expect(within(telegram).getByText(/Isi token bot dan minimal satu chat ID/)).toBeInTheDocument()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
 
     await user.type(within(telegram).getByLabelText('Token bot'), TOKEN)
     await user.type(within(telegram).getByLabelText('Chat ID'), '-1001234567890')
     await user.click(within(telegram).getByRole('button', { name: 'Simpan' }))
+    expect(systemApi.setTelegram).not.toHaveBeenCalled()
+    await confirm(user, 'Simpan saluran Telegram?')
 
     await waitFor(() =>
       expect(systemApi.setTelegram).toHaveBeenCalledWith({
@@ -118,18 +130,24 @@ describe('AlertsTab', () => {
     await screen.findByRole('heading', { name: 'Email' })
     const email = card('Email')
     expect(within(email).getByText('Tersimpan')).toBeInTheDocument()
+    expect(within(email).queryByRole('button', { name: 'Hapus password' })).not.toBeInTheDocument()
+    await user.click(within(email).getByRole('button', { name: 'Ubah Email' }))
     await user.clear(within(email).getByLabelText('Penerima'))
     await user.type(within(email).getByLabelText('Penerima'), 'ops@example.co.id{Enter}cto@example.co.id')
     await user.click(within(email).getByRole('button', { name: 'Simpan' }))
+    await confirm(user, 'Simpan saluran email?')
     await waitFor(() =>
       expect(systemApi.setEmail).toHaveBeenLastCalledWith(
         expect.objectContaining({ to: ['ops@example.co.id', 'cto@example.co.id'], password: null }),
       ),
     )
+    await waitFor(() => expect(within(card('Email')).getByLabelText('Penerima')).toBeDisabled())
 
+    await user.click(within(card('Email')).getByRole('button', { name: 'Ubah Email' }))
     await user.click(within(card('Email')).getByRole('button', { name: 'Hapus password' }))
     expect(within(card('Email')).getByText(/akan dihapus saat Anda menyimpan/)).toBeInTheDocument()
     await user.click(within(card('Email')).getByRole('button', { name: 'Simpan' }))
+    await confirm(user, 'Simpan saluran email?', 'Password SMTP dihapus')
     await waitFor(() =>
       expect(systemApi.setEmail).toHaveBeenLastCalledWith(expect.objectContaining({ password: '' })),
     )
@@ -150,11 +168,13 @@ describe('AlertsTab', () => {
     await screen.findByRole('heading', { name: 'Email' })
     expect(within(card('Telegram')).getByRole('button', { name: 'Kirim uji Telegram' })).toBeDisabled()
 
+    await user.click(within(card('Email')).getByRole('button', { name: 'Ubah Email' }))
     await user.type(within(card('Email')).getByLabelText('Username'), 'x')
     expect(within(card('Email')).getByRole('button', { name: 'Kirim uji email' })).toBeDisabled()
     expect(within(card('Email')).getByText('Simpan perubahan dulu sebelum mengirim uji.')).toBeInTheDocument()
-    await user.clear(within(card('Email')).getByLabelText('Username'))
-    await user.type(within(card('Email')).getByLabelText('Username'), 'ops')
+    await user.click(within(card('Email')).getByRole('button', { name: 'Batal' }))
+    expect(within(card('Email')).getByLabelText('Username')).toHaveValue('ops')
+    expect(within(card('Email')).getByLabelText('Username')).toBeDisabled()
 
     vi.mocked(systemApi.channels).mockResolvedValue(pending)
     await user.click(within(card('Email')).getByRole('button', { name: 'Kirim uji email' }))
@@ -192,9 +212,11 @@ describe('AlertsTab', () => {
     vi.mocked(systemApi.setOptions).mockResolvedValue(channels({ console_url: window.location.origin }))
     renderWithProviders(<AlertsTab />, monitorFixture)
 
-    await user.click(await screen.findByRole('button', { name: 'Pakai alamat web ini' }))
+    await user.click(await screen.findByRole('button', { name: 'Ubah Label & tautan' }))
+    await user.click(screen.getByRole('button', { name: 'Pakai alamat web ini' }))
     expect(screen.getByLabelText('Alamat web CS')).toHaveValue(window.location.origin)
     await user.click(within(card('Label & tautan')).getByRole('button', { name: 'Simpan' }))
+    await confirm(user, 'Simpan label dan tautan alert?')
 
     await waitFor(() =>
       expect(systemApi.setOptions).toHaveBeenCalledWith('OLT Social', window.location.origin),

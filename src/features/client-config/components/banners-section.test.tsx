@@ -318,28 +318,22 @@ describe('BannersSection', () => {
     expect(bannersApi.stats).toHaveBeenCalledWith('banner-1')
   })
 
-  it('edits the allowed deep link schemes', async () => {
+  it('leaves the deep link schemes to Settings and lists them in the link hint', async () => {
     const user = userEvent.setup()
-    vi.mocked(bannersApi.setLinkSchemes).mockResolvedValue({
-      ...settings,
-      deep_link_schemes: ['mitra', 'olt'],
-    })
     renderSection()
-    const input = await screen.findByLabelText('Skema yang diizinkan')
-    expect(input).toHaveValue('olt')
-    await user.clear(input)
-    await user.type(input, 'olt, https')
-    await user.click(screen.getByRole('button', { name: 'Simpan skema' }))
+    expect(await screen.findByRole('button', { name: 'Tambah banner' })).toBeVisible()
+    await waitFor(() => expect(bannersApi.settings).toHaveBeenCalled())
+    expect(screen.queryByLabelText('Skema yang diizinkan')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Skema deep link/)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Tambah banner' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
     expect(
-      screen.getByText('Skema http, https, javascript, data, file, intent, dan content tidak boleh dipakai.'),
+      within(dialog).getByText(
+        'https://… atau deep link aplikasi. Skema yang diizinkan: olt://. Super Admin mengatur skema di Pengaturan → Integrasi → Integrasi aplikasi.',
+      ),
     ).toBeVisible()
     expect(bannersApi.setLinkSchemes).not.toHaveBeenCalled()
-    await user.clear(input)
-    await user.type(input, 'olt, Mitra')
-    await user.click(screen.getByRole('button', { name: 'Simpan skema' }))
-    await waitFor(() => expect(bannersApi.setLinkSchemes).toHaveBeenCalledWith(['mitra', 'olt']))
-    expect(await screen.findByText('Skema deep link disimpan')).toBeVisible()
-    expect(input).toHaveValue('mitra, olt')
   })
 
   it('deletes a banner after confirmation', async () => {

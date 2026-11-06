@@ -1,20 +1,15 @@
-import {
-  CheckCircle2Icon,
-  CheckIcon,
-  CopyIcon,
-  LoaderCircleIcon,
-  PlugZapIcon,
-  TriangleAlertIcon,
-} from 'lucide-react'
+import { CheckCircle2Icon, CheckIcon, CopyIcon, LoaderCircleIcon, TriangleAlertIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Dot } from '@/components/badges'
+import { LockedForm } from '@/components/locked-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Confirm } from '@/features/nasabah/components/confirm'
+import { useLockedEdit } from '@/hooks/use-locked-edit'
 import { errorText } from '@/lib/error-text'
 import { stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
@@ -74,6 +69,7 @@ function ConnectionCard({
   const test = useTestIntegration()
   const save = useSaveIntegration()
   const clear = useClearIntegration()
+  const lock = useLockedEdit()
   const [url, setUrl] = useState(status.url)
   const [touched, setTouched] = useState(false)
   const [result, setResult] = useState<{ check: IntegrationCheck; saved: boolean | null } | null>(null)
@@ -88,120 +84,138 @@ function ConnectionCard({
     apply()
     setResult(null)
   }
-  const whenValid = (run: () => void) => {
+  const valid = () => {
     setTouched(true)
-    if (!urlProblem && !clientProblem) run()
+    return !urlProblem && !clientProblem
   }
 
   return (
     <SettingsCard title={t('settings.csadminTitle')}>
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="csadmin-url">{t('settings.csadminUrl')}</Label>
-          <Input
-            id="csadmin-url"
-            inputMode="url"
-            autoComplete="off"
-            spellCheck={false}
-            maxLength={200}
-            placeholder="http://192.168.10.10:9001/csAdmin"
-            value={url}
-            aria-invalid={touched && urlProblem ? true : undefined}
-            onChange={(event) => edit(() => setUrl(event.target.value))}
-          />
-          <FieldMessage
-            error={
-              touched && urlProblem
-                ? t(urlProblem === 'required' ? 'settings.csadminUrlRequired' : 'settings.csadminUrlInvalid')
-                : undefined
-            }
-            hint={t('settings.csadminUrlHint')}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="csadmin-client">{t('settings.csadminClientId')}</Label>
-          <Input
-            id="csadmin-client"
-            autoComplete="off"
-            spellCheck={false}
-            maxLength={50}
-            placeholder={t('settings.clientIdPlaceholder')}
-            value={clientId}
-            aria-invalid={touched && clientProblem ? true : undefined}
-            onChange={(event) => edit(() => onClientId(event.target.value))}
-          />
-          <FieldMessage
-            error={
-              touched && clientProblem
-                ? t(
-                    clientProblem === 'required'
-                      ? 'settings.csadminClientIdRequired'
-                      : 'settings.csadminClientIdInvalid',
-                  )
-                : undefined
-            }
-            hint={t('settings.csadminClientIdHint')}
-          />
-        </div>
-      </div>
-      <p className={cn('text-xs', status.configured ? 'text-muted-foreground' : 'text-warning')}>
-        {status.configured
-          ? t('settings.integrationSince', {
-              time: status.connected_at ? stamp(status.connected_at) : '-',
-              name: status.connected_by ?? '-',
-            })
-          : t('settings.integrationNotSetHint')}
-      </p>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          variant="outline"
-          disabled={busy}
-          onClick={() =>
-            whenValid(() =>
-              test.mutate(
-                { url: typedUrl, clientId: typedClient },
-                {
-                  onSuccess: (check) => setResult({ check, saved: null }),
-                  onError: (error) => toast.error(errorText(error)),
-                },
-              ),
-            )
-          }
-        >
-          {test.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-          {t('settings.testConnection')}
-        </Button>
-        <Button
-          disabled={busy || unchanged}
-          onClick={() =>
-            whenValid(() =>
-              save.mutate(
-                { url: typedUrl, clientId: typedClient },
-                {
-                  onSuccess: (saved) => {
-                    setResult({ check: saved.check, saved: saved.saved })
-                    if (saved.saved) toast.success(t('settings.integrationSaved'))
+      <LockedForm
+        lock={lock}
+        name={t('settings.csadminTitle')}
+        className="flex flex-col gap-4"
+        autoComplete="off"
+        confirmTitle={t('settings.integrationConfirmTitle')}
+        confirmBody={t(
+          status.configured ? 'settings.integrationConfirmReplace' : 'settings.integrationConfirmBody',
+        )}
+        saveLabel={t('settings.saveActivate')}
+        saving={save.isPending}
+        canSave={!busy && !unchanged}
+        onCheck={valid}
+        onReset={() => {
+          setUrl(status.url)
+          onClientId(status.client_id)
+          setTouched(false)
+          setResult(null)
+        }}
+        onSave={() =>
+          save.mutateAsync({ url: typedUrl, clientId: typedClient }).then((saved) => {
+            setResult({ check: saved.check, saved: saved.saved })
+            if (saved.saved) toast.success(t('settings.integrationSaved'))
+            return saved.saved
+          })
+        }
+        onError={(error) => toast.error(errorText(error))}
+        actions={
+          <>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() => {
+                if (!valid()) return
+                test.mutate(
+                  { url: typedUrl, clientId: typedClient },
+                  {
+                    onSuccess: (check) => setResult({ check, saved: null }),
+                    onError: (error) => toast.error(errorText(error)),
                   },
-                  onError: (error) => toast.error(errorText(error)),
-                },
-              ),
-            )
-          }
-        >
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : <PlugZapIcon />}
-          {t('settings.saveActivate')}
-        </Button>
-        {status.configured ? (
-          <Button
-            variant="ghost"
-            className="text-destructive"
-            disabled={busy}
-            onClick={() => setConfirming(true)}
-          >
-            {t('settings.disconnect')}
-          </Button>
-        ) : null}
-      </div>
+                )
+              }}
+            >
+              {test.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
+              {t('settings.testConnection')}
+            </Button>
+            {status.configured && !lock.editing ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="text-destructive"
+                disabled={busy}
+                onClick={() => setConfirming(true)}
+              >
+                {t('settings.disconnect')}
+              </Button>
+            ) : null}
+          </>
+        }
+      >
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="csadmin-url">{t('settings.csadminUrl')}</Label>
+            <Input
+              id="csadmin-url"
+              inputMode="url"
+              autoComplete="off"
+              spellCheck={false}
+              maxLength={200}
+              placeholder="http://192.168.10.10:9001/csAdmin"
+              value={url}
+              aria-invalid={touched && urlProblem ? true : undefined}
+              onChange={(event) => edit(() => setUrl(event.target.value))}
+            />
+            <FieldMessage
+              error={
+                touched && urlProblem
+                  ? t(
+                      urlProblem === 'required'
+                        ? 'settings.csadminUrlRequired'
+                        : 'settings.csadminUrlInvalid',
+                    )
+                  : undefined
+              }
+              hint={t('settings.csadminUrlHint')}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="csadmin-client">{t('settings.csadminClientId')}</Label>
+            <Input
+              id="csadmin-client"
+              autoComplete="off"
+              spellCheck={false}
+              maxLength={50}
+              placeholder={t('settings.clientIdPlaceholder')}
+              value={clientId}
+              aria-invalid={touched && clientProblem ? true : undefined}
+              onChange={(event) => edit(() => onClientId(event.target.value))}
+            />
+            <FieldMessage
+              error={
+                touched && clientProblem
+                  ? t(
+                      clientProblem === 'required'
+                        ? 'settings.csadminClientIdRequired'
+                        : 'settings.csadminClientIdInvalid',
+                    )
+                  : undefined
+              }
+              hint={t('settings.csadminClientIdHint')}
+            />
+          </div>
+        </div>
+        <p className={cn('text-xs', status.configured ? 'text-muted-foreground' : 'text-warning')}>
+          {status.configured
+            ? t('settings.integrationSince', {
+                time: status.connected_at ? stamp(status.connected_at) : '-',
+                name: status.connected_by ?? '-',
+              })
+            : t('settings.integrationNotSetHint')}
+        </p>
+      </LockedForm>
       {result ? <CheckMessage check={result.check} saved={result.saved} /> : null}
       <Confirm
         open={confirming}

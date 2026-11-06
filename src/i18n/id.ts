@@ -8,6 +8,7 @@ export const id = {
     saving: 'Menyimpan…',
     close: 'Tutup',
     edit: 'Ubah',
+    editNamed: 'Ubah {{name}}',
     delete: 'Hapus',
     done: 'Selesai',
     copy: 'Salin',
@@ -618,6 +619,21 @@ export const id = {
     superAdminAlerts: 'Alert Super Admin',
     alertUnclaimed: 'Tiket belum diambil lebih dari (menit)',
     alertP1: 'Tiket P1 belum diambil lebih dari (menit)',
+    modeConfirmTitle: 'Ubah mode penugasan ke {{mode}}?',
+    modeConfirmAuto:
+      'Mulai sekarang sistem menugaskan tiket terbuka ke CS online yang sesuai skill dan masih punya slot; CS tidak lagi memilih tiket sendiri.',
+    modeConfirmClaim:
+      'Mulai sekarang tiket baru tidak ditugaskan otomatis. CS harus mengambil sendiri tiket dari daftar Terbuka.',
+    autoReleaseConfirmTitle: 'Simpan aturan lepas otomatis?',
+    autoReleaseConfirmOn:
+      'Tiket milik CS yang offline lebih dari {{minutes}} menit kembali ke antrean dan bisa diambil CS lain.',
+    autoReleaseConfirmOff: 'Tiket tetap dipegang pemiliknya walau CS tersebut offline.',
+    autoCloseConfirmTitle: 'Simpan batas tutup otomatis?',
+    autoCloseConfirmBody:
+      'Tiket selesai yang belum dinilai ditutup otomatis setelah {{days}} hari. Tiket yang sudah ditutup tidak bisa dibalas lagi.',
+    superAdminAlertsConfirmTitle: 'Simpan batas alert Super Admin?',
+    superAdminAlertsConfirmBody:
+      'Super Admin diberi tahu bila tiket belum diambil lebih dari {{unclaimed}} menit, atau {{p1}} menit untuk tiket P1.',
     integration: 'Integrasi API Nasabah',
     apiKeys: 'API Notifikasi',
     appIntegration: 'Integrasi aplikasi',
@@ -635,6 +651,18 @@ export const id = {
     policyFourEyes: 'Empat mata kebijakan konten',
     policyFourEyesHint:
       'Default aktif. Perubahan kebijakan konten (kata terlarang, kategori, domain, frasa, ambang gambar, anti-manipulasi) dan pemulihan versi wajib disetujui staf Kepatuhan lain, bukan pembuatnya. Bila dimatikan, staf Kepatuhan bisa langsung mengaktifkan drafnya sendiri.',
+    fourEyesOnTitle: 'Nyalakan aturan empat mata?',
+    fourEyesOnBody:
+      'Postingan dan notifikasi resmi baru wajib disetujui staf lain sebelum terbit, termasuk buatan Anda sendiri.',
+    fourEyesOffTitle: 'Matikan aturan empat mata?',
+    fourEyesOffBody:
+      'Staf dengan izin "Setujui & terbitkan" bisa langsung menerbitkan postingan dan notifikasi resmi buatannya sendiri ke semua nasabah tanpa diperiksa staf lain.',
+    policyFourEyesOnTitle: 'Nyalakan empat mata kebijakan konten?',
+    policyFourEyesOnBody:
+      'Perubahan kebijakan konten dan pemulihan versi wajib disetujui staf Kepatuhan lain sebelum aktif.',
+    policyFourEyesOffTitle: 'Matikan empat mata kebijakan konten?',
+    policyFourEyesOffBody:
+      'Staf Kepatuhan bisa langsung mengaktifkan draf kebijakan konten buatannya sendiri. Perubahan langsung berlaku untuk semua konten baru.',
     push: 'Push notification',
     integrationDescription:
       'Sambungan menu Akun Nasabah ke CS Admin service. Menu baru tampil untuk CS setelah alamat dan client id disimpan dengan tes koneksi berhasil.',
@@ -657,6 +685,11 @@ export const id = {
     csadminClientIdInvalid: 'Client id 1–50 karakter: huruf, angka, titik, _, atau -',
     testConnection: 'Tes koneksi',
     saveActivate: 'Simpan & aktifkan',
+    integrationConfirmTitle: 'Simpan dan aktifkan integrasi API Nasabah?',
+    integrationConfirmBody:
+      'Koneksi dites dulu dengan alamat dan client id ini. Bila berhasil, menu Akun Nasabah langsung tampil untuk CS yang punya izin.',
+    integrationConfirmReplace:
+      'Alamat dan client id lama akan diganti. Koneksi dites dulu; bila gagal, pengaturan lama tetap dipakai dan menu Akun Nasabah tidak terganggu.',
     notSaved: 'Belum disimpan.',
     integrationSaved: 'Integrasi API Nasabah aktif. Menu Akun Nasabah tampil untuk CS yang punya izin.',
     disconnect: 'Putuskan',
@@ -2068,6 +2101,15 @@ export const id = {
         'Kunci Firebase baru saja diganti ke project {{project}} oleh staf lain. Pilih file lagi untuk melanjutkan.',
       saved: 'Kunci Firebase disimpan. Notifier memuatnya dalam beberapa detik.',
       removed: 'Kunci Firebase dihapus. Push ke HP berhenti.',
+      confirmFirstTitle: 'Simpan kunci Firebase?',
+      confirmFirstBody:
+        'Notifier memakai kunci project {{project}} untuk mengirim push ke HP nasabah begitu kunci dimuat.',
+      confirmReplaceTitle: 'Ganti kunci Firebase?',
+      confirmReplaceBody:
+        'Kunci Firebase lama akan diganti. Push ke HP memakai kunci baru begitu notifier memuatnya.',
+      confirmProjectTitle: 'Ganti project Firebase ke {{project}}?',
+      confirmProjectBody:
+        'Kunci project {{current}} akan diganti. Push ke HP hanya sampai bila aplikasi OLT juga memakai project {{project}}.',
       removeTitle: 'Hapus kunci Firebase?',
       removeBody:
         'Push ke HP berhenti sampai kunci baru diunggah. Notifikasi tetap masuk ke kotak notifikasi aplikasi, dan push yang sedang antre dibatalkan setelah {{hours}} jam.',
@@ -2573,6 +2615,30 @@ export const id = {
       },
       saveTarget: 'Simpan tujuan',
       targetSaved: 'Tujuan backup disimpan. Layanan backup memuatnya dalam satu menit.',
+      confirm: {
+        targetTitle: 'Simpan tujuan backup?',
+        target: {
+          first:
+            'Layanan backup mulai menyimpan backup terenkripsi ke tujuan ini. Tanpa password enkripsi yang baru Anda buat, backup tidak bisa dipulihkan.',
+          new_repository:
+            'Backup berikutnya disimpan ke repositori baru dengan password enkripsi baru. Backup di tujuan lama tidak dipindahkan dan tetap memakai password lama.',
+          locked:
+            'Backup berikutnya memakai pengaturan tujuan ini. Kunci akses lama diganti bila Anda mengisi yang baru.',
+        },
+        scheduleTitle: 'Simpan jadwal backup?',
+        scheduleBody:
+          'Layanan backup memakai jadwal dan retensi baru mulai siklus berikutnya. Backup yang melewati batas retensi baru dihapus saat pemangkasan.',
+        request: {
+          base: {
+            title: 'Jalankan backup penuh sekarang?',
+            body: 'Backup penuh berjalan di latar belakang dan menambah beban database serta disk selama beberapa menit. Sebaiknya di jam sepi.',
+          },
+          restore_test: {
+            title: 'Jalankan uji restore sekarang?',
+            body: 'Backup terbaru dipulihkan ke database sementara. Database produksi tidak disentuh, tetapi beban CPU dan disk server naik selama uji berjalan.',
+          },
+        },
+      },
       schedule: {
         title: 'Jadwal & retensi',
         hint: 'Semua jam dalam WIB.',
@@ -2617,6 +2683,20 @@ export const id = {
       consoleUrlHint: 'Tautan "Buka" di pesan alert mengarah ke {{url}}.',
       useThisAddress: 'Pakai alamat web ini',
       saved: 'Pengaturan alert disimpan.',
+      confirm: {
+        optionsTitle: 'Simpan label dan tautan alert?',
+        optionsBody: 'Pesan alert berikutnya memakai label dan alamat web CS ini.',
+        telegramTitle: 'Simpan saluran Telegram?',
+        telegramBody: 'Alert berikutnya dikirim ke chat ID yang tersimpan.',
+        telegramToken:
+          'Token bot lama akan diganti. Alert berikutnya dikirim lewat bot baru ke chat ID yang tersimpan.',
+        telegramOff: 'Alert tidak lagi dikirim ke Telegram sampai dinyalakan kembali.',
+        emailTitle: 'Simpan saluran email?',
+        emailBody: 'Alert berikutnya dikirim lewat server SMTP ini ke daftar penerima yang tersimpan.',
+        emailPassword: 'Password SMTP lama akan diganti. Alert berikutnya dikirim memakai password baru.',
+        emailClear: 'Password SMTP dihapus; server SMTP dihubungi tanpa password.',
+        emailOff: 'Alert tidak lagi dikirim lewat email sampai dinyalakan kembali.',
+      },
       telegram: {
         title: 'Telegram',
         hint: 'Kirim alert ke grup atau channel Telegram tim.',

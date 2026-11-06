@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Confirm } from '@/features/nasabah/components/confirm'
 import { SettingsCard } from '@/features/settings/components/settings-ui'
 import { FieldText } from '@/features/system/components/system-ui'
 import { platformErrorText } from '@/lib/error-text'
@@ -33,9 +34,22 @@ function SwitchForm({ enable, onClose }: { enable: boolean; onClose: () => void 
   const [reason, setReason] = useState('')
   const [typed, setTyped] = useState('')
   const [checked, setChecked] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const phrase = enable ? t('platform.flags.kill.phraseOn') : t('platform.flags.kill.phraseOff')
   const reasonOk = killReasonValid(reason)
   const phraseOk = phraseMatches(typed, phrase)
+  const apply = () =>
+    void save
+      .mutateAsync({ enabled: enable, reason: collapseSpaces(reason) })
+      .then(() => {
+        toast.success(enable ? t('platform.flags.kill.enabled') : t('platform.flags.kill.disabled'))
+        setConfirming(false)
+        onClose()
+      })
+      .catch((error: unknown) => {
+        setConfirming(false)
+        toast.error(platformErrorText(error))
+      })
   return (
     <form
       className="flex flex-col gap-4"
@@ -44,13 +58,7 @@ function SwitchForm({ enable, onClose }: { enable: boolean; onClose: () => void 
         event.preventDefault()
         setChecked(true)
         if (!reasonOk || !phraseOk) return
-        save
-          .mutateAsync({ enabled: enable, reason: collapseSpaces(reason) })
-          .then(() => {
-            toast.success(enable ? t('platform.flags.kill.enabled') : t('platform.flags.kill.disabled'))
-            onClose()
-          })
-          .catch((error: unknown) => toast.error(platformErrorText(error)))
+        setConfirming(true)
       }}
     >
       <div className="flex flex-col gap-1.5">
@@ -96,6 +104,20 @@ function SwitchForm({ enable, onClose }: { enable: boolean; onClose: () => void 
           {enable ? t('platform.flags.kill.turnOn') : t('platform.flags.kill.turnOff')}
         </Button>
       </DialogFooter>
+      <Confirm
+        open={confirming}
+        title={enable ? t('platform.flags.kill.confirmOnTitle') : t('platform.flags.kill.confirmOffTitle')}
+        body={
+          enable
+            ? t('platform.flags.kill.confirmOnBody')
+            : t('platform.flags.kill.confirmOffBody', { reason: collapseSpaces(reason) })
+        }
+        action={enable ? t('platform.flags.kill.turnOn') : t('platform.flags.kill.turnOff')}
+        destructive={!enable}
+        pending={save.isPending}
+        onClose={() => setConfirming(false)}
+        onConfirm={apply}
+      />
     </form>
   )
 }

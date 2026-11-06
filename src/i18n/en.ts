@@ -10,6 +10,7 @@ export const en: Translation = {
     saving: 'Saving…',
     close: 'Close',
     edit: 'Edit',
+    editNamed: 'Edit {{name}}',
     delete: 'Delete',
     done: 'Done',
     copy: 'Copy',
@@ -620,6 +621,21 @@ export const en: Translation = {
     superAdminAlerts: 'Super Admin alerts',
     alertUnclaimed: 'Ticket unclaimed for more than (minutes)',
     alertP1: 'P1 ticket unclaimed for more than (minutes)',
+    modeConfirmTitle: 'Change the assignment mode to {{mode}}?',
+    modeConfirmAuto:
+      'From now on the system assigns open tickets to online CS with the right skill and a free slot; CS no longer pick tickets themselves.',
+    modeConfirmClaim:
+      'From now on new tickets are not assigned automatically. CS must claim tickets themselves from the Open list.',
+    autoReleaseConfirmTitle: 'Save the auto-release rule?',
+    autoReleaseConfirmOn:
+      'Tickets owned by CS who are offline for more than {{minutes}} minutes go back to the queue for other CS to claim.',
+    autoReleaseConfirmOff: 'Tickets stay with their owner even when that CS is offline.',
+    autoCloseConfirmTitle: 'Save the auto-close limit?',
+    autoCloseConfirmBody:
+      'Resolved tickets without a rating are closed automatically after {{days}} days. Closed tickets can no longer be replied to.',
+    superAdminAlertsConfirmTitle: 'Save the Super Admin alert limits?',
+    superAdminAlertsConfirmBody:
+      'Super Admins are alerted when a ticket is unclaimed for more than {{unclaimed}} minutes, or {{p1}} minutes for P1 tickets.',
     integration: 'Customer API integration',
     apiKeys: 'Notification API',
     appIntegration: 'App integration',
@@ -637,6 +653,18 @@ export const en: Translation = {
     policyFourEyes: 'Content policy four-eyes',
     policyFourEyesHint:
       'On by default. Content policy changes (banned words, categories, domains, phrases, image thresholds, anti-manipulation) and version restores must be approved by another Compliance staff member, not their author. When off, Compliance staff can activate their own drafts directly.',
+    fourEyesOnTitle: 'Turn on the four-eyes rule?',
+    fourEyesOnBody:
+      'New official posts and notifications must be approved by another staff member before they are published, including your own.',
+    fourEyesOffTitle: 'Turn off the four-eyes rule?',
+    fourEyesOffBody:
+      'Staff with the "Approve & publish" permission can publish their own official posts and notifications to all customers without another staff member checking them.',
+    policyFourEyesOnTitle: 'Turn on four eyes for the content policy?',
+    policyFourEyesOnBody:
+      'Content policy changes and version restores must be approved by another Compliance staff member before they take effect.',
+    policyFourEyesOffTitle: 'Turn off four eyes for the content policy?',
+    policyFourEyesOffBody:
+      'Compliance staff can activate their own content policy drafts right away. Changes apply immediately to all new content.',
     push: 'Push notifications',
     integrationDescription:
       'Connects the Customer accounts menu to the CS Admin service. Agents see the menu only after the address and client id are saved with a successful connection test.',
@@ -659,6 +687,11 @@ export const en: Translation = {
     csadminClientIdInvalid: 'Client id: 1–50 letters, digits, dots, _, or -',
     testConnection: 'Test connection',
     saveActivate: 'Save & activate',
+    integrationConfirmTitle: 'Save and activate the Customer API integration?',
+    integrationConfirmBody:
+      'The connection is tested first with this address and client id. If it succeeds, the Customer Accounts menu appears right away for CS with access.',
+    integrationConfirmReplace:
+      'The current address and client id will be replaced. The connection is tested first; if it fails, the current settings stay in use and the Customer Accounts menu is not affected.',
     notSaved: 'Not saved.',
     integrationSaved:
       'The Customer API integration is active. Agents with permission now see the Customer accounts menu.',
@@ -2060,6 +2093,15 @@ export const en: Translation = {
         'Another staff member just switched the Firebase key to project {{project}}. Choose the file again to continue.',
       saved: 'Firebase key saved. The notifier loads it within a few seconds.',
       removed: 'Firebase key removed. Phone push has stopped.',
+      confirmFirstTitle: 'Save the Firebase key?',
+      confirmFirstBody:
+        'The notifier uses the key of project {{project}} to send push to customer phones once it is loaded.',
+      confirmReplaceTitle: 'Replace the Firebase key?',
+      confirmReplaceBody:
+        'The current Firebase key will be replaced. Push to phones uses the new key as soon as the notifier loads it.',
+      confirmProjectTitle: 'Switch the Firebase project to {{project}}?',
+      confirmProjectBody:
+        'The key of project {{current}} will be replaced. Push only reaches phones if the OLT app also uses project {{project}}.',
       removeTitle: 'Remove the Firebase key?',
       removeBody:
         'Phone push stops until a new key is uploaded. Notifications still reach the in-app inbox, and queued pushes are cancelled after {{hours}} hours.',
@@ -2568,6 +2610,30 @@ export const en: Translation = {
       },
       saveTarget: 'Save target',
       targetSaved: 'Backup target saved. The backup service loads it within a minute.',
+      confirm: {
+        targetTitle: 'Save the backup target?',
+        target: {
+          first:
+            'The backup service starts storing encrypted backups at this target. Without the encryption password you just created, backups cannot be restored.',
+          new_repository:
+            'The next backups go to a new repository with a new encryption password. Backups at the old target are not moved and keep the old password.',
+          locked:
+            'The next backups use these target settings. The current access key is replaced if you enter a new one.',
+        },
+        scheduleTitle: 'Save the backup schedule?',
+        scheduleBody:
+          'The backup service uses the new schedule and retention from the next cycle. Backups beyond the new retention are deleted when pruning runs.',
+        request: {
+          base: {
+            title: 'Run a full backup now?',
+            body: 'The full backup runs in the background and adds load to the database and disk for a few minutes. Prefer quiet hours.',
+          },
+          restore_test: {
+            title: 'Run a restore test now?',
+            body: 'The latest backup is restored into a temporary database. The production database is not touched, but server CPU and disk load rise while the test runs.',
+          },
+        },
+      },
       schedule: {
         title: 'Schedule & retention',
         hint: 'All times are WIB.',
@@ -2612,6 +2678,20 @@ export const en: Translation = {
       consoleUrlHint: 'The "Open" link in alert messages points to {{url}}.',
       useThisAddress: 'Use this web address',
       saved: 'Alert settings saved.',
+      confirm: {
+        optionsTitle: 'Save the alert label and link?',
+        optionsBody: 'The next alert messages use this label and CS console address.',
+        telegramTitle: 'Save the Telegram channel?',
+        telegramBody: 'The next alerts are sent to the saved chat IDs.',
+        telegramToken:
+          'The current bot token will be replaced. The next alerts are sent through the new bot to the saved chat IDs.',
+        telegramOff: 'Alerts are no longer sent to Telegram until it is turned on again.',
+        emailTitle: 'Save the email channel?',
+        emailBody: 'The next alerts are sent through this SMTP server to the saved recipients.',
+        emailPassword: 'The current SMTP password will be replaced. The next alerts use the new password.',
+        emailClear: 'The SMTP password is removed; the SMTP server is contacted without a password.',
+        emailOff: 'Alerts are no longer sent by email until it is turned on again.',
+      },
       telegram: {
         title: 'Telegram',
         hint: 'Send alerts to the team Telegram group or channel.',

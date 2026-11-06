@@ -64,7 +64,7 @@ beforeEach(() => {
 })
 
 describe('FeaturesSection', () => {
-  it('turns social features off only with a reason and the typed confirmation', async () => {
+  it('turns social features off only with a reason, the typed phrase, and a final confirmation', async () => {
     const user = userEvent.setup()
     vi.mocked(clientConfigApi.setKillSwitch).mockResolvedValue(
       config({
@@ -87,17 +87,26 @@ describe('FeaturesSection', () => {
     await user.type(within(dialog).getByLabelText('Ketik MATIKAN untuk konfirmasi'), 'matikan')
     await user.click(within(dialog).getByRole('button', { name: 'Matikan fitur sosial' }))
     expect(within(dialog).getByText('Alasan 10–500 karakter.')).toBeVisible()
-    expect(clientConfigApi.setKillSwitch).not.toHaveBeenCalled()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
 
     await user.type(within(dialog).getByLabelText('Alasan'), ' masif dari bot')
     await user.clear(within(dialog).getByLabelText('Ketik MATIKAN untuk konfirmasi'))
     await user.type(within(dialog).getByLabelText('Ketik MATIKAN untuk konfirmasi'), 'MATIKA')
     await user.click(within(dialog).getByRole('button', { name: 'Matikan fitur sosial' }))
     expect(within(dialog).getByText('Ketik MATIKAN persis untuk melanjutkan.')).toBeVisible()
-    expect(clientConfigApi.setKillSwitch).not.toHaveBeenCalled()
 
     await user.type(within(dialog).getByLabelText('Ketik MATIKAN untuk konfirmasi'), 'N')
     await user.click(within(dialog).getByRole('button', { name: 'Matikan fitur sosial' }))
+    let confirm = await screen.findByRole('alertdialog', { name: 'Yakin matikan fitur sosial sekarang?' })
+    expect(confirm).toHaveTextContent('Semua nasabah di semua platform langsung tidak bisa memposting')
+    expect(confirm).toHaveTextContent('Alasan yang dicatat: Spam masif dari bot')
+    await user.click(within(confirm).getByRole('button', { name: 'Batal' }))
+    expect(clientConfigApi.setKillSwitch).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog', { name: 'Matikan fitur sosial untuk semua pengguna?' })).toBeVisible()
+
+    await user.click(within(dialog).getByRole('button', { name: 'Matikan fitur sosial' }))
+    confirm = await screen.findByRole('alertdialog', { name: 'Yakin matikan fitur sosial sekarang?' })
+    await user.click(within(confirm).getByRole('button', { name: 'Matikan fitur sosial' }))
     await waitFor(() =>
       expect(clientConfigApi.setKillSwitch).toHaveBeenCalledWith(false, 'Spam masif dari bot'),
     )
@@ -106,7 +115,36 @@ describe('FeaturesSection', () => {
     expect(screen.getByRole('button', { name: 'Nyalakan kembali' })).toBeVisible()
   })
 
-  it('shows the fixed feature list with only an on/off switch', async () => {
+  it('confirms before turning social features back on', async () => {
+    const user = userEvent.setup()
+    vi.mocked(clientConfigApi.config).mockResolvedValue(
+      config({
+        kill_switch: {
+          social_enabled: false,
+          reason: 'Spam masif dari bot',
+          changed_by: { id: 'adi', name: 'Adi' },
+          changed_at: '2026-11-03T03:00:00.000Z',
+        },
+      }),
+    )
+    vi.mocked(clientConfigApi.setKillSwitch).mockResolvedValue(config())
+    renderSection()
+
+    await user.click(await screen.findByRole('button', { name: 'Nyalakan kembali' }))
+    const dialog = screen.getByRole('dialog', { name: 'Nyalakan kembali fitur sosial?' })
+    await user.type(within(dialog).getByLabelText('Alasan'), 'Spam sudah ditangani')
+    await user.type(within(dialog).getByLabelText('Ketik NYALAKAN untuk konfirmasi'), 'NYALAKAN')
+    await user.click(within(dialog).getByRole('button', { name: 'Nyalakan kembali' }))
+    const confirm = await screen.findByRole('alertdialog', { name: 'Yakin nyalakan fitur sosial sekarang?' })
+    expect(clientConfigApi.setKillSwitch).not.toHaveBeenCalled()
+    await user.click(within(confirm).getByRole('button', { name: 'Nyalakan kembali' }))
+    await waitFor(() =>
+      expect(clientConfigApi.setKillSwitch).toHaveBeenCalledWith(true, 'Spam sudah ditangani'),
+    )
+  })
+
+  it('shows the fixed feature list locked until Ubah', async () => {
+    const user = userEvent.setup()
     renderSection()
 
     expect(await screen.findByRole('switch', { name: 'Pencarian' })).toBeChecked()
@@ -120,17 +158,34 @@ describe('FeaturesSection', () => {
       'Analitik aplikasi',
     ]) {
       expect(screen.getByRole('switch', { name: label })).not.toBeChecked()
+      expect(screen.getByRole('switch', { name: label })).toBeDisabled()
     }
     expect(screen.getByText('Cari postingan, pengguna, saham, dan hashtag.')).toBeVisible()
-    expect(screen.queryByRole('button', { name: /Tambah|Hapus|Ubah/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Tambah|Hapus/ })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Ubah Fitur aplikasi' }))
+    expect(screen.getByRole('switch', { name: 'Trending' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Selesai' })).toHaveFocus()
+    await user.click(screen.getByRole('button', { name: 'Selesai' }))
+    expect(screen.getByRole('switch', { name: 'Trending' })).toBeDisabled()
+    expect(clientConfigApi.toggleFlag).not.toHaveBeenCalled()
   })
 
-  it('turns a feature on right away', async () => {
+  it('confirms before turning a feature on', async () => {
     const user = userEvent.setup()
     vi.mocked(clientConfigApi.toggleFlag).mockResolvedValue(config())
     renderSection()
 
-    await user.click(await screen.findByRole('switch', { name: 'Trending' }))
+    await user.click(await screen.findByRole('button', { name: 'Ubah Fitur aplikasi' }))
+    await user.click(screen.getByRole('switch', { name: 'Trending' }))
+    let confirm = screen.getByRole('alertdialog', { name: 'Nyalakan Trending?' })
+    expect(within(confirm).getByText(/langsung muncul untuk semua pengguna/)).toBeVisible()
+    await user.click(within(confirm).getByRole('button', { name: 'Batal' }))
+    expect(clientConfigApi.toggleFlag).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('switch', { name: 'Trending' }))
+    confirm = screen.getByRole('alertdialog', { name: 'Nyalakan Trending?' })
+    await user.click(within(confirm).getByRole('button', { name: 'Nyalakan' }))
     await waitFor(() => expect(clientConfigApi.toggleFlag).toHaveBeenCalledWith('trending', true))
     expect(await screen.findByText('Trending dinyalakan')).toBeVisible()
   })
@@ -140,7 +195,8 @@ describe('FeaturesSection', () => {
     vi.mocked(clientConfigApi.toggleFlag).mockResolvedValue(config())
     renderSection()
 
-    await user.click(await screen.findByRole('switch', { name: 'Pencarian' }))
+    await user.click(await screen.findByRole('button', { name: 'Ubah Fitur aplikasi' }))
+    await user.click(screen.getByRole('switch', { name: 'Pencarian' }))
     const confirm = screen.getByRole('alertdialog', { name: 'Matikan Pencarian?' })
     expect(within(confirm).getByText(/tersembunyi untuk semua pengguna/)).toBeVisible()
     expect(clientConfigApi.toggleFlag).not.toHaveBeenCalled()
@@ -153,14 +209,21 @@ describe('FeaturesSection', () => {
     vi.mocked(clientConfigApi.toggleFlag).mockRejectedValue(new ApiError('unknown_flag', 'x', 400))
     renderSection()
 
-    await user.click(await screen.findByRole('switch', { name: 'Trending' }))
+    await user.click(await screen.findByRole('button', { name: 'Ubah Fitur aplikasi' }))
+    await user.click(screen.getByRole('switch', { name: 'Trending' }))
+    await user.click(
+      within(screen.getByRole('alertdialog', { name: 'Nyalakan Trending?' })).getByRole('button', {
+        name: 'Nyalakan',
+      }),
+    )
     expect(await screen.findByText('Fitur ini tidak dikenal aplikasi. Daftar dimuat ulang.')).toBeVisible()
   })
 
-  it('lists a minimum version for every app platform', async () => {
+  it('lists a minimum version for every app platform, locked until Ubah', async () => {
     renderSection()
     for (const platform of ['Android', 'iOS', 'Web', 'Windows', 'macOS', 'Linux']) {
-      expect(await screen.findByLabelText(platform)).toBeInTheDocument()
+      expect(await screen.findByLabelText(platform)).toBeDisabled()
+      expect(screen.getByRole('button', { name: `Ubah ${platform}` })).toBeInTheDocument()
     }
   })
 
@@ -170,9 +233,18 @@ describe('FeaturesSection', () => {
     renderSection()
 
     const input = await screen.findByLabelText('Android')
-    await user.type(input, '2.10.0')
     const row = input.closest('li')
     if (!row) throw new Error('version row not found')
+    await user.click(within(row).getByRole('button', { name: 'Ubah Android' }))
+    expect(input).toHaveFocus()
+    expect(screen.getByLabelText('iOS')).toBeDisabled()
+    await user.type(input, '2.10.0')
+    await user.click(within(row).getByRole('button', { name: 'Batal' }))
+    expect(input).toHaveValue('')
+    expect(input).toBeDisabled()
+
+    await user.click(within(row).getByRole('button', { name: 'Ubah Android' }))
+    await user.type(input, '2.10.0')
     await user.click(within(row).getByRole('button', { name: 'Simpan' }))
     const confirm = screen.getByRole('alertdialog', {
       name: 'Wajibkan Android versi 2.10.0 atau lebih baru?',

@@ -139,6 +139,18 @@ const running = (): BackupOverview =>
     ],
   })
 
+type User = ReturnType<typeof userEvent.setup>
+
+async function unlock(user: User, name: string) {
+  await user.click(await screen.findByRole('button', { name: `Ubah ${name}` }))
+}
+
+async function confirm(user: User, title: string, action: string, text?: string) {
+  const dialog = await screen.findByRole('alertdialog', { name: title })
+  if (text) expect(dialog).toHaveTextContent(text)
+  await user.click(within(dialog).getByRole('button', { name: action }))
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -173,7 +185,9 @@ describe('BackupTab', () => {
 
     expect(await screen.findByText('Belum diatur')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Backup penuh sekarang' })).toBeDisabled()
+    expect(screen.getByLabelText('Endpoint S3')).toBeDisabled()
 
+    await unlock(user, 'Tujuan backup')
     await user.type(screen.getByLabelText('Endpoint S3'), 'https://s3.example.co.id')
     await user.type(screen.getByLabelText('Bucket'), 'olt-backup')
     await user.type(screen.getByLabelText('Access key ID'), 'AKIA123')
@@ -193,6 +207,8 @@ describe('BackupTab', () => {
     await user.clear(screen.getByLabelText('Ulangi password enkripsi'))
     await user.type(screen.getByLabelText('Ulangi password enkripsi'), PASSWORD)
     await user.click(screen.getByRole('button', { name: 'Simpan tujuan' }))
+    expect(systemApi.setBackupTarget).not.toHaveBeenCalled()
+    await confirm(user, 'Simpan tujuan backup?', 'Simpan tujuan', 'backup tidak bisa dipulihkan')
 
     await waitFor(() =>
       expect(systemApi.setBackupTarget).toHaveBeenCalledWith({
@@ -242,6 +258,7 @@ describe('BackupTab', () => {
     expect(screen.queryByLabelText('Password enkripsi')).not.toBeInTheDocument()
     expect(screen.getByText('Tersimpan', { selector: 'span' })).toBeInTheDocument()
 
+    await unlock(user, 'Tujuan backup')
     await user.clear(screen.getByLabelText('Folder (prefix)'))
     await user.type(screen.getByLabelText('Folder (prefix)'), 'prod-2')
     expect(screen.getByRole('note')).toHaveTextContent('repositori baru yang butuh password enkripsi baru')
@@ -252,6 +269,12 @@ describe('BackupTab', () => {
     await user.clear(screen.getByLabelText('Access key ID'))
     await user.type(screen.getByLabelText('Access key ID'), 'AKIA456')
     await user.click(screen.getByRole('button', { name: 'Simpan tujuan' }))
+    await confirm(
+      user,
+      'Simpan tujuan backup?',
+      'Simpan tujuan',
+      'Backup berikutnya memakai pengaturan tujuan ini',
+    )
 
     await waitFor(() =>
       expect(systemApi.setBackupTarget).toHaveBeenCalledWith(
@@ -274,6 +297,7 @@ describe('BackupTab', () => {
 
     expect(await screen.findByLabelText('Endpoint S3')).toBeInTheDocument()
     expect(screen.queryByText('Backup hanya tersimpan di server ini')).not.toBeInTheDocument()
+    await unlock(user, 'Tujuan backup')
     await user.click(screen.getByRole('radio', { name: /Folder lokal di server/ }))
 
     expect(screen.queryByLabelText('Endpoint S3')).not.toBeInTheDocument()
@@ -291,6 +315,7 @@ describe('BackupTab', () => {
     await user.type(screen.getByLabelText('Ulangi password enkripsi'), PASSWORD)
     await user.click(screen.getByRole('checkbox', { name: /Saya sudah menyimpan password ini/ }))
     await user.click(screen.getByRole('button', { name: 'Simpan tujuan' }))
+    await confirm(user, 'Simpan tujuan backup?', 'Simpan tujuan')
 
     await waitFor(() =>
       expect(systemApi.setBackupTarget).toHaveBeenCalledWith(
@@ -352,8 +377,12 @@ describe('BackupTab', () => {
       monitorFixture,
     )
 
-    await user.click(await screen.findByRole('button', { name: 'Simpan tujuan' }))
+    await unlock(user, 'Tujuan backup')
+    await user.click(screen.getByRole('button', { name: 'Simpan tujuan' }))
+    await confirm(user, 'Simpan tujuan backup?', 'Simpan tujuan')
     expect(await screen.findByText(/Pakai folder atau bucket baru\.$/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Simpan tujuan' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Access key ID')).toBeEnabled()
   })
 
   it('shows a pending full backup and still lets Super Admin request a restore test', async () => {
@@ -377,6 +406,10 @@ describe('BackupTab', () => {
     expect(screen.getByRole('button', { name: 'Backup penuh sekarang' })).toBeDisabled()
     vi.mocked(systemApi.backup).mockResolvedValue(updated)
     await user.click(screen.getByRole('button', { name: 'Uji restore sekarang' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Jalankan uji restore sekarang?' })
+    expect(dialog).toHaveTextContent('Database produksi tidak disentuh')
+    expect(systemApi.requestBackup).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Uji restore sekarang' }))
 
     await waitFor(() => expect(systemApi.requestBackup).toHaveBeenCalledWith('restore_test'))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Uji restore sekarang' })).toBeDisabled())
@@ -389,6 +422,15 @@ describe('BackupTab', () => {
     renderWithProviders(<BackupTab />, monitorFixture)
 
     const days = await screen.findByLabelText('Simpan backup harian')
+    expect(days).toBeDisabled()
+    await unlock(user, 'Jadwal & retensi')
+    await user.clear(days)
+    await user.type(days, '3')
+    await user.click(screen.getByRole('button', { name: 'Batal' }))
+    expect(days).toHaveValue('7')
+    expect(days).toBeDisabled()
+
+    await unlock(user, 'Jadwal & retensi')
     await user.clear(days)
     await user.type(days, '61')
     await user.click(screen.getByRole('button', { name: 'Simpan jadwal' }))
@@ -399,6 +441,8 @@ describe('BackupTab', () => {
     await user.type(days, '14')
     await user.click(screen.getByRole('radio', { name: 'Sabtu' }))
     await user.click(screen.getByRole('button', { name: 'Simpan jadwal' }))
+    expect(systemApi.setBackupSchedule).not.toHaveBeenCalled()
+    await confirm(user, 'Simpan jadwal backup?', 'Simpan jadwal')
 
     await waitFor(() =>
       expect(systemApi.setBackupSchedule).toHaveBeenCalledWith({
@@ -413,5 +457,21 @@ describe('BackupTab', () => {
         restoreTestTime: '04:00',
       }),
     )
+  })
+
+  it('asks before requesting a full backup', async () => {
+    const user = userEvent.setup()
+    vi.mocked(systemApi.backup).mockResolvedValue(running())
+    vi.mocked(systemApi.requestBackup).mockResolvedValue(running())
+    renderWithProviders(<BackupTab />, monitorFixture)
+
+    await user.click(await screen.findByRole('button', { name: 'Backup penuh sekarang' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Jalankan backup penuh sekarang?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Batal' }))
+    expect(systemApi.requestBackup).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Backup penuh sekarang' }))
+    await confirm(user, 'Jalankan backup penuh sekarang?', 'Backup penuh sekarang')
+    await waitFor(() => expect(systemApi.requestBackup).toHaveBeenCalledWith('base'))
   })
 })
