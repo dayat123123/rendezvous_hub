@@ -65,6 +65,8 @@ export function normalizeAgent(raw: AgentProfile): AgentProfile {
 }
 
 export const isSuperAdmin = (agent: Pick<AgentProfile, 'roles'>) => agent.roles.includes('cs_super_admin')
+export const canManageFeatures = (agent: Pick<AgentProfile, 'roles'>) =>
+  isSuperAdmin(agent) || agent.roles.includes('product')
 export const worksTickets = (agent: Pick<AgentProfile, 'roles'>) => agent.roles.includes('cs_agent')
 export const hasNasabah = (agent: Pick<AgentProfile, 'nasabah_permissions'>) =>
   agent.nasabah_permissions.length > 0

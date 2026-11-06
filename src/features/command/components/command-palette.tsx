@@ -50,6 +50,7 @@ import { featuresCampaignsTabs, type FeaturesCampaignsTab } from '@/features/fea
 import { useSetStatus } from '@/features/presence/hooks'
 import {
   agentStatuses,
+  canManageFeatures,
   canViewTickets,
   hasNasabah,
   isCompliance,
@@ -197,12 +198,10 @@ function PaletteBody({
         ]
       : []),
     ...(hasNasabah(agent) ? [{ label: t('nav.nasabah'), icon: UsersIcon, to: '/nasabah' as const }] : []),
-    ...(superAdmin
-      ? [
-          { label: t('nav.featuresCampaigns'), icon: SlidersHorizontalIcon, to: '/features' as const },
-          { label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const },
-        ]
+    ...(canManageFeatures(agent)
+      ? [{ label: t('nav.featuresCampaigns'), icon: SlidersHorizontalIcon, to: '/features' as const }]
       : []),
+    ...(superAdmin ? [{ label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const }] : []),
     ...(superAdmin && !compliance
       ? [{ label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const }]
       : []),
@@ -238,7 +237,7 @@ function PaletteBody({
       icon: section.icon,
       run: () => void navigate({ to: section.to, search: section.search }),
     })),
-    ...(superAdmin
+    ...(canManageFeatures(agent)
       ? featuresCampaignsTabs.map((tab) => ({
           id: `nav:/features:${tab}`,
           label: t('command.featuresCampaignsTab', { tab: t(`featuresCampaigns.tabs.${tab}`) }),

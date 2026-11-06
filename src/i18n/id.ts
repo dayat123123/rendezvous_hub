@@ -113,6 +113,7 @@ export const id = {
     cs_super_admin: 'Super Admin',
     compliance: 'Kepatuhan',
     community: 'Komunitas',
+    product: 'Fitur & Kampanye',
   },
   nav: {
     nasabah: 'Akun Nasabah',

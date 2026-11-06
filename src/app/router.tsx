@@ -17,6 +17,7 @@ import { caseStates, type CaseState } from '@/features/compliance/types'
 import { isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
 import { systemTabs, type SystemTab } from '@/features/system/types'
 import {
+  canManageFeatures,
   canOpenCommunity,
   canViewTickets,
   hasCommunityAccess,
@@ -35,6 +36,10 @@ type RouterContext = { agent: AgentProfile }
 
 const superAdminOnly = ({ context }: { context: RouterContext }) => {
   if (!isSuperAdmin(context.agent)) throw redirect({ to: '/' })
+}
+
+const featuresOnly = ({ context }: { context: RouterContext }) => {
+  if (!canManageFeatures(context.agent)) throw redirect({ to: '/' })
 }
 
 const complianceOnly = ({ context }: { context: RouterContext }) => {
@@ -56,6 +61,7 @@ const homeRoute = createRoute({
     if (isCompliance(context.agent)) throw redirect({ to: '/compliance' })
     if (hasNasabah(context.agent)) throw redirect({ to: '/nasabah' })
     if (hasCommunityAccess(context.agent)) throw redirect({ to: '/community' })
+    if (canManageFeatures(context.agent)) throw redirect({ to: '/features' })
   },
   loader: () => loadStrings('labels', 'replies'),
   component: Home,
@@ -103,7 +109,7 @@ const settingsRoute = createRoute({
 const featuresCampaignsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/features',
-  beforeLoad: superAdminOnly,
+  beforeLoad: featuresOnly,
   validateSearch: (search: Record<string, unknown>): { tab?: FeaturesCampaignsTab } =>
     isFeaturesCampaignsTab(search.tab) ? { tab: search.tab } : {},
   component: lazyRouteComponent(

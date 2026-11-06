@@ -40,6 +40,7 @@ import {
 } from '@/features/presence/components/status-menu'
 import { useCommunityBadge } from '@/features/community/hooks'
 import {
+  canManageFeatures,
   canOpenCommunity,
   canViewTickets,
   hasNasabah,
@@ -279,12 +280,8 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
             countLabel={t('nav.communityAttention', { count: communityCount })}
           />
         ) : null}
-        {superAdmin ? (
-          <>
-            <NavLink to="/features" label={t('nav.featuresCampaigns')} />
-            <NavLink to="/settings" label={t('nav.settings')} />
-          </>
-        ) : null}
+        {canManageFeatures(agent) ? <NavLink to="/features" label={t('nav.featuresCampaigns')} /> : null}
+        {superAdmin ? <NavLink to="/settings" label={t('nav.settings')} /> : null}
         {showSystem ? (
           <NavLink
             to="/system"

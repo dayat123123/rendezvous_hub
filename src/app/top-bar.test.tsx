@@ -65,6 +65,13 @@ describe('TopBar', () => {
     expect(navLinks()).toEqual(['Layanan Nasabah'])
   })
 
+  it('shows only Fitur & Kampanye to the product role, without Settings or ticket menus', () => {
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, { ...monitorFixture, roles: ['product'] })
+
+    expect(navLinks()).toEqual(['Fitur & Kampanye'])
+    expect(screen.queryByText('Mode pantau')).not.toBeInTheDocument()
+  })
+
   it('shows monitor mode and admin menus to Super Admins without status or capacity', () => {
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
 

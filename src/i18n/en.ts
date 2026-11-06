@@ -116,6 +116,7 @@ export const en: Translation = {
     cs_super_admin: 'Super Admin',
     compliance: 'Compliance',
     community: 'Community',
+    product: 'Features & campaigns',
   },
   nav: {
     nasabah: 'Customer accounts',

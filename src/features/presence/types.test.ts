@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { actionBlock, canViewTickets, isMonitor, isSuperAdmin, worksTickets, type AgentStatus } from './types'
+import {
+  actionBlock,
+  canManageFeatures,
+  canViewTickets,
+  isMonitor,
+  isSuperAdmin,
+  worksTickets,
+  type AgentStatus,
+} from './types'
 
 describe('staff roles', () => {
   it('lets only agents work tickets while Super Admins watch them', () => {
@@ -13,6 +21,36 @@ describe('staff roles', () => {
     expect([agent, monitor, both, compliance].map(canViewTickets)).toEqual([true, true, true, false])
     expect([agent, monitor, both, compliance].map(isMonitor)).toEqual([false, true, false, false])
     expect([agent, monitor, both, compliance].map(isSuperAdmin)).toEqual([false, true, true, false])
+  })
+})
+
+describe('canManageFeatures', () => {
+  it('opens Fitur & Kampanye to Super Admins and the product role only', () => {
+    const roles = [
+      ['cs_super_admin'],
+      ['product'],
+      ['cs_agent', 'product'],
+      ['cs_agent'],
+      ['compliance'],
+      ['community'],
+    ]
+    expect(roles.map((value) => canManageFeatures({ roles: value }))).toEqual([
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+    ])
+  })
+
+  it('does not make the product role a Super Admin or a ticket worker', () => {
+    const product = { roles: ['product'] }
+    expect([isSuperAdmin(product), canViewTickets(product), worksTickets(product)]).toEqual([
+      false,
+      false,
+      false,
+    ])
   })
 })
 
