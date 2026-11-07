@@ -8,11 +8,39 @@ import type * as TicketsApiModule from '@/features/tickets/api'
 import { ticketsApi } from '@/features/tickets/api'
 import type { Ticket } from '@/features/tickets/types'
 import { realtime } from '@/lib/realtime'
-import { agentFixture, monitorFixture, ticketFixture } from '@/test/fixtures'
+import { agentFixture, messageFixture, monitorFixture, ticketFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
 
 import type * as ApiModule from '../api'
+import { conversationApi } from '../api'
 import { ConversationPane } from './conversation-pane'
+
+vi.mock('@tanstack/react-virtual', async () => {
+  const { useRef } = await import('react')
+  type Options = { count: number; getItemKey: (index: number) => string | number }
+  return {
+    useVirtualizer: (options: Options) => {
+      const current = useRef(options)
+      current.current = options
+      const instance = useRef({
+        getVirtualItems: () =>
+          Array.from({ length: current.current.count }, (_, index) => ({
+            index,
+            key: current.current.getItemKey(index),
+            start: index * 64,
+            end: index * 64 + 64,
+            size: 64,
+          })),
+        getTotalSize: () => current.current.count * 64,
+        getOffsetForIndex: (index: number) => [index * 64, 'start'],
+        measureElement: () => undefined,
+        scrollToIndex: vi.fn(),
+        scrollToOffset: vi.fn(),
+      })
+      return instance.current
+    },
+  }
+})
 
 vi.mock('@/features/tickets/api', async (importOriginal) => {
   const actual = await importOriginal<typeof TicketsApiModule>()
@@ -156,6 +184,20 @@ describe('ConversationPane', () => {
     expect(room).toHaveBeenLastCalledWith(handled.room_id, expect.anything(), expect.anything(), {
       signals: true,
     })
+  })
+
+  it('focuses the reply box right after choosing a message to reply to, even from the note tab', async () => {
+    vi.mocked(conversationApi.page).mockResolvedValueOnce([messageFixture({ body: 'Order saya gagal' })])
+    const user = userEvent.setup()
+    renderPane(ticketFixture(), agentFixture)
+    await user.click(await screen.findByRole('tab', { name: 'Catatan internal' }))
+
+    await user.click(await screen.findByRole('button', { name: 'Balas pesan ini' }))
+
+    const box = await screen.findByRole('textbox', { name: 'Balas' })
+    await waitFor(() => expect(box).toHaveFocus())
+    await user.keyboard('Baik kak')
+    expect(box).toHaveValue('Baik kak')
   })
 
   it('still gives the owning agent the composer', async () => {

@@ -6,7 +6,7 @@ import { ErrorState } from '@/components/states'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/primitives'
 import { useAgent } from '@/features/auth/hooks'
-import { useCommandHandler } from '@/features/command/bus'
+import { runCommand, useCommandHandler } from '@/features/command/bus'
 import { useNotes } from '@/features/customer/hooks'
 import { GoOnlineButton } from '@/features/presence/components/go-online-button'
 import { useActionGuard, useClaimGate } from '@/features/presence/hooks'
@@ -160,6 +160,10 @@ function Conversation({
   const { send, resend } = useSendMessage(ticket, agent.id)
   const topics = useTopics()
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
+  const replyAndFocus = useCallback((message: ChatMessage) => {
+    setReplyTo(message)
+    runCommand('focusReply')
+  }, [])
   const [action, setAction] = useState<TicketAction | null>(null)
   const [followSignal, setFollowSignal] = useState(0)
   const follow = useCallback(() => setFollowSignal((value) => value + 1), [])
@@ -279,7 +283,7 @@ function Conversation({
           onFindOlder={messages.findOlder}
           followSignal={followSignal}
           trustedHost={trustedHost}
-          onReply={owner ? setReplyTo : undefined}
+          onReply={owner ? replyAndFocus : undefined}
           onResend={(item) => void resend(item).catch(() => undefined)}
           onDiscard={discard}
         />
