@@ -25,6 +25,7 @@ export const nasabahKeys = {
   openings: (page: number, filter: OpeningFilter, size: number) =>
     ['nasabah', 'openings', page, filter.loginId, filter.custId, size] as const,
   me: ['nasabah', 'me'] as const,
+  duplicates: ['nasabah', 'duplicates'] as const,
   ticketLogin: (ticketId: string) => ['nasabah', 'ticket-login', ticketId] as const,
   profile: (loginId: string) => ['nasabah', 'profile', loginId.toLowerCase()] as const,
 }
@@ -72,6 +73,15 @@ export function useFreshPermissions(enabled = true) {
   useEffect(() => {
     if (me.error && toApiError(me.error).code === 'session_revoked') void signOut('expired')
   }, [me.error, signOut])
+}
+
+export function useDuplicates(enabled = true) {
+  return useQuery({
+    queryKey: nasabahKeys.duplicates,
+    queryFn: () => nasabahApi.duplicates(),
+    enabled,
+    staleTime: 5 * 60_000,
+  })
 }
 
 export function useOnlineUsers(page: number, query: string, enabled = true) {

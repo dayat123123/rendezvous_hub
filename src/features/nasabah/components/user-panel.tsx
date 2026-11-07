@@ -1,6 +1,7 @@
 import {
   CheckCircle2Icon,
   CircleAlertIcon,
+  CopyIcon,
   KeyRoundIcon,
   LinkIcon,
   PencilIcon,
@@ -19,7 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAgent } from '@/features/auth/hooks'
 import { errorText } from '@/lib/error-text'
 
-import { useLinkedAccounts, useResetCredential, useSubmitApproval } from '../hooks'
+import { useDuplicates, useLinkedAccounts, useResetCredential, useSubmitApproval } from '../hooks'
 import { legacyStamp, useNasabahLabels } from '../labels'
 import {
   approvalPayload,
@@ -27,8 +28,10 @@ import {
   canEditUser,
   canLinkAccounts,
   canResetCredentials,
+  duplicateMatch,
   flagsOf,
   formFromUser,
+  hasDuplicate,
   incompleteFields,
 } from '../logic'
 import type { OnlineUser } from '../types'
@@ -69,6 +72,7 @@ function UserBody({ user, onClose }: { user: OnlineUser; onClose: () => void }) 
   const label = useNasabahLabels()
   const perms = agent.nasabah_permissions
   const links = useLinkedAccounts(user.LoginId)
+  const duplicate = duplicateMatch(useDuplicates().data, user.LoginId)
   const submit = useSubmitApproval()
   const reset = useResetCredential()
   const [editing, setEditing] = useState(false)
@@ -138,6 +142,30 @@ function UserBody({ user, onClose }: { user: OnlineUser; onClose: () => void }) 
                 {t('nasabah.incomplete.fix')}
               </Button>
             ) : null}
+          </section>
+        ) : null}
+        {hasDuplicate(duplicate) ? (
+          <section
+            aria-labelledby="nasabah-duplicate-title"
+            className="flex items-start gap-3 border-b bg-danger/10 px-5 py-3"
+          >
+            <CopyIcon className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden="true" />
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <h3 id="nasabah-duplicate-title" className="text-row font-semibold">
+                {t('nasabah.duplicate.title')}
+              </h3>
+              {duplicate.email.length > 0 ? (
+                <p className="text-xs">
+                  {t('nasabah.duplicate.emailLine', { ids: duplicate.email.join(', ') })}
+                </p>
+              ) : null}
+              {duplicate.phone.length > 0 ? (
+                <p className="text-xs">
+                  {t('nasabah.duplicate.phoneLine', { ids: duplicate.phone.join(', ') })}
+                </p>
+              ) : null}
+              <p className="text-xs text-muted-foreground">{t('nasabah.duplicate.body')}</p>
+            </div>
           </section>
         ) : null}
         <dl className="grid gap-x-6 gap-y-3 border-b px-5 py-4 sm:grid-cols-2">

@@ -5,6 +5,7 @@ import {
   canDecide,
   canEditUser,
   canLinkAccounts,
+  duplicateMatch,
   emptyForm,
   flagsOf,
   formFromUser,
@@ -60,6 +61,20 @@ describe('nasabah logic', () => {
     expect(canDecide(['online_user.approve'], approval, 'CS-0046')).toBe(true)
     expect(canDecide(['online_user.approve'], { ...approval, Status: 2 }, 'CS-0046')).toBe(false)
     expect(canDecide(['online_user.manage'], approval, 'CS-0046')).toBe(false)
+  })
+
+  it('lists the other Online IDs that share an email or phone', () => {
+    const duplicates = {
+      email: [{ value: 'a@olt.test', loginIds: ['Budi', 'budi2', 'Citra'] }],
+      phone: [{ value: '0812', loginIds: ['Citra', 'Dewi'] }],
+      users: [],
+      scanned: 4,
+      complete: true,
+      checkedAt: '2026-11-07T03:00:00Z',
+    }
+    expect(duplicateMatch(duplicates, ' BUDI ')).toEqual({ email: ['budi2', 'Citra'], phone: [] })
+    expect(duplicateMatch(duplicates, 'Citra')).toEqual({ email: ['Budi', 'budi2'], phone: ['Dewi'] })
+    expect(duplicateMatch(undefined, 'Budi')).toEqual({ email: [], phone: [] })
   })
 
   it('searches both LoginId and email when the characters allow it', () => {

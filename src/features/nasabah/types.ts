@@ -104,6 +104,19 @@ export type OpeningAccount = {
 
 export type IncompleteField = 'email' | 'phone' | 'birthDate'
 
+export type DuplicateGroup = { value: string; loginIds: string[] }
+
+export type Duplicates = {
+  email: DuplicateGroup[]
+  phone: DuplicateGroup[]
+  users: OnlineUser[]
+  scanned: number
+  complete: boolean
+  checkedAt: string
+}
+
+export type DuplicateMatch = { email: string[]; phone: string[] }
+
 export type Page<T> = {
   rows: T[]
   total: number

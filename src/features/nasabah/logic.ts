@@ -8,6 +8,9 @@ import {
   type Approval,
   type ApprovalAction,
   type CatalogAccount,
+  type DuplicateGroup,
+  type DuplicateMatch,
+  type Duplicates,
   type FormContext,
   type IncompleteField,
   type LoginType,
@@ -97,6 +100,25 @@ export const canDecide = (
   (isSelfSubmitted(approval, agentCode)
     ? has(perms, 'online_user.approve_own')
     : has(perms, 'online_user.approve'))
+
+function sharedWith(groups: DuplicateGroup[], loginId: string) {
+  const id = loginId.trim().toLowerCase()
+  const others = new Set<string>()
+  for (const group of groups) {
+    if (!group.loginIds.some((member) => member.trim().toLowerCase() === id)) continue
+    for (const member of group.loginIds) if (member.trim().toLowerCase() !== id) others.add(member.trim())
+  }
+  return [...others]
+}
+
+export function duplicateMatch(duplicates: Duplicates | undefined, loginId: string): DuplicateMatch {
+  return {
+    email: sharedWith(duplicates?.email ?? [], loginId),
+    phone: sharedWith(duplicates?.phone ?? [], loginId),
+  }
+}
+
+export const hasDuplicate = (match: DuplicateMatch) => match.email.length + match.phone.length > 0
 
 const searchLoginId = /^[A-Za-z0-9._@-]{1,50}$/
 const searchEmail = /^[A-Za-z0-9._@+-]{1,100}$/

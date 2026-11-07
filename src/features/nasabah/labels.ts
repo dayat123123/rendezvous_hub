@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { formatDay } from '@/lib/time'
 
-import type { IncompleteField, NasabahPermission, UserFlag } from './types'
+import type { DuplicateMatch, IncompleteField, NasabahPermission, UserFlag } from './types'
 
 const loginTypeKeys = ['demo', 'client', 'sales', 'branch', 'csAll', 'csBranch'] as const
 const statusKeys = ['inactive', 'active', 'suspendTrading', 'suspendLogin'] as const
@@ -50,5 +50,12 @@ export function useNasabahLabels() {
     permission: (value: NasabahPermission) =>
       t(`nasabah.permissions.${value.replace('.', '_') as 'online_user_view'}`),
     incomplete: (key: IncompleteField) => t(`nasabah.incomplete.${key}`),
+    duplicate: (match: DuplicateMatch) =>
+      [
+        match.email.length > 0 ? t('nasabah.duplicate.email', { ids: match.email.join(', ') }) : '',
+        match.phone.length > 0 ? t('nasabah.duplicate.phone', { ids: match.phone.join(', ') }) : '',
+      ]
+        .filter(Boolean)
+        .join('; '),
   }
 }

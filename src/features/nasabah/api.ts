@@ -10,6 +10,7 @@ import {
   type ApprovalFilter,
   type ApprovalLink,
   type CatalogAccount,
+  type Duplicates,
   type LinkedAccount,
   type OnlineUser,
   type OpeningAccount,
@@ -53,6 +54,7 @@ export const nasabahApi = {
       found.some((part) => part.limited),
     )
   },
+  duplicates: async () => (await gatewayRequest<{ data: Duplicates }>('GET', '/online/duplicates')).data,
   ticketLogin: (ticketId: string) => rpc<TicketLogin>('ticket_customer_login', { p_ticket_id: ticketId }),
   onlineUser: async (loginId: string) =>
     (

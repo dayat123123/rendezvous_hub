@@ -1,4 +1,5 @@
-import { CircleAlertIcon, PlusIcon, SearchIcon } from 'lucide-react'
+import { format, parseISO } from 'date-fns'
+import { CircleAlertIcon, CopyIcon, PlusIcon, SearchIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -12,10 +13,17 @@ import { useAgent } from '@/features/auth/hooks'
 import { useDebounced } from '@/hooks/use-now'
 import { cn } from '@/lib/utils'
 
-import { useOnlineUsers } from '../hooks'
+import { useDuplicates, useOnlineUsers } from '../hooks'
 import { legacyStamp, useNasabahLabels } from '../labels'
-import { canEditUser, incompleteFields } from '../logic'
-import type { OnlineUser } from '../types'
+import {
+  canEditUser,
+  duplicateMatch,
+  hasDuplicate,
+  incompleteFields,
+  mergeUserSearch,
+  slicePage,
+} from '../logic'
+import { PAGE_SIZE, type OnlineUser } from '../types'
 import { Pager } from './pager'
 import { UserDialog } from './user-dialog'
 import { UserPanel } from './user-panel'
@@ -36,9 +44,17 @@ export function UsersTab({ initialQuery = '' }: { initialQuery?: string }) {
   const [selected, setSelected] = useState<OnlineUser | null>(null)
   const [creating, setCreating] = useState(false)
   const [onlyIncomplete, setOnlyIncomplete] = useState(false)
+  const [onlyDuplicates, setOnlyDuplicates] = useState(false)
   const debounced = useDebounced(query.trim(), 300)
-  const users = useOnlineUsers(page, debounced)
-  const all = users.data?.rows ?? []
+  const users = useOnlineUsers(page, debounced, !onlyDuplicates)
+  const duplicates = useDuplicates()
+  const source = onlyDuplicates ? duplicates : users
+  const listed = onlyDuplicates
+    ? duplicates.data
+      ? slicePage(mergeUserSearch(debounced, [duplicates.data.users]), page, PAGE_SIZE)
+      : undefined
+    : users.data
+  const all = listed?.rows ?? []
   const rows = onlyIncomplete ? all.filter((user) => incompleteFields(user).length > 0) : all
   const current = selected ? (all.find((user) => user.LoginId === selected.LoginId) ?? selected) : null
 
@@ -65,6 +81,19 @@ export function UsersTab({ initialQuery = '' }: { initialQuery?: string }) {
             {t('nasabah.incomplete.filter')}
           </Label>
         </div>
+        <div className="flex items-center gap-2">
+          <Switch
+            id="nasabah-only-duplicates"
+            checked={onlyDuplicates}
+            onCheckedChange={(checked) => {
+              setOnlyDuplicates(checked)
+              setPage(1)
+            }}
+          />
+          <Label htmlFor="nasabah-only-duplicates" className="text-row font-normal">
+            {t('nasabah.duplicate.filter')}
+          </Label>
+        </div>
         {canEditUser(agent.nasabah_permissions, null) ? (
           <Button size="sm" className="ml-auto" onClick={() => setCreating(true)}>
             <PlusIcon />
@@ -72,9 +101,12 @@ export function UsersTab({ initialQuery = '' }: { initialQuery?: string }) {
           </Button>
         ) : null}
       </div>
-      {users.data ? (
+      {listed ? (
         <div
-          className={cn('flex flex-col gap-3 transition-opacity', users.isPlaceholderData && 'opacity-60')}
+          className={cn(
+            'flex flex-col gap-3 transition-opacity',
+            !onlyDuplicates && users.isPlaceholderData && 'opacity-60',
+          )}
         >
           {rows.length > 0 ? (
             <Table>
@@ -93,6 +125,10 @@ export function UsersTab({ initialQuery = '' }: { initialQuery?: string }) {
                   const missing = incompleteFields(user)
                   const missingText = t('nasabah.incomplete.rowLabel', {
                     fields: missing.map(label.incomplete).join(', '),
+                  })
+                  const duplicate = duplicateMatch(duplicates.data, user.LoginId)
+                  const duplicateText = t('nasabah.duplicate.rowLabel', {
+                    detail: label.duplicate(duplicate),
                   })
                   return (
                     <TableRow key={user.LoginId} className="cursor-pointer" onClick={() => setSelected(user)}>
@@ -118,6 +154,15 @@ export function UsersTab({ initialQuery = '' }: { initialQuery?: string }) {
                               <title>{missingText}</title>
                             </CircleAlertIcon>
                           ) : null}
+                          {hasDuplicate(duplicate) ? (
+                            <CopyIcon
+                              role="img"
+                              aria-label={duplicateText}
+                              className="size-3.5 shrink-0 text-danger"
+                            >
+                              <title>{duplicateText}</title>
+                            </CopyIcon>
+                          ) : null}
                         </span>
                       </TableCell>
                       <TableCell>{label.loginType(user.LoginType)}</TableCell>
@@ -136,24 +181,33 @@ export function UsersTab({ initialQuery = '' }: { initialQuery?: string }) {
             </Table>
           ) : (
             <p className="border-y py-6 text-center text-row text-muted-foreground">
-              {t('nasabah.users.empty')}
+              {onlyDuplicates && !debounced ? t('nasabah.duplicate.empty') : t('nasabah.users.empty')}
             </p>
           )}
           {onlyIncomplete ? (
             <p className="text-xs text-muted-foreground">{t('nasabah.incomplete.pageNote')}</p>
           ) : null}
-          {users.data.limited ? (
+          {onlyDuplicates && duplicates.data ? (
+            <p className="text-xs text-muted-foreground">
+              {t('nasabah.duplicate.checked', {
+                count: duplicates.data.scanned,
+                time: format(parseISO(duplicates.data.checkedAt), 'HH:mm'),
+              })}
+              {duplicates.data.complete ? null : ` ${t('nasabah.duplicate.partial')}`}
+            </p>
+          ) : null}
+          {listed.limited ? (
             <p className="text-xs text-muted-foreground">{t('nasabah.users.searchLimited')}</p>
           ) : null}
           <Pager
-            page={users.data.page}
-            totalPages={users.data.totalPages}
-            summary={t('nasabah.users.count', { count: users.data.total })}
+            page={listed.page}
+            totalPages={listed.totalPages}
+            summary={t('nasabah.users.count', { count: listed.total })}
             onPage={setPage}
           />
         </div>
-      ) : users.isError ? (
-        <ErrorState error={users.error} onRetry={() => void users.refetch()} />
+      ) : source.isError ? (
+        <ErrorState error={source.error} onRetry={() => void source.refetch()} />
       ) : (
         <ListSkeleton rows={6} />
       )}
