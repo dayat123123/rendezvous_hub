@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { messageFixture } from '@/test/fixtures'
@@ -85,5 +86,42 @@ describe('MessageBubble', () => {
     )
     expect(screen.getByText('PDF · 178 KB')).toBeInTheDocument()
     expect(conversationApi.signedUrl).toHaveBeenCalledWith('rooms/r1/u1/a.pdf', 'cs-documents')
+  })
+
+  it('turns https links in the text into links, asks before opening an unknown site, and leaves http as text', async () => {
+    const open = vi.spyOn(window, 'open').mockReturnValue(null)
+    const user = userEvent.setup()
+    renderWithProviders(
+      <MessageBubble
+        message={messageFixture({
+          body: 'Kalo connect ke MME bisa pake koneksi ini https://greenvest.evergreensekuritas.co.id:29001. Panduan: https://help.olt.test/akun, lama http://old.olt.test',
+          sender_role: 'agent',
+        })}
+        staff
+        first
+        last
+        read={false}
+        trustedHost={(host) => host === 'help.olt.test'}
+      />,
+    )
+
+    expect(screen.getByText(/Kalo connect ke MME/)).toBeInTheDocument()
+    const mme = screen.getByRole('link', { name: 'https://greenvest.evergreensekuritas.co.id:29001' })
+    expect(mme).toHaveAttribute('href', 'https://greenvest.evergreensekuritas.co.id:29001')
+    expect(mme).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(screen.getByRole('link', { name: 'https://help.olt.test/akun' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /old\.olt\.test/ })).not.toBeInTheDocument()
+    expect(screen.getByText(/lama http:\/\/old\.olt\.test/)).toBeInTheDocument()
+
+    await user.click(mme)
+    expect(await screen.findByRole('alertdialog', { name: 'Buka tautan luar?' })).toBeInTheDocument()
+    expect(open).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: 'Buka tautan' }))
+    expect(open).toHaveBeenCalledWith(
+      'https://greenvest.evergreensekuritas.co.id:29001',
+      '_blank',
+      'noopener,noreferrer',
+    )
+    open.mockRestore()
   })
 })

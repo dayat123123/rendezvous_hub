@@ -6,7 +6,7 @@ import {
   LoaderCircleIcon,
   ReplyIcon,
 } from 'lucide-react'
-import { memo, useState } from 'react'
+import { memo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -65,14 +65,32 @@ function httpsHost(url: string) {
   }
 }
 
+const textLink = /https:\/\/[^\s<>"']+/g
+const linkTail = /[.,;:!?)\]}'"]+$/
+
+function MessageText({ text, trusted }: { text: string; trusted: (host: string) => boolean }) {
+  const parts: ReactNode[] = []
+  let last = 0
+  for (const match of text.matchAll(textLink)) {
+    const url = match[0].replace(linkTail, '')
+    if (match.index > last) parts.push(text.slice(last, match.index))
+    parts.push(<SafeLink key={match.index} url={url} trusted={trusted} inline />)
+    last = match.index + url.length
+  }
+  if (last < text.length) parts.push(text.slice(last))
+  return <p className="break-words whitespace-pre-wrap">{parts}</p>
+}
+
 function SafeLink({
   url,
   title,
   trusted,
+  inline = false,
 }: {
   url: string
-  title: string
+  title?: string
   trusted: (host: string) => boolean
+  inline?: boolean
 }) {
   const { t } = useTranslation()
   const [confirming, setConfirming] = useState(false)
@@ -90,10 +108,20 @@ function SafeLink({
           event.preventDefault()
           setConfirming(true)
         }}
-        className="mt-1 inline-flex max-w-full items-center gap-1 underline underline-offset-2"
+        className={
+          inline
+            ? 'break-all underline underline-offset-2'
+            : 'mt-1 inline-flex max-w-full items-center gap-1 underline underline-offset-2'
+        }
       >
-        <ExternalLinkIcon className="size-3.5 shrink-0" />
-        <span className="truncate">{title || url}</span>
+        {inline ? (
+          url
+        ) : (
+          <>
+            <ExternalLinkIcon className="size-3.5 shrink-0" />
+            <span className="truncate">{title || url}</span>
+          </>
+        )}
       </a>
       <AlertDialog open={confirming} onOpenChange={setConfirming}>
         <AlertDialogContent>
@@ -217,7 +245,7 @@ export const MessageBubble = memo(function MessageBubble({
             {message.is_deleted ? (
               <p className="italic opacity-80">{t('conversation.deleted')}</p>
             ) : message.body ? (
-              <p className="break-words whitespace-pre-wrap">{message.body}</p>
+              <MessageText text={message.body} trusted={trustedHost} />
             ) : null}
             {url ? <SafeLink url={url} title={message.body} trusted={trustedHost} /> : null}
             {options.length > 0 ? (
