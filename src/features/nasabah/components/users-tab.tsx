@@ -142,6 +142,9 @@ export function UsersTab({ initialQuery = '' }: { initialQuery?: string }) {
           {onlyIncomplete ? (
             <p className="text-xs text-muted-foreground">{t('nasabah.incomplete.pageNote')}</p>
           ) : null}
+          {users.data.limited ? (
+            <p className="text-xs text-muted-foreground">{t('nasabah.users.searchLimited')}</p>
+          ) : null}
           <Pager
             page={users.data.page}
             totalPages={users.data.totalPages}

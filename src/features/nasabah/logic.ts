@@ -98,10 +98,44 @@ export const canDecide = (
     ? has(perms, 'online_user.approve_own')
     : has(perms, 'online_user.approve'))
 
-export function userSearch(query: string): Record<string, string> {
+const searchLoginId = /^[A-Za-z0-9._@-]{1,50}$/
+const searchEmail = /^[A-Za-z0-9._@+-]{1,100}$/
+
+export function userSearches(query: string): Record<string, string>[] {
   const value = query.trim()
-  if (!value) return {}
-  return value.includes('@') ? { email: value } : { loginId: value }
+  if (!value) return []
+  return [
+    ...(searchLoginId.test(value) ? [{ loginId: value }] : []),
+    ...(searchEmail.test(value) ? [{ email: value }] : []),
+  ]
+}
+
+export function mergeUserSearch(query: string, groups: OnlineUser[][]): OnlineUser[] {
+  const needle = query.trim().toLowerCase()
+  const seen = new Set<string>()
+  const matches: OnlineUser[] = []
+  for (const user of groups.flat()) {
+    const id = (user.LoginId ?? '').trim().toLowerCase()
+    const email = (user.Email ?? '').trim().toLowerCase()
+    if (!id || seen.has(id) || !(id.startsWith(needle) || email.startsWith(needle))) continue
+    seen.add(id)
+    matches.push(user)
+  }
+  return matches.sort((a, b) =>
+    a.LoginId.trim().localeCompare(b.LoginId.trim(), undefined, { sensitivity: 'base' }),
+  )
+}
+
+export function slicePage<T>(rows: T[], page: number, perPage: number, limited = false): Page<T> {
+  const totalPages = Math.ceil(rows.length / perPage)
+  return {
+    rows: rows.slice((page - 1) * perPage, page * perPage),
+    total: rows.length,
+    page,
+    perPage,
+    totalPages,
+    limited,
+  }
 }
 
 type RawPage<T> = {

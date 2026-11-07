@@ -1324,6 +1324,7 @@ export const en: Translation = {
     },
     users: {
       searchPlaceholder: 'Search LoginId or email…',
+      searchLimited: 'Too many results, some are not shown. Type a more complete LoginId or email.',
       submitNew: 'Submit Online ID',
       colLoginId: 'LoginId',
       colType: 'Type',

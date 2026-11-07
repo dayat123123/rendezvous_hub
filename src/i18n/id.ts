@@ -1319,6 +1319,8 @@ export const id = {
     },
     users: {
       searchPlaceholder: 'Cari LoginId atau email…',
+      searchLimited:
+        'Hasil terlalu banyak, sebagian tidak ditampilkan. Ketik LoginId atau email lebih lengkap.',
       submitNew: 'Ajukan Online ID',
       colLoginId: 'LoginId',
       colType: 'Tipe',

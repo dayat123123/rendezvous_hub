@@ -1,9 +1,11 @@
 import { gatewayRequest } from '@/lib/gateway'
 import { rpc } from '@/lib/supabase'
 
-import { toList, toPage, userSearch } from './logic'
+import { mergeUserSearch, slicePage, toList, toPage, userSearches } from './logic'
 import {
   PAGE_SIZE,
+  SEARCH_MAX_PAGES,
+  SEARCH_PAGE_SIZE,
   type Approval,
   type ApprovalFilter,
   type ApprovalLink,
@@ -19,17 +21,38 @@ import {
 
 type Message = { message?: string }
 
+const onlineUserPage = async (page: number, size: number, search: Record<string, string> = {}) =>
+  toPage<OnlineUser>(
+    await gatewayRequest('GET', '/online/get-list-online-user', { page, size, ...search }),
+    page,
+    size,
+  )
+
+async function collectOnlineUsers(search: Record<string, string>) {
+  const first = await onlineUserPage(1, SEARCH_PAGE_SIZE, search)
+  const pages = Math.min(first.totalPages, SEARCH_MAX_PAGES)
+  const rest = await Promise.all(
+    Array.from({ length: Math.max(pages - 1, 0) }, (_, index) =>
+      onlineUserPage(index + 2, SEARCH_PAGE_SIZE, search),
+    ),
+  )
+  return { rows: [first, ...rest].flatMap((part) => part.rows), limited: first.totalPages > SEARCH_MAX_PAGES }
+}
+
 export const nasabahApi = {
-  users: async (page: number, query: string): Promise<Page<OnlineUser>> =>
-    toPage(
-      await gatewayRequest('GET', '/online/get-list-online-user', {
-        page,
-        size: PAGE_SIZE,
-        ...userSearch(query),
-      }),
+  users: async (page: number, query: string): Promise<Page<OnlineUser>> => {
+    if (!query.trim()) return onlineUserPage(page, PAGE_SIZE)
+    const found = await Promise.all(userSearches(query).map(collectOnlineUsers))
+    return slicePage(
+      mergeUserSearch(
+        query,
+        found.map((part) => part.rows),
+      ),
       page,
       PAGE_SIZE,
-    ),
+      found.some((part) => part.limited),
+    )
+  },
   ticketLogin: (ticketId: string) => rpc<TicketLogin>('ticket_customer_login', { p_ticket_id: ticketId }),
   onlineUser: async (loginId: string) =>
     (

@@ -14,7 +14,7 @@ import {
   toggleFlag,
   toList,
   toPage,
-  userSearch,
+  userSearches,
   withLoginType,
 } from './logic'
 import type { CatalogAccount, OnlineUser, OnlineUserForm } from './types'
@@ -62,10 +62,11 @@ describe('nasabah logic', () => {
     expect(canDecide(['online_user.manage'], approval, 'CS-0046')).toBe(false)
   })
 
-  it('searches by email only when the query looks like one', () => {
-    expect(userSearch('  budi ')).toEqual({ loginId: 'budi' })
-    expect(userSearch('budi@olt')).toEqual({ email: 'budi@olt' })
-    expect(userSearch('  ')).toEqual({})
+  it('searches both LoginId and email when the characters allow it', () => {
+    expect(userSearches('  budi ')).toEqual([{ loginId: 'budi' }, { email: 'budi' }])
+    expect(userSearches('budi@olt')).toEqual([{ loginId: 'budi@olt' }, { email: 'budi@olt' }])
+    expect(userSearches('budi+1')).toEqual([{ email: 'budi+1' }])
+    expect(userSearches('  ')).toEqual([])
   })
 
   it('normalizes legacy paginated and empty responses', () => {
