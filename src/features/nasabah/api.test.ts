@@ -101,6 +101,21 @@ describe('nasabahApi', () => {
       expect(page.total).toBe(3)
     })
 
+    it('finds text in the middle of an email or LoginId', async () => {
+      serve({
+        'loginId:1': { rows: [user('Hidayat2', 'dayatburgerkill389@gmail.com')] },
+        'email:1': {
+          rows: [
+            user('Hidayat2', 'dayatburgerkill389@gmail.com'),
+            user('Kosong', ''),
+            user('Budi', 'budi@olt.test'),
+          ],
+        },
+      })
+      const page = await nasabahApi.users(1, 'burger')
+      expect(page.rows.map((row) => row.LoginId)).toEqual(['Hidayat2'])
+    })
+
     it('finds a full email address', async () => {
       serve({
         'loginId:1': { rows: [] },

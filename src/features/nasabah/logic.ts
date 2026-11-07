@@ -139,7 +139,7 @@ export function mergeUserSearch(query: string, groups: OnlineUser[][]): OnlineUs
   for (const user of groups.flat()) {
     const id = (user.LoginId ?? '').trim().toLowerCase()
     const email = (user.Email ?? '').trim().toLowerCase()
-    if (!id || seen.has(id) || !(id.startsWith(needle) || email.startsWith(needle))) continue
+    if (!id || seen.has(id) || !(id.includes(needle) || email.includes(needle))) continue
     seen.add(id)
     matches.push(user)
   }
