@@ -23,6 +23,7 @@ import type { AgentNote } from '@/features/customer/types'
 import { clock } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
+import { linkify } from '../linkify'
 import { isDocument, isDocumentFile } from '../media'
 import { systemText } from '../system-text'
 import type { ChatMessage, PendingMessage } from '../types'
@@ -65,20 +66,22 @@ function httpsHost(url: string) {
   }
 }
 
-const textLink = /https:\/\/[^\s<>"']+/g
-const linkTail = /[.,;:!?)\]}'"]+$/
-
 function MessageText({ text, trusted }: { text: string; trusted: (host: string) => boolean }) {
-  const parts: ReactNode[] = []
-  let last = 0
-  for (const match of text.matchAll(textLink)) {
-    const url = match[0].replace(linkTail, '')
-    if (match.index > last) parts.push(text.slice(last, match.index))
-    parts.push(<SafeLink key={match.index} url={url} trusted={trusted} inline />)
-    last = match.index + url.length
-  }
-  if (last < text.length) parts.push(text.slice(last))
-  return <p className="break-words whitespace-pre-wrap">{parts}</p>
+  return (
+    <p className="break-words whitespace-pre-wrap">
+      {linkify(text).map((part, index): ReactNode => {
+        if (part.kind === 'text') return part.text
+        if (part.kind === 'url') {
+          return <SafeLink key={index} url={part.href} title={part.text} trusted={trusted} inline />
+        }
+        return (
+          <a key={index} href={part.href} className="break-all underline underline-offset-2">
+            {part.text}
+          </a>
+        )
+      })}
+    </p>
+  )
 }
 
 function SafeLink({
@@ -115,7 +118,7 @@ function SafeLink({
         }
       >
         {inline ? (
-          url
+          title || url
         ) : (
           <>
             <ExternalLinkIcon className="size-3.5 shrink-0" />

@@ -124,4 +124,28 @@ describe('MessageBubble', () => {
     )
     open.mockRestore()
   })
+
+  it('makes emails mailto links, phone numbers tel links and www addresses guarded links', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(
+      <MessageBubble
+        message={messageFixture({
+          body: 'Email cs@olt.test, telepon 0812-3456-7890, situs www.olt.co.id',
+          sender_role: 'customer',
+        })}
+        staff={false}
+        first
+        last
+        read={false}
+        trustedHost={() => false}
+      />,
+    )
+
+    expect(screen.getByRole('link', { name: 'cs@olt.test' })).toHaveAttribute('href', 'mailto:cs@olt.test')
+    expect(screen.getByRole('link', { name: '0812-3456-7890' })).toHaveAttribute('href', 'tel:081234567890')
+    const site = screen.getByRole('link', { name: 'www.olt.co.id' })
+    expect(site).toHaveAttribute('href', 'https://www.olt.co.id')
+    await user.click(site)
+    expect(await screen.findByRole('alertdialog', { name: 'Buka tautan luar?' })).toBeInTheDocument()
+  })
 })
