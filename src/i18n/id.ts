@@ -759,6 +759,7 @@ export const id = {
       complaint: 'Pengaduan',
       fraud: 'Penipuan',
       fakeCs: 'CS palsu',
+      ticket: 'Tiket biasa',
     },
     deadline: {
       running: 'Sisa {{days}} hari kerja',
@@ -792,9 +793,10 @@ export const id = {
       subtitle: 'Register pengaduan dan penipuan dari chat CS',
       kindLabel: 'Jenis kasus',
       kinds: {
-        all: 'Semua',
+        all: 'Semua kasus',
         complaint: 'Pengaduan',
         fraud: 'Penipuan',
+        tickets: 'Semua tiket',
       },
       stateLabel: 'Keadaan',
       states: {
@@ -882,6 +884,8 @@ export const id = {
       ratingValue: '{{rating}}/5',
       extendedNote: 'Diperpanjang {{time}}. Alasan: {{reason}}',
       accessLogged: 'Akses ke kasus ini tercatat di Jejak Audit.',
+      ticketAccess:
+        'Tiket biasa, bukan pengaduan atau penipuan. Chat dan catatannya bisa dibaca selama 12 jam sejak dibuka, dan setiap pembukaan tercatat di Jejak Audit.',
       transcriptEmpty: 'Belum ada pesan.',
       timelineEmpty: 'Belum ada kejadian.',
       download: 'Unduh transkrip',
@@ -1006,6 +1010,7 @@ export const id = {
       compliance_deadline_extended: 'Perpanjang tenggat pengaduan',
       compliance_policy_confirm: 'Konfirmasi kebijakan',
       compliance_review: 'Tinjauan kepatuhan',
+      compliance_ticket_view: 'Buka tiket biasa',
       compliance_transcript_export: 'Unduh transkrip',
       customer_data_cash_transactions: 'Lihat transaksi dana (lama)',
       customer_data_orders: 'Lihat order (lama)',

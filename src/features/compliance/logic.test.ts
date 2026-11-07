@@ -25,6 +25,7 @@ import type { AuditEntry, CaseRow } from './types'
 const row = (overrides: Partial<CaseRow> = {}): CaseRow => ({
   id: 't1',
   ticket_number: 'CS-20261031-0001',
+  case: true,
   room_id: 'r1',
   version: 3,
   status: 'resolved',

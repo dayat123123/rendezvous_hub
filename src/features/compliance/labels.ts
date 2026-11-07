@@ -29,5 +29,5 @@ export function useCaseKindLabel() {
       row.flags.includes('fraud') ? t('compliance.kind.fraud') : null,
     ]
       .filter(Boolean)
-      .join(' + ')
+      .join(' + ') || t('compliance.kind.ticket')
 }

@@ -118,18 +118,14 @@ function AuditTable({ rows }: { rows: AuditEntry[] }) {
               </TableCell>
               <TableCell className="py-2 align-top">
                 {entry.ticket ? (
-                  entry.ticket.case ? (
-                    <Link
-                      to="/compliance/cases"
-                      search={{ case: entry.ticket.id }}
-                      className="font-mono text-xs underline underline-offset-2"
-                      aria-label={t('compliance.cases.openCase', { number: entry.ticket.ticket_number })}
-                    >
-                      {entry.ticket.ticket_number}
-                    </Link>
-                  ) : (
-                    <span className="font-mono text-xs">{entry.ticket.ticket_number}</span>
-                  )
+                  <Link
+                    to="/compliance/cases"
+                    search={{ case: entry.ticket.id }}
+                    className="font-mono text-xs underline underline-offset-2"
+                    aria-label={t('compliance.cases.openCase', { number: entry.ticket.ticket_number })}
+                  >
+                    {entry.ticket.ticket_number}
+                  </Link>
                 ) : (
                   '–'
                 )}

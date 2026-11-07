@@ -447,7 +447,7 @@ function ReviewSection({ detail }: { detail: CaseDetail }) {
 function CaseBody({ ticketId }: { ticketId: string }) {
   const { t } = useTranslation()
   const detail = useCaseDetail(ticketId)
-  const messages = useCaseMessages(ticketId)
+  const messages = useCaseMessages(ticketId, Boolean(detail.data))
   const [tab, setTab] = useState<Tab>('transcript')
   if (detail.isError) {
     return (
@@ -459,6 +459,7 @@ function CaseBody({ ticketId }: { ticketId: string }) {
   }
   if (!detail.data) return <ListSkeleton rows={8} className="pt-10" />
   const data = detail.data
+  const visibleTabs = data.case ? tabs : tabs.filter((item) => item !== 'review')
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex flex-col gap-1 border-b px-5 pt-4 pr-12 pb-3">
@@ -484,14 +485,16 @@ function CaseBody({ ticketId }: { ticketId: string }) {
         <div className="flex flex-wrap items-center gap-2 border-b px-5 py-3">
           <TranscriptButton detail={data} messages={messages.data} />
           {data.can_extend ? <ExtendDialog detail={data} /> : null}
-          <p className="w-full text-xs text-muted-foreground">{t('compliance.case.accessLogged')}</p>
+          <p className="w-full text-xs text-muted-foreground">
+            {data.case ? t('compliance.case.accessLogged') : t('compliance.case.ticketAccess')}
+          </p>
         </div>
         <div
           role="tablist"
           aria-label={t('compliance.case.tabsLabel')}
           className="sticky top-0 z-10 flex gap-4 border-b bg-background px-5"
         >
-          {tabs.map((item) => (
+          {visibleTabs.map((item) => (
             <button
               key={item}
               id={`case-tab-${item}`}
@@ -517,7 +520,7 @@ function CaseBody({ ticketId }: { ticketId: string }) {
         <div role="tabpanel" id={`case-panel-${tab}`} aria-labelledby={`case-tab-${tab}`}>
           {tab === 'transcript' ? <Transcript detail={data} messages={messages} /> : null}
           {tab === 'timeline' ? <Timeline detail={data} /> : null}
-          {tab === 'review' ? <ReviewSection detail={data} /> : null}
+          {tab === 'review' && data.case ? <ReviewSection detail={data} /> : null}
         </div>
       </div>
     </div>

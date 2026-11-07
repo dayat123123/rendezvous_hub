@@ -17,6 +17,7 @@ export type CaseAgent = { id: string; display_name: string; agent_code: string |
 export type CaseRow = {
   id: string
   ticket_number: string
+  case: boolean
   room_id: string
   version: number
   status: TicketStatus
@@ -78,7 +79,7 @@ export type ComplianceOverview = {
   secret_agents: SecretAgent[]
 }
 
-export const caseKinds = ['all', 'complaint', 'fraud'] as const
+export const caseKinds = ['all', 'complaint', 'fraud', 'tickets'] as const
 export type CaseKind = (typeof caseKinds)[number]
 
 export const caseStates = ['all', 'active', 'attention', 'done', 'unreviewed'] as const

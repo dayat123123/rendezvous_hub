@@ -63,11 +63,11 @@ export function useCaseDetail(ticketId: string | undefined) {
   })
 }
 
-export function useCaseMessages(ticketId: string | undefined) {
+export function useCaseMessages(ticketId: string | undefined, enabled = true) {
   return useQuery({
     queryKey: complianceKeys.messages(ticketId ?? ''),
     queryFn: () => complianceApi.messages(ticketId ?? ''),
-    enabled: Boolean(ticketId),
+    enabled: Boolean(ticketId) && enabled,
     staleTime: 60_000,
   })
 }

@@ -77,6 +77,11 @@ export function CaseKindText({
     row.flags.includes('fraud') ? t('compliance.kind.fraud') : null,
     row.fake_cs ? t('compliance.kind.fakeCs') : null,
   ].filter(Boolean)
+  if (parts.length === 0) {
+    return (
+      <span className={cn('text-xs text-muted-foreground', className)}>{t('compliance.kind.ticket')}</span>
+    )
+  }
   return (
     <span
       className={cn(

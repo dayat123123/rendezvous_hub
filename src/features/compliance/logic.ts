@@ -77,6 +77,7 @@ export const auditActions = [
   'compliance.deadline_extended',
   'compliance.policy_confirm',
   'compliance.review',
+  'compliance.ticket_view',
   'compliance.transcript_export',
   'content_rule.new_account_days',
   'content_rule.update',

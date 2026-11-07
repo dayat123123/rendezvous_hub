@@ -763,6 +763,7 @@ export const en: Translation = {
       complaint: 'Complaint',
       fraud: 'Fraud',
       fakeCs: 'Fake agent',
+      ticket: 'Regular ticket',
     },
     deadline: {
       running: '{{days}} business days left',
@@ -796,9 +797,10 @@ export const en: Translation = {
       subtitle: 'Complaint and fraud register from CS chat',
       kindLabel: 'Case type',
       kinds: {
-        all: 'All',
+        all: 'All cases',
         complaint: 'Complaints',
         fraud: 'Fraud',
+        tickets: 'All tickets',
       },
       stateLabel: 'State',
       states: {
@@ -886,6 +888,8 @@ export const en: Translation = {
       ratingValue: '{{rating}}/5',
       extendedNote: 'Extended {{time}}. Reason: {{reason}}',
       accessLogged: 'Opening this case is recorded in the Audit trail.',
+      ticketAccess:
+        'Regular ticket, not a complaint or fraud case. Its chat and notes stay readable for 12 hours after opening, and every opening is recorded in the Audit trail.',
       transcriptEmpty: 'No messages yet.',
       timelineEmpty: 'No events yet.',
       download: 'Download transcript',
@@ -1010,6 +1014,7 @@ export const en: Translation = {
       compliance_deadline_extended: 'Complaint deadline extended',
       compliance_policy_confirm: 'Policy confirmed',
       compliance_review: 'Compliance review',
+      compliance_ticket_view: 'Regular ticket opened',
       compliance_transcript_export: 'Transcript downloaded',
       customer_data_cash_transactions: 'Cash transactions viewed (legacy)',
       customer_data_orders: 'Orders viewed (legacy)',
