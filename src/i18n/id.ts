@@ -601,6 +601,15 @@ export const id = {
     moveDown: 'Turunkan {{name}}',
     dragToReorder: 'Seret baris untuk mengurutkan',
     orderSaved: 'Urutan topik disimpan',
+    topicDelete: 'Hapus',
+    topicDeleteNamed: 'Hapus topik {{name}}',
+    topicDeleteTitle: 'Hapus topik {{name}}?',
+    topicDeleteBody:
+      'Topik dihapus permanen dan hilang dari aplikasi. Artikel FAQ yang terkait dilepas dari topik ini. Tindakan ini tercatat di Jejak Audit.',
+    topicDeleted: 'Topik {{name}} dihapus',
+    topicDeleteInUse:
+      'Sudah dipakai {{count}} tiket, jadi tidak bisa dihapus. Nonaktifkan saja agar tidak tampil di aplikasi.',
+    topicDeleteFlagged: 'Topik bertanda pengaduan/penipuan hanya bisa dihapus Super Admin',
     colOrder: 'Urutan',
     colCode: 'Kode',
     colName: 'Nama',

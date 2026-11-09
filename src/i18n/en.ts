@@ -605,6 +605,15 @@ export const en: Translation = {
     moveDown: 'Move {{name}} down',
     dragToReorder: 'Drag a row to reorder',
     orderSaved: 'Topic order saved',
+    topicDelete: 'Delete',
+    topicDeleteNamed: 'Delete topic {{name}}',
+    topicDeleteTitle: 'Delete topic {{name}}?',
+    topicDeleteBody:
+      'The topic is deleted permanently and disappears from the app. Linked FAQ articles are detached from it. This is recorded in the Audit Trail.',
+    topicDeleted: 'Topic {{name}} deleted',
+    topicDeleteInUse:
+      'Used by {{count}} tickets, so it cannot be deleted. Deactivate it instead to hide it from the app.',
+    topicDeleteFlagged: 'Only Super Admins can delete complaint or fraud topics',
     colOrder: 'Order',
     colCode: 'Code',
     colName: 'Name',

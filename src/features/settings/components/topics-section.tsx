@@ -6,6 +6,7 @@ import {
   GripVerticalIcon,
   LoaderCircleIcon,
   PlusIcon,
+  Trash2Icon,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -24,7 +25,19 @@ import {
   SelectValue,
   Switch,
 } from '@/components/ui/controls'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -37,6 +50,7 @@ import { cn } from '@/lib/utils'
 
 import {
   useAdminOptions,
+  useDeleteTopic,
   useReorderTopics,
   useSaveTopic,
   useSaveTopicPicker,
@@ -510,6 +524,16 @@ export function TopicsSection() {
   const [editing, setEditing] = useState<{ topic: TopicConfig | null; key: number } | null>(null)
   const [extras, setExtras] = useState<{ topic: TopicConfig; key: number } | null>(null)
   const reorder = useReorderTopics()
+  const remove = useDeleteTopic()
+  const agent = useAgent()
+  const superAdmin = isSuperAdmin(agent)
+  const [deleting, setDeleting] = useState<TopicConfig | null>(null)
+  const deleteBlocker = (topic: TopicConfig) => {
+    if ((topic.ticket_count ?? 0) > 0)
+      return t('settings.topicDeleteInUse', { count: topic.ticket_count ?? 0 })
+    if (topic.flags.length > 0 && !superAdmin) return t('settings.topicDeleteFlagged')
+    return null
+  }
   const [dragging, setDragging] = useState<string | null>(null)
   const [over, setOver] = useState<string | null>(null)
   const move = (items: TopicConfig[], from: number, to: number) => {
@@ -634,8 +658,10 @@ export function TopicsSection() {
                         </span>
                       </span>
                     </TableCell>
-                    <TableCell className="max-w-64 text-xs text-muted-foreground">
-                      {description ?? '–'}
+                    <TableCell className="max-w-64 min-w-48 text-xs whitespace-normal text-muted-foreground">
+                      <span className="line-clamp-2" title={description ?? undefined}>
+                        {description ?? '–'}
+                      </span>
                     </TableCell>
                     <TableCell className={cn('text-xs', topic.style === 'danger' && 'text-danger')}>
                       {t(`settings.topicStyles.${topic.style}`)}
@@ -673,6 +699,19 @@ export function TopicsSection() {
                       >
                         {t('help.extras.open')}
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-destructive hover:text-destructive"
+                        aria-label={t('settings.topicDeleteNamed', { name: topic.name_id })}
+                        title={
+                          deleteBlocker(topic) ?? t('settings.topicDeleteNamed', { name: topic.name_id })
+                        }
+                        disabled={deleteBlocker(topic) !== null || remove.isPending}
+                        onClick={() => setDeleting(topic)}
+                      >
+                        <Trash2Icon />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 )
@@ -681,6 +720,30 @@ export function TopicsSection() {
           </Table>
         )}
       </QueryContent>
+      <AlertDialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogTitle>
+            {t('settings.topicDeleteTitle', { name: deleting?.name_id ?? '' })}
+          </AlertDialogTitle>
+          <AlertDialogDescription>{t('settings.topicDeleteBody')}</AlertDialogDescription>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel>{t('app.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive-solid text-destructive-foreground hover:bg-destructive-solid/90"
+              onClick={() => {
+                const topic = deleting
+                if (!topic) return
+                remove.mutate(topic.code, {
+                  onSuccess: () => toast.success(t('settings.topicDeleted', { name: topic.name_id })),
+                  onError: (error) => toast.error(errorText(error)),
+                })
+              }}
+            >
+              {t('settings.topicDelete')}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
       {editing ? (
         <TopicDialog key={editing.key} topic={editing.topic} onClose={() => setEditing(null)} />
       ) : null}

@@ -155,6 +155,17 @@ export function useSaveTopicExtras() {
   })
 }
 
+export function useDeleteTopic() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (code: string) => settingsApi.deleteTopic(code),
+    onSuccess: (topics) => {
+      client.setQueryData(settingsKeys.topics, topics)
+      void client.invalidateQueries({ queryKey: ['topics'] })
+    },
+  })
+}
+
 export function useReorderTopics() {
   const client = useQueryClient()
   return useMutation({

@@ -83,6 +83,7 @@ export type TopicConfig = {
   intake?: IntakeField[]
   customer_replies?: CustomerReply[]
   sop?: string | null
+  ticket_count?: number
 }
 
 export const intakeTypes = ['text', 'number', 'date', 'choice'] as const

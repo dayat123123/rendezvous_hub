@@ -22,6 +22,7 @@ vi.mock('../api', async (importOriginal) => {
       topicPicker: vi.fn(),
       saveTopicPicker: vi.fn(),
       reorderTopics: vi.fn(),
+      deleteTopic: vi.fn(),
     },
   }
 })
@@ -160,5 +161,39 @@ describe('TopicsSection', () => {
     await waitFor(() => expect(settingsApi.reorderTopics).toHaveBeenCalledWith(['fraud', 'account']))
     const rows = screen.getAllByRole('row').slice(1)
     expect(rows[0]).toHaveTextContent('Laporkan Penipuan')
+  })
+
+  it('deletes an unused topic after confirmation and blocks topics already used by tickets', async () => {
+    const unused: TopicConfig = {
+      ...fraud,
+      code: 'testing',
+      name_id: 'Test',
+      name_en: 'Test',
+      flags: [],
+      style: 'normal',
+      ticket_count: 0,
+      sort_order: 100,
+      description_id:
+        'Topik uji dengan deskripsi yang sangat panjang sekali sampai melewati lebar kolom tabel',
+    }
+    const used: TopicConfig = { ...fraud, ticket_count: 2 }
+    vi.mocked(settingsApi.topics).mockResolvedValue([used, unused])
+    vi.mocked(settingsApi.deleteTopic).mockReset().mockResolvedValue([used])
+    const user = userEvent.setup()
+    renderWithProviders(<TopicsSection />, content)
+
+    const blocked = await screen.findByRole('button', { name: 'Hapus topik Laporkan Penipuan' })
+    expect(blocked).toBeDisabled()
+    expect(blocked).toHaveAttribute('title', expect.stringContaining('Sudah dipakai 2 tiket'))
+    expect(screen.getByTitle(/Topik uji dengan deskripsi/)).toHaveClass('line-clamp-2')
+
+    await user.click(screen.getByRole('button', { name: 'Hapus topik Test' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Hapus topik Test?' })
+    expect(settingsApi.deleteTopic).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Hapus' }))
+    await waitFor(() => expect(settingsApi.deleteTopic).toHaveBeenCalledWith('testing'))
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Hapus topik Test' })).not.toBeInTheDocument(),
+    )
   })
 })
