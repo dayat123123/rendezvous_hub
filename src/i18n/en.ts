@@ -1655,7 +1655,12 @@ export const en: Translation = {
     answerHint: 'Answer 1–8,000 characters',
     answerHtml: 'The answer cannot contain HTML tags',
     answerLink: 'Links in the answer must be https://',
-    answerFormat: 'Format: **bold**, *italic*, lists with "- " or "1. ", links [text](https://...).',
+    answerImage: 'Images must be uploaded with the Insert image button',
+    answerFormat:
+      'Format: **bold**, *italic*, lists with "- " or "1. ", links [text](https://...). Insert images with the button below (JPEG, PNG, WebP, up to 2 MB).',
+    insertImageId: 'Insert image (ID)',
+    insertImageEn: 'Insert image (EN)',
+    imageInserted: 'Image uploaded and inserted',
     keywords: 'Keywords',
     keywordsHelp: 'Separate with commas. Helps search, e.g. "forgot pin, reset pin".',
     keywordsHint: 'At most 20 keywords, 40 characters each',

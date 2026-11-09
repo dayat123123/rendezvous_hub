@@ -1,4 +1,7 @@
-import { rpc } from '@/lib/supabase'
+import { fitImage } from '@/features/conversation/clipboard'
+import { toApiError } from '@/lib/errors'
+import { appEnv, rpc, supabase } from '@/lib/supabase'
+import { uuid } from '@/lib/utils'
 
 import type {
   FaqArticle,
@@ -11,6 +14,14 @@ import type {
   FaqStatus,
   FaqVersion,
 } from './types'
+
+export const FAQ_BUCKET = 'faq-images'
+const FAQ_IMAGE_MAX_BYTES = 2 * 1024 * 1024
+const imageExtension: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
 
 export const faqApi = {
   overview: () => rpc<FaqOverview>('admin_faq'),
@@ -44,4 +55,11 @@ export const faqApi = {
     rpc<FaqArticle>('admin_faq_restore', { p_id: id, p_version: version }),
   comments: (id: string) => rpc<FaqComment[]>('admin_faq_feedback', { p_id: id }),
   misses: (days: number) => rpc<FaqMiss[]>('admin_faq_misses', { p_days: days }),
+  uploadImage: async (image: File) => {
+    const file = await fitImage(image, FAQ_IMAGE_MAX_BYTES)
+    const path = `${uuid()}.${imageExtension[file.type] ?? 'jpg'}`
+    const { error } = await supabase().storage.from(FAQ_BUCKET).upload(path, file, { contentType: file.type })
+    if (error) throw toApiError(error)
+    return `${appEnv().publicApiUrl ?? appEnv().supabaseUrl}/storage/v1/object/public/${FAQ_BUCKET}/${path}`
+  },
 }

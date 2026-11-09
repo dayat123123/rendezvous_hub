@@ -1653,7 +1653,12 @@ export const id = {
     answerHint: 'Jawaban 1–8.000 karakter',
     answerHtml: 'Jawaban tidak boleh memuat tag HTML',
     answerLink: 'Tautan di jawaban harus https://',
-    answerFormat: 'Format: **tebal**, *miring*, daftar dengan "- " atau "1. ", tautan [teks](https://...).',
+    answerImage: 'Gambar harus diunggah dengan tombol Sisipkan gambar',
+    answerFormat:
+      'Format: **tebal**, *miring*, daftar dengan "- " atau "1. ", tautan [teks](https://...). Gambar disisipkan dengan tombol di bawah (JPEG, PNG, WebP, maks. 2 MB).',
+    insertImageId: 'Sisipkan gambar (ID)',
+    insertImageEn: 'Sisipkan gambar (EN)',
+    imageInserted: 'Gambar diunggah dan disisipkan',
     keywords: 'Kata kunci',
     keywordsHelp: 'Pisahkan dengan koma. Membantu pencarian, mis. "lupa pin, reset pin".',
     keywordsHint: 'Maksimal 20 kata kunci, masing-masing 40 karakter',

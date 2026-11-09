@@ -22,6 +22,7 @@ vi.mock('../api', () => ({
     restore: vi.fn(),
     comments: vi.fn(),
     misses: vi.fn(),
+    uploadImage: vi.fn(),
   },
 }))
 
@@ -195,6 +196,39 @@ describe('FaqSection', () => {
         expect.objectContaining({ id: 'art-pin', version: 2, topic_code: 'account' }),
       ),
     )
+  })
+
+  it('uploads an image into the answer and rejects images from other sites', async () => {
+    vi.mocked(faqApi.uploadImage).mockResolvedValue(
+      'https://api.olt.test/storage/v1/object/public/faq-images/0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e6f.png',
+    )
+    const user = setup()
+    await user.click(await screen.findByRole('button', { name: 'Tambah artikel' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Tambah artikel' })
+    const answer = within(dialog).getByLabelText('Jawaban (ID)')
+    await user.type(answer, 'Buka menu profil.')
+    await user.click(within(dialog).getByRole('button', { name: 'Sisipkan gambar (ID)' }))
+    await user.upload(
+      within(dialog).getByTestId('faq-image-input'),
+      new File(['x'], 'menu-profil.png', { type: 'image/png' }),
+    )
+    await waitFor(() =>
+      expect(answer).toHaveValue(
+        'Buka menu profil.\n\n![menu-profil](https://api.olt.test/storage/v1/object/public/faq-images/0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e6f.png)',
+      ),
+    )
+    const preview = within(dialog).getByRole('region', { name: 'Pratinjau di aplikasi' })
+    expect(within(preview).getByRole('img', { name: 'menu-profil' })).toBeInTheDocument()
+
+    await user.type(within(dialog).getByLabelText('Pertanyaan (ID)'), 'Di mana menu profil?')
+    await user.type(within(dialog).getByLabelText('Pertanyaan (EN)'), 'Where is the profile menu?')
+    await user.click(within(dialog).getByLabelText('Jawaban (EN)'))
+    await user.paste('![x](https://contoh.id/pixel.png)')
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan draf' }))
+    expect(
+      await within(dialog).findByText('Gambar harus diunggah dengan tombol Sisipkan gambar'),
+    ).toBeInTheDocument()
+    expect(faqApi.saveArticle).not.toHaveBeenCalled()
   })
 
   it('restores an older version only after confirmation', async () => {

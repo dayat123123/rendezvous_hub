@@ -29,6 +29,16 @@ export function FaqMarkdown({ text }: { text: string }) {
     <div className="flex flex-col gap-2 text-sm leading-relaxed">
       {parseBlocks(text).map((block, index) => {
         if (block.kind === 'paragraph') return <p key={index}>{renderInline(block.lines.join(' '))}</p>
+        if (block.kind === 'image')
+          return (
+            <img
+              key={index}
+              src={block.src}
+              alt={block.alt}
+              loading="lazy"
+              className="max-h-64 rounded-lg border"
+            />
+          )
         const items = block.items.map((item, itemIndex) => <li key={itemIndex}>{renderInline(item)}</li>)
         return block.ordered ? (
           <ol key={index} className="list-decimal pl-5">

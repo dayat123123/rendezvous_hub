@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LoaderCircleIcon } from 'lucide-react'
-import { useState } from 'react'
+import { ImagePlusIcon, LoaderCircleIcon } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -13,9 +13,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { FieldMessage, FormError } from '@/features/settings/components/settings-ui'
+import { errorText } from '@/lib/error-text'
 import { useTopicConfigs } from '@/features/settings/hooks'
 import { cn } from '@/lib/utils'
 
+import { faqApi } from '../api'
 import { useSaveFaqArticle } from '../hooks'
 import { parseKeywords } from '../logic'
 import { FaqMarkdown } from '../markdown'
@@ -23,13 +25,16 @@ import type { FaqArticle, FaqCategory } from '../types'
 
 const NO_TOPIC = '-'
 const htmlTag = /<[A-Za-z/!?]/
-const plainLink = /\]\(\s*(?!https:\/\/)/i
+const plainLink = /(^|[^!])\[[^\]]*\]\(\s*(?!https:\/\/)/i
+const foreignImage =
+  /!\[[^\]]*\]\(\s*(?!https?:\/\/[^\s/?#]+(?:\/[^\s?#]*)?\/storage\/v1\/object\/public\/faq-images\/)/
 
 type Message =
   | 'faq.questionHint'
   | 'faq.answerHint'
   | 'faq.answerHtml'
   | 'faq.answerLink'
+  | 'faq.answerImage'
   | 'faq.categoryRequired'
   | 'faq.keywordsHint'
 
@@ -40,6 +45,7 @@ const answer = z
   .max(8000, 'faq.answerHint')
   .refine((value) => !htmlTag.test(value), 'faq.answerHtml')
   .refine((value) => !plainLink.test(value), 'faq.answerLink')
+  .refine((value) => !foreignImage.test(value), 'faq.answerImage')
 
 const articleSchema = z.object({
   category_id: z.string().min(1, 'faq.categoryRequired'),
@@ -73,6 +79,9 @@ export function ArticleDialog({
   const topics = useTopicConfigs()
   const save = useSaveFaqArticle()
   const [preview, setPreview] = useState<'id' | 'en'>('id')
+  const [uploading, setUploading] = useState<'answer_id' | 'answer_en' | null>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
+  const target = useRef<'answer_id' | 'answer_en'>('answer_id')
   const form = useForm<ArticleForm>({
     resolver: zodResolver(articleSchema),
     defaultValues: {
@@ -116,6 +125,35 @@ export function ArticleDialog({
     }
   })
 
+  const insertImage = async (file: File) => {
+    const name = target.current
+    setUploading(name)
+    try {
+      const url = await faqApi.uploadImage(file)
+      const field = document.getElementById(`faq-${name}`) as HTMLTextAreaElement | null
+      const current = form.getValues(name)
+      const at = field?.selectionStart ?? current.length
+      const before = current.slice(0, at).replace(/\s*$/, '')
+      const after = current.slice(at).replace(/^\s*/, '')
+      const alt =
+        file.name
+          .replace(/\.[^.]+$/, '')
+          .replace(/[[\]()]/g, '')
+          .slice(0, 60) || 'gambar'
+      const image = `![${alt}](${url})`
+      form.setValue(name, [before, image, after].filter(Boolean).join('\n\n'), {
+        shouldDirty: true,
+        shouldValidate: form.formState.isSubmitted,
+      })
+      setPreview(name === 'answer_id' ? 'id' : 'en')
+      toast.success(t('faq.imageInserted'))
+    } catch (error) {
+      toast.error(errorText(error))
+    } finally {
+      setUploading(null)
+    }
+  }
+
   const textField = (name: 'question_id' | 'question_en', label: string) => (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={`faq-${name}`}>{label}</Label>
@@ -139,6 +177,21 @@ export function ArticleDialog({
         {...form.register(name)}
       />
       <FieldMessage error={message(errors[name]?.message)} hint={t('faq.answerFormat')} />
+      <div>
+        <Button
+          type="button"
+          size="xs"
+          variant="outline"
+          disabled={uploading !== null}
+          onClick={() => {
+            target.current = name
+            fileInput.current?.click()
+          }}
+        >
+          {uploading === name ? <LoaderCircleIcon className="animate-spin" /> : <ImagePlusIcon />}
+          {name === 'answer_id' ? t('faq.insertImageId') : t('faq.insertImageEn')}
+        </Button>
+      </div>
     </div>
   )
 
@@ -153,6 +206,18 @@ export function ArticleDialog({
           <DialogTitle>{article ? t('faq.editArticle') : t('faq.addArticle')}</DialogTitle>
         </DialogHeader>
         <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)} noValidate>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            data-testid="faq-image-input"
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              event.target.value = ''
+              if (file) void insertImage(file)
+            }}
+          />
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="faq-category">{t('faq.category')}</Label>
