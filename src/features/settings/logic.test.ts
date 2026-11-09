@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import {
   csadminConfigBlock,
   hoursValue,
+  inRange,
+  numberSetting,
   placeholders,
   readHours,
   validClientId,
@@ -92,5 +94,29 @@ describe('csAdmin integration', () => {
         '}',
       ].join('\n'),
     )
+  })
+})
+
+describe('number settings', () => {
+  const entry = (value: unknown) => ({
+    key: 'accounts.max_per_customer',
+    value,
+    description: null,
+    version: 1,
+    updated_at: null,
+    updated_by: null,
+  })
+
+  it('reads whole numbers and falls back for anything else', () => {
+    expect(numberSetting([entry(150)], 'accounts.max_per_customer', 200)).toBe(150)
+    expect(numberSetting([entry('150')], 'accounts.max_per_customer', 200)).toBe(200)
+    expect(numberSetting([], 'accounts.max_per_customer', 200)).toBe(200)
+  })
+
+  it('accepts only digits inside the range', () => {
+    expect(inRange(' 200 ', 1, 200)).toBe(true)
+    expect(inRange('201', 1, 200)).toBe(false)
+    expect(inRange('0', 1, 200)).toBe(false)
+    expect(inRange('1e2', 1, 200)).toBe(false)
   })
 })

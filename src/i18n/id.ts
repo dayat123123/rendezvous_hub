@@ -659,6 +659,13 @@ export const id = {
     autoCloseHint:
       'Tiket langsung ditutup setelah nasabah memberi rating. Bila tidak dinilai, tiket ditutup otomatis setelah batas hari ini. Tiket yang sudah ditutup tidak bisa dibalas; nasabah membuat tiket baru.',
     autoCloseDays: 'Batas tanpa rating (hari, 1–30)',
+    accountLimit: 'Batas rekening per nasabah',
+    accountLimitHint:
+      'Jumlah maksimal rekening (cust id) dari klaim accounts token login OLT yang ditautkan ke satu nasabah untuk notifikasi transaksi. Rekening di atas batas diabaikan dan dihitung di log auth-bridge.',
+    accountLimitLabel: 'Batas rekening (1–{{max}})',
+    accountLimitConfirmTitle: 'Simpan batas rekening?',
+    accountLimitConfirmBody:
+      'Mulai login berikutnya, paling banyak {{count}} rekening per nasabah ditautkan. Rekening di atas batas tidak menerima notifikasi transaksi.',
     superAdminAlerts: 'Alert Super Admin',
     alertUnclaimed: 'Tiket belum diambil lebih dari (menit)',
     alertP1: 'Tiket P1 belum diambil lebih dari (menit)',

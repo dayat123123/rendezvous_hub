@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { useBannerSettings, useClientConfig, useSetLinkSchemes } from '@/features/client-config/hooks'
 import { parseSchemes, schemeProblem } from '@/features/client-config/logic'
 import type { BannerSettings } from '@/features/client-config/types'
+import { AccountLimitCard } from '@/features/settings/components/account-limit-card'
 import { QueryContent, SectionFrame, SettingsCard } from '@/features/settings/components/settings-ui'
 import { FieldText } from '@/features/system/components/system-ui'
 import { useLockedEdit } from '@/hooks/use-locked-edit'
@@ -377,6 +378,7 @@ export function AppIntegrationSection() {
         <ConnectionCard />
         <SchemesCard />
         <QueryContent query={overview}>{(data) => <LoginCard data={data} />}</QueryContent>
+        <AccountLimitCard />
       </div>
     </SectionFrame>
   )

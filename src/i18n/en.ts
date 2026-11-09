@@ -660,6 +660,13 @@ export const en: Translation = {
     autoCloseHint:
       'A ticket closes as soon as the customer rates it. If it is not rated, it closes automatically after this many days. Closed tickets cannot be answered; the customer starts a new ticket.',
     autoCloseDays: 'Unrated limit (days, 1–30)',
+    accountLimit: 'Accounts per customer',
+    accountLimitHint:
+      'Maximum number of accounts (cust id) from the accounts claim of the OLT login token linked to one customer for transaction notifications. Accounts above the limit are ignored and counted in the auth-bridge log.',
+    accountLimitLabel: 'Account limit (1–{{max}})',
+    accountLimitConfirmTitle: 'Save the account limit?',
+    accountLimitConfirmBody:
+      'From the next login, at most {{count}} accounts per customer are linked. Accounts above the limit receive no transaction notifications.',
     superAdminAlerts: 'Super Admin alerts',
     alertUnclaimed: 'Ticket unclaimed for more than (minutes)',
     alertP1: 'P1 ticket unclaimed for more than (minutes)',

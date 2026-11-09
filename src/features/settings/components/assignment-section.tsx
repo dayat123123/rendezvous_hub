@@ -8,19 +8,9 @@ import { Label } from '@/components/ui/label'
 import { useLockedEdit } from '@/hooks/use-locked-edit'
 
 import { findSetting, useSaveSettings, useSettingEntries } from '../hooks'
+import { inRange, numberSetting } from '../logic'
 import type { SettingEntry } from '../types'
 import { ChangedBy, FieldMessage, QueryContent, SectionFrame, SettingsCard } from './settings-ui'
-
-function numberSetting(items: SettingEntry[], key: string, fallback: number) {
-  const value = findSetting(items, key)?.value
-  return typeof value === 'number' && Number.isFinite(value) ? Math.trunc(value) : fallback
-}
-
-function inRange(value: string, min: number, max: number) {
-  if (!/^\d{1,4}$/.test(value.trim())) return false
-  const number = Number(value.trim())
-  return number >= min && number <= max
-}
 
 function ModeCard({ items }: { items: SettingEntry[] }) {
   const { t } = useTranslation()

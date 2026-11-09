@@ -1,3 +1,5 @@
+import type { SettingEntry } from './types'
+
 export type DayHours = { open: boolean; opens: string; closes: string }
 
 export const weekdays = [1, 2, 3, 4, 5, 6, 7] as const
@@ -60,4 +62,15 @@ export function csadminConfigBlock(clientId: string, publicKey: string) {
     '        duration_token_minutes = 15',
     '}',
   ].join('\n')
+}
+
+export function numberSetting(items: SettingEntry[], key: string, fallback: number) {
+  const value = items.find((item) => item.key === key)?.value
+  return typeof value === 'number' && Number.isFinite(value) ? Math.trunc(value) : fallback
+}
+
+export function inRange(value: string, min: number, max: number) {
+  if (!/^\d{1,4}$/.test(value.trim())) return false
+  const number = Number(value.trim())
+  return number >= min && number <= max
 }
