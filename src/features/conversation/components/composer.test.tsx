@@ -10,6 +10,9 @@ import { agentFixture, attachmentPolicyFixture, messageFixture, ticketFixture } 
 import { renderWithProviders } from '@/test/render'
 import { dismissToasts, findToast, Toaster } from '@/test/toast'
 
+import type * as FaqApiModule from '@/features/faq/api'
+import { faqApi } from '@/features/faq/api'
+
 import type * as ApiModule from '../api'
 import { conversationApi } from '../api'
 import type { SendRequest } from '../hooks'
@@ -19,6 +22,11 @@ import { Composer } from './composer'
 vi.mock('@/features/presence/api', async (importOriginal) => {
   const actual = await importOriginal<typeof PresenceApiModule>()
   return { ...actual, presenceApi: { ...actual.presenceApi, setStatus: vi.fn() } }
+})
+
+vi.mock('@/features/faq/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof FaqApiModule>()
+  return { ...actual, faqApi: { ...actual.faqApi, agentSearch: vi.fn(), agentFlag: vi.fn() } }
 })
 
 vi.mock('../api', async (importOriginal) => {
@@ -136,11 +144,15 @@ describe('Composer', () => {
     expect(send).not.toHaveBeenCalled()
   })
 
-  it('offers only help links and quick options as special messages', async () => {
+  it('offers help links, quick options and FAQ articles from the more menu', async () => {
     const { send, user } = setup()
     await user.click(screen.getByRole('button', { name: 'Kirim lainnya' }))
     const items = await screen.findAllByRole('menuitem')
-    expect(items.map((item) => item.textContent)).toEqual(['Tautan bantuan', 'Pilihan cepat'])
+    expect(items.map((item) => item.textContent)).toEqual([
+      'Tautan bantuan',
+      'Pilihan cepat',
+      'Sisipkan artikel FAQ',
+    ])
     await user.click(screen.getByRole('menuitem', { name: 'Pilihan cepat' }))
     const dialog = await screen.findByRole('dialog', { name: 'Kirim pilihan cepat' })
     await user.type(within(dialog).getByLabelText('Pertanyaan'), 'Dana sudah masuk?')
@@ -154,6 +166,33 @@ describe('Composer', () => {
         payload: { options: ['Sudah', 'Belum'] },
       }),
     )
+  })
+
+  it('inserts a FAQ article as plain text in the ticket language after the current draft', async () => {
+    vi.mocked(faqApi.agentSearch).mockResolvedValue([
+      {
+        id: 'a1',
+        category: 'akun',
+        question: 'Lupa PIN?',
+        answer: 'Pilih **Lupa PIN** lalu ikuti [panduan](https://help.example.com/pin).',
+        topic: null,
+        updated_at: '2026-11-01T00:00:00.000Z',
+        open_flags: 0,
+      },
+    ])
+    const { send, user, box } = setup()
+    await user.type(box, 'Halo Budi,')
+    await user.click(screen.getByRole('button', { name: 'Kirim lainnya' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Sisipkan artikel FAQ' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Sisipkan artikel FAQ' })
+    await user.click(await within(dialog).findByRole('button', { name: 'Sisipkan' }))
+
+    await waitFor(() => expect(dialog).not.toBeInTheDocument())
+    expect(faqApi.agentSearch).toHaveBeenCalledWith('', 'id')
+    expect(box).toHaveValue(
+      'Halo Budi,\n\nLupa PIN?\n\nPilih Lupa PIN lalu ikuti panduan (https://help.example.com/pin).',
+    )
+    expect(send).not.toHaveBeenCalled()
   })
 
   it('locks the reply box while Offline but keeps the draft and offers to go Online', async () => {

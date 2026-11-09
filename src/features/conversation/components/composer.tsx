@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import {
+  BookOpenTextIcon,
   EllipsisIcon,
   LinkIcon,
   ListChecksIcon,
@@ -26,6 +27,8 @@ import {
 } from '@/components/ui/menu'
 import { useCommandHandler } from '@/features/command/bus'
 import { customerKeys } from '@/features/customer/hooks'
+import { appendSnippet, faqSnippet } from '@/features/faq/plain-text'
+import type { AgentFaqArticle } from '@/features/faq/types'
 import { GoOnlineButton } from '@/features/presence/components/go-online-button'
 import { useAgent } from '@/features/auth/hooks'
 import { useActionGuard } from '@/features/presence/hooks'
@@ -65,6 +68,7 @@ const MAX_INPUT_HEIGHT = 182
 const noGroups: QuickReplyGroups = { personal: [], shared: [] }
 
 const PersonalRepliesDialog = lazy(() => import('./personal-replies-dialog'))
+const FaqInsertDialog = lazy(() => import('@/features/faq/components/faq-insert-dialog'))
 
 function ToolButton({
   label,
@@ -133,6 +137,7 @@ export function Composer({
   const matches = useMemo(() => flattenGroups(groups), [groups])
   const pickerOpen = token !== null && mode === 'reply' && (matches.length > 0 || token.query === '')
   const [managing, setManaging] = useState(false)
+  const [faqOpen, setFaqOpen] = useState(false)
   const secret = mode === 'reply' && requestsSecret(value)
   const note = mode === 'note'
   const locked = offline && !note
@@ -317,6 +322,23 @@ export function Composer({
     requestAnimationFrame(() => {
       element.focus()
       element.setSelectionRange(next.caret, next.caret)
+    })
+  }
+
+  const insertFaq = (article: AgentFaqArticle) => {
+    const next = appendSnippet(value, faqSnippet(article.question, article.answer))
+    if (next.length > MAX_BODY) {
+      toast.error(t('help.faqInsert.tooLong', { max: MAX_BODY }))
+      return
+    }
+    setFaqOpen(false)
+    setValue(next)
+    setBlocked(null)
+    requestAnimationFrame(() => {
+      const element = textarea.current
+      if (!element) return
+      element.focus()
+      element.setSelectionRange(next.length, next.length)
     })
   }
 
@@ -610,6 +632,10 @@ export function Composer({
                       <ListChecksIcon />
                       {t('composer.sendOptions')}
                     </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setFaqOpen(true)}>
+                      <BookOpenTextIcon />
+                      {t('help.faqInsert.menu')}
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
@@ -656,6 +682,18 @@ export function Composer({
         onClose={() => setSpecial(null)}
         onSend={(message) => void sendSpecial(message)}
       />
+      {faqOpen ? (
+        <Suspense fallback={null}>
+          <FaqInsertDialog
+            language={ticket.language === 'en' ? 'en' : 'id'}
+            onInsert={insertFaq}
+            onClose={() => {
+              setFaqOpen(false)
+              requestAnimationFrame(() => textarea.current?.focus())
+            }}
+          />
+        </Suspense>
+      ) : null}
       {managing ? (
         <Suspense fallback={null}>
           <PersonalRepliesDialog

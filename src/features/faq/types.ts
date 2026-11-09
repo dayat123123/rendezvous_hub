@@ -42,6 +42,7 @@ export type FaqArticle = FaqContent & {
   helpful: number
   not_helpful: number
   tickets_after: number
+  open_flags?: number
   created_at: string
   updated_at: string
   updated_by_name: string | null
@@ -60,5 +61,24 @@ export type FaqVersion = {
 }
 
 export type FaqComment = { helpful: boolean; comment: string; updated_at: string }
+
+export type AgentFaqArticle = {
+  id: string
+  category: string | null
+  question: string
+  answer: string
+  topic: string | null
+  updated_at: string
+  open_flags: number
+}
+
+export type FaqFlag = {
+  id: number
+  note: string
+  agent_name: string | null
+  created_at: string
+  resolved_at: string | null
+  resolved_by_name: string | null
+}
 
 export type FaqMiss = { query: string; language: 'id' | 'en'; count: number; last_at: string }

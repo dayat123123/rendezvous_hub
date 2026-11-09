@@ -22,6 +22,8 @@ vi.mock('../api', () => ({
     restore: vi.fn(),
     comments: vi.fn(),
     misses: vi.fn(),
+    flags: vi.fn(),
+    resolveFlags: vi.fn(),
     uploadImage: vi.fn(),
   },
 }))
@@ -261,5 +263,49 @@ describe('FaqSection', () => {
     await user.click(within(confirm).getByRole('button', { name: 'Pulihkan' }))
     await waitFor(() => expect(faqApi.restore).toHaveBeenCalledWith('art-pin', 1))
     expect(await screen.findByText('Versi 1 dipulihkan')).toBeInTheDocument()
+  })
+
+  it('shows open notes from agents and resolves them after confirming', async () => {
+    vi.mocked(faqApi.overview).mockResolvedValue({
+      categories: [category],
+      articles: [article({ open_flags: 2 })],
+    })
+    const open = {
+      note: 'Menu Profil sudah pindah ke Akun',
+      agent_name: 'Rina',
+      created_at: '2026-11-09T02:00:00.000Z',
+      resolved_at: null,
+      resolved_by_name: null,
+    }
+    vi.mocked(faqApi.flags).mockResolvedValue([
+      { ...open, id: 2 },
+      { ...open, id: 1, note: 'Tangkapan layar lama' },
+    ])
+    vi.mocked(faqApi.resolveFlags).mockResolvedValue([
+      { ...open, id: 2, resolved_at: '2026-11-09T03:00:00.000Z', resolved_by_name: 'Laras' },
+      {
+        ...open,
+        id: 1,
+        note: 'Tangkapan layar lama',
+        resolved_at: '2026-11-09T03:00:00.000Z',
+        resolved_by_name: 'Laras',
+      },
+    ])
+    const user = setup()
+
+    await user.click(await screen.findByRole('button', { name: '2 catatan perlu diperbarui' }))
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Catatan dari CS: Bagaimana cara mengganti PIN?',
+    })
+    expect(await within(dialog).findByText('Menu Profil sudah pindah ke Akun')).toBeInTheDocument()
+    await user.click(within(dialog).getByRole('button', { name: 'Tandai selesai' }))
+    const confirm = await screen.findByRole('alertdialog', { name: 'Tandai semua catatan selesai?' })
+    await user.click(within(confirm).getByRole('button', { name: 'Tandai selesai' }))
+
+    await waitFor(() => expect(faqApi.resolveFlags).toHaveBeenCalledWith('art-pin'))
+    expect(await screen.findByText('Catatan ditandai selesai')).toBeInTheDocument()
+    expect(within(dialog).getAllByText(/^Selesai oleh Laras/)).toHaveLength(2)
+    expect(within(dialog).getByRole('button', { name: 'Tandai selesai' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: '2 catatan perlu diperbarui' })).not.toBeInTheDocument()
   })
 })

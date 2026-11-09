@@ -32,6 +32,7 @@ beforeEach(() => {
     entry('ticket.auto_close_days', 3),
     entry('alerts.unclaimed_minutes', 10),
     entry('alerts.p1_unclaimed_minutes', 2),
+    entry('ticket.reminder_hours', 24),
   ])
   vi.mocked(settingsApi.setSetting).mockImplementation((key, value) =>
     Promise.resolve({ key, value, version: 2, updated_at: '2026-11-02T03:00:00.000Z' }),
@@ -95,5 +96,44 @@ describe('AssignmentSection mode', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
     await waitFor(() => expect(settingsApi.setSetting).toHaveBeenCalledWith('assignment.mode', 'auto_assign'))
     await waitFor(() => expect(screen.getByRole('radio', { name: /Penugasan otomatis/ })).toBeDisabled())
+  })
+})
+
+describe('AssignmentSection waiting reminder', () => {
+  it('saves the reminder hours and turns the reminder off with 0 after confirmation', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AssignmentSection />, monitorFixture)
+
+    const hours = await screen.findByLabelText('Kirim pengingat setelah (jam, 1–72)')
+    expect(hours).toHaveValue('24')
+    const card = hours.closest('section') as HTMLElement
+    expect(
+      within(card).getByText('Teks pengingat diatur di Pengaturan → Pesan otomatis.'),
+    ).toBeInTheDocument()
+
+    await user.click(within(card).getByRole('button', { name: 'Ubah Pengingat tiket menunggu nasabah' }))
+    await user.clear(hours)
+    await user.type(hours, '80')
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    expect(within(card).getByText('Isi angka 1–72')).toBeVisible()
+
+    await user.clear(hours)
+    await user.type(hours, '12')
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan pengingat tiket?' })
+    expect(dialog).toHaveTextContent('belum membalas 12 jam')
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(settingsApi.setSetting).toHaveBeenCalledWith('ticket.reminder_hours', 12))
+
+    const edit = await screen.findByRole('button', { name: 'Ubah Pengingat tiket menunggu nasabah' })
+    const next = edit.closest('section') as HTMLElement
+    expect(within(next).getByLabelText('Kirim pengingat setelah (jam, 1–72)')).toHaveValue('12')
+    await user.click(edit)
+    await user.click(within(next).getByRole('switch', { name: 'Pengingat tiket menunggu nasabah' }))
+    await user.click(within(next).getByRole('button', { name: 'Simpan' }))
+    const off = await screen.findByRole('alertdialog', { name: 'Simpan pengingat tiket?' })
+    expect(off).toHaveTextContent('Pengingat otomatis dimatikan')
+    await user.click(within(off).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(settingsApi.setSetting).toHaveBeenLastCalledWith('ticket.reminder_hours', 0))
   })
 })

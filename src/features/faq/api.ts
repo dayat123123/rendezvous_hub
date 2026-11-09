@@ -4,11 +4,13 @@ import { appEnv, rpc, supabase } from '@/lib/supabase'
 import { uuid } from '@/lib/utils'
 
 import type {
+  AgentFaqArticle,
   FaqArticle,
   FaqArticleDraft,
   FaqCategory,
   FaqCategoryDraft,
   FaqComment,
+  FaqFlag,
   FaqMiss,
   FaqOverview,
   FaqStatus,
@@ -55,6 +57,12 @@ export const faqApi = {
     rpc<FaqArticle>('admin_faq_restore', { p_id: id, p_version: version }),
   comments: (id: string) => rpc<FaqComment[]>('admin_faq_feedback', { p_id: id }),
   misses: (days: number) => rpc<FaqMiss[]>('admin_faq_misses', { p_days: days }),
+  flags: (id: string) => rpc<FaqFlag[]>('admin_faq_flags', { p_id: id }),
+  resolveFlags: (id: string) => rpc<FaqFlag[]>('admin_faq_resolve_flags', { p_id: id }),
+  agentSearch: (query: string, language: 'id' | 'en') =>
+    rpc<AgentFaqArticle[]>('agent_faq_search', { p_query: query, p_language: language }),
+  agentFlag: (articleId: string, note: string) =>
+    rpc<{ id: number }>('agent_flag_faq', { p_article_id: articleId, p_note: note }),
   uploadImage: async (image: File) => {
     const file = await fitImage(image, FAQ_IMAGE_MAX_BYTES)
     const path = `${uuid()}.${imageExtension[file.type] ?? 'jpg'}`

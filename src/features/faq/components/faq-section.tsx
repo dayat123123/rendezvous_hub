@@ -33,6 +33,7 @@ import {
 } from '../types'
 import { ArticleDialog } from './article-dialog'
 import { CategoryDialog } from './category-dialog'
+import { FlagsDialog } from './flags-dialog'
 import { CommentsDialog, VersionsDialog } from './history-dialogs'
 
 const statusTone = { draft: 'warn', published: 'ok', archived: 'neutral' } as const
@@ -40,7 +41,7 @@ const statusTone = { draft: 'warn', published: 'ok', archived: 'neutral' } as co
 type Open =
   | { kind: 'article'; article: FaqArticle | null; key: number }
   | { kind: 'category'; category: FaqCategory | null; key: number }
-  | { kind: 'versions' | 'comments'; id: string }
+  | { kind: 'versions' | 'comments' | 'flags'; id: string }
 
 function StatusBadge({ status }: { status: FaqStatus }) {
   const { t } = useTranslation()
@@ -83,6 +84,9 @@ function ArticleActions({ article, onOpen }: { article: FaqArticle; onOpen: (ope
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onOpen({ kind: 'comments', id: article.id })}>
           {t('faq.comments')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onOpen({ kind: 'flags', id: article.id })}>
+          {t('help.faqFlags.menu', { count: article.open_flags ?? 0 })}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {article.status !== 'published' ? (
@@ -204,6 +208,16 @@ function ArticlesTable({ data, onOpen }: { data: FaqOverview; onOpen: (open: Ope
                     <span className="block truncate text-xs text-muted-foreground">
                       {article.question_en}
                     </span>
+                    {article.open_flags ? (
+                      <button
+                        type="button"
+                        onClick={() => onOpen({ kind: 'flags', id: article.id })}
+                        className="mt-1 inline-flex items-center gap-1.5 rounded-sm text-xs font-medium text-warning outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+                      >
+                        <Dot tone="warn" />
+                        {t('help.faqFlags.badge', { count: article.open_flags })}
+                      </button>
+                    ) : null}
                   </TableCell>
                   <TableCell>{categoryName(article.category_id)}</TableCell>
                   <TableCell>
@@ -333,7 +347,7 @@ export function FaqSection() {
   const [open, setOpen] = useState<Open | null>(null)
   const close = () => setOpen(null)
   const target =
-    open?.kind === 'versions' || open?.kind === 'comments'
+    open?.kind === 'versions' || open?.kind === 'comments' || open?.kind === 'flags'
       ? faq.data?.articles.find((article) => article.id === open.id)
       : undefined
   return (
@@ -372,6 +386,7 @@ export function FaqSection() {
       </QueryContent>
       {target && open?.kind === 'versions' ? <VersionsDialog article={target} onClose={close} /> : null}
       {target && open?.kind === 'comments' ? <CommentsDialog article={target} onClose={close} /> : null}
+      {target && open?.kind === 'flags' ? <FlagsDialog article={target} onClose={close} /> : null}
     </SectionFrame>
   )
 }

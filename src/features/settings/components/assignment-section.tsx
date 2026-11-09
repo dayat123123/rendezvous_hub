@@ -172,6 +172,69 @@ function CloseCard({ items }: { items: SettingEntry[] }) {
   )
 }
 
+const REMINDER_KEY = 'ticket.reminder_hours'
+
+function ReminderCard({ items }: { items: SettingEntry[] }) {
+  const { t } = useTranslation()
+  const save = useSaveSettings()
+  const lock = useLockedEdit()
+  const saved = numberSetting(items, REMINDER_KEY, 24)
+  const [enabled, setEnabled] = useState(saved > 0)
+  const [hours, setHours] = useState(String(saved > 0 ? saved : 24))
+  const [touched, setTouched] = useState(false)
+  const valid = !enabled || inRange(hours, 1, 72)
+  const next = enabled ? Number(hours.trim()) : 0
+  return (
+    <SettingsCard title={t('help.reminder.title')} subtitle={t('help.reminder.hint')}>
+      <LockedForm
+        lock={lock}
+        name={t('help.reminder.title')}
+        className="flex flex-col gap-3"
+        confirmTitle={t('help.reminder.confirmTitle')}
+        confirmBody={
+          enabled ? t('help.reminder.confirmOn', { hours: hours.trim() }) : t('help.reminder.confirmOff')
+        }
+        saving={save.isPending}
+        canSave={!valid || next !== saved}
+        onCheck={() => {
+          setTouched(true)
+          return valid
+        }}
+        onReset={() => {
+          setEnabled(saved > 0)
+          setHours(String(saved > 0 ? saved : 24))
+          setTouched(false)
+        }}
+        onSave={() => save.mutateAsync({ [REMINDER_KEY]: next })}
+        status={<ChangedBy entry={findSetting(items, REMINDER_KEY)} />}
+      >
+        <div className="flex flex-wrap items-end gap-4">
+          <label className="flex h-9 items-center gap-2 text-sm font-medium">
+            <Switch checked={enabled} onCheckedChange={setEnabled} aria-label={t('help.reminder.title')} />
+            {enabled ? t('app.active') : t('app.inactive')}
+          </label>
+          <div className="flex w-72 flex-col gap-1.5">
+            <Label htmlFor="reminder-hours">{t('help.reminder.hours')}</Label>
+            <Input
+              id="reminder-hours"
+              inputMode="numeric"
+              maxLength={2}
+              disabled={!enabled}
+              value={hours}
+              aria-invalid={touched && !valid ? true : undefined}
+              onChange={(event) => setHours(event.target.value)}
+            />
+          </div>
+        </div>
+        <FieldMessage
+          error={touched && !valid ? t('settings.numberRange', { min: 1, max: 72 }) : undefined}
+          hint={t('help.reminder.messageHint')}
+        />
+      </LockedForm>
+    </SettingsCard>
+  )
+}
+
 function AlertsCard({ items }: { items: SettingEntry[] }) {
   const { t } = useTranslation()
   const save = useSaveSettings()
@@ -255,6 +318,7 @@ export function AssignmentSection() {
               key={`close-${findSetting(items, 'ticket.auto_close_days')?.version ?? 0}`}
               items={items}
             />
+            <ReminderCard key={`reminder-${findSetting(items, REMINDER_KEY)?.version ?? 0}`} items={items} />
             <AlertsCard
               key={`alerts-${findSetting(items, 'alerts.unclaimed_minutes')?.version ?? 0}-${findSetting(items, 'alerts.p1_unclaimed_minutes')?.version ?? 0}`}
               items={items}
