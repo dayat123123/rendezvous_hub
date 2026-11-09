@@ -548,6 +548,8 @@ export const id = {
     attachmentsSummaryVideo: '{{kind}} maks. {{mb}} MB dan {{seconds}} detik ({{formats}})',
     attachmentsSummaryOff: '{{kind}} nonaktif',
     assignment: 'Penugasan, tiket & alert',
+    incidents: 'Status layanan / gangguan',
+    survey: 'Survei kepuasan',
     accountsDescription:
       'Tambah akun, atur peran dan batas tiket aktif, atau nonaktifkan akun. Akun yang dinonaktifkan langsung tidak bisa login, dan tiket aktifnya kembali ke antrean dengan tanda.',
     addAccount: 'Tambah akun',
@@ -1833,6 +1835,19 @@ export const id = {
     resolve: 'Selesaikan tiket',
     send: 'Kirim pesan',
     help: 'Daftar pintasan',
+  },
+  complianceNotices: {
+    title: 'Kasus baru',
+    titleUnseen_one: '{{count}} kasus baru belum dilihat',
+    titleUnseen_other: '{{count}} kasus baru belum dilihat',
+    hint: 'Tiket yang baru ditandai pengaduan atau penipuan.',
+    empty: 'Belum ada kasus baru.',
+    byAgent: 'Ditandai oleh {{name}}',
+    source: {
+      agent: 'Ditandai oleh CS',
+      customer: 'Dari nasabah',
+      system: 'Dari sistem',
+    },
   },
   notifications: {
     settings: 'Pengaturan notifikasi',

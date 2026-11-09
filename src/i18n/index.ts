@@ -6,6 +6,7 @@ import { readLocal } from '@/lib/storage'
 
 import type { account } from './account/id'
 import type { evidence } from './evidence/id'
+import type { help } from './help/id'
 import { id } from './id'
 import type { labels } from './labels/id'
 import type { moderation } from './moderation/id'
@@ -24,6 +25,7 @@ type Bundles = {
   account: typeof account
   labels: typeof labels
   replies: typeof replies
+  help: typeof help
 }
 export type Bundle = keyof Bundles
 
@@ -62,6 +64,10 @@ const bundleLoaders: { [B in Bundle]: Record<Language, () => Promise<Bundles[B]>
   replies: {
     id: () => import('./replies/id').then((module) => module.replies),
     en: () => import('./replies/en').then((module) => module.replies),
+  },
+  help: {
+    id: () => import('./help/id').then((module) => module.help),
+    en: () => import('./help/en').then((module) => module.help),
   },
 }
 

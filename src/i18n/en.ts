@@ -552,6 +552,8 @@ export const en: Translation = {
     attachmentsSummaryVideo: '{{kind}} up to {{mb}} MB and {{seconds}} seconds ({{formats}})',
     attachmentsSummaryOff: '{{kind}} off',
     assignment: 'Assignment, tickets & alerts',
+    incidents: 'Service status / incidents',
+    survey: 'Satisfaction survey',
     accountsDescription:
       'Add accounts, set roles and active ticket limits, or disable accounts. Disabled accounts cannot sign in, and their active tickets return to the queue with a mark.',
     addAccount: 'Add account',
@@ -1837,6 +1839,19 @@ export const en: Translation = {
     resolve: 'Resolve ticket',
     send: 'Send message',
     help: 'Shortcut list',
+  },
+  complianceNotices: {
+    title: 'New cases',
+    titleUnseen_one: '{{count}} new case not seen yet',
+    titleUnseen_other: '{{count}} new cases not seen yet',
+    hint: 'Tickets just flagged as a complaint or fraud.',
+    empty: 'No new cases yet.',
+    byAgent: 'Flagged by {{name}}',
+    source: {
+      agent: 'Flagged by an agent',
+      customer: 'From the customer',
+      system: 'From the system',
+    },
   },
   notifications: {
     settings: 'Notification settings',

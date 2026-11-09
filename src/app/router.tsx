@@ -70,7 +70,7 @@ const homeRoute = createRoute({
     if (canManageFeatures(context.agent)) throw redirect({ to: '/features' })
     if (canManageContent(context.agent)) throw redirect({ to: '/content' })
   },
-  loader: () => loadStrings('labels', 'replies'),
+  loader: () => loadStrings('labels', 'replies', 'help'),
   component: Home,
 })
 
@@ -98,7 +98,7 @@ const reportsRoute = createRoute({
   path: '/reports',
   beforeLoad: superAdminOnly,
   component: lazyRouteComponent(
-    withStrings(() => import('@/features/reports/components/reports-page'), 'labels'),
+    withStrings(() => import('@/features/reports/components/reports-page'), 'labels', 'help'),
     'ReportsPage',
   ),
 })
@@ -108,7 +108,7 @@ const settingsRoute = createRoute({
   path: '/settings',
   beforeLoad: superAdminOnly,
   component: lazyRouteComponent(
-    withStrings(() => import('@/features/settings/components/settings-page'), 'platform', 'labels'),
+    withStrings(() => import('@/features/settings/components/settings-page'), 'platform', 'labels', 'help'),
     'SettingsPage',
   ),
 })
@@ -131,7 +131,10 @@ const contentRoute = createRoute({
   beforeLoad: contentOnly,
   validateSearch: (search: Record<string, unknown>): { tab?: ContentTab } =>
     isContentTab(search.tab) ? { tab: search.tab } : {},
-  component: lazyRouteComponent(() => import('@/features/content/components/content-page'), 'ContentPage'),
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/content/components/content-page'), 'help'),
+    'ContentPage',
+  ),
 })
 
 const legacyAppRoute = createRoute({
