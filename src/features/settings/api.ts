@@ -16,6 +16,8 @@ import type {
   SettingEntry,
   StaffAccount,
   TopicConfig,
+  TopicPicker,
+  TopicPickerDraft,
 } from './types'
 
 async function invoke<T>(path: string, method: 'POST' | 'PATCH', body: Record<string, unknown>): Promise<T> {
@@ -80,6 +82,19 @@ export const settingsApi = {
       p_help_url: topic.help_url,
       p_sort_order: topic.sort_order,
       p_active: topic.active,
+      p_description_id: topic.description_id,
+      p_description_en: topic.description_en,
+      p_icon: topic.icon,
+      p_style: topic.style,
+      p_flags: topic.flags,
+    }),
+  topicPicker: () => rpc<TopicPicker>('admin_topic_picker'),
+  saveTopicPicker: (draft: TopicPickerDraft) =>
+    rpc<TopicPicker>('admin_set_topic_picker', {
+      p_title_id: draft.title_id,
+      p_title_en: draft.title_en,
+      p_hint_id: draft.hint_id,
+      p_hint_en: draft.hint_en,
     }),
   quickReplies: () => rpc<QuickReplyConfig[]>('admin_quick_replies'),
   saveQuickReply: (reply: QuickReplyConfig) =>

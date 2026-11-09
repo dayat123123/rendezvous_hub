@@ -1,13 +1,36 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import {
+  BellIcon,
+  ChevronRightIcon,
+  CircleHelpIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  GiftIcon,
+  GlobeIcon,
+  LoaderCircleIcon,
+  LockIcon,
+  MessageCircleIcon,
+  PhoneIcon,
+  PieChartIcon,
+  PlusIcon,
+  ReceiptTextIcon,
+  ShieldAlertIcon,
+  StarIcon,
+  UserIcon,
+  WalletIcon,
+  WrenchIcon,
+  type LucideIcon,
+} from 'lucide-react'
 import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { PriorityText } from '@/components/badges'
 import { Button } from '@/components/ui/button'
 import {
+  Checkbox,
   Select,
   SelectContent,
   SelectItem,
@@ -19,14 +42,49 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Textarea } from '@/components/ui/textarea'
+import { useAgent } from '@/features/auth/hooks'
+import { isSuperAdmin } from '@/features/presence/types'
 import { ticketPriorities } from '@/features/tickets/types'
+import { cn } from '@/lib/utils'
 
-import { useAdminOptions, useSaveTopic, useTopicConfigs } from '../hooks'
-import type { TopicConfig } from '../types'
+import { useAdminOptions, useSaveTopic, useSaveTopicPicker, useTopicConfigs, useTopicPicker } from '../hooks'
+import {
+  topicFlags,
+  topicIcons,
+  topicStyles,
+  type TopicConfig,
+  type TopicIcon,
+  type TopicPicker,
+  type TopicStyle,
+} from '../types'
 import { ActiveBadge, FieldMessage, FormError, QueryContent, SectionFrame } from './settings-ui'
 
+const iconGlyphs: Record<TopicIcon, LucideIcon> = {
+  account: UserIcon,
+  wallet: WalletIcon,
+  receipt: ReceiptTextIcon,
+  chart: PieChartIcon,
+  tools: WrenchIcon,
+  shield: ShieldAlertIcon,
+  help: CircleHelpIcon,
+  document: FileTextIcon,
+  phone: PhoneIcon,
+  card: CreditCardIcon,
+  chat: MessageCircleIcon,
+  star: StarIcon,
+  bell: BellIcon,
+  lock: LockIcon,
+  globe: GlobeIcon,
+  gift: GiftIcon,
+}
+
 type Message =
-  'settings.invalidTopicCode' | 'settings.invalidName' | 'settings.requiredField' | 'settings.helpUrlHint'
+  | 'settings.invalidTopicCode'
+  | 'settings.invalidName'
+  | 'settings.requiredField'
+  | 'settings.helpUrlHint'
+  | 'settings.topicDescriptionHint'
 
 const topicSchema = z.object({
   code: z
@@ -35,6 +93,11 @@ const topicSchema = z.object({
     .regex(/^[a-z][a-z0-9_]{1,31}$/, 'settings.invalidTopicCode'),
   name_id: z.string().trim().min(2, 'settings.invalidName').max(40, 'settings.invalidName'),
   name_en: z.string().trim().min(2, 'settings.invalidName').max(40, 'settings.invalidName'),
+  description_id: z.string().trim().max(120, 'settings.topicDescriptionHint'),
+  description_en: z.string().trim().max(120, 'settings.topicDescriptionHint'),
+  icon: z.enum(topicIcons),
+  style: z.enum(topicStyles),
+  flags: z.array(z.enum(topicFlags)),
   skill: z.string().min(1, 'settings.requiredField'),
   default_priority: z.enum(ticketPriorities),
   help_url: z
@@ -53,11 +116,47 @@ const topicSchema = z.object({
 
 type TopicForm = z.infer<typeof topicSchema>
 
+function TopicCard({
+  icon,
+  name,
+  description,
+  style,
+}: {
+  icon: TopicIcon | null
+  name: string
+  description: string
+  style: TopicStyle
+}) {
+  const Glyph = iconGlyphs[icon ?? 'help']
+  const danger = style === 'danger'
+  return (
+    <div className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5">
+      <span
+        className={cn(
+          'flex size-9 shrink-0 items-center justify-center rounded-full',
+          danger ? 'bg-danger/10 text-danger' : 'bg-muted text-foreground',
+        )}
+      >
+        <Glyph className="size-4" aria-hidden="true" />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className={cn('truncate text-sm font-medium', danger && 'text-danger')}>{name || '–'}</span>
+        {description ? (
+          <span className="line-clamp-2 text-xs text-muted-foreground">{description}</span>
+        ) : null}
+      </span>
+      <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+    </div>
+  )
+}
+
 function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: () => void }) {
   const { t } = useTranslation()
+  const agent = useAgent()
   const options = useAdminOptions()
   const save = useSaveTopic()
   const editing = topic !== null
+  const canFlag = isSuperAdmin(agent)
   const skills = options.data?.skills ?? []
   const form = useForm<TopicForm>({
     resolver: zodResolver(topicSchema),
@@ -65,6 +164,13 @@ function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: (
       code: topic?.code ?? '',
       name_id: topic?.name_id ?? '',
       name_en: topic?.name_en ?? '',
+      description_id: topic?.description_id ?? '',
+      description_en: topic?.description_en ?? '',
+      icon: topic?.icon ?? 'help',
+      style: topic?.style ?? 'normal',
+      flags: (topic?.flags ?? []).filter((flag): flag is (typeof topicFlags)[number] =>
+        (topicFlags as readonly string[]).includes(flag),
+      ),
       skill: topic?.skill ?? 'general',
       default_priority: ticketPriorities.find((priority) => priority === topic?.default_priority) ?? 'P3',
       help_url: topic?.help_url ?? '',
@@ -74,6 +180,10 @@ function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: (
   })
   const errors = form.formState.errors
   const message = (value?: string) => (value ? t(value as Message) : undefined)
+  const [nameId, descriptionId, icon, style] = useWatch({
+    control: form.control,
+    name: ['name_id', 'description_id', 'icon', 'style'],
+  })
 
   const submit = form.handleSubmit(async (values) => {
     try {
@@ -81,6 +191,11 @@ function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: (
         code: values.code.trim(),
         name_id: values.name_id.trim(),
         name_en: values.name_en.trim(),
+        description_id: values.description_id.trim() || null,
+        description_en: values.description_en.trim() || null,
+        icon: values.icon,
+        style: values.style,
+        flags: [...values.flags].sort(),
         skill: values.skill,
         default_priority: values.default_priority,
         help_url: values.help_url.trim() || null,
@@ -95,7 +210,11 @@ function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: (
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg" closeLabel={t('app.close')} aria-describedby={undefined}>
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"
+        closeLabel={t('app.close')}
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle>
             {editing ? t('settings.editTopicTitle', { name: topic.name_id }) : t('settings.addTopic')}
@@ -136,6 +255,118 @@ function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: (
               />
               <FieldMessage error={message(errors.name_en?.message)} />
             </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="topic-description-id">{t('settings.topicDescriptionId')}</Label>
+              <Textarea
+                id="topic-description-id"
+                rows={2}
+                maxLength={120}
+                aria-invalid={errors.description_id ? true : undefined}
+                {...form.register('description_id')}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="topic-description-en">{t('settings.topicDescriptionEn')}</Label>
+              <Textarea
+                id="topic-description-en"
+                rows={2}
+                maxLength={120}
+                aria-invalid={errors.description_en ? true : undefined}
+                {...form.register('description_en')}
+              />
+            </div>
+          </div>
+          <FieldMessage hint={t('settings.topicDescriptionHint')} />
+          <div className="flex flex-col gap-1.5">
+            <span id="topic-icon-label" className="text-sm font-medium">
+              {t('settings.topicIcon')}
+            </span>
+            <Controller
+              control={form.control}
+              name="icon"
+              render={({ field }) => (
+                <div role="radiogroup" aria-labelledby="topic-icon-label" className="flex flex-wrap gap-1.5">
+                  {topicIcons.map((key) => {
+                    const Glyph = iconGlyphs[key]
+                    const selected = field.value === key
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        aria-label={t(`settings.topicIcons.${key}`)}
+                        title={t(`settings.topicIcons.${key}`)}
+                        onClick={() => field.onChange(key)}
+                        className={cn(
+                          'flex size-9 items-center justify-center rounded-md border outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+                          selected ? 'border-foreground bg-muted' : 'text-muted-foreground hover:bg-muted',
+                        )}
+                      >
+                        <Glyph className="size-4" aria-hidden="true" />
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="topic-style">{t('settings.topicStyle')}</Label>
+              <Controller
+                control={form.control}
+                name="style"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="topic-style" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {topicStyles.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {t(`settings.topicStyles.${value}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <fieldset className="flex flex-col gap-1.5" disabled={!canFlag}>
+              <legend className="mb-1.5 text-sm font-medium">{t('settings.topicFlags')}</legend>
+              <Controller
+                control={form.control}
+                name="flags"
+                render={({ field }) => (
+                  <div className="flex h-9 items-center gap-4">
+                    {topicFlags.map((flag) => (
+                      <label key={flag} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={field.value.includes(flag)}
+                          disabled={!canFlag}
+                          onCheckedChange={(checked) =>
+                            field.onChange(
+                              checked === true
+                                ? [...field.value, flag]
+                                : field.value.filter((value) => value !== flag),
+                            )
+                          }
+                        />
+                        {t(`settings.topicFlagNames.${flag}`)}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              />
+              <FieldMessage hint={t('settings.topicFlagsHint')} />
+            </fieldset>
+          </div>
+          <div role="group" aria-label={t('settings.topicPreview')} className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium">{t('settings.topicPreview')}</span>
+            <TopicCard icon={icon} name={nameId} description={descriptionId} style={style} />
           </div>
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <div className="flex flex-col gap-1.5">
@@ -237,12 +468,71 @@ function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: (
   )
 }
 
-export function TopicsSection() {
+function PickerTextForm({ picker }: { picker: TopicPicker }) {
   const { t } = useTranslation()
+  const save = useSaveTopicPicker()
+  const [draft, setDraft] = useState({
+    title_id: picker.title?.id ?? '',
+    title_en: picker.title?.en ?? '',
+    hint_id: picker.hint?.id ?? '',
+    hint_en: picker.hint?.en ?? '',
+  })
+  const field = (key: keyof typeof draft, label: string, max: number) => (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={`topic-picker-${key}`}>{label}</Label>
+      <Input
+        id={`topic-picker-${key}`}
+        maxLength={max}
+        value={draft[key]}
+        onChange={(event) => setDraft((current) => ({ ...current, [key]: event.target.value }))}
+      />
+    </div>
+  )
+  return (
+    <form
+      className="flex flex-col gap-3 rounded-lg border p-4"
+      onSubmit={(event) => {
+        event.preventDefault()
+        save.mutate(
+          {
+            title_id: draft.title_id.trim(),
+            title_en: draft.title_en.trim(),
+            hint_id: draft.hint_id.trim(),
+            hint_en: draft.hint_en.trim(),
+          },
+          { onSuccess: () => toast.success(t('settings.pickerSaved')) },
+        )
+      }}
+    >
+      <div>
+        <h3 className="text-sm font-semibold">{t('settings.pickerTitle')}</h3>
+        <p className="text-xs text-muted-foreground">{t('settings.pickerDescription')}</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {field('title_id', t('settings.pickerTitleId'), 80)}
+        {field('title_en', t('settings.pickerTitleEn'), 80)}
+        {field('hint_id', t('settings.pickerHintId'), 160)}
+        {field('hint_en', t('settings.pickerHintEn'), 160)}
+      </div>
+      <FormError error={save.error} />
+      <div>
+        <Button type="submit" variant="outline" size="sm" disabled={save.isPending}>
+          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
+          {t('settings.savePicker')}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+export function TopicsSection() {
+  const { t, i18n } = useTranslation()
   const topics = useTopicConfigs()
   const options = useAdminOptions()
+  const picker = useTopicPicker()
   const [editing, setEditing] = useState<{ topic: TopicConfig | null; key: number } | null>(null)
   const skillName = (code: string) => options.data?.skills.find((skill) => skill.code === code)?.name ?? code
+  const english = i18n.language.startsWith('en')
   return (
     <SectionFrame
       title={t('settings.topics')}
@@ -254,6 +544,7 @@ export function TopicsSection() {
         </Button>
       }
     >
+      {picker.data ? <PickerTextForm picker={picker.data} /> : null}
       <QueryContent query={topics}>
         {(items) => (
           <Table>
@@ -262,6 +553,8 @@ export function TopicsSection() {
                 <TableHead className="text-right">{t('settings.colOrder')}</TableHead>
                 <TableHead>{t('settings.colCode')}</TableHead>
                 <TableHead>{t('settings.colName')}</TableHead>
+                <TableHead>{t('settings.colDescription')}</TableHead>
+                <TableHead>{t('settings.colStyle')}</TableHead>
                 <TableHead>{t('settings.colSkill')}</TableHead>
                 <TableHead>{t('settings.colDefaultPriority')}</TableHead>
                 <TableHead>{t('settings.colHelpLink')}</TableHead>
@@ -272,30 +565,52 @@ export function TopicsSection() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((topic) => (
-                <TableRow key={topic.code}>
-                  <TableCell className="tabular text-right">{topic.sort_order}</TableCell>
-                  <TableCell className="font-mono text-xs">{topic.code}</TableCell>
-                  <TableCell>
-                    {topic.name_id} <span className="text-muted-foreground">/ {topic.name_en}</span>
-                  </TableCell>
-                  <TableCell>{skillName(topic.skill)}</TableCell>
-                  <TableCell>
-                    <PriorityText priority={topic.default_priority} />
-                  </TableCell>
-                  <TableCell className="max-w-56 truncate" title={topic.help_url ?? undefined}>
-                    {topic.help_url ?? '–'}
-                  </TableCell>
-                  <TableCell>
-                    <ActiveBadge active={topic.active} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="xs" onClick={() => setEditing({ topic, key: Date.now() })}>
-                      {t('app.edit')}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {items.map((topic) => {
+                const Glyph = iconGlyphs[topic.icon ?? 'help']
+                const description = english ? topic.description_en : topic.description_id
+                return (
+                  <TableRow key={topic.code}>
+                    <TableCell className="tabular text-right">{topic.sort_order}</TableCell>
+                    <TableCell className="font-mono text-xs">{topic.code}</TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-2">
+                        <Glyph
+                          className={cn('size-4 shrink-0', topic.style === 'danger' && 'text-danger')}
+                          aria-hidden="true"
+                        />
+                        <span>
+                          {topic.name_id} <span className="text-muted-foreground">/ {topic.name_en}</span>
+                        </span>
+                      </span>
+                    </TableCell>
+                    <TableCell className="max-w-64 text-xs text-muted-foreground">
+                      {description ?? '–'}
+                    </TableCell>
+                    <TableCell className={cn('text-xs', topic.style === 'danger' && 'text-danger')}>
+                      {t(`settings.topicStyles.${topic.style}`)}
+                    </TableCell>
+                    <TableCell>{skillName(topic.skill)}</TableCell>
+                    <TableCell>
+                      <PriorityText priority={topic.default_priority} />
+                    </TableCell>
+                    <TableCell className="max-w-56 truncate" title={topic.help_url ?? undefined}>
+                      {topic.help_url ?? '–'}
+                    </TableCell>
+                    <TableCell>
+                      <ActiveBadge active={topic.active} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => setEditing({ topic, key: Date.now() })}
+                      >
+                        {t('app.edit')}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         )}

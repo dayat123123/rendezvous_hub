@@ -15,12 +15,14 @@ import type {
   SettingEntry,
   StaffAccount,
   TopicConfig,
+  TopicPickerDraft,
 } from './types'
 
 export const settingsKeys = {
   accounts: ['admin', 'accounts'] as const,
   options: ['admin', 'options'] as const,
   topics: ['admin', 'topics'] as const,
+  topicPicker: ['admin', 'topic-picker'] as const,
   quickReplies: ['admin', 'quick-replies'] as const,
   settings: ['admin', 'settings'] as const,
   holidays: (year: number) => ['admin', 'holidays', year] as const,
@@ -108,6 +110,18 @@ export function useSaveTopic() {
       client.setQueryData(settingsKeys.topics, topics)
       void client.invalidateQueries({ queryKey: ['topics'] })
     },
+  })
+}
+
+export function useTopicPicker() {
+  return useQuery({ queryKey: settingsKeys.topicPicker, queryFn: settingsApi.topicPicker })
+}
+
+export function useSaveTopicPicker() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (draft: TopicPickerDraft) => settingsApi.saveTopicPicker(draft),
+    onSuccess: (picker) => client.setQueryData(settingsKeys.topicPicker, picker),
   })
 }
 

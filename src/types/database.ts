@@ -19,7 +19,10 @@ export type Database = {
         Args: { p_body: string; p_customer_id?: string; p_ticket_id?: string }
         Returns: Json
       }
-      add_ticket_label: { Args: { p_label_id: string; p_ticket_id: string }; Returns: Json }
+      add_ticket_label: {
+        Args: { p_label_id: string; p_ticket_id: string }
+        Returns: Json
+      }
       admin_agents: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_analytics: {
         Args: { p_from?: string; p_to?: string }
@@ -79,21 +82,37 @@ export type Database = {
         }
         Returns: Json
       }
-      admin_save_ticket_label: { Args: { p_active: boolean; p_color: string; p_id: string; p_name: string }; Returns: Json }
+      admin_save_ticket_label: {
+        Args: {
+          p_active: boolean
+          p_color: string
+          p_id: string
+          p_name: string
+        }
+        Returns: Json
+      }
       admin_save_topic: {
         Args: {
           p_active: boolean
           p_code: string
           p_default_priority: string
+          p_description_en?: string
+          p_description_id?: string
+          p_flags?: string[]
           p_help_url: string
+          p_icon?: string
           p_name_en: string
           p_name_id: string
           p_skill: string
           p_sort_order: number
+          p_style?: string
         }
         Returns: Json
       }
-      admin_set_banner_link_schemes: { Args: { p_schemes: string[] }; Returns: Json }
+      admin_set_banner_link_schemes: {
+        Args: { p_schemes: string[] }
+        Returns: Json
+      }
       admin_set_community_permissions: {
         Args: { p_agent_id: string; p_permissions: string[] }
         Returns: Json
@@ -130,12 +149,22 @@ export type Database = {
         Args: { p_key: string; p_value: Json }
         Returns: Json
       }
+      admin_set_topic_picker: {
+        Args: {
+          p_hint_en: string
+          p_hint_id: string
+          p_title_en: string
+          p_title_id: string
+        }
+        Returns: Json
+      }
       admin_settings: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_ticket_labels: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_toggle_feature_flag: {
         Args: { p_enabled: boolean; p_key: string }
         Returns: Json
       }
+      admin_topic_picker: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_topics: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_update_agent: {
         Args: {
@@ -152,7 +181,10 @@ export type Database = {
       agent_me: { Args: Record<PropertyKey, never>; Returns: Json }
       agent_my_profile: { Args: Record<PropertyKey, never>; Returns: Json }
       agent_my_stats: { Args: { p_period: string }; Returns: Json }
-      agent_password_changed: { Args: Record<PropertyKey, never>; Returns: Json }
+      agent_password_changed: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       agent_send_message: {
         Args: {
           p_attachments?: Json
@@ -169,7 +201,10 @@ export type Database = {
         Args: { p_reason?: string; p_status: string }
         Returns: Json
       }
-      agent_signed_out_everywhere: { Args: Record<PropertyKey, never>; Returns: Json }
+      agent_signed_out_everywhere: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       agent_typing: {
         Args: { p_room_id: string; p_typing?: boolean }
         Returns: boolean
@@ -197,7 +232,10 @@ export type Database = {
         Args: { p_bot_token?: string; p_chat_ids: string[]; p_enabled: boolean }
         Returns: Json
       }
-      app_integration_overview: { Args: Record<PropertyKey, never>; Returns: Json }
+      app_integration_overview: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       backup_overview: { Args: Record<PropertyKey, never>; Returns: Json }
       backup_request: { Args: { p_kind: string }; Returns: Json }
       backup_set_schedule: {
@@ -791,7 +829,10 @@ export type Database = {
         Args: { p_reason: string; p_ticket_id: string; p_version?: number }
         Returns: Json
       }
-      remove_ticket_label: { Args: { p_label_id: string; p_ticket_id: string }; Returns: Json }
+      remove_ticket_label: {
+        Args: { p_label_id: string; p_ticket_id: string }
+        Returns: Json
+      }
       report_customer_trail: {
         Args: { p_customer_id: string; p_from: string; p_to: string }
         Returns: Json
@@ -802,7 +843,10 @@ export type Database = {
       }
       report_fake_cs: { Args: { p_description: string }; Returns: Json }
       report_summary: { Args: { p_from: string; p_to: string }; Returns: Json }
-      report_ticket_labels: { Args: { p_from: string; p_to: string }; Returns: Json }
+      report_ticket_labels: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       request_complaint: { Args: Record<PropertyKey, never>; Returns: Json }
       request_transfer: {
         Args: {
@@ -828,7 +872,15 @@ export type Database = {
         Returns: Json
       }
       room_members: { Args: { p_room_id: string }; Returns: Json }
-      save_my_quick_reply: { Args: { p_body: string; p_id: string; p_shortcut?: string; p_title: string }; Returns: Json }
+      save_my_quick_reply: {
+        Args: {
+          p_body: string
+          p_id: string
+          p_shortcut?: string
+          p_title: string
+        }
+        Returns: Json
+      }
       search_tickets: { Args: { p_query: string }; Returns: Json }
       send_message: {
         Args: {

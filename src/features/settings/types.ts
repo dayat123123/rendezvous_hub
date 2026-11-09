@@ -41,6 +41,31 @@ export type Choice = { code: string; name: string }
 
 export type AdminOptions = { teams: Choice[]; skills: Choice[] }
 
+export const topicIcons = [
+  'account',
+  'wallet',
+  'receipt',
+  'chart',
+  'tools',
+  'shield',
+  'help',
+  'document',
+  'phone',
+  'card',
+  'chat',
+  'star',
+  'bell',
+  'lock',
+  'globe',
+  'gift',
+] as const
+export type TopicIcon = (typeof topicIcons)[number]
+
+export const topicStyles = ['normal', 'danger'] as const
+export type TopicStyle = (typeof topicStyles)[number]
+
+export const topicFlags = ['complaint', 'fraud'] as const
+
 export type TopicConfig = {
   code: string
   name_id: string
@@ -50,7 +75,19 @@ export type TopicConfig = {
   help_url: string | null
   sort_order: number
   active: boolean
+  description_id: string | null
+  description_en: string | null
+  icon: TopicIcon | null
+  style: TopicStyle
+  flags: string[]
 }
+
+export type TopicPicker = {
+  title?: { id?: string; en?: string }
+  hint?: { id?: string; en?: string }
+}
+
+export type TopicPickerDraft = { title_id: string; title_en: string; hint_id: string; hint_en: string }
 
 export type QuickReplyConfig = {
   id: string | null
