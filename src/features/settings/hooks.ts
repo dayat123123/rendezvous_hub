@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { useAgent } from '@/features/auth/hooks'
+import { conversationKeys } from '@/features/conversation/hooks'
 import { nasabahKeys } from '@/features/nasabah/hooks'
 import { errorText } from '@/lib/error-text'
 import type { Json } from '@/types/database'
@@ -10,6 +11,9 @@ import type { Json } from '@/types/database'
 import { settingsApi } from './api'
 import type {
   AccountDraft,
+  AdminAttachmentPolicy,
+  AttachmentKindRule,
+  AttachmentPolicyKind,
   Holiday,
   QuickReplyConfig,
   SettingEntry,
@@ -27,6 +31,29 @@ export const settingsKeys = {
   settings: ['admin', 'settings'] as const,
   holidays: (year: number) => ['admin', 'holidays', year] as const,
   integration: ['admin', 'integration'] as const,
+  attachments: ['admin', 'attachment-policy'] as const,
+}
+
+export function useAdminAttachmentPolicy() {
+  return useQuery({ queryKey: settingsKeys.attachments, queryFn: settingsApi.attachmentPolicy })
+}
+
+export function useSaveAttachmentPolicy() {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (policy: Record<AttachmentPolicyKind, AttachmentKindRule>) =>
+      settingsApi.saveAttachmentPolicy(policy),
+    onSuccess: (saved: AdminAttachmentPolicy) => {
+      client.setQueryData(settingsKeys.attachments, saved)
+      void client.invalidateQueries({ queryKey: conversationKeys.attachmentPolicy })
+      toast.success(t('app.saved'))
+    },
+    onError: (error) => {
+      toast.error(errorText(error))
+      void client.invalidateQueries({ queryKey: settingsKeys.attachments })
+    },
+  })
 }
 
 function putAccount(client: QueryClient, agent: StaffAccount) {

@@ -6,6 +6,7 @@ import {
   MegaphoneIcon,
   MessageSquareTextIcon,
   MessagesSquareIcon,
+  PaperclipIcon,
   PlugZapIcon,
   SirenIcon,
   SlidersHorizontalIcon,
@@ -28,6 +29,7 @@ import { cn } from '@/lib/utils'
 import { settingsGroupOrder, settingsGroups, type SettingsSection } from '../types'
 import { AccountsSection } from './accounts-section'
 import { AlertsSection } from './alerts-section'
+import { AttachmentsSection } from './attachments-section'
 import { AssignmentSection } from './assignment-section'
 import { BackupSection } from './backup-section'
 import { CommunitySection } from './community-section'
@@ -42,6 +44,7 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
   ticketLabels: TagIcon,
   hours: CalendarClockIcon,
   messages: MessagesSquareIcon,
+  attachments: PaperclipIcon,
   assignment: SlidersHorizontalIcon,
   community: MegaphoneIcon,
   integration: PlugZapIcon,
@@ -58,6 +61,7 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   quickReplies: () => <QuickRepliesSection />,
   hours: () => <HoursSection />,
   messages: () => <MessagesSection />,
+  attachments: () => <AttachmentsSection />,
   assignment: () => <AssignmentSection />,
   community: () => <CommunitySection />,
   push: () => <PushSection />,

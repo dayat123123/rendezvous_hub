@@ -85,8 +85,8 @@ test('PDF dua arah di chat CS, video ditolak', async ({ page }) => {
     await expect(customer.upload('attachments', 'mp4', 'video/mp4', Buffer.from('video'))).rejects.toThrow()
 
     const input = page.locator('input[type="file"]')
-    await input.setInputFiles({ name: 'rekaman.mp4', mimeType: 'video/mp4', buffer: Buffer.from('video') })
-    await expect(page.getByText(/^rekaman\.mp4 tidak didukung/)).toBeVisible()
+    await input.setInputFiles({ name: 'suara.m4a', mimeType: 'audio/mp4', buffer: Buffer.from('audio') })
+    await expect(page.getByText(/^suara\.m4a tidak didukung/)).toBeVisible()
 
     await input.setInputFiles({ name: 'Formulir.pdf', mimeType: 'application/pdf', buffer: pdf })
     const box = page.getByRole('textbox', { name: 'Balas' })

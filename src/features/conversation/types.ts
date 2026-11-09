@@ -6,6 +6,8 @@ export type Attachment = {
   size?: number | null
   width?: number | null
   height?: number | null
+  duration?: number | null
+  thumbnail?: string | null
 }
 
 export type SenderRole = 'customer' | 'agent' | 'supervisor' | 'system'
@@ -61,6 +63,7 @@ export type PendingMessage = {
   files: LocalAttachment[]
   replyTo: ChatMessage | null
   status: 'sending' | 'failed'
+  checking?: boolean
   createdAt: string
 }
 

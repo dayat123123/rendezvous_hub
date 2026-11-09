@@ -6,7 +6,7 @@ import { useAuth } from '@/features/auth/hooks'
 import type * as PresenceApiModule from '@/features/presence/api'
 import { presenceApi } from '@/features/presence/api'
 import type { AgentProfile } from '@/features/presence/types'
-import { agentFixture, messageFixture, ticketFixture } from '@/test/fixtures'
+import { agentFixture, attachmentPolicyFixture, messageFixture, ticketFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
 import { dismissToasts, findToast, Toaster } from '@/test/toast'
 
@@ -39,6 +39,7 @@ vi.mock('../api', async (importOriginal) => {
         ]),
       ),
       addNote: vi.fn(() => Promise.resolve({})),
+      attachmentPolicy: vi.fn(),
     },
   }
 })
@@ -80,6 +81,7 @@ describe('Composer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     window.localStorage.clear()
+    vi.mocked(conversationApi.attachmentPolicy).mockResolvedValue(attachmentPolicyFixture())
   })
   afterEach(dismissToasts)
 
@@ -166,7 +168,7 @@ describe('Composer', () => {
     )
     expect(box).toBeDisabled()
     expect(box).toHaveValue('Draf sebelum Offline')
-    for (const name of ['Lampirkan gambar atau PDF', 'Sisipkan balasan cepat', 'Kirim lainnya', 'Kirim']) {
+    for (const name of ['Lampirkan file', 'Sisipkan balasan cepat', 'Kirim lainnya', 'Kirim']) {
       expect(screen.getByRole('button', { name })).toBeDisabled()
     }
 
@@ -210,20 +212,119 @@ describe('Composer', () => {
     await waitFor(() => expect(conversationApi.addNote).toHaveBeenCalledTimes(1))
   })
 
-  it('attaches PDFs and refuses videos with a clear reason', async () => {
+  it('accepts the formats from the server policy and sends documents and videos', async () => {
     const { send, user } = setup()
-    const input = document.querySelector<HTMLInputElement>('input[type="file"]')
-    expect(input?.accept).toContain('application/pdf')
-    fireEvent.change(input!, { target: { files: [new File(['x'], 'rekaman.mp4', { type: 'video/mp4' })] } })
-    expect(await findToast(/^rekaman\.mp4 tidak didukung/)).toBeVisible()
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!
+    await waitFor(() => expect(input.accept).toContain('.docx'))
+    for (const item of [
+      'application/pdf',
+      '.xlsx',
+      '.pptx',
+      '.txt',
+      '.csv',
+      'video/mp4',
+      '.mov',
+      '.webm',
+      'image/png',
+    ])
+      expect(input.accept).toContain(item)
 
-    const pdf = new File([new Uint8Array(2048)], 'Bukti Transfer.pdf', { type: 'application/pdf' })
-    fireEvent.change(input!, { target: { files: [pdf] } })
-    expect(await screen.findByText('Bukti Transfer.pdf')).toBeVisible()
-    expect(screen.getByText('2 KB')).toBeVisible()
+    const sheet = new File([new Uint8Array(2048)], 'Mutasi Oktober.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+    const clip = new File([new Uint8Array(4096)], 'Rekaman layar.mp4', { type: 'video/mp4' })
+    fireEvent.change(input, { target: { files: [sheet, clip] } })
+    expect(await screen.findByText('Mutasi Oktober.xlsx')).toBeVisible()
+    expect(screen.getByText('Excel · 2 KB')).toBeVisible()
+    expect(screen.getByText('Video · 4 KB')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Kirim' }))
     await waitFor(() => expect(send).toHaveBeenCalledTimes(1))
-    expect(send.mock.calls[0]?.[0]?.files?.map((item) => item.file)).toEqual([pdf])
+    expect(send.mock.calls[0]?.[0]?.files?.map((item) => item.file)).toEqual([sheet, clip])
+  })
+
+  it('refuses macro, legacy and too large files with a clear reason', async () => {
+    setup()
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!
+    await waitFor(() => expect(input.accept).toContain('.docx'))
+
+    fireEvent.change(input, {
+      target: {
+        files: [
+          new File(['x'], 'Laporan.docm', { type: 'application/vnd.ms-word.document.macroEnabled.12' }),
+        ],
+      },
+    })
+    const refused = await findToast(/^Laporan\.docm tidak didukung/)
+    expect(refused).toHaveTextContent(
+      'Format yang diterima: PDF, Word, Excel, PowerPoint, TXT, CSV, JPEG, PNG, WebP, GIF, MP4, MOV, WebM.',
+    )
+    dismissToasts()
+
+    fireEvent.change(input, {
+      target: { files: [new File(['x'], 'arsip.zip', { type: 'application/zip' })] },
+    })
+    expect(await findToast(/^arsip\.zip tidak didukung/)).toBeVisible()
+    dismissToasts()
+
+    const big = new File([new Uint8Array(11 * 1024 * 1024)], 'Besar.pptx', {
+      type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    })
+    fireEvent.change(input, { target: { files: [big] } })
+    expect(await findToast('Besar.pptx lebih dari 10 MB.')).toBeVisible()
+    expect(screen.queryByText('Besar.pptx')).not.toBeInTheDocument()
+  })
+
+  it('names the kind a Super Admin turned off and keeps the accept list in step', async () => {
+    vi.mocked(conversationApi.attachmentPolicy).mockResolvedValue(
+      attachmentPolicyFixture({
+        videos: { enabled: false, bucket: 'cs-videos', max_bytes: 0, max_seconds: 120, formats: [] },
+      }),
+    )
+    setup()
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!
+    await waitFor(() => expect(input.accept).toContain('.docx'))
+    expect(input.accept).not.toContain('video/mp4')
+    fireEvent.change(input, { target: { files: [new File(['x'], 'rekaman.mp4', { type: 'video/mp4' })] } })
+    expect(
+      await findToast('rekaman.mp4 tidak bisa dikirim: lampiran video sedang dinonaktifkan.'),
+    ).toBeVisible()
+  })
+
+  it('attaches documents that are pasted or dropped', async () => {
+    const { box } = setup()
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!
+    await waitFor(() => expect(input.accept).toContain('.csv'))
+    const report = new File(['a,b'], 'mutasi.csv', { type: 'text/csv' })
+    fireEvent.paste(box, {
+      clipboardData: { items: [{ kind: 'file', type: report.type, getAsFile: () => report }] },
+    })
+    expect(await screen.findByText('mutasi.csv')).toBeVisible()
+
+    const note = new File(['halo'], 'catatan.txt', { type: 'text/plain' })
+    const composer = box.closest('.border-t') as HTMLElement
+    fireEvent.drop(composer, { dataTransfer: { files: [note], types: ['Files'] } })
+    expect(await screen.findByText('catatan.txt')).toBeVisible()
+    expect(screen.getByText('Teks · 4 B')).toBeVisible()
+  })
+
+  it('explains why the server refused an upload', async () => {
+    const { ApiError } = await import('@/lib/errors')
+    const { send, user } = setup()
+    send.mockRejectedValueOnce(new ApiError('office_macro', 'macro', 422))
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!
+    await waitFor(() => expect(input.accept).toContain('.docx'))
+    fireEvent.change(input, {
+      target: {
+        files: [
+          new File(['x'], 'Surat.docx', {
+            type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          }),
+        ],
+      },
+    })
+    await screen.findByText('Surat.docx')
+    await user.click(screen.getByRole('button', { name: 'Kirim' }))
+    expect(await findToast(/^File Office berisi makro dan ditolak/)).toBeVisible()
   })
 
   it('attaches a screenshot pasted anywhere in the conversation, like WhatsApp', async () => {

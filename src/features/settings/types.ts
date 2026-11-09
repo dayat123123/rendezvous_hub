@@ -116,7 +116,7 @@ export type HolidayKind = (typeof holidayKinds)[number]
 export type Holiday = { day: string; name: string; kind: HolidayKind }
 
 export const settingsGroups = {
-  service: ['accounts', 'quickReplies', 'ticketLabels', 'hours', 'messages', 'assignment'],
+  service: ['accounts', 'quickReplies', 'ticketLabels', 'hours', 'messages', 'attachments', 'assignment'],
   community: ['community'],
   integration: ['integration', 'appIntegration', 'apiKeys', 'push'],
   system: ['backup', 'alerts'],
@@ -156,3 +156,21 @@ export type IntegrationSave = { saved: boolean; check: IntegrationCheck; status:
 
 export const isStaffRole = (role: string): role is StaffRole =>
   (staffRoles as readonly string[]).includes(role)
+
+export type AttachmentKindRule = { enabled: boolean; max_mb: number; max_seconds?: number; formats: string[] }
+
+export type AttachmentKindCatalog = {
+  bucket: string
+  ceiling_mb: number
+  ceiling_seconds?: number
+  formats: Record<string, { mime: string; ext: string }>
+}
+
+export type AttachmentPolicyKind = 'documents' | 'images' | 'videos'
+
+export type AdminAttachmentPolicy = {
+  policy: Partial<Record<AttachmentPolicyKind, AttachmentKindRule>>
+  catalog: Record<AttachmentPolicyKind, AttachmentKindCatalog>
+  updated_at: string | null
+  updated_by: string | null
+}

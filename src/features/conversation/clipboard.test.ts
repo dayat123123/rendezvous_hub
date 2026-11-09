@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { clipboardImages, fitImage, pasteBelongsElsewhere, scaledSize } from './clipboard'
+import { clipboardFiles, clipboardImages, fitImage, pasteBelongsElsewhere, scaledSize } from './clipboard'
 
 function clipboard(files: File[], extra: { kind: string; type: string }[] = []) {
   return {
@@ -17,6 +17,18 @@ describe('clipboardImages', () => {
     const video = new File(['mp4'], 'clip.mp4', { type: 'video/mp4' })
     expect(clipboardImages(clipboard([shot, video], [{ kind: 'string', type: 'text/html' }]))).toEqual([shot])
     expect(clipboardImages(null)).toEqual([])
+  })
+})
+
+describe('clipboardFiles', () => {
+  it('takes every pasted file so the composer can check it against the policy', () => {
+    const shot = new File(['png'], 'image.png', { type: 'image/png' })
+    const report = new File(['pdf'], 'laporan.pdf', { type: 'application/pdf' })
+    expect(clipboardFiles(clipboard([shot, report], [{ kind: 'string', type: 'text/plain' }]))).toEqual([
+      shot,
+      report,
+    ])
+    expect(clipboardFiles(null)).toEqual([])
   })
 })
 

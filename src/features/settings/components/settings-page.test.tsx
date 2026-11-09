@@ -51,6 +51,7 @@ describe('SettingsPage', () => {
       'Label tiket',
       'Jam layanan & libur',
       'Pesan otomatis',
+      'Lampiran chat CS',
       'Penugasan, tiket & alert',
     ])
     expect(groupItems('Komunitas')).toEqual(['Aturan persetujuan'])

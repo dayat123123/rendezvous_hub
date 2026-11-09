@@ -13,6 +13,14 @@ export function clipboardImages(data: DataTransfer | null) {
     .filter((file): file is File => file !== null)
 }
 
+export function clipboardFiles(data: DataTransfer | null) {
+  if (!data) return []
+  return Array.from(data.items)
+    .filter((item) => item.kind === 'file')
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => file !== null)
+}
+
 export function pasteBelongsElsewhere(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false
   return (

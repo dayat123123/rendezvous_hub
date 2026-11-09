@@ -10,7 +10,7 @@ import { realtime } from '@/lib/realtime'
 import { readLocal, writeLocal } from '@/lib/storage'
 import { uuid } from '@/lib/utils'
 
-import { conversationApi, PAGE_SIZE } from './api'
+import { conversationApi, PAGE_SIZE, type SignedUrlOptions } from './api'
 import {
   collectAfter,
   insertMessages,
@@ -21,6 +21,7 @@ import {
   type MessagePages,
 } from './cache'
 import { createGapSchedule } from './gap-schedule'
+import { fallbackPolicy, needsCheck } from './media'
 import type {
   ChatMessage,
   LocalAttachment,
@@ -36,7 +37,18 @@ export const conversationKeys = {
   members: (roomId: string) => ['members', roomId] as const,
   quickReplies: (language: string) => ['quick-replies', language] as const,
   myQuickReplies: ['quick-replies', 'mine'] as const,
-  signedUrl: (path: string, bucket: string) => ['signed-url', bucket, path] as const,
+  signedUrl: (path: string, bucket: string, download?: string) =>
+    download ? (['signed-url', bucket, path, download] as const) : (['signed-url', bucket, path] as const),
+  attachmentPolicy: ['attachment-policy'] as const,
+}
+
+export function useAttachmentPolicy() {
+  const query = useQuery({
+    queryKey: conversationKeys.attachmentPolicy,
+    queryFn: conversationApi.attachmentPolicy,
+    staleTime: 5 * 60_000,
+  })
+  return query.data ?? fallbackPolicy
 }
 
 type PendingStore = {
@@ -115,13 +127,43 @@ export function useDeleteMyQuickReply() {
   })
 }
 
-export function useSignedUrl(path: string, bucket = 'attachments') {
+export function useSignedUrl(
+  path: string,
+  bucket = 'attachments',
+  options: { enabled?: boolean; long?: boolean } = {},
+) {
   return useQuery({
     queryKey: conversationKeys.signedUrl(path, bucket),
-    queryFn: () => conversationApi.signedUrl(path, bucket),
-    staleTime: 90_000,
-    gcTime: 110_000,
+    queryFn: () =>
+      options.long
+        ? conversationApi.signedUrl(path, bucket, { expiresIn: 3600 })
+        : conversationApi.signedUrl(path, bucket),
+    enabled: options.enabled ?? true,
+    staleTime: options.long ? 50 * 60_000 : 90_000,
+    gcTime: options.long ? 55 * 60_000 : 110_000,
   })
+}
+
+export function useDownload() {
+  const client = useQueryClient()
+  return useCallback(
+    async (path: string, bucket: string, name: string) => {
+      const options: SignedUrlOptions = { download: name }
+      const url = await client.fetchQuery({
+        queryKey: conversationKeys.signedUrl(path, bucket, name),
+        queryFn: () => conversationApi.signedUrl(path, bucket, options),
+        staleTime: 60_000,
+      })
+      const link = document.createElement('a')
+      link.href = url
+      link.download = name
+      link.rel = 'noopener'
+      document.body.append(link)
+      link.click()
+      link.remove()
+    },
+    [client],
+  )
 }
 
 export function useRoom(ticket: Ticket, me: { id: string; username: string; displayName: string }) {
@@ -254,11 +296,22 @@ export function useSendMessage(ticket: Ticket, meId: string) {
     ): Promise<SendResult> => {
       const store = usePending.getState()
       const showPending = !extra.kind || extra.kind === 'text'
-      if (showPending) store.add({ ...pending, status: 'sending' })
+      const checking = pending.files.some((file) => needsCheck(file.file))
+      if (showPending) store.add({ ...pending, status: 'sending', checking })
       try {
+        const policy =
+          pending.files.length > 0
+            ? await client
+                .ensureQueryData({
+                  queryKey: conversationKeys.attachmentPolicy,
+                  queryFn: conversationApi.attachmentPolicy,
+                })
+                .catch(() => fallbackPolicy)
+            : fallbackPolicy
         const attachments = await Promise.all(
-          pending.files.map((file) => conversationApi.upload(pending.roomId, meId, file.file)),
+          pending.files.map((file) => conversationApi.upload(pending.roomId, meId, file.file, policy)),
         )
+        if (checking && showPending) store.update(pending.clientId, { checking: false })
         const result = await conversationApi.send({
           ticketId: pending.ticketId,
           body: pending.body,

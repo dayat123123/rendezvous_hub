@@ -1,6 +1,7 @@
 import { EyeIcon, LoaderCircleIcon } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { ErrorState } from '@/components/states'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,8 @@ import {
 } from '@/features/tickets/hooks'
 import { newerActiveTicket } from '@/features/tickets/logic'
 import { emptyLists, type Ticket } from '@/features/tickets/types'
+import { attachmentErrorText } from '@/lib/error-text'
+import { toApiError } from '@/lib/errors'
 
 import { latestCustomerMessage } from '../cache'
 import {
@@ -284,7 +287,11 @@ function Conversation({
           followSignal={followSignal}
           trustedHost={trustedHost}
           onReply={owner ? replyAndFocus : undefined}
-          onResend={(item) => void resend(item).catch(() => undefined)}
+          onResend={(item) =>
+            void resend(item).catch((error: unknown) => {
+              if (toApiError(error).code !== 'network') toast.error(attachmentErrorText(error))
+            })
+          }
           onDiscard={discard}
         />
       )}

@@ -24,12 +24,13 @@ import { clock } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
 import { linkify } from '../linkify'
-import { isDocument, isDocumentFile } from '../media'
+import { attachmentKind, fileKind, fileLabelType } from '../media'
 import { SWIPE_TRIGGER, useSwipeReply } from '../swipe-reply'
 import { systemText } from '../system-text'
 import type { ChatMessage, PendingMessage } from '../types'
 import { AttachmentFile, DocumentLabel } from './attachment-file'
 import { AttachmentImage } from './attachment-image'
+import { AttachmentVideo } from './attachment-video'
 
 export const SystemMessage = memo(function SystemMessage({ message }: { message: ChatMessage }) {
   const { i18n } = useTranslation()
@@ -200,8 +201,9 @@ export const MessageBubble = memo(function MessageBubble({
   const url =
     message.kind === 'help_link' && typeof message.payload.url === 'string' ? message.payload.url : null
   const status = read ? t('conversation.read') : t('conversation.sent')
-  const images = message.attachments.filter((attachment) => !isDocument(attachment))
-  const documents = message.attachments.filter(isDocument)
+  const images = message.attachments.filter((attachment) => attachmentKind(attachment) === 'images')
+  const documents = message.attachments.filter((attachment) => attachmentKind(attachment) === 'documents')
+  const videos = message.attachments.filter((attachment) => attachmentKind(attachment) === 'videos')
   const swipe = useSwipeReply(onReply ? () => onReply(message) : undefined)
   const progress = Math.min(swipe.offset / SWIPE_TRIGGER, 1)
 
@@ -257,6 +259,13 @@ export const MessageBubble = memo(function MessageBubble({
                     attachment={attachment}
                     compact={images.length > 1}
                   />
+                ))}
+              </div>
+            ) : null}
+            {videos.length > 0 ? (
+              <div className="mb-1 flex flex-col gap-2">
+                {videos.map((attachment) => (
+                  <AttachmentVideo key={attachment.path} attachment={attachment} />
                 ))}
               </div>
             ) : null}
@@ -342,12 +351,16 @@ export function PendingBubble({
           {pending.files.length > 0 ? (
             <div className="mb-1 grid grid-cols-2 gap-1">
               {pending.files.map((file) =>
-                isDocumentFile(file.file) ? (
+                fileKind(file.file) !== 'images' ? (
                   <div
                     key={file.id}
                     className="col-span-2 flex items-center gap-2.5 rounded-lg border border-current/20 px-2.5 py-2"
                   >
-                    <DocumentLabel name={file.file.name} size={file.file.size} />
+                    <DocumentLabel
+                      name={file.file.name}
+                      size={file.file.size}
+                      type={fileLabelType(file.file)}
+                    />
                   </div>
                 ) : (
                   <img
@@ -384,7 +397,7 @@ export function PendingBubble({
           ) : (
             <span className="inline-flex items-center gap-1">
               <LoaderCircleIcon className="size-3 animate-spin" />
-              {t('conversation.sending')}
+              {pending.checking ? t('attachments.checking') : t('conversation.sending')}
             </span>
           )}
         </div>

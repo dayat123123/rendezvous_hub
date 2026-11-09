@@ -1,3 +1,4 @@
+import { knownFormats, parsePolicy, type AttachmentPolicy } from '@/features/conversation/media'
 import type { ChatMessage } from '@/features/conversation/types'
 import { defaultSettings, type AgentProfile } from '@/features/presence/types'
 import type { Ticket } from '@/features/tickets/types'
@@ -92,4 +93,23 @@ export function messageFixture(overrides: Partial<ChatMessage> = {}): ChatMessag
     sender_role: 'customer',
     ...overrides,
   }
+}
+
+const formatsOf = (kind: string) =>
+  knownFormats.filter((format) => format.kind === kind).map(({ code, mime, ext }) => ({ code, mime, ext }))
+
+export function attachmentPolicyFixture(overrides: Partial<Record<string, unknown>> = {}): AttachmentPolicy {
+  const MB = 1024 * 1024
+  return parsePolicy({
+    documents: { enabled: true, bucket: 'cs-documents', max_bytes: 10 * MB, formats: formatsOf('documents') },
+    images: { enabled: true, bucket: 'attachments', max_bytes: 5 * MB, formats: formatsOf('images') },
+    videos: {
+      enabled: true,
+      bucket: 'cs-videos',
+      max_bytes: 25 * MB,
+      max_seconds: 120,
+      formats: formatsOf('videos'),
+    },
+    ...overrides,
+  })
 }

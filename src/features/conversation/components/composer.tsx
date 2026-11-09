@@ -31,13 +31,13 @@ import { useAgent } from '@/features/auth/hooks'
 import { useActionGuard } from '@/features/presence/hooks'
 import type { AgentProfile } from '@/features/presence/types'
 import { customerName, type Ticket } from '@/features/tickets/types'
-import { errorText } from '@/lib/error-text'
+import { attachmentErrorText, errorText } from '@/lib/error-text'
 import { toApiError } from '@/lib/errors'
 import { cn, uuid } from '@/lib/utils'
 
 import { conversationApi } from '../api'
-import { clipboardImages, fitImage, pasteBelongsElsewhere } from '../clipboard'
-import { useDraft, useQuickReplies, type SendRequest } from '../hooks'
+import { clipboardFiles, fitImage, pasteBelongsElsewhere } from '../clipboard'
+import { useAttachmentPolicy, useDraft, useQuickReplies, type SendRequest } from '../hooks'
 import {
   applyQuickReply,
   fillVariables,
@@ -47,12 +47,10 @@ import {
   type QuickReplyGroups,
   type SlashToken,
 } from '../quick-replies'
-import { ATTACHMENT_TYPES, fileSize, isDocumentFile, mediaLimit, mediaProblem } from '../media'
+import { acceptList, allowedLabels, fileKind, fileSize, isImageFile, mediaProblem } from '../media'
 import { requestsSecret } from '../secret'
 import {
-  IMAGE_TYPES,
   MAX_BODY,
-  MAX_FILE_BYTES,
   MAX_FILES,
   type ChatMessage,
   type ComposerMode,
@@ -126,6 +124,7 @@ export function Composer({
   const quickReplies = useQuickReplies()
   const guard = useActionGuard()
   const offline = useAgent().status === 'offline'
+  const policy = useAttachmentPolicy()
 
   const groups = useMemo(
     () => (token && mode === 'reply' ? groupQuickReplies(quickReplies.data ?? [], token.query) : noGroups),
@@ -160,21 +159,28 @@ export function Composer({
     async (incoming: File[]) => {
       const prepared = await Promise.all(
         incoming.map((file) =>
-          IMAGE_TYPES.includes(file.type) ? fitImage(file, MAX_FILE_BYTES) : Promise.resolve(file),
+          isImageFile(file) && policy.images.enabled
+            ? fitImage(file, policy.images.max_bytes)
+            : Promise.resolve(file),
         ),
       )
       const images: LocalAttachment[] = []
       for (const file of prepared) {
-        const problem = mediaProblem(file)
-        if (problem === 'badType') {
-          toast.error(t('composer.badType', { name: file.name }))
+        const problem = mediaProblem(file, policy)
+        const kind = fileKind(file)
+        if (problem === 'badType' || !kind) {
+          toast.error(t('composer.badType', { name: file.name, formats: allowedLabels(policy).join(', ') }))
+          continue
+        }
+        if (problem === 'disabled') {
+          toast.error(t('composer.kindDisabled', { name: file.name, kind: t(`attachments.kinds.${kind}`) }))
           continue
         }
         if (problem === 'tooLarge') {
-          toast.error(t('composer.tooLarge', { name: file.name, max: fileSize(mediaLimit(file)) }))
+          toast.error(t('composer.tooLarge', { name: file.name, max: fileSize(policy[kind].max_bytes) }))
           continue
         }
-        images.push({ id: uuid(), file, preview: isDocumentFile(file) ? '' : URL.createObjectURL(file) })
+        images.push({ id: uuid(), file, preview: kind === 'images' ? URL.createObjectURL(file) : '' })
       }
       setFiles((current) => {
         const room = MAX_FILES - current.length
@@ -183,17 +189,17 @@ export function Composer({
         return [...current, ...images.slice(0, room)]
       })
     },
-    [t],
+    [t, policy],
   )
 
   useEffect(() => {
     if (note || locked) return
     const onPaste = (event: ClipboardEvent) => {
       if (event.defaultPrevented || pasteBelongsElsewhere(event.target)) return
-      const images = clipboardImages(event.clipboardData)
-      if (images.length === 0) return
+      const pasted = clipboardFiles(event.clipboardData)
+      if (pasted.length === 0) return
       event.preventDefault()
-      void addFiles(images)
+      void addFiles(pasted)
       textarea.current?.focus()
     }
     window.addEventListener('paste', onPaste)
@@ -255,7 +261,7 @@ export function Composer({
     } catch (error) {
       const apiError = toApiError(error)
       if (apiError.code !== 'network') {
-        toast.error(errorText(apiError))
+        toast.error(attachmentErrorText(apiError))
         setValue(body)
       }
     } finally {
@@ -564,10 +570,10 @@ export function Composer({
             onBlur={() => window.setTimeout(() => setToken(null), 150)}
             onPaste={(event) => {
               if (note) return
-              const images = clipboardImages(event.clipboardData)
-              if (images.length > 0) {
+              const pasted = clipboardFiles(event.clipboardData)
+              if (pasted.length > 0) {
                 event.preventDefault()
-                void addFiles(images)
+                void addFiles(pasted)
               }
             }}
             className="block max-h-[182px] min-h-[42px] w-full resize-none bg-transparent px-3 pt-2.5 pb-1 text-sm leading-normal outline-none disabled:cursor-not-allowed disabled:text-muted-foreground"
@@ -637,7 +643,7 @@ export function Composer({
       <input
         ref={fileInput}
         type="file"
-        accept={ATTACHMENT_TYPES.join(',')}
+        accept={acceptList(policy)}
         multiple
         hidden
         onChange={(event) => {

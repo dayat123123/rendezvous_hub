@@ -28,6 +28,10 @@ export type Database = {
         Args: { p_from?: string; p_to?: string }
         Returns: Json
       }
+      admin_attachment_policy: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       admin_banner_settings: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_banner_stats: { Args: { p_id: string }; Returns: Json }
       admin_banners: { Args: Record<PropertyKey, never>; Returns: Json }
@@ -148,6 +152,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_set_attachment_policy: { Args: { p_policy: Json }; Returns: Json }
       admin_set_banner_link_schemes: {
         Args: { p_schemes: string[] }
         Returns: Json
@@ -275,6 +280,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      attachment_policy: { Args: Record<PropertyKey, never>; Returns: Json }
       backup_overview: { Args: Record<PropertyKey, never>; Returns: Json }
       backup_request: { Args: { p_kind: string }; Returns: Json }
       backup_set_schedule: {
@@ -616,6 +622,11 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      compliance_notices: { Args: Record<PropertyKey, never>; Returns: Json }
+      compliance_notices_seen: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       compliance_overview: { Args: Record<PropertyKey, never>; Returns: Json }
       compliance_policies: { Args: Record<PropertyKey, never>; Returns: Json }
       compliance_policy_call: {
@@ -751,7 +762,7 @@ export type Database = {
         Returns: Json
       }
       flag_ticket: {
-        Args: { p_flag: string; p_ticket_id: string }
+        Args: { p_flag: string; p_reason: string; p_ticket_id: string }
         Returns: Json
       }
       get_messages: {

@@ -1,11 +1,12 @@
-import { FileTextIcon, XIcon } from 'lucide-react'
+import { XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 
-import { fileSize, isDocumentFile } from '../media'
+import { fileKind, fileLabelType, fileSize } from '../media'
 import type { LocalAttachment } from '../types'
+import { DocumentLabel } from './attachment-file'
 
 export function PendingAttachments({
   files,
@@ -21,13 +22,9 @@ export function PendingAttachments({
     <div className="mb-2 flex flex-wrap gap-2">
       {files.map((file) => (
         <div key={file.id} className="relative">
-          {isDocumentFile(file.file) ? (
-            <div className="flex h-14 w-44 items-center gap-2 rounded-md border px-2.5">
-              <FileTextIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="min-w-0">
-                <span className="block truncate text-xs font-medium">{file.file.name}</span>
-                <span className="block text-xs text-muted-foreground">{fileSize(file.file.size)}</span>
-              </span>
+          {fileKind(file.file) !== 'images' ? (
+            <div className="flex h-14 w-52 items-center gap-2 rounded-md border px-2.5">
+              <DocumentLabel name={file.file.name} size={file.file.size} type={fileLabelType(file.file)} />
             </div>
           ) : (
             <button

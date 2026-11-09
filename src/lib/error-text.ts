@@ -284,3 +284,33 @@ export function bannerErrorText(error: unknown): string {
   const code = toApiError(error).code
   return among(bannerCodes, code) ? i18n.t(`platform.banners.errors.${code}`) : errorText(error)
 }
+
+const attachmentCodes = [
+  'kind_disabled',
+  'policy_unavailable',
+  'office_macro',
+  'office_unsafe',
+  'archive_bomb',
+  'invalid_text',
+  'invalid_video',
+  'video_too_long',
+  'malware_detected',
+  'scanner_unavailable',
+  'unsupported_type',
+  'file_too_large',
+  'invalid_pdf',
+  'pdf_encrypted',
+  'pdf_active_content',
+  'too_many_uploads',
+  'busy',
+  'upload_forbidden',
+  'storage_unavailable',
+  'attachment_not_allowed',
+  'attachment_too_large',
+  'attachment_too_long',
+] as const
+
+export function attachmentErrorText(error: unknown): string {
+  const code = toApiError(error).code
+  return among(attachmentCodes, code) ? i18n.t(`attachments.errors.${code}`) : errorText(error)
+}

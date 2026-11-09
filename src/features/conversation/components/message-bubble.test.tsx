@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -7,7 +7,7 @@ import { renderWithProviders } from '@/test/render'
 
 import type * as ApiModule from '../api'
 import { conversationApi } from '../api'
-import { MessageBubble } from './message-bubble'
+import { MessageBubble, PendingBubble } from './message-bubble'
 
 vi.mock('../api', async (importOriginal) => {
   const actual = await importOriginal<typeof ApiModule>()
@@ -15,8 +15,10 @@ vi.mock('../api', async (importOriginal) => {
     ...actual,
     conversationApi: {
       ...actual.conversationApi,
-      signedUrl: vi.fn((path: string, bucket: string) =>
-        Promise.resolve(`https://cs.test/${bucket}/${path}`),
+      signedUrl: vi.fn((path: string, bucket: string, options?: { download?: string; expiresIn?: number }) =>
+        Promise.resolve(
+          `https://cs.test/${bucket}/${path}${options?.download ? `?download=${options.download}` : ''}`,
+        ),
       ),
     },
   }
@@ -86,6 +88,142 @@ describe('MessageBubble', () => {
     )
     expect(screen.getByText('PDF · 178 KB')).toBeInTheDocument()
     expect(conversationApi.signedUrl).toHaveBeenCalledWith('rooms/r1/u1/a.pdf', 'cs-documents')
+    expect(screen.getByRole('button', { name: 'Unduh Bukti Transfer.pdf' })).toBeVisible()
+  })
+
+  it('shows Office, CSV and text files as cards with a type icon and a download button', async () => {
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+    const user = userEvent.setup()
+    const documents = [
+      ['Mutasi.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'excel', 'Excel'],
+      [
+        'Surat.docx',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'word',
+        'Word',
+      ],
+      [
+        'Paparan.pptx',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'powerpoint',
+        'PowerPoint',
+      ],
+      ['data.csv', 'text/csv', 'csv', 'CSV'],
+      ['catatan.txt', 'text/plain', 'text', 'Teks'],
+    ] as const
+    renderWithProviders(
+      <MessageBubble
+        message={messageFixture({
+          id: 'd2',
+          body: '',
+          attachments: documents.map(([name, mime], index) => ({
+            bucket: 'cs-documents',
+            path: `rooms/r1/u1/f${index}.${name.split('.')[1]}`,
+            mime,
+            name,
+            size: 2048,
+          })),
+        })}
+        staff={false}
+        first
+        last
+        read={false}
+        trustedHost={() => false}
+      />,
+    )
+    for (const [name, , type, label] of documents) {
+      const card = screen.getByRole('group', { name })
+      expect(within(card).getByText(`${label} · 2 KB`)).toBeVisible()
+      expect(card.querySelector(`svg[data-type="${type}"]`)).not.toBeNull()
+      expect(within(card).queryByRole('link')).not.toBeInTheDocument()
+    }
+    await user.click(screen.getByRole('button', { name: 'Unduh Mutasi.xlsx' }))
+    await vi.waitFor(() => expect(click).toHaveBeenCalledTimes(1))
+    expect(conversationApi.signedUrl).toHaveBeenCalledWith('rooms/r1/u1/f0.xlsx', 'cs-documents', {
+      download: 'Mutasi.xlsx',
+    })
+    const link = click.mock.contexts[0] as HTMLAnchorElement
+    expect(link.href).toBe('https://cs.test/cs-documents/rooms/r1/u1/f0.xlsx?download=Mutasi.xlsx')
+    expect(link.download).toBe('Mutasi.xlsx')
+    click.mockRestore()
+  })
+
+  it('shows a video with its thumbnail and length, and plays it from a signed URL', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(
+      <MessageBubble
+        message={messageFixture({
+          id: 'v1',
+          body: 'Ini errornya',
+          attachments: [
+            {
+              bucket: 'cs-videos',
+              path: 'rooms/r1/u1/v.mp4',
+              mime: 'video/mp4',
+              name: 'Rekaman layar.mp4',
+              size: 3_145_728,
+              duration: 65.2,
+              width: 1280,
+              height: 720,
+              thumbnail: 'rooms/r1/u1/v.jpg',
+            },
+          ],
+        })}
+        staff={false}
+        first
+        last
+        read={false}
+        trustedHost={() => false}
+      />,
+    )
+    const play = screen.getByRole('button', { name: 'Putar video Rekaman layar.mp4' })
+    await vi.waitFor(() =>
+      expect(play.querySelector('img')).toHaveAttribute('src', 'https://cs.test/cs-videos/rooms/r1/u1/v.jpg'),
+    )
+    expect(within(play).getByText('1:05')).toBeVisible()
+    expect(screen.getByText('Video · 1:05 · 3 MB')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Unduh Rekaman layar.mp4' })).toBeVisible()
+    expect(conversationApi.signedUrl).not.toHaveBeenCalledWith('rooms/r1/u1/v.mp4', 'cs-videos', {
+      expiresIn: 3600,
+    })
+
+    await user.click(play)
+    const video = await screen.findByLabelText('Rekaman layar.mp4', { selector: 'video' })
+    expect(video).toHaveAttribute('controls')
+    expect(video).toHaveAttribute('preload', 'metadata')
+    expect(video).toHaveAttribute('src', 'https://cs.test/cs-videos/rooms/r1/u1/v.mp4')
+    expect(video).toHaveAttribute('poster', 'https://cs.test/cs-videos/rooms/r1/u1/v.jpg')
+    expect(conversationApi.signedUrl).toHaveBeenCalledWith('rooms/r1/u1/v.mp4', 'cs-videos', {
+      expiresIn: 3600,
+    })
+  })
+
+  it('says the file is being checked while a document or video uploads', () => {
+    renderWithProviders(
+      <PendingBubble
+        pending={{
+          clientId: 'p1',
+          roomId: 'r1',
+          ticketId: 't1',
+          body: '',
+          files: [
+            {
+              id: 'f1',
+              file: new File(['x'], 'Rekaman.mov', { type: 'video/quicktime' }),
+              preview: '',
+            },
+          ],
+          replyTo: null,
+          status: 'sending',
+          checking: true,
+          createdAt: '2026-11-09T03:00:00.000Z',
+        }}
+        onResend={vi.fn()}
+        onDiscard={vi.fn()}
+      />,
+    )
+    expect(screen.getByText('Memeriksa file…')).toBeVisible()
+    expect(screen.getByText('Video · 1 B')).toBeVisible()
   })
 
   it('turns https links in the text into links, asks before opening an unknown site, and leaves http as text', async () => {

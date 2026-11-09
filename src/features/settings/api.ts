@@ -5,7 +5,10 @@ import type { Json } from '@/types/database'
 
 import type {
   AccountDraft,
+  AdminAttachmentPolicy,
   AdminOptions,
+  AttachmentKindRule,
+  AttachmentPolicyKind,
   CreatedAccount,
   Holiday,
   IntegrationCheck,
@@ -109,6 +112,9 @@ export const settingsApi = {
   settings: () => rpc<SettingEntry[]>('admin_settings'),
   setSetting: (key: string, value: Json) =>
     rpc<SavedSetting>('admin_set_setting', { p_key: key, p_value: value }),
+  attachmentPolicy: () => rpc<AdminAttachmentPolicy>('admin_attachment_policy'),
+  saveAttachmentPolicy: (policy: Record<AttachmentPolicyKind, AttachmentKindRule>) =>
+    rpc<AdminAttachmentPolicy>('admin_set_attachment_policy', { p_policy: policy as unknown as Json }),
   holidays: (year: number) => rpc<Holiday[]>('admin_holidays', { p_year: year }),
   saveHoliday: (holiday: Holiday) =>
     rpc<Holiday[]>('admin_save_holiday', { p_day: holiday.day, p_name: holiday.name, p_kind: holiday.kind }),
