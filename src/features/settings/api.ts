@@ -19,6 +19,7 @@ import type {
   SettingEntry,
   StaffAccount,
   TopicConfig,
+  TopicExtras,
   TopicPicker,
   TopicPickerDraft,
 } from './types'
@@ -90,6 +91,13 @@ export const settingsApi = {
       p_icon: topic.icon,
       p_style: topic.style,
       p_flags: topic.flags,
+    }),
+  saveTopicExtras: (code: string, extras: TopicExtras) =>
+    rpc<TopicConfig>('admin_set_topic_extras', {
+      p_code: code,
+      p_intake: extras.intake as unknown as Json,
+      p_customer_replies: extras.customer_replies as unknown as Json,
+      p_sop: extras.sop,
     }),
   topicPicker: () => rpc<TopicPicker>('admin_topic_picker'),
   saveTopicPicker: (draft: TopicPickerDraft) =>

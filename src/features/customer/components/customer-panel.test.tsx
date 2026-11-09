@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type * as TicketsApiModule from '@/features/tickets/api'
@@ -92,5 +93,39 @@ describe('CustomerPanel', () => {
     expect(customerApi.history).toHaveBeenCalledWith(ticket.customer?.id)
     expect(customerApi.notes).toHaveBeenCalledWith(ticket.customer?.id)
     expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('shows the intake answers open and keeps the topic SOP collapsed until asked', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(
+      <CustomerPanel
+        ticket={ticketFixture({
+          intake: [
+            { key: 'order_no', type: 'text', label: 'Nomor order', value: 'ORD-77', display: 'ORD-77' },
+            { key: 'channel', type: 'choice', label: 'Kanal', value: 'app', display: 'Aplikasi' },
+          ],
+          topic_sop: 'Minta bukti transfer.\nCek status order di back office.',
+        })}
+      />,
+    )
+    const panel = screen.getByRole('complementary', { name: 'Info nasabah' })
+    expect(
+      within(panel)
+        .getAllByRole('heading')
+        .map((heading) => heading.textContent),
+    ).toEqual(['Jawaban awal nasabah', 'SOP topik', 'Riwayat tiket', 'Catatan internal'])
+    expect(within(panel).getByText('Nomor order')).toBeInTheDocument()
+    expect(within(panel).getByText('ORD-77')).toBeInTheDocument()
+    expect(within(panel).getByText('Aplikasi')).toBeInTheDocument()
+    expect(within(panel).queryByText(/Minta bukti transfer/)).not.toBeInTheDocument()
+
+    await user.click(within(panel).getByRole('button', { name: 'SOP topik' }))
+    expect(within(panel).getByText(/Minta bukti transfer/)).toBeInTheDocument()
+  })
+
+  it('leaves the intake and SOP sections out when the topic has none', () => {
+    renderWithProviders(<CustomerPanel ticket={ticketFixture({ intake: [], topic_sop: null })} />)
+    expect(screen.queryByRole('button', { name: 'Jawaban awal nasabah' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'SOP topik' })).not.toBeInTheDocument()
   })
 })

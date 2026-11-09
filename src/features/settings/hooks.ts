@@ -19,6 +19,7 @@ import type {
   SettingEntry,
   StaffAccount,
   TopicConfig,
+  TopicExtras,
   TopicPickerDraft,
 } from './types'
 
@@ -135,6 +136,20 @@ export function useSaveTopic() {
     mutationFn: (topic: TopicConfig) => settingsApi.saveTopic(topic),
     onSuccess: (topics) => {
       client.setQueryData(settingsKeys.topics, topics)
+      void client.invalidateQueries({ queryKey: ['topics'] })
+    },
+  })
+}
+
+export function useSaveTopicExtras() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ code, extras }: { code: string; extras: TopicExtras }) =>
+      settingsApi.saveTopicExtras(code, extras),
+    onSuccess: (topic) => {
+      client.setQueryData<TopicConfig[]>(settingsKeys.topics, (items) =>
+        items?.map((item) => (item.code === topic.code ? { ...item, ...topic } : item)),
+      )
       void client.invalidateQueries({ queryKey: ['topics'] })
     },
   })

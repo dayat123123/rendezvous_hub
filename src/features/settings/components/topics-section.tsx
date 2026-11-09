@@ -38,6 +38,7 @@ import {
   type TopicStyle,
 } from '../types'
 import { ActiveBadge, FieldMessage, FormError, QueryContent, SectionFrame } from './settings-ui'
+import { TopicExtrasDialog } from './topic-extras-dialog'
 import { iconGlyphs } from './topic-icons'
 
 type Message =
@@ -492,6 +493,7 @@ export function TopicsSection() {
   const options = useAdminOptions()
   const picker = useTopicPicker()
   const [editing, setEditing] = useState<{ topic: TopicConfig | null; key: number } | null>(null)
+  const [extras, setExtras] = useState<{ topic: TopicConfig; key: number } | null>(null)
   const skillName = (code: string) => options.data?.skills.find((skill) => skill.code === code)?.name ?? code
   const english = i18n.language.startsWith('en')
   return (
@@ -519,6 +521,7 @@ export function TopicsSection() {
                 <TableHead>{t('settings.colSkill')}</TableHead>
                 <TableHead>{t('settings.colDefaultPriority')}</TableHead>
                 <TableHead>{t('settings.colHelpLink')}</TableHead>
+                <TableHead>{t('help.extras.column')}</TableHead>
                 <TableHead>{t('settings.colStatus')}</TableHead>
                 <TableHead>
                   <span className="sr-only">{t('app.edit')}</span>
@@ -557,16 +560,31 @@ export function TopicsSection() {
                     <TableCell className="max-w-56 truncate" title={topic.help_url ?? undefined}>
                       {topic.help_url ?? '–'}
                     </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {t('help.extras.summary', {
+                        intake: topic.intake?.length ?? 0,
+                        replies: topic.customer_replies?.length ?? 0,
+                      })}
+                      {topic.sop ? ` · ${t('help.extras.hasSop')}` : ''}
+                    </TableCell>
                     <TableCell>
                       <ActiveBadge active={topic.active} />
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right whitespace-nowrap">
                       <Button
                         variant="ghost"
                         size="xs"
                         onClick={() => setEditing({ topic, key: Date.now() })}
                       >
                         {t('app.edit')}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        aria-label={t('help.extras.openNamed', { name: topic.name_id })}
+                        onClick={() => setExtras({ topic, key: Date.now() })}
+                      >
+                        {t('help.extras.open')}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -578,6 +596,9 @@ export function TopicsSection() {
       </QueryContent>
       {editing ? (
         <TopicDialog key={editing.key} topic={editing.topic} onClose={() => setEditing(null)} />
+      ) : null}
+      {extras ? (
+        <TopicExtrasDialog key={extras.key} topic={extras.topic} onClose={() => setExtras(null)} />
       ) : null}
     </SectionFrame>
   )
