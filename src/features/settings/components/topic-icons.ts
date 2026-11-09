@@ -1,0 +1,40 @@
+import {
+  BellIcon,
+  CircleHelpIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  GiftIcon,
+  GlobeIcon,
+  LockIcon,
+  MessageCircleIcon,
+  PhoneIcon,
+  PieChartIcon,
+  ReceiptTextIcon,
+  ShieldAlertIcon,
+  StarIcon,
+  UserIcon,
+  WalletIcon,
+  WrenchIcon,
+  type LucideIcon,
+} from 'lucide-react'
+
+import type { TopicIcon } from '../types'
+
+export const iconGlyphs: Record<TopicIcon, LucideIcon> = {
+  account: UserIcon,
+  wallet: WalletIcon,
+  receipt: ReceiptTextIcon,
+  chart: PieChartIcon,
+  tools: WrenchIcon,
+  shield: ShieldAlertIcon,
+  help: CircleHelpIcon,
+  document: FileTextIcon,
+  phone: PhoneIcon,
+  card: CreditCardIcon,
+  chat: MessageCircleIcon,
+  star: StarIcon,
+  bell: BellIcon,
+  lock: LockIcon,
+  globe: GlobeIcon,
+  gift: GiftIcon,
+}

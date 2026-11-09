@@ -34,6 +34,45 @@ export type Database = {
       admin_delete_banner: { Args: { p_id: string }; Returns: Json }
       admin_delete_feature_flag: { Args: { p_key: string }; Returns: Json }
       admin_delete_holiday: { Args: { p_day: string }; Returns: Json }
+      admin_faq: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_faq_feedback: { Args: { p_id: string }; Returns: Json }
+      admin_faq_misses: { Args: { p_days?: number }; Returns: Json }
+      admin_faq_restore: {
+        Args: { p_id: string; p_version: number }
+        Returns: Json
+      }
+      admin_faq_save_article: {
+        Args: {
+          p_answer_en: string
+          p_answer_id: string
+          p_category_id: string
+          p_id: string
+          p_keywords?: string[]
+          p_question_en: string
+          p_question_id: string
+          p_sort_order?: number
+          p_topic_code?: string
+          p_version?: number
+        }
+        Returns: Json
+      }
+      admin_faq_save_category: {
+        Args: {
+          p_active?: boolean
+          p_code: string
+          p_icon?: string
+          p_id: string
+          p_name_en: string
+          p_name_id: string
+          p_sort_order?: number
+        }
+        Returns: Json
+      }
+      admin_faq_set_status: {
+        Args: { p_id: string; p_status: string }
+        Returns: Json
+      }
+      admin_faq_versions: { Args: { p_id: string }; Returns: Json }
       admin_feature_flags: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_holidays: { Args: { p_year: number }; Returns: Json }
       admin_options: { Args: Record<PropertyKey, never>; Returns: Json }
@@ -694,6 +733,23 @@ export type Database = {
         Returns: Json
       }
       evidence_verify: { Args: { p_id: string }; Returns: Json }
+      faq: { Args: { p_language?: string }; Returns: Json }
+      faq_article: {
+        Args: { p_id: string; p_language?: string }
+        Returns: Json
+      }
+      faq_feedback: {
+        Args: { p_article_id: string; p_comment?: string; p_helpful: boolean }
+        Returns: Json
+      }
+      faq_for_topic: {
+        Args: { p_language?: string; p_limit?: number; p_topic: string }
+        Returns: Json
+      }
+      faq_search: {
+        Args: { p_language?: string; p_query: string }
+        Returns: Json
+      }
       flag_ticket: {
         Args: { p_flag: string; p_ticket_id: string }
         Returns: Json

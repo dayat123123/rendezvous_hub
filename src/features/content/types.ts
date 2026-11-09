@@ -1,4 +1,4 @@
-export const contentTabs = ['topics'] as const
+export const contentTabs = ['topics', 'faq'] as const
 export type ContentTab = (typeof contentTabs)[number]
 
 export const isContentTab = (value: unknown): value is ContentTab =>

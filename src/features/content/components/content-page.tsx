@@ -2,6 +2,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import { SectionBoundary } from '@/components/states'
+import { FaqSection } from '@/features/faq/components/faq-section'
 import { TopicsSection } from '@/features/settings/components/topics-section'
 import { cn } from '@/lib/utils'
 
@@ -9,6 +10,7 @@ import { contentTabs, isContentTab, type ContentTab } from '../types'
 
 const panels: Record<ContentTab, () => React.ReactNode> = {
   topics: () => <TopicsSection />,
+  faq: () => <FaqSection />,
 }
 
 export function ContentPage() {

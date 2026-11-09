@@ -1,26 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  BellIcon,
-  ChevronRightIcon,
-  CircleHelpIcon,
-  CreditCardIcon,
-  FileTextIcon,
-  GiftIcon,
-  GlobeIcon,
-  LoaderCircleIcon,
-  LockIcon,
-  MessageCircleIcon,
-  PhoneIcon,
-  PieChartIcon,
-  PlusIcon,
-  ReceiptTextIcon,
-  ShieldAlertIcon,
-  StarIcon,
-  UserIcon,
-  WalletIcon,
-  WrenchIcon,
-  type LucideIcon,
-} from 'lucide-react'
+import { ChevronRightIcon, LoaderCircleIcon, PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -59,25 +38,7 @@ import {
   type TopicStyle,
 } from '../types'
 import { ActiveBadge, FieldMessage, FormError, QueryContent, SectionFrame } from './settings-ui'
-
-const iconGlyphs: Record<TopicIcon, LucideIcon> = {
-  account: UserIcon,
-  wallet: WalletIcon,
-  receipt: ReceiptTextIcon,
-  chart: PieChartIcon,
-  tools: WrenchIcon,
-  shield: ShieldAlertIcon,
-  help: CircleHelpIcon,
-  document: FileTextIcon,
-  phone: PhoneIcon,
-  card: CreditCardIcon,
-  chat: MessageCircleIcon,
-  star: StarIcon,
-  bell: BellIcon,
-  lock: LockIcon,
-  globe: GlobeIcon,
-  gift: GiftIcon,
-}
+import { iconGlyphs } from './topic-icons'
 
 type Message =
   | 'settings.invalidTopicCode'
