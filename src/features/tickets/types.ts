@@ -5,6 +5,10 @@ export type TicketStatus = 'open' | 'claimed' | 'waiting_customer' | 'resolved' 
 
 export const ticketPriorities = ['P1', 'P2', 'P3', 'P4'] as const
 export const ticketFlags = ['complaint', 'fraud', 'vip'] as const
+export const caseFlags = ['complaint', 'fraud'] as const
+export type TicketCaseFlag = (typeof caseFlags)[number]
+
+export type IntakeAnswer = { key: string; type: string; label: string; value: string; display: string | null }
 
 export type TicketCustomer = {
   id: string
@@ -66,6 +70,8 @@ export type Ticket = {
   waiting_since: string | null
   events?: TicketEventItem[]
   labels?: TicketLabel[]
+  intake?: IntakeAnswer[]
+  topic_sop?: string | null
 }
 
 export type TransferRequest = {

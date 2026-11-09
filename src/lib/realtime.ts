@@ -136,10 +136,11 @@ class RealtimeManager {
   private readonly leaving = new Map<string, Promise<unknown>>()
   private readonly listeners = new Set<(event: QueueEvent) => void>()
   private readonly resyncListeners = new Set<() => void>()
+  private readonly noticeListeners = new Set<() => void>()
   private resyncTimer: number | undefined
   private started = false
 
-  start(agentId: string, viewsTickets: boolean) {
+  start(agentId: string, viewsTickets: boolean, watchesCases = false) {
     this.stop()
     this.started = true
     window.addEventListener('online', this.onOnline)
@@ -155,6 +156,13 @@ class RealtimeManager {
         channel
           .on('broadcast', { event: 'ticket' }, ({ payload }) => this.emit('ticket', payload as Payload))
           .on('broadcast', { event: 'transfer' }, ({ payload }) => this.emit('transfer', payload as Payload)),
+      )
+    }
+    if (watchesCases) {
+      this.open('cs:compliance', false, (channel) =>
+        channel.on('broadcast', { event: 'case_flagged' }, () =>
+          this.noticeListeners.forEach((listener) => listener()),
+        ),
       )
     }
     this.recompute()
@@ -173,6 +181,13 @@ class RealtimeManager {
     this.listeners.add(listener)
     return () => {
       this.listeners.delete(listener)
+    }
+  }
+
+  onNotice(listener: () => void) {
+    this.noticeListeners.add(listener)
+    return () => {
+      this.noticeListeners.delete(listener)
     }
   }
 

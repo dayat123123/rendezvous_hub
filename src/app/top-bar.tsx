@@ -39,6 +39,8 @@ import {
   StatusMenu,
 } from '@/features/presence/components/status-menu'
 import { useCommunityBadge } from '@/features/community/hooks'
+import { ComplianceNoticesMenu } from '@/features/compliance/notices/components/notices-menu'
+import { useComplianceNotices } from '@/features/compliance/notices/hooks'
 import {
   canManageContent,
   canManageFeatures,
@@ -259,6 +261,8 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
   const superAdmin = isSuperAdmin(agent)
   const compliance = isCompliance(agent)
   const showSystem = superAdmin && SHOW_SYSTEM_HEALTH_NAV
+  const watchesCases = compliance || superAdmin
+  const unseenNotices = useComplianceNotices(watchesCases).data?.unseen ?? 0
   const communityCount = useCommunityBadge()
   const health = badgeView(useHealthBadge(showSystem).data)
   const [dialog, setDialog] = useState<AccountDialog | null>(null)
@@ -302,7 +306,12 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
         ) : null}
         {compliance ? (
           <>
-            <NavLink to="/compliance" label={t('nav.overview')} />
+            <NavLink
+              to="/compliance"
+              label={t('nav.overview')}
+              count={unseenNotices || undefined}
+              countLabel={t('complianceNotices.titleUnseen', { count: unseenNotices })}
+            />
             <NavLink
               to="/compliance/cases"
               label={t('nav.cases')}
@@ -350,6 +359,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
           </>
         ) : null}
         {monitor ? <MonitorIndicator /> : null}
+        {watchesCases ? <ComplianceNoticesMenu /> : null}
         <AlertsMenu />
         <AccountMenu onOpen={setDialog} />
       </div>

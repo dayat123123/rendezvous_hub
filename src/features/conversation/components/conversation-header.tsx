@@ -1,5 +1,5 @@
-import { ArrowLeftIcon, EllipsisIcon, PanelRightCloseIcon, PanelRightOpenIcon } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { ArrowLeftIcon, EllipsisIcon, FlagIcon, PanelRightCloseIcon, PanelRightOpenIcon } from 'lucide-react'
+import { lazy, Suspense, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dot, FlagText, PriorityText } from '@/components/badges'
@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -20,13 +21,21 @@ import { LabelNames } from '@/features/labels/components/label-chip'
 import { TicketLabelMenu } from '@/features/labels/components/ticket-label-menu'
 import { ticketLabels } from '@/features/labels/logic'
 import { useTopicName } from '@/features/tickets/hooks'
-import { customerName, ticketPriorities, type Ticket } from '@/features/tickets/types'
+import {
+  caseFlags,
+  customerName,
+  ticketPriorities,
+  type Ticket,
+  type TicketCaseFlag,
+} from '@/features/tickets/types'
 import { useNow } from '@/hooks/use-now'
 import { minutesSince, stamp, waitLabel } from '@/lib/time'
 
 import type { TicketAction } from './action-dialogs'
 
 const WIDE_HEADER = 720
+
+const FlagTicketDialog = lazy(() => import('./flag-dialog'))
 
 function useWide() {
   const [wide, setWide] = useState(true)
@@ -76,6 +85,9 @@ export function ConversationHeader({
   const canChangePriority = active && (owner || superAdmin)
   const canReassign = superAdmin && !owner && (active || ticket.status === 'open')
   const canLabel = owner || superAdmin
+  const flagOptions =
+    active && (owner || superAdmin) ? caseFlags.filter((flag) => !ticket.flags.includes(flag)) : []
+  const [flagging, setFlagging] = useState<TicketCaseFlag | null>(null)
   const labels = ticketLabels(ticket)
   const ownerName = ticket.owner
     ? ticket.owner.id === meId
@@ -170,7 +182,7 @@ export function ConversationHeader({
           </Button>
         ) : null}
         {canLabel ? <TicketLabelMenu ticket={ticket} /> : null}
-        {canChangePriority || owner ? (
+        {canChangePriority || owner || flagOptions.length > 0 ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon-sm" aria-label={t('conversation.moreActions')}>
@@ -197,6 +209,18 @@ export function ConversationHeader({
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               ) : null}
+              {flagOptions.length > 0 ? <DropdownMenuSeparator /> : null}
+              {flagOptions.map((flag) => (
+                <DropdownMenuItem
+                  key={flag}
+                  destructive={flag === 'fraud'}
+                  disabled={busy}
+                  onSelect={() => setFlagging(flag)}
+                >
+                  <FlagIcon />
+                  {t(`help.flag.menu.${flag}`)}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         ) : null}
@@ -211,6 +235,11 @@ export function ConversationHeader({
           </Button>
         </Tooltip>
       </div>
+      {flagging ? (
+        <Suspense fallback={null}>
+          <FlagTicketDialog ticketId={ticket.id} flag={flagging} onClose={() => setFlagging(null)} />
+        </Suspense>
+      ) : null}
     </header>
   )
 }

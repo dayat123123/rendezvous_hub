@@ -23,6 +23,15 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
+const notices = vi.hoisted(() => ({ unseen: 0 }))
+
+vi.mock('@/features/compliance/notices/api', () => ({
+  noticesApi: {
+    list: vi.fn(() => Promise.resolve({ unseen: notices.unseen, last_seen_id: 0, items: [] })),
+    seen: vi.fn(() => Promise.resolve({ unseen: 0, last_seen_id: 0, items: [] })),
+  },
+}))
+
 vi.mock('@/features/community/api', () => ({
   communityApi: {
     overview: vi.fn(() =>
@@ -47,6 +56,7 @@ vi.mock('@/features/system/api', () => ({
 
 afterEach(() => {
   nav.SHOW_SYSTEM_HEALTH_NAV = false
+  notices.unseen = 0
 })
 
 function navLinks() {
@@ -216,6 +226,25 @@ describe('TopBar', () => {
       'Dokumen hukum',
       'Bukti',
     ])
+  })
+
+  it('shows unseen case notices on Ringkasan and in the case notice button for compliance', async () => {
+    notices.unseen = 2
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
+      ...agentFixture,
+      roles: ['compliance'],
+    })
+
+    expect(await screen.findByRole('button', { name: '2 kasus baru belum dilihat' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Ringkasan/ })).toHaveTextContent('Ringkasan2')
+  })
+
+  it('gives Super Admins the case notice button and plain agents none', () => {
+    const { unmount } = renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
+    expect(screen.getByRole('button', { name: 'Kasus baru' })).toBeInTheDocument()
+    unmount()
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, agentFixture)
+    expect(screen.queryByRole('button', { name: 'Kasus baru' })).not.toBeInTheDocument()
   })
 
   it('offers profile, performance, password and sign-out-everywhere in the account menu', async () => {

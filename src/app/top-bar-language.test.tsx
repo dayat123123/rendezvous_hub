@@ -22,6 +22,13 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
+vi.mock('@/features/compliance/notices/api', () => ({
+  noticesApi: {
+    list: vi.fn(() => Promise.resolve({ unseen: 0, last_seen_id: 0, items: [] })),
+    seen: vi.fn(() => Promise.resolve({ unseen: 0, last_seen_id: 0, items: [] })),
+  },
+}))
+
 vi.mock('@/features/community/api', () => ({
   communityApi: {
     overview: vi.fn(() =>

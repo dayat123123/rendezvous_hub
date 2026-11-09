@@ -11,6 +11,7 @@ import { useConsoleAlerts, useDocumentTitle, useOverdueAlerts } from '@/features
 import { useFreshPermissions } from '@/features/nasabah/hooks'
 import { useHeartbeat, useResumeStatus, useStatusOnClose } from '@/features/presence/hooks'
 import { useComplianceOverview } from '@/features/compliance/hooks'
+import { useComplianceNoticeRealtime } from '@/features/compliance/notices/hooks'
 import { caseAttention } from '@/features/compliance/logic'
 import { canViewTickets, isCompliance, isSuperAdmin, worksTickets } from '@/features/presence/types'
 import { useSupervisorOverview } from '@/features/supervisor/hooks'
@@ -37,10 +38,12 @@ export function Shell() {
     return () => tabs.setScope(null)
   }, [agent.id])
 
+  const watchesCases = isCompliance(agent) || superAdmin
+
   useEffect(() => {
-    realtime.start(agent.id, tickets)
+    realtime.start(agent.id, tickets, watchesCases)
     return () => realtime.stop()
-  }, [agent.id, tickets])
+  }, [agent.id, tickets, watchesCases])
 
   useEffect(
     () =>
@@ -51,6 +54,7 @@ export function Shell() {
   )
 
   useTicketRealtime(agent.id, tickets, superAdmin)
+  useComplianceNoticeRealtime(watchesCases)
   useFreshPermissions()
   useHeartbeat()
   useStatusOnClose(worker)

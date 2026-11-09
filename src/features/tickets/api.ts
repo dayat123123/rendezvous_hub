@@ -1,6 +1,6 @@
 import { rpc } from '@/lib/supabase'
 
-import { emptyLists, type SupportTopic, type Ticket, type TicketLists } from './types'
+import { emptyLists, type SupportTopic, type Ticket, type TicketCaseFlag, type TicketLists } from './types'
 
 export const ticketsApi = {
   lists: async (): Promise<TicketLists> => ({
@@ -42,6 +42,8 @@ export const ticketsApi = {
       p_priority: priority,
       p_version: ticket.version,
     }),
+  flag: (ticketId: string, flag: TicketCaseFlag, reason: string) =>
+    rpc<Ticket>('flag_ticket', { p_ticket_id: ticketId, p_flag: flag, p_reason: reason }),
   reassign: (ticketId: string, toAgentId: string, reason: string) =>
     rpc<Ticket>('reassign_ticket', { p_ticket_id: ticketId, p_to_agent_id: toAgentId, p_reason: reason }),
   topics: (language: string) => rpc<SupportTopic[]>('topics', { p_language: language }),

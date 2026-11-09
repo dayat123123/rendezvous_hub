@@ -244,6 +244,22 @@ describe('realtime manager', () => {
     stop()
   })
 
+  it('joins the private compliance topic only for case watchers and reports flagged cases', async () => {
+    const notices = vi.fn()
+    const stop = realtime.onNotice(notices)
+    realtime.start('a1', false)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(socket.joined('cs:compliance')).toBeUndefined()
+
+    realtime.start('a1', false, true)
+    await vi.advanceTimersByTimeAsync(0)
+    socket.finishLeaves()
+    await vi.advanceTimersByTimeAsync(0)
+    socket.joined('cs:compliance')!.broadcast('case_flagged', { id: 4, ticket_id: 't1', flag: 'fraud' })
+    expect(notices).toHaveBeenCalledTimes(1)
+    stop()
+  })
+
   it('leaves typing and presence out of rooms the agent only watches', async () => {
     const room = realtime.room('r1', me, roomHandlers(), { signals: false })
     await vi.advanceTimersByTimeAsync(0)
