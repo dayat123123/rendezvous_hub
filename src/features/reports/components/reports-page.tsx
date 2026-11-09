@@ -35,6 +35,8 @@ import {
 } from '../types'
 import { CustomersSection } from './customers-section'
 import { DailyChart } from './daily-chart'
+import { HelpReportSection } from './help-report-section'
+import { RatingReasonsSection } from './rating-reasons-section'
 import { SortableTable } from './sortable-table'
 
 type TopicRow = TopicCount & { share: number | undefined }
@@ -335,6 +337,8 @@ export function ReportsPage() {
           </div>
         )}
         <LabelsReport range={range} />
+        <RatingReasonsSection range={range} />
+        <HelpReportSection range={range} />
         <CustomersSection range={range} />
       </div>
     </div>

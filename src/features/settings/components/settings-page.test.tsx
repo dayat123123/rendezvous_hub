@@ -53,6 +53,8 @@ describe('SettingsPage', () => {
       'Pesan otomatis',
       'Lampiran chat CS',
       'Penugasan, tiket & alert',
+      'Status layanan / gangguan',
+      'Survei kepuasan',
     ])
     expect(groupItems('Komunitas')).toEqual(['Aturan persetujuan'])
     expect(groupItems('Integrasi')).toEqual([

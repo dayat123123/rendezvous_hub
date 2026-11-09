@@ -9,6 +9,8 @@ export const reportKeys = {
     ['reports', 'customers', range.from, range.to, search] as const,
   trail: (customerId: string, range: DateRange) =>
     ['reports', 'trail', customerId, range.from, range.to] as const,
+  ratingReasons: (range: DateRange) => ['reports', 'rating-reasons', range.from, range.to] as const,
+  help: (range: DateRange) => ['reports', 'help', range.from, range.to] as const,
 }
 
 export function useReport(range: DateRange) {
@@ -36,5 +38,23 @@ export function useCustomerTrail(customerId: string, range: DateRange) {
     staleTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+  })
+}
+
+export function useRatingReasons(range: DateRange) {
+  return useQuery({
+    queryKey: reportKeys.ratingReasons(range),
+    queryFn: () => reportsApi.ratingReasons(range),
+    placeholderData: (previous) => previous,
+    staleTime: 60_000,
+  })
+}
+
+export function useHelpReport(range: DateRange) {
+  return useQuery({
+    queryKey: reportKeys.help(range),
+    queryFn: () => reportsApi.helpReport(range),
+    placeholderData: (previous) => previous,
+    staleTime: 60_000,
   })
 }

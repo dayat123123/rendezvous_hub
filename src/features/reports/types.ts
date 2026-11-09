@@ -108,3 +108,43 @@ export type CustomerTrail = {
 }
 
 export const MAX_CUSTOMER_ROWS = 200
+
+export type RatingReasonByTopic = { topic: string; reason: string; count: number }
+
+export type RatingReasonByAgent = {
+  agent_id: string
+  agent_name: string | null
+  reason: string
+  count: number
+}
+
+export type RatingReasons = { by_topic: RatingReasonByTopic[]; by_agent: RatingReasonByAgent[] }
+
+export type HelpTopicRow = {
+  topic: string
+  name: string | null
+  tickets: number
+  median_first_response_minutes: number | null
+  median_resolution_minutes: number | null
+}
+
+export type HelpArticleRow = {
+  id: string
+  question: string
+  readers: number
+  helpful: number
+  not_helpful: number
+  tickets_after: number
+  prevented: number
+  helpful_percent: number | null
+}
+
+export type HelpMissRow = { query: string; language: string; count: number }
+
+export type HelpReport = {
+  from: string
+  to: string
+  topics: HelpTopicRow[]
+  articles: HelpArticleRow[]
+  misses: HelpMissRow[]
+}

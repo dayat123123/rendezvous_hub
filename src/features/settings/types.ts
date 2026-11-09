@@ -80,7 +80,28 @@ export type TopicConfig = {
   icon: TopicIcon | null
   style: TopicStyle
   flags: string[]
+  intake?: IntakeField[]
+  customer_replies?: CustomerReply[]
+  sop?: string | null
 }
+
+export const intakeTypes = ['text', 'number', 'date', 'choice'] as const
+export type IntakeType = (typeof intakeTypes)[number]
+
+export type IntakeOption = { value: string; label_id: string; label_en: string }
+
+export type IntakeField = {
+  key: string
+  type: IntakeType
+  label_id: string
+  label_en: string
+  required: boolean
+  options: IntakeOption[]
+}
+
+export type CustomerReply = { id: string; en: string }
+
+export type TopicExtras = { intake: IntakeField[]; customer_replies: CustomerReply[]; sop: string | null }
 
 export type TopicPicker = {
   title?: { id?: string; en?: string }
@@ -116,7 +137,17 @@ export type HolidayKind = (typeof holidayKinds)[number]
 export type Holiday = { day: string; name: string; kind: HolidayKind }
 
 export const settingsGroups = {
-  service: ['accounts', 'quickReplies', 'ticketLabels', 'hours', 'messages', 'attachments', 'assignment'],
+  service: [
+    'accounts',
+    'quickReplies',
+    'ticketLabels',
+    'hours',
+    'messages',
+    'attachments',
+    'assignment',
+    'incidents',
+    'survey',
+  ],
   community: ['community'],
   integration: ['integration', 'appIntegration', 'apiKeys', 'push'],
   system: ['backup', 'alerts'],

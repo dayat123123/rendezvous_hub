@@ -9,6 +9,8 @@ import {
   PaperclipIcon,
   PlugZapIcon,
   SirenIcon,
+  SmilePlusIcon,
+  TriangleAlertIcon,
   SlidersHorizontalIcon,
   SmartphoneIcon,
   TagIcon,
@@ -24,6 +26,8 @@ import { IntegrationKeysSection } from '@/features/integration-keys/components/k
 import { LabelsSection } from '@/features/labels/components/labels-section'
 import { PushSection } from '@/features/push/components/push-section'
 import { PushInactiveBadge } from '@/features/push/components/push-state'
+import { IncidentsSection } from '@/features/incidents/components/incidents-section'
+import { SurveySection } from '@/features/survey/components/survey-section'
 import { cn } from '@/lib/utils'
 
 import { settingsGroupOrder, settingsGroups, type SettingsSection } from '../types'
@@ -46,6 +50,8 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
   messages: MessagesSquareIcon,
   attachments: PaperclipIcon,
   assignment: SlidersHorizontalIcon,
+  incidents: TriangleAlertIcon,
+  survey: SmilePlusIcon,
   community: MegaphoneIcon,
   integration: PlugZapIcon,
   appIntegration: SmartphoneIcon,
@@ -63,6 +69,8 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   messages: () => <MessagesSection />,
   attachments: () => <AttachmentsSection />,
   assignment: () => <AssignmentSection />,
+  incidents: () => <IncidentsSection />,
+  survey: () => <SurveySection />,
   community: () => <CommunitySection />,
   push: () => <PushSection />,
   integration: () => <IntegrationSection />,

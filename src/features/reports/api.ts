@@ -5,6 +5,8 @@ import {
   type CustomerReport,
   type CustomerTrail,
   type DateRange,
+  type HelpReport,
+  type RatingReasons,
   type ReportSummary,
 } from './types'
 
@@ -32,4 +34,21 @@ export const reportsApi = {
       p_from: range.from,
       p_to: range.to,
     }),
+  ratingReasons: async (range: DateRange): Promise<RatingReasons> => {
+    const raw = await rpc<Partial<RatingReasons>>('admin_rating_reasons', {
+      p_from: range.from,
+      p_to: range.to,
+    })
+    return { by_topic: raw.by_topic ?? [], by_agent: raw.by_agent ?? [] }
+  },
+  helpReport: async (range: DateRange): Promise<HelpReport> => {
+    const raw = await rpc<Partial<HelpReport>>('admin_help_report', { p_from: range.from, p_to: range.to })
+    return {
+      from: raw.from ?? range.from,
+      to: raw.to ?? range.to,
+      topics: raw.topics ?? [],
+      articles: raw.articles ?? [],
+      misses: raw.misses ?? [],
+    }
+  },
 }
