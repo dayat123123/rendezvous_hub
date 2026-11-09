@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { EmptyState } from '@/components/states'
 import { Button } from '@/components/ui/button'
 import type { AgentNote } from '@/features/customer/types'
+import { cn } from '@/lib/utils'
 
 import { compareMessages } from '../cache'
 import { buildRows, type MessageRow } from '../rows'
@@ -36,6 +37,7 @@ const SMOOTH_SCREENS = 2
 const FOLLOW_MS = 10_000
 const FLASH_MS = 1400
 const MAX_BADGE = 99
+const FLOAT_HOLD = 1500
 
 function incoming(message: ChatMessage, meId: string) {
   return message.sender_id !== meId && !isStaffMessage(message)
@@ -74,7 +76,11 @@ export function MessageList({
   const followUntil = useRef(0)
   const seeking = useRef(false)
   const flashTimer = useRef<number | undefined>(undefined)
+  const floatTimer = useRef<number | undefined>(undefined)
+  const [floating, setFloating] = useState<{ label: string; shown: boolean } | null>(null)
   const badgeId = useId()
+
+  useEffect(() => () => window.clearTimeout(floatTimer.current), [])
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -216,6 +222,22 @@ export function MessageList({
     setAway(distance > JUMP_DISTANCE)
     if (atBottom.current && unseen > 0) setUnseen(0)
     if (element.scrollTop < 240) requestOlder()
+    showFloatingDate(element.scrollTop)
+  }
+
+  const showFloatingDate = (scrollTop: number) => {
+    window.clearTimeout(floatTimer.current)
+    const top = virtualizer.getVirtualItems().find((item) => item.end > scrollTop)
+    const day = top ? rows.slice(0, top.index + 1).findLast((row) => row.kind === 'day') : undefined
+    if (atBottom.current || !top || day?.kind !== 'day' || rows[top.index]?.kind === 'day') {
+      setFloating((current) => (current ? { ...current, shown: false } : current))
+      return
+    }
+    setFloating({ label: day.label, shown: true })
+    floatTimer.current = window.setTimeout(
+      () => setFloating((current) => (current ? { ...current, shown: false } : current)),
+      FLOAT_HOLD,
+    )
   }
 
   const renderRow = (row: MessageRow) => {
@@ -295,6 +317,18 @@ export function MessageList({
           </div>
         )}
       </div>
+      {floating ? (
+        <div
+          aria-hidden="true"
+          data-testid="floating-date"
+          className={cn(
+            'pointer-events-none absolute top-2 left-1/2 -translate-x-1/2 rounded-full border bg-popover px-3 py-1 text-xs text-muted-foreground shadow-float transition-opacity motion-reduce:transition-none',
+            floating.shown ? 'opacity-100 duration-150' : 'opacity-0 duration-300',
+          )}
+        >
+          {floating.label}
+        </div>
+      ) : null}
       {away || unseen > 0 ? (
         <Button
           size="icon"
