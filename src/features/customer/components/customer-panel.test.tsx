@@ -128,4 +128,30 @@ describe('CustomerPanel', () => {
     expect(screen.queryByRole('button', { name: 'Jawaban awal nasabah' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'SOP topik' })).not.toBeInTheDocument()
   })
+
+  it('labels a guest as not logged in with the claimed Login ID instead of the username', () => {
+    const { unmount } = renderWithProviders(
+      <CustomerPanel
+        ticket={ticketFixture({
+          customer: { id: 'c-guest', display_name: 'Sari', username: 'tamu_abc' },
+          guest: { login_id: 'SARI01', problem: 'password', verified: false, recent_24h: 1 },
+        })}
+      />,
+    )
+    const panel = screen.getByRole('complementary', { name: 'Info nasabah' })
+    expect(within(panel).getByText('Tamu (belum login)')).toBeInTheDocument()
+    expect(within(panel).getByText('Login ID disebutkan: SARI01')).toBeInTheDocument()
+    expect(within(panel).queryByText('@tamu_abc')).not.toBeInTheDocument()
+    unmount()
+
+    renderWithProviders(
+      <CustomerPanel
+        ticket={ticketFixture({
+          customer: { id: 'c-guest', display_name: 'Sari', username: 'tamu_abc' },
+          guest: { problem: 'other', verified: false, recent_24h: 0 },
+        })}
+      />,
+    )
+    expect(screen.getByText('Login ID yang disebutkan: tidak diisi')).toBeInTheDocument()
+  })
 })

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { PriorityText } from '@/components/badges'
+import { GuestBadge, PriorityText } from '@/components/badges'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
@@ -44,7 +44,9 @@ export function TransferInbox({
       {incoming.map((request) => (
         <div key={request.id} className="border-b px-3 py-(--row-py) last:border-b-0">
           <div className="flex items-center gap-2 text-row">
-            <span className="min-w-0 flex-1 truncate font-medium">{customerName(request.ticket)}</span>
+            <span className="min-w-0 truncate font-medium">{customerName(request.ticket)}</span>
+            {request.ticket.guest ? <GuestBadge /> : null}
+            <span className="flex-1" />
             <PriorityText priority={request.ticket.priority} className="text-xs" />
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">

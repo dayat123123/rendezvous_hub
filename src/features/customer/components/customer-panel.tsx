@@ -69,15 +69,28 @@ function HistorySection({ customerId, currentId }: { customerId: string; current
   return <HistoryList items={history.data.filter((item) => item.id !== currentId)} topicName={topicName} />
 }
 
-export function CustomerHeader({ ticket }: { ticket: Pick<Ticket, 'customer'> }) {
+export function CustomerHeader({ ticket }: { ticket: Pick<Ticket, 'customer' | 'guest'> }) {
+  const { t } = useTranslation()
   const name = customerName(ticket)
   const username = ticket.customer?.username
+  const guestLogin = ticket.guest?.login_id?.trim()
   return (
     <div className="flex items-center gap-3 border-b px-4 py-3">
       <Avatar name={name || '?'} className="size-9 text-xs" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-panel font-medium">{name}</p>
-        {username ? <p className="truncate font-mono text-xs text-muted-foreground">@{username}</p> : null}
+        {ticket.guest ? (
+          <>
+            <p className="truncate text-xs font-medium text-warning">{t('help.guest.customer')}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {guestLogin
+                ? t('help.guest.claimedLogin', { loginId: guestLogin })
+                : `${t('help.guest.loginId')}: ${t('help.guest.notFilled')}`}
+            </p>
+          </>
+        ) : username ? (
+          <p className="truncate font-mono text-xs text-muted-foreground">@{username}</p>
+        ) : null}
       </div>
     </div>
   )
@@ -122,7 +135,7 @@ export function CustomerPanel({ ticket }: { ticket: Ticket }) {
                 </AccordionContent>
               </AccordionItem>
             ) : null}
-            <CustomerAccount ticketId={ticket.id} />
+            <CustomerAccount ticketId={ticket.id} guest={Boolean(ticket.guest)} />
             <AccordionItem value="history">
               <AccordionTrigger>{t('customer.history')}</AccordionTrigger>
               <AccordionContent>

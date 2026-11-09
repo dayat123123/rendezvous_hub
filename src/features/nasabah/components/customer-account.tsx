@@ -157,23 +157,45 @@ function Profile({ profile }: { profile: OnlineUserProfile }) {
   )
 }
 
-export function CustomerAccount({ ticketId }: { ticketId: string }) {
+function GuestHint({ text }: { text: string }) {
+  const { t } = useTranslation()
+  return (
+    <div role="note" className="flex flex-col items-start gap-1.5 py-1">
+      <p className="text-row text-warning">{text}</p>
+      <Link
+        to="/nasabah"
+        className="inline-flex items-center gap-1 rounded-sm text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
+        {t('help.guest.openNasabah')}
+        <ArrowUpRightIcon className="size-3.5" aria-hidden="true" />
+      </Link>
+    </div>
+  )
+}
+
+export function CustomerAccount({ ticketId, guest = false }: { ticketId: string; guest?: boolean }) {
   const { t } = useTranslation()
   const agent = useAgent()
   const allowed = canViewProfiles(agent.nasabah_permissions)
   const login = useTicketLogin(ticketId, allowed)
-  const loginId = login.data?.login_id
+  const loginId = login.data?.login_id ?? undefined
   const profile = useOnlineUserProfile(allowed ? loginId : undefined)
+  const guestTicket = guest || login.data?.source === 'guest'
+  const notFound = profile.isError && toApiError(profile.error).status === 404
 
-  if (!allowed || (profile.isError && toApiError(profile.error).status === 404)) return null
+  if (!allowed || (notFound && !guestTicket)) return null
   return (
     <AccordionItem value="account">
       <AccordionTrigger>{t('customer.account')}</AccordionTrigger>
       <AccordionContent>
         {login.isError ? (
           <ErrorState error={login.error} onRetry={() => void login.refetch()} />
+        ) : guestTicket && login.isSuccess && !loginId ? (
+          <GuestHint text={t('help.guest.noLoginId')} />
         ) : !loginId || profile.isPending ? (
           <Loading />
+        ) : notFound ? (
+          <GuestHint text={t('help.guest.loginNotFound', { loginId })} />
         ) : profile.isError ? (
           <ErrorState error={profile.error} onRetry={() => void profile.refetch()} />
         ) : (

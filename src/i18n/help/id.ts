@@ -122,6 +122,45 @@ export const help = {
     confirmBody_other: '{{count}} catatan terbuka akan ditandai selesai dan tercatat di Jejak Audit.',
     resolved: 'Catatan ditandai selesai',
   },
+  guest: {
+    title: 'Pengadu belum login dan identitasnya BELUM terverifikasi.',
+    loginId: 'Login ID yang disebutkan',
+    notFilled: 'tidak diisi',
+    problemLabel: 'Masalah',
+    problem: {
+      password: 'Lupa password',
+      pin: 'Lupa PIN',
+      locked: 'Akun terkunci atau ditangguhkan',
+      other: 'Masalah login lainnya',
+    },
+    recent_one: '{{count}} pengaduan tamu untuk Login ID ini dalam 24 jam',
+    recent_other: '{{count}} pengaduan tamu untuk Login ID ini dalam 24 jam',
+    repeatHint: 'Pengaduan berulang: waspadai penyalahgunaan.',
+    sopTitle: 'SOP pengaduan tamu',
+    sop: {
+      noData: 'Jangan sebutkan data akun (email, nomor HP, rekening, saldo, alamat).',
+      resetOnly:
+        'Bantuan akun hanya lewat Reset password/PIN di panel Akun Nasabah, yang dikirim ke email terdaftar.',
+      noChanges:
+        'Jangan mengubah email, nomor HP, atau data akun berdasarkan chat ini; arahkan ke kantor cabang dengan identitas.',
+      noSecrets: 'Jangan minta atau terima password, PIN, OTP.',
+    },
+    customer: 'Tamu (belum login)',
+    claimedLogin: 'Login ID disebutkan: {{loginId}}',
+    noLoginId: 'Login ID tidak diisi; tanyakan Login ID atau cari lewat menu Akun Nasabah.',
+    loginNotFound:
+      'Login ID {{loginId}} tidak ditemukan di csAdmin. Tanyakan ulang Login ID atau cari lewat menu Akun Nasabah.',
+    openNasabah: 'Buka menu Akun Nasabah',
+    settingTitle: 'Pengaduan tanpa login',
+    settingHint:
+      'Nasabah yang tidak bisa login dapat membuat pengaduan dari halaman login aplikasi tanpa OTP. Identitas pengadu tidak diverifikasi; tiket masuk antrean biasa dengan tanda Tamu, dan Reset password/PIN tetap hanya dikirim ke email terdaftar.',
+    settingOnTitle: 'Aktifkan pengaduan tanpa login?',
+    settingOnBody:
+      'Tombol pengaduan tampil lagi di halaman login aplikasi. Pengaduan tamu masuk antrean CS dengan tanda Tamu.',
+    settingOffTitle: 'Matikan pengaduan tanpa login?',
+    settingOffBody:
+      'Nasabah yang tidak bisa login tidak bisa lagi membuat pengaduan dari aplikasi. Tiket tamu yang sudah ada tetap bisa ditangani.',
+  },
   reminder: {
     title: 'Pengingat tiket menunggu nasabah',
     hint: 'Kirim pesan otomatis ke nasabah bila belum membalas dalam N jam saat tiket berstatus menunggu nasabah, sebelum tiket ditutup otomatis.',

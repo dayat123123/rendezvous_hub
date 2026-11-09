@@ -10,7 +10,7 @@ import { useLockedEdit } from '@/hooks/use-locked-edit'
 import { findSetting, useSaveSettings, useSettingEntries } from '../hooks'
 import { inRange, numberSetting } from '../logic'
 import type { SettingEntry } from '../types'
-import { ChangedBy, FieldMessage, QueryContent, SectionFrame, SettingsCard } from './settings-ui'
+import { ChangedBy, FieldMessage, QueryContent, SectionFrame, SettingsCard, ToggleForm } from './settings-ui'
 
 function ModeCard({ items }: { items: SettingEntry[] }) {
   const { t } = useTranslation()
@@ -235,6 +235,29 @@ function ReminderCard({ items }: { items: SettingEntry[] }) {
   )
 }
 
+const GUEST_KEY = 'guest.enabled'
+
+function GuestCard({ items }: { items: SettingEntry[] }) {
+  const { t } = useTranslation()
+  const save = useSaveSettings()
+  const entry = findSetting(items, GUEST_KEY)
+  const enabled = entry?.value !== false
+  return (
+    <SettingsCard title={t('help.guest.settingTitle')} subtitle={t('help.guest.settingHint')}>
+      <ToggleForm
+        key={`${String(enabled)}-${entry?.version ?? 0}`}
+        label={t('help.guest.settingTitle')}
+        saved={enabled}
+        saving={save.isPending}
+        confirmTitle={(next) => t(next ? 'help.guest.settingOnTitle' : 'help.guest.settingOffTitle')}
+        confirmBody={(next) => t(next ? 'help.guest.settingOnBody' : 'help.guest.settingOffBody')}
+        status={<ChangedBy entry={entry} />}
+        onSave={(next) => save.mutateAsync({ [GUEST_KEY]: next })}
+      />
+    </SettingsCard>
+  )
+}
+
 function AlertsCard({ items }: { items: SettingEntry[] }) {
   const { t } = useTranslation()
   const save = useSaveSettings()
@@ -319,6 +342,7 @@ export function AssignmentSection() {
               items={items}
             />
             <ReminderCard key={`reminder-${findSetting(items, REMINDER_KEY)?.version ?? 0}`} items={items} />
+            <GuestCard items={items} />
             <AlertsCard
               key={`alerts-${findSetting(items, 'alerts.unclaimed_minutes')?.version ?? 0}-${findSetting(items, 'alerts.p1_unclaimed_minutes')?.version ?? 0}`}
               items={items}

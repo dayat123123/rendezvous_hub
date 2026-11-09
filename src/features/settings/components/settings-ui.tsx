@@ -1,8 +1,12 @@
 import type { UseQueryResult } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dot } from '@/components/badges'
+import { LockedForm } from '@/components/locked-form'
 import { ErrorState, ListSkeleton } from '@/components/states'
+import { Switch } from '@/components/ui/controls'
+import { useLockedEdit } from '@/hooks/use-locked-edit'
 import { errorText } from '@/lib/error-text'
 import { stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
@@ -104,4 +108,49 @@ export function FormError({ error }: { error: unknown }) {
 export function FieldMessage({ error, hint }: { error?: string; hint?: string }) {
   if (error) return <p className="text-xs text-destructive">{error}</p>
   return hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null
+}
+
+export function ToggleForm({
+  label,
+  saved,
+  saving,
+  confirmTitle,
+  confirmBody,
+  status,
+  onSave,
+  onError,
+}: {
+  label: string
+  saved: boolean
+  saving: boolean
+  confirmTitle: (enabled: boolean) => string
+  confirmBody: (enabled: boolean) => string
+  status: React.ReactNode
+  onSave: (enabled: boolean) => Promise<unknown>
+  onError?: (error: unknown) => void
+}) {
+  const { t } = useTranslation()
+  const lock = useLockedEdit()
+  const [enabled, setEnabled] = useState(saved)
+  return (
+    <LockedForm
+      lock={lock}
+      name={label}
+      className="flex flex-col gap-3"
+      confirmTitle={confirmTitle(enabled)}
+      confirmBody={confirmBody(enabled)}
+      destructive={!enabled}
+      saving={saving}
+      canSave={enabled !== saved}
+      onReset={() => setEnabled(saved)}
+      onSave={() => onSave(enabled)}
+      onError={onError}
+      status={status}
+    >
+      <label className="flex h-9 items-center gap-2 text-sm font-medium">
+        <Switch checked={enabled} aria-label={label} onCheckedChange={setEnabled} />
+        {enabled ? t('app.active') : t('app.inactive')}
+      </label>
+    </LockedForm>
+  )
 }

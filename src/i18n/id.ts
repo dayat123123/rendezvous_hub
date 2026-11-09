@@ -210,6 +210,8 @@ export const id = {
       fraud: 'Fraud',
       vip: 'VIP',
     },
+    guest: 'Tamu',
+    guestHint: 'Pengadu belum login dan identitasnya belum terverifikasi',
   },
   conversation: {
     internalNote: 'Catatan internal · tidak terlihat nasabah',
@@ -730,7 +732,7 @@ export const id = {
     lastChangedBy: 'Terakhir diubah {{time}} oleh {{name}}',
     lastChanged: 'Terakhir diubah {{time}}',
     assignmentDescription:
-      'Atur cara tiket dibagikan ke CS, kapan tiket selesai ditutup, dan kapan Super Admin mendapat peringatan.',
+      'Atur cara tiket dibagikan ke CS, pengaduan tanpa login, kapan tiket selesai ditutup, dan kapan Super Admin mendapat peringatan.',
     assignmentMode: 'Mode penugasan',
     modeClaim: 'Ambil tiket (default)',
     modeClaimHint: 'CS memilih dan mengambil sendiri tiket dari daftar Terbuka.',

@@ -141,4 +141,37 @@ describe('CustomerAccount', () => {
     expect(screen.queryByRole('region', { name: /Akun Nasabah/ })).not.toBeInTheDocument()
     expect(nasabahApi.ticketLogin).not.toHaveBeenCalled()
   })
+
+  it('looks up the Login ID claimed by a guest', async () => {
+    vi.mocked(nasabahApi.ticketLogin).mockResolvedValue({ login_id: 'HIDAYAT', source: 'guest' })
+    render('t-5', viewer)
+
+    await waitFor(() => expect(nasabahApi.onlineUser).toHaveBeenCalledWith('HIDAYAT'))
+    expect(await screen.findByRole('region', { name: 'Akun Nasabah hidayat' })).toBeInTheDocument()
+  })
+
+  it('asks for the Login ID when a guest did not provide one', async () => {
+    vi.mocked(nasabahApi.ticketLogin).mockResolvedValue({ login_id: null, source: 'guest' })
+    render('t-6', viewer)
+
+    const note = await screen.findByRole('note')
+    expect(note).toHaveTextContent(
+      'Login ID tidak diisi; tanyakan Login ID atau cari lewat menu Akun Nasabah.',
+    )
+    expect(within(note).getByRole('link', { name: 'Buka menu Akun Nasabah' })).toHaveAttribute(
+      'href',
+      '/nasabah',
+    )
+    expect(nasabahApi.onlineUser).not.toHaveBeenCalled()
+  })
+
+  it('explains when the Login ID claimed by a guest is not in csAdmin', async () => {
+    vi.mocked(nasabahApi.ticketLogin).mockResolvedValue({ login_id: 'SALAH01', source: 'guest' })
+    vi.mocked(nasabahApi.onlineUser).mockRejectedValue(
+      new ApiError('not_found', 'Online user not found.', 404),
+    )
+    render('t-7', viewer)
+
+    expect(await screen.findByRole('note')).toHaveTextContent('Login ID SALAH01 tidak ditemukan di csAdmin.')
+  })
 })

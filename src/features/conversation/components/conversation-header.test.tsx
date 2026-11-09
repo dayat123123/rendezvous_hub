@@ -102,3 +102,17 @@ describe('ConversationHeader flags', () => {
     expect(screen.queryByRole('button', { name: 'Aksi lainnya' })).not.toBeInTheDocument()
   })
 })
+
+describe('ConversationHeader guest badge', () => {
+  it('marks guest tickets next to the customer name and leaves normal tickets unmarked', () => {
+    const { unmount } = renderHeader(
+      ticketFixture({ guest: { login_id: 'BUDI01', problem: 'pin', verified: false, recent_24h: 1 } }),
+    )
+    const heading = screen.getByRole('heading', { name: 'Budi Santoso' })
+    expect(heading.parentElement).toHaveTextContent('Tamu')
+    unmount()
+
+    renderHeader(ticketFixture({ guest: null }))
+    expect(screen.queryByText('Tamu')).not.toBeInTheDocument()
+  })
+})

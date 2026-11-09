@@ -2,7 +2,7 @@ import { LoaderCircleIcon } from 'lucide-react'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Dot, FlagText, PriorityText, UnreadBadge } from '@/components/badges'
+import { Dot, FlagText, GuestBadge, PriorityText, UnreadBadge } from '@/components/badges'
 import { Button } from '@/components/ui/button'
 import { LabelNames } from '@/features/labels/components/label-chip'
 import { waitTone } from '@/lib/sla'
@@ -66,13 +66,14 @@ export const TicketRow = memo(function TicketRow({
         type="button"
         onClick={onSelect}
         aria-current={selected ? 'true' : undefined}
-        aria-label={`${ticket.ticket_number} · ${name} · ${topicName}`}
+        aria-label={`${ticket.ticket_number} · ${name}${ticket.guest ? ` (${t('tickets.guest')})` : ''} · ${topicName}`}
         className="absolute inset-0 z-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
       />
       <div className="pointer-events-none relative flex items-center gap-2">
         <Dot tone={waited === null ? 'neutral' : waitTone(waited, warn, late)} />
-        <span className="min-w-0 flex-1 truncate text-row font-medium">{name}</span>
-        <span className="tabular shrink-0 text-xs text-muted-foreground">
+        <span className="min-w-0 truncate text-row font-medium">{name}</span>
+        {ticket.guest ? <GuestBadge /> : null}
+        <span className="tabular ml-auto shrink-0 text-xs text-muted-foreground">
           {waited !== null ? waitLabel(waited) : finishedAt ? clock(finishedAt) : ''}
         </span>
       </div>

@@ -827,6 +827,23 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      guest_config: { Args: { p_language?: string }; Returns: Json }
+      guest_end: { Args: { p_token: string }; Returns: undefined }
+      guest_poll: { Args: { p_token: string }; Returns: Json }
+      guest_send: {
+        Args: { p_body: string; p_client_id?: string; p_token: string }
+        Returns: Json
+      }
+      guest_start: {
+        Args: {
+          p_description: string
+          p_language?: string
+          p_login_id: string
+          p_name: string
+          p_problem: string
+        }
+        Returns: Json
+      }
       healer_overview: { Args: Record<PropertyKey, never>; Returns: Json }
       health_acknowledge: { Args: { p_alert_id: number }; Returns: undefined }
       integration_broadcasts: {

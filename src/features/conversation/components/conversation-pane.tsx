@@ -40,6 +40,7 @@ import type { ChatMessage, PendingMessage } from '../types'
 import { ActionDialog, type TicketAction } from './action-dialogs'
 import { Composer } from './composer'
 import { ConversationHeader } from './conversation-header'
+import { GuestBanner } from './guest-banner'
 import { MessageList } from './message-list'
 
 const barClass = 'flex min-h-12 shrink-0 items-center gap-3 border-t bg-subtle px-(--pane-px) py-2'
@@ -265,6 +266,7 @@ function Conversation({
         onWait={() => wait.mutate(undefined)}
         onPriority={(value) => priority.mutate(value)}
       />
+      {ticket.guest ? <GuestBanner guest={ticket.guest} /> : null}
       {messages.isPending ? (
         <div className="flex flex-1 flex-col gap-3 p-(--pane-px)" aria-busy="true">
           <Skeleton className="h-8 w-2/3 rounded-xl" />

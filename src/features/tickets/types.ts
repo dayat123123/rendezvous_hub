@@ -16,6 +16,16 @@ export type TicketCustomer = {
   username: string | null
   deleted?: boolean
 }
+export const guestProblems = ['password', 'pin', 'locked', 'other'] as const
+export type GuestProblem = (typeof guestProblems)[number]
+
+export type TicketGuest = {
+  login_id?: string | null
+  problem: GuestProblem
+  verified: false
+  recent_24h: number
+}
+
 export type TicketOwner = { id: string; display_name: string; agent_code: string | null; status: AgentStatus }
 
 export type PendingTransfer = {
@@ -72,6 +82,7 @@ export type Ticket = {
   labels?: TicketLabel[]
   intake?: IntakeAnswer[]
   topic_sop?: string | null
+  guest?: TicketGuest | null
 }
 
 export type TransferRequest = {
@@ -124,6 +135,8 @@ export const emptyLists: TicketLists = {
   transfers_in: [],
   transfers_out: [],
 }
+
+export const GUEST_REPEAT_ALERT = 2
 
 export const customerName = (ticket: Pick<Ticket, 'customer'>) =>
   ticket.customer?.display_name?.trim() || ticket.customer?.username || ''

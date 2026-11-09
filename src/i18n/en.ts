@@ -213,6 +213,8 @@ export const en: Translation = {
       fraud: 'Fraud',
       vip: 'VIP',
     },
+    guest: 'Guest',
+    guestHint: 'The complainant is not logged in and their identity is not verified',
   },
   conversation: {
     internalNote: 'Internal note · not visible to the customer',
@@ -732,7 +734,7 @@ export const en: Translation = {
     lastChangedBy: 'Last changed {{time}} by {{name}}',
     lastChanged: 'Last changed {{time}}',
     assignmentDescription:
-      'Control how tickets reach agents, when resolved tickets close, and when Super Admins are alerted.',
+      'Control how tickets reach agents, complaints without login, when resolved tickets close, and when Super Admins are alerted.',
     assignmentMode: 'Assignment mode',
     modeClaim: 'Claim tickets (default)',
     modeClaimHint: 'Agents pick and claim tickets from the Open list.',

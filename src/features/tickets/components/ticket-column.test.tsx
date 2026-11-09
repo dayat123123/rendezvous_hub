@@ -125,4 +125,33 @@ describe('TicketColumn', () => {
     expect(screen.queryByRole('button', { name: 'Ubah ke Online' })).not.toBeInTheDocument()
     expect(hasCommand('claim')).toBe(false)
   })
+
+  it('marks guest tickets in the queue with a Tamu badge', async () => {
+    const guestTicket = ticketFixture({
+      id: 'guest-1',
+      ticket_number: 'CS-000125',
+      status: 'open',
+      owner: null,
+      is_mine: false,
+      customer: { id: 'c-guest', display_name: 'Sari', username: 'tamu_abc' },
+      guest: { login_id: 'SARI01', problem: 'password', verified: false, recent_24h: 2 },
+    })
+    const lists = vi.mocked(ticketsApi.lists)
+    const original = lists.getMockImplementation()
+    lists.mockImplementation(() => Promise.resolve({ ...emptyLists, open: [openTicket, guestTicket] }))
+    try {
+      renderWithProviders(<TicketColumn />, agentFixture)
+
+      const guestRow = (await screen.findByRole('button', { name: /^CS-000125 · Sari \(Tamu\)/ })).closest(
+        '[data-ticket-id]',
+      ) as HTMLElement
+      expect(within(guestRow).getByText('Tamu')).toBeInTheDocument()
+      const normalRow = screen
+        .getByRole('button', { name: /^CS-000124 · Andi Pratama/ })
+        .closest('[data-ticket-id]') as HTMLElement
+      expect(within(normalRow).queryByText('Tamu')).not.toBeInTheDocument()
+    } finally {
+      if (original) lists.mockImplementation(original)
+    }
+  })
 })

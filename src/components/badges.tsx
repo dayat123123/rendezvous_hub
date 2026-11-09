@@ -108,3 +108,19 @@ export function UnreadBadge({ count, label }: { count: number; label: string }) 
     </span>
   )
 }
+
+export function GuestBadge({ className }: { className?: string }) {
+  const { t } = useTranslation()
+  return (
+    <span
+      title={t('tickets.guestHint')}
+      className={cn(
+        'inline-flex shrink-0 items-center rounded-sm border border-warning/40 bg-warning/10 px-1 text-[11px] leading-4 font-medium text-warning',
+        className,
+      )}
+    >
+      {t('tickets.guest')}
+      <span className="sr-only">: {t('tickets.guestHint')}</span>
+    </span>
+  )
+}

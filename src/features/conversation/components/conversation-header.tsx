@@ -2,7 +2,7 @@ import { ArrowLeftIcon, EllipsisIcon, FlagIcon, PanelRightCloseIcon, PanelRightO
 import { lazy, Suspense, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Dot, FlagText, PriorityText } from '@/components/badges'
+import { Dot, FlagText, GuestBadge, PriorityText } from '@/components/badges'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -126,6 +126,7 @@ export function ConversationHeader({
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-baseline gap-2">
           <h2 className="truncate text-panel font-medium">{customerName(ticket)}</h2>
+          {ticket.guest ? <GuestBadge className="self-center" /> : null}
           <span className="shrink-0 font-mono text-xs text-muted-foreground select-all">
             {ticket.ticket_number}
           </span>

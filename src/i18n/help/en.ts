@@ -124,6 +124,45 @@ export const help: Translated<typeof source> = {
     confirmBody_other: '{{count}} open notes will be marked resolved and recorded in the Audit Trail.',
     resolved: 'Notes marked resolved',
   },
+  guest: {
+    title: 'The complainant is not logged in and their identity is NOT verified.',
+    loginId: 'Claimed Login ID',
+    notFilled: 'not provided',
+    problemLabel: 'Problem',
+    problem: {
+      password: 'Forgot password',
+      pin: 'Forgot PIN',
+      locked: 'Account locked or suspended',
+      other: 'Other login problem',
+    },
+    recent_one: '{{count}} guest complaint for this Login ID in 24 hours',
+    recent_other: '{{count}} guest complaints for this Login ID in 24 hours',
+    repeatHint: 'Repeated complaints: watch for abuse.',
+    sopTitle: 'Guest complaint SOP',
+    sop: {
+      noData: 'Do not mention any account data (email, phone number, accounts, balance, address).',
+      resetOnly:
+        'Account help only through Reset password/PIN in the Customer account panel, which is sent to the registered email.',
+      noChanges:
+        'Do not change the email, phone number or account data based on this chat; refer the customer to a branch office with ID.',
+      noSecrets: 'Do not ask for or accept passwords, PINs or OTPs.',
+    },
+    customer: 'Guest (not logged in)',
+    claimedLogin: 'Claimed Login ID: {{loginId}}',
+    noLoginId: 'No Login ID provided; ask for the Login ID or search in the Customer accounts menu.',
+    loginNotFound:
+      'Login ID {{loginId}} was not found in csAdmin. Ask for the Login ID again or search in the Customer accounts menu.',
+    openNasabah: 'Open Customer accounts',
+    settingTitle: 'Complaints without login',
+    settingHint:
+      'Customers who cannot log in can file a complaint from the app login page without an OTP. The identity is not verified; the ticket joins the normal queue marked Guest, and Reset password/PIN is still sent only to the registered email.',
+    settingOnTitle: 'Turn on complaints without login?',
+    settingOnBody:
+      'The complaint button shows again on the app login page. Guest complaints join the CS queue marked Guest.',
+    settingOffTitle: 'Turn off complaints without login?',
+    settingOffBody:
+      'Customers who cannot log in can no longer file a complaint from the app. Existing guest tickets can still be handled.',
+  },
   reminder: {
     title: 'Reminder for tickets waiting on the customer',
     hint: 'Send the customer an automatic message when they have not replied for N hours while the ticket waits on them, before the ticket closes automatically.',

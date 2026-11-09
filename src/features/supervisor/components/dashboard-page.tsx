@@ -1,7 +1,7 @@
 import { ChevronRightIcon, RefreshCwIcon, WifiOffIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { PriorityText, StatusDot, WaitTime } from '@/components/badges'
+import { GuestBadge, PriorityText, StatusDot, WaitTime } from '@/components/badges'
 import { MetricStrip } from '@/components/metric-strip'
 import { ErrorState } from '@/components/states'
 import { Button } from '@/components/ui/button'
@@ -56,6 +56,7 @@ function AttentionRow({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-row font-medium">
           {customerName(ticket)} <span className="font-mono text-xs font-normal">{ticket.ticket_number}</span>
+          {ticket.guest ? <GuestBadge className="ml-1.5 align-middle" /> : null}
         </span>
         <span className="block truncate text-xs text-muted-foreground">{meta.join(' · ')}</span>
       </span>

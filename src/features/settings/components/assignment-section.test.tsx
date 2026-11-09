@@ -33,6 +33,7 @@ beforeEach(() => {
     entry('alerts.unclaimed_minutes', 10),
     entry('alerts.p1_unclaimed_minutes', 2),
     entry('ticket.reminder_hours', 24),
+    entry('guest.enabled', true),
   ])
   vi.mocked(settingsApi.setSetting).mockImplementation((key, value) =>
     Promise.resolve({ key, value, version: 2, updated_at: '2026-11-02T03:00:00.000Z' }),
@@ -135,5 +136,51 @@ describe('AssignmentSection waiting reminder', () => {
     expect(off).toHaveTextContent('Pengingat otomatis dimatikan')
     await user.click(within(off).getByRole('button', { name: 'Simpan' }))
     await waitFor(() => expect(settingsApi.setSetting).toHaveBeenLastCalledWith('ticket.reminder_hours', 0))
+  })
+})
+
+describe('AssignmentSection guest complaints', () => {
+  it('keeps the guest switch locked and turns it off only after confirmation', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AssignmentSection />, monitorFixture)
+
+    const toggle = await screen.findByRole('switch', { name: 'Pengaduan tanpa login' })
+    expect(toggle).toBeChecked()
+    expect(toggle).toBeDisabled()
+    const card = toggle.closest('section') as HTMLElement
+    expect(within(card).getByText(/Identitas pengadu tidak diverifikasi/)).toBeVisible()
+
+    await user.click(within(card).getByRole('button', { name: 'Ubah Pengaduan tanpa login' }))
+    await user.click(toggle)
+    expect(toggle).not.toBeChecked()
+    await user.click(within(card).getByRole('button', { name: 'Batal' }))
+    expect(toggle).toBeChecked()
+    expect(toggle).toBeDisabled()
+
+    await user.click(within(card).getByRole('button', { name: 'Ubah Pengaduan tanpa login' }))
+    await user.click(toggle)
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Matikan pengaduan tanpa login?' })
+    expect(dialog).toHaveTextContent('tidak bisa lagi membuat pengaduan dari aplikasi')
+    expect(settingsApi.setSetting).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(settingsApi.setSetting).toHaveBeenCalledWith('guest.enabled', false))
+    await waitFor(() => expect(screen.getByRole('switch', { name: 'Pengaduan tanpa login' })).toBeDisabled())
+  })
+
+  it('turns guest complaints back on after confirmation', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsApi.settings).mockResolvedValue([entry('guest.enabled', false)])
+    renderWithProviders(<AssignmentSection />, monitorFixture)
+
+    const toggle = await screen.findByRole('switch', { name: 'Pengaduan tanpa login' })
+    expect(toggle).not.toBeChecked()
+    const card = toggle.closest('section') as HTMLElement
+    await user.click(within(card).getByRole('button', { name: 'Ubah Pengaduan tanpa login' }))
+    await user.click(toggle)
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Aktifkan pengaduan tanpa login?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(settingsApi.setSetting).toHaveBeenCalledWith('guest.enabled', true))
   })
 })
