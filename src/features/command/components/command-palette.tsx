@@ -13,6 +13,7 @@ import {
   HandIcon,
   KeyboardIcon,
   LayoutDashboardIcon,
+  LibraryIcon,
   LineChartIcon,
   ListIcon,
   MessageSquareTextIcon,
@@ -50,6 +51,7 @@ import { featuresCampaignsTabs, type FeaturesCampaignsTab } from '@/features/fea
 import { useSetStatus } from '@/features/presence/hooks'
 import {
   agentStatuses,
+  canManageContent,
   canManageFeatures,
   canViewTickets,
   hasNasabah,
@@ -122,6 +124,7 @@ type SectionTarget =
   | '/reports'
   | '/community'
   | '/features'
+  | '/content'
   | '/settings'
   | '/compliance'
   | '/compliance/cases'
@@ -200,6 +203,9 @@ function PaletteBody({
     ...(hasNasabah(agent) ? [{ label: t('nav.nasabah'), icon: UsersIcon, to: '/nasabah' as const }] : []),
     ...(canManageFeatures(agent)
       ? [{ label: t('nav.featuresCampaigns'), icon: SlidersHorizontalIcon, to: '/features' as const }]
+      : []),
+    ...(canManageContent(agent)
+      ? [{ label: t('nav.content'), icon: LibraryIcon, to: '/content' as const }]
       : []),
     ...(superAdmin ? [{ label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const }] : []),
     ...(superAdmin && !compliance

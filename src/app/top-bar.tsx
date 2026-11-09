@@ -40,6 +40,7 @@ import {
 } from '@/features/presence/components/status-menu'
 import { useCommunityBadge } from '@/features/community/hooks'
 import {
+  canManageContent,
   canManageFeatures,
   canOpenCommunity,
   canViewTickets,
@@ -63,6 +64,7 @@ type NavTarget =
   | '/dashboard'
   | '/reports'
   | '/features'
+  | '/content'
   | '/settings'
   | '/compliance'
   | '/compliance/cases'
@@ -280,6 +282,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
             countLabel={t('nav.communityAttention', { count: communityCount })}
           />
         ) : null}
+        {canManageContent(agent) ? <NavLink to="/content" label={t('nav.content')} /> : null}
         {canManageFeatures(agent) ? <NavLink to="/features" label={t('nav.featuresCampaigns')} /> : null}
         {superAdmin ? <NavLink to="/settings" label={t('nav.settings')} /> : null}
         {showSystem ? (

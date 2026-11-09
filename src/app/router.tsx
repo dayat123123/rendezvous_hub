@@ -14,9 +14,11 @@ import {
 } from '@/features/community/types'
 import { policyTabs, type PolicyTab } from '@/features/content-policy/types'
 import { caseStates, type CaseState } from '@/features/compliance/types'
+import { isContentTab, type ContentTab } from '@/features/content/types'
 import { isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
 import { systemTabs, type SystemTab } from '@/features/system/types'
 import {
+  canManageContent,
   canManageFeatures,
   canOpenCommunity,
   canViewTickets,
@@ -42,6 +44,10 @@ const featuresOnly = ({ context }: { context: RouterContext }) => {
   if (!canManageFeatures(context.agent)) throw redirect({ to: '/' })
 }
 
+const contentOnly = ({ context }: { context: RouterContext }) => {
+  if (!canManageContent(context.agent)) throw redirect({ to: '/' })
+}
+
 const complianceOnly = ({ context }: { context: RouterContext }) => {
   if (!isCompliance(context.agent)) throw redirect({ to: '/' })
 }
@@ -62,6 +68,7 @@ const homeRoute = createRoute({
     if (hasNasabah(context.agent)) throw redirect({ to: '/nasabah' })
     if (hasCommunityAccess(context.agent)) throw redirect({ to: '/community' })
     if (canManageFeatures(context.agent)) throw redirect({ to: '/features' })
+    if (canManageContent(context.agent)) throw redirect({ to: '/content' })
   },
   loader: () => loadStrings('labels', 'replies'),
   component: Home,
@@ -116,6 +123,15 @@ const featuresCampaignsRoute = createRoute({
     withStrings(() => import('@/features/features-campaigns/components/features-campaigns-page'), 'platform'),
     'FeaturesCampaignsPage',
   ),
+})
+
+const contentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/content',
+  beforeLoad: contentOnly,
+  validateSearch: (search: Record<string, unknown>): { tab?: ContentTab } =>
+    isContentTab(search.tab) ? { tab: search.tab } : {},
+  component: lazyRouteComponent(() => import('@/features/content/components/content-page'), 'ContentPage'),
 })
 
 const legacyAppRoute = createRoute({
@@ -291,6 +307,7 @@ const routeTree = rootRoute.addChildren([
   reportsRoute,
   analyticsRoute,
   featuresCampaignsRoute,
+  contentRoute,
   legacyAppRoute,
   settingsRoute,
   complianceRoute,

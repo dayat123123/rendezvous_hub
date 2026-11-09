@@ -115,6 +115,7 @@ export const id = {
     compliance: 'Kepatuhan',
     community: 'Komunitas',
     product: 'Fitur & Kampanye',
+    cs_content: 'Konten Layanan',
   },
   nav: {
     nasabah: 'Akun Nasabah',
@@ -122,6 +123,7 @@ export const id = {
     dashboard: 'Dashboard',
     reports: 'Laporan',
     featuresCampaigns: 'Fitur & Kampanye',
+    content: 'Konten Layanan',
     settings: 'Pengaturan',
     attention: '{{count}} tiket perlu perhatian',
     account: 'Akun',
@@ -1574,6 +1576,12 @@ export const id = {
       invalid_account_link: 'Daftar rekening tidak valid (kode ganda atau tidak dikenal).',
       links_client_only: 'Hanya akun Klien yang bisa ditautkan ke rekening.',
     },
+  },
+  content: {
+    title: 'Konten Layanan',
+    subtitle: 'Isi bantuan yang dilihat nasabah di aplikasi: topik chat CS dan pusat bantuan.',
+    tabsLabel: 'Bagian Konten Layanan',
+    tabs: { topics: 'Topik chat CS' },
   },
   featuresCampaigns: {
     title: 'Fitur & Kampanye',

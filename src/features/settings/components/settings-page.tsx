@@ -11,7 +11,6 @@ import {
   SlidersHorizontalIcon,
   SmartphoneIcon,
   TagIcon,
-  TagsIcon,
   UsersIcon,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -36,11 +35,9 @@ import { HoursSection } from './hours-section'
 import { IntegrationBadge, IntegrationSection } from './integration-section'
 import { MessagesSection } from './messages-section'
 import { QuickRepliesSection } from './quick-replies-section'
-import { TopicsSection } from './topics-section'
 
 const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>> = {
   accounts: UsersIcon,
-  topics: TagsIcon,
   quickReplies: MessageSquareTextIcon,
   ticketLabels: TagIcon,
   hours: CalendarClockIcon,
@@ -57,7 +54,6 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
 
 const content: Record<SettingsSection, () => React.ReactNode> = {
   accounts: () => <AccountsSection />,
-  topics: () => <TopicsSection />,
   ticketLabels: () => <LabelsSection />,
   quickReplies: () => <QuickRepliesSection />,
   hours: () => <HoursSection />,

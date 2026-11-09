@@ -47,7 +47,6 @@ describe('SettingsPage', () => {
     ).toEqual(['Layanan CS', 'Komunitas', 'Integrasi', 'Sistem'])
     expect(groupItems('Layanan CS')).toEqual([
       'Akun CS',
-      'Topik',
       'Quick reply',
       'Label tiket',
       'Jam layanan & libur',

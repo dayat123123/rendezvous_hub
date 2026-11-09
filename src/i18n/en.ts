@@ -118,6 +118,7 @@ export const en: Translation = {
     compliance: 'Compliance',
     community: 'Community',
     product: 'Features & campaigns',
+    cs_content: 'Service content',
   },
   nav: {
     nasabah: 'Customer accounts',
@@ -125,6 +126,7 @@ export const en: Translation = {
     dashboard: 'Dashboard',
     reports: 'Reports',
     featuresCampaigns: 'Features & Campaigns',
+    content: 'Service Content',
     settings: 'Settings',
     attention: '{{count}} tickets need attention',
     account: 'Account',
@@ -1577,6 +1579,12 @@ export const en: Translation = {
       invalid_account_link: 'Invalid account list (duplicate or unknown codes).',
       links_client_only: 'Only client logins can be linked to accounts.',
     },
+  },
+  content: {
+    title: 'Service Content',
+    subtitle: 'Help content customers see in the app: customer service chat topics and the help center.',
+    tabsLabel: 'Service Content sections',
+    tabs: { topics: 'Customer service topics' },
   },
   featuresCampaigns: {
     title: 'Features & Campaigns',

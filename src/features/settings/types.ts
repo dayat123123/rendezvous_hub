@@ -1,6 +1,13 @@
 import type { AgentStatus } from '@/features/presence/types'
 
-export const staffRoles = ['cs_agent', 'cs_super_admin', 'compliance', 'community', 'product'] as const
+export const staffRoles = [
+  'cs_agent',
+  'cs_super_admin',
+  'compliance',
+  'community',
+  'product',
+  'cs_content',
+] as const
 export type StaffRole = (typeof staffRoles)[number]
 
 export type StaffAccount = {
@@ -72,7 +79,7 @@ export type HolidayKind = (typeof holidayKinds)[number]
 export type Holiday = { day: string; name: string; kind: HolidayKind }
 
 export const settingsGroups = {
-  service: ['accounts', 'topics', 'quickReplies', 'ticketLabels', 'hours', 'messages', 'assignment'],
+  service: ['accounts', 'quickReplies', 'ticketLabels', 'hours', 'messages', 'assignment'],
   community: ['community'],
   integration: ['integration', 'appIntegration', 'apiKeys', 'push'],
   system: ['backup', 'alerts'],

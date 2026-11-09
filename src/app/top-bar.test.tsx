@@ -83,6 +83,7 @@ describe('TopBar', () => {
       'Dashboard',
       'Laporan',
       'Komunitas',
+      'Konten Layanan',
       'Fitur & Kampanye',
       'Pengaturan',
     ])
@@ -115,6 +116,7 @@ describe('TopBar', () => {
       'Laporan',
       'Akun Nasabah',
       'Komunitas',
+      'Konten Layanan',
       'Fitur & Kampanye',
       'Pengaturan',
     ])
@@ -137,6 +139,7 @@ describe('TopBar', () => {
       'Dashboard',
       'Laporan',
       'Komunitas',
+      'Konten Layanan',
       'Fitur & Kampanye',
       'Pengaturan',
       'Kesehatan sistem',
@@ -187,6 +190,15 @@ describe('TopBar', () => {
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, agentFixture)
 
     expect(systemApi.badge).not.toHaveBeenCalled()
+  })
+
+  it('shows only Konten Layanan to the service content role', () => {
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
+      ...agentFixture,
+      roles: ['cs_content'],
+    })
+    expect(navLinks()).toEqual(['Konten Layanan'])
+    expect(screen.getByRole('link', { name: 'Konten Layanan' })).toHaveAttribute('href', '/content')
   })
 
   it('lists Dokumen hukum among the compliance menus', () => {
