@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils'
 
 import { linkify } from '../linkify'
 import { isDocument, isDocumentFile } from '../media'
+import { SWIPE_TRIGGER, useSwipeReply } from '../swipe-reply'
 import { systemText } from '../system-text'
 import type { ChatMessage, PendingMessage } from '../types'
 import { AttachmentFile, DocumentLabel } from './attachment-file'
@@ -201,18 +202,39 @@ export const MessageBubble = memo(function MessageBubble({
   const status = read ? t('conversation.read') : t('conversation.sent')
   const images = message.attachments.filter((attachment) => !isDocument(attachment))
   const documents = message.attachments.filter(isDocument)
+  const swipe = useSwipeReply(onReply ? () => onReply(message) : undefined)
+  const progress = Math.min(swipe.offset / SWIPE_TRIGGER, 1)
 
   return (
     <div
+      {...swipe.handlers}
       className={cn(
-        'group flex px-(--pane-px)',
+        'group relative flex touch-pan-y px-(--pane-px)',
+        swipe.offset > 0 && 'overflow-x-clip',
         staff ? 'justify-end' : 'justify-start',
         first ? 'pt-3 compact:pt-2' : 'pt-0.5',
         highlighted && 'animate-flash',
       )}
       data-highlighted={highlighted || undefined}
     >
-      <div className={cn('flex max-w-[68%] min-w-0 flex-col', staff ? 'items-end' : 'items-start')}>
+      {swipe.offset > 0 ? (
+        <span
+          aria-hidden
+          data-testid="swipe-reply-indicator"
+          className="pointer-events-none absolute top-1/2 left-(--pane-px) flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-muted text-muted-foreground"
+          style={{ opacity: progress, transform: `translateY(-50%) scale(${0.6 + 0.4 * progress})` }}
+        >
+          <ReplyIcon className="size-4" />
+        </span>
+      ) : null}
+      <div
+        className={cn(
+          'flex max-w-[68%] min-w-0 flex-col',
+          staff ? 'items-end' : 'items-start',
+          swipe.offset === 0 && 'transition-transform duration-200 motion-reduce:transition-none',
+        )}
+        style={swipe.offset > 0 ? { transform: `translateX(${swipe.offset}px)` } : undefined}
+      >
         {first ? (
           <p className="mb-1 px-1 text-xs font-medium text-muted-foreground">
             {staff ? name : name || t('conversation.customer')}

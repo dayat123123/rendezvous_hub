@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -147,5 +147,71 @@ describe('MessageBubble', () => {
     expect(site).toHaveAttribute('href', 'https://www.olt.co.id')
     await user.click(site)
     expect(await screen.findByRole('alertdialog', { name: 'Buka tautan luar?' })).toBeInTheDocument()
+  })
+
+  describe('swipe to reply', () => {
+    function swipeBubble(onReply = vi.fn()) {
+      renderWithProviders(
+        <MessageBubble
+          message={messageFixture({ id: 's1', body: 'Geser saya' })}
+          staff={false}
+          first
+          last
+          read={false}
+          trustedHost={() => false}
+          onReply={onReply}
+        />,
+      )
+      const row = screen.getByText('Geser saya').closest('.group') as HTMLElement
+      return { onReply, row }
+    }
+
+    function drag(row: HTMLElement, pointerType: string, dx: number, dy = 0) {
+      fireEvent.pointerDown(row, { pointerId: 1, pointerType, isPrimary: true, clientX: 10, clientY: 10 })
+      fireEvent.pointerMove(row, {
+        pointerId: 1,
+        pointerType,
+        isPrimary: true,
+        clientX: 10 + dx / 2,
+        clientY: 10 + dy / 2,
+      })
+      fireEvent.pointerMove(row, {
+        pointerId: 1,
+        pointerType,
+        isPrimary: true,
+        clientX: 10 + dx,
+        clientY: 10 + dy,
+      })
+    }
+
+    it('replies after a touch swipe past the threshold and vibrates once', () => {
+      const vibrate = vi.fn(() => true)
+      Object.defineProperty(navigator, 'vibrate', { configurable: true, value: vibrate })
+      const { onReply, row } = swipeBubble()
+      drag(row, 'touch', 80)
+      expect(screen.getByTestId('swipe-reply-indicator')).toBeInTheDocument()
+      fireEvent.pointerUp(row, {
+        pointerId: 1,
+        pointerType: 'touch',
+        isPrimary: true,
+        clientX: 90,
+        clientY: 10,
+      })
+      expect(onReply).toHaveBeenCalledTimes(1)
+      expect(vibrate).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('swipe-reply-indicator')).not.toBeInTheDocument()
+      Reflect.deleteProperty(navigator, 'vibrate')
+    })
+
+    it('does nothing for a short swipe, a vertical scroll or a mouse drag', () => {
+      const { onReply, row } = swipeBubble()
+      drag(row, 'touch', 30)
+      fireEvent.pointerUp(row, { pointerId: 1, pointerType: 'touch', isPrimary: true })
+      drag(row, 'touch', 20, 120)
+      fireEvent.pointerUp(row, { pointerId: 1, pointerType: 'touch', isPrimary: true })
+      drag(row, 'mouse', 120)
+      fireEvent.pointerUp(row, { pointerId: 1, pointerType: 'mouse', isPrimary: true })
+      expect(onReply).not.toHaveBeenCalled()
+    })
   })
 })
