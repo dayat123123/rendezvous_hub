@@ -629,6 +629,14 @@ export const id = {
     topicPreview: 'Pratinjau di aplikasi',
     colDescription: 'Deskripsi',
     colStyle: 'Tampilan',
+    pickerDefault: 'bawaan',
+    pickerPlaceholder: 'Kosong = {{text}}',
+    pickerEmptyHint: 'Kolom yang dikosongkan memakai teks bawaan aplikasi (ditandai "bawaan" di pratinjau).',
+    pickerPreview: 'Pratinjau di aplikasi',
+    pickerPreviewLanguage: 'Bahasa pratinjau',
+    pickerConfirmTitle: 'Simpan teks halaman pilih topik?',
+    pickerConfirmBody:
+      'Teks baru langsung tampil di aplikasi nasabah. Kolom yang kosong memakai teks bawaan aplikasi.',
     pickerTitle: 'Teks halaman pilih topik',
     pickerDescription:
       'Judul dan petunjuk di atas daftar topik di aplikasi. Kosongkan untuk memakai teks bawaan aplikasi.',

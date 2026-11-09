@@ -111,15 +111,37 @@ describe('TopicsSection', () => {
     expect(vi.mocked(settingsApi.saveTopic).mock.calls[0]?.[0].flags).toEqual(['complaint', 'fraud'])
   })
 
-  it('saves the topic page title and hint in both languages', async () => {
+  it('shows the app preview with default texts and saves the page text only after Ubah and confirmation', async () => {
+    vi.mocked(settingsApi.saveTopicPicker).mockImplementation((draft) =>
+      Promise.resolve({ title: { id: draft.title_id, en: draft.title_en } }),
+    )
     const user = userEvent.setup()
     renderWithProviders(<TopicsSection />, content)
-    await screen.findByRole('row', { name: /Laporkan Penipuan/ })
+    const preview = await screen.findByRole('region', { name: 'Pratinjau di aplikasi' })
+    expect(within(preview).getByText('Apa yang bisa kami bantu?')).toBeInTheDocument()
+    expect(within(preview).getAllByText('bawaan')).toHaveLength(2)
+    expect(within(preview).getByText('Laporkan Penipuan')).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText('Judul (Indonesia)'), 'Ada kendala apa?')
+    const titleId = screen.getByLabelText('Judul (Indonesia)')
+    expect(titleId).toBeDisabled()
+    expect(titleId).toHaveAttribute('placeholder', 'Kosong = Apa yang bisa kami bantu?')
+    await user.click(screen.getByRole('button', { name: 'Ubah Teks halaman pilih topik' }))
+    await user.type(titleId, 'Ada kendala apa?')
+    expect(within(preview).getByText('Ada kendala apa?')).toBeInTheDocument()
+    expect(within(preview).getAllByText('bawaan')).toHaveLength(1)
+
     await user.type(screen.getByLabelText('Judul (Inggris)'), 'What do you need?')
-    await user.click(screen.getByRole('button', { name: 'Simpan teks halaman' }))
+    expect(within(preview).getByText('What do you need?')).toBeInTheDocument()
+    expect(within(preview).getByText('Report Fraud')).toBeInTheDocument()
 
+    await user.click(
+      within(screen.getByRole('region', { name: 'Teks halaman pilih topik' })).getByRole('button', {
+        name: 'Simpan',
+      }),
+    )
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan teks halaman pilih topik?' })
+    expect(settingsApi.saveTopicPicker).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
     await waitFor(() =>
       expect(settingsApi.saveTopicPicker).toHaveBeenCalledWith({
         title_id: 'Ada kendala apa?',

@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { PriorityText } from '@/components/badges'
+import { LockedForm } from '@/components/locked-form'
 import { Button } from '@/components/ui/button'
 import {
   Checkbox,
@@ -45,6 +46,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAgent } from '@/features/auth/hooks'
 import { isSuperAdmin } from '@/features/presence/types'
 import { ticketPriorities } from '@/features/tickets/types'
+import { useLockedEdit } from '@/hooks/use-locked-edit'
 import { errorText } from '@/lib/error-text'
 import { cn } from '@/lib/utils'
 
@@ -459,60 +461,164 @@ function TopicDialog({ topic, onClose }: { topic: TopicConfig | null; onClose: (
   )
 }
 
-function PickerTextForm({ picker }: { picker: TopicPicker }) {
-  const { t } = useTranslation()
-  const save = useSaveTopicPicker()
-  const [draft, setDraft] = useState({
+const pickerDefaults = {
+  title: { id: 'Apa yang bisa kami bantu?', en: 'How can we help?' },
+  hint: {
+    id: 'Pilih topik agar CS yang tepat langsung membantu Anda.',
+    en: 'Pick a topic so the right agent can help you right away.',
+  },
+} as const
+
+type PickerLanguage = 'id' | 'en'
+
+function pickerDraft(picker: TopicPicker) {
+  return {
     title_id: picker.title?.id ?? '',
     title_en: picker.title?.en ?? '',
     hint_id: picker.hint?.id ?? '',
     hint_en: picker.hint?.en ?? '',
-  })
-  const field = (key: keyof typeof draft, label: string, max: number) => (
+  }
+}
+
+function PickerPreview({
+  title,
+  hint,
+  titleDefault,
+  hintDefault,
+  topics,
+  language,
+}: {
+  title: string
+  hint: string
+  titleDefault: boolean
+  hintDefault: boolean
+  topics: TopicConfig[]
+  language: PickerLanguage
+}) {
+  const { t } = useTranslation()
+  const shown = topics.filter((topic) => topic.active).slice(0, 4)
+  const badge = (
+    <span className="ml-1.5 rounded-sm bg-muted px-1 py-px text-[10px] font-normal text-muted-foreground">
+      {t('settings.pickerDefault')}
+    </span>
+  )
+  return (
+    <div className="mx-auto w-full max-w-xs rounded-[1.75rem] border-4 border-muted bg-background p-4">
+      <p className="text-base leading-snug font-semibold">
+        {title}
+        {titleDefault ? badge : null}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {hint}
+        {hintDefault ? badge : null}
+      </p>
+      <div className="mt-3 flex flex-col gap-2">
+        {shown.map((topic) => (
+          <TopicCard
+            key={topic.code}
+            icon={topic.icon}
+            name={language === 'en' ? topic.name_en : topic.name_id}
+            description={(language === 'en' ? topic.description_en : topic.description_id) ?? ''}
+            style={topic.style}
+          />
+        ))}
+        {topics.filter((topic) => topic.active).length > shown.length ? (
+          <p className="text-center text-xs text-muted-foreground">…</p>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function PickerTextForm({ picker, topics }: { picker: TopicPicker; topics: TopicConfig[] }) {
+  const { t } = useTranslation()
+  const save = useSaveTopicPicker()
+  const lock = useLockedEdit()
+  const saved = pickerDraft(picker)
+  const [draft, setDraft] = useState(saved)
+  const [language, setLanguage] = useState<PickerLanguage>('id')
+  const trimmed = {
+    title_id: draft.title_id.trim(),
+    title_en: draft.title_en.trim(),
+    hint_id: draft.hint_id.trim(),
+    hint_en: draft.hint_en.trim(),
+  }
+  const changed = (Object.keys(trimmed) as (keyof typeof trimmed)[]).some(
+    (key) => trimmed[key] !== saved[key],
+  )
+  const title = trimmed[`title_${language}`]
+  const hint = trimmed[`hint_${language}`]
+  const field = (key: keyof typeof draft, label: string, max: number, fallback: string) => (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={`topic-picker-${key}`}>{label}</Label>
       <Input
         id={`topic-picker-${key}`}
         maxLength={max}
         value={draft[key]}
+        placeholder={t('settings.pickerPlaceholder', { text: fallback })}
+        onFocus={() => setLanguage(key.endsWith('_en') ? 'en' : 'id')}
         onChange={(event) => setDraft((current) => ({ ...current, [key]: event.target.value }))}
       />
     </div>
   )
   return (
-    <form
-      className="flex flex-col gap-3 rounded-lg border p-4"
-      onSubmit={(event) => {
-        event.preventDefault()
-        save.mutate(
-          {
-            title_id: draft.title_id.trim(),
-            title_en: draft.title_en.trim(),
-            hint_id: draft.hint_id.trim(),
-            hint_en: draft.hint_en.trim(),
-          },
-          { onSuccess: () => toast.success(t('settings.pickerSaved')) },
-        )
-      }}
-    >
+    <section className="flex flex-col gap-3 rounded-lg border p-4" aria-labelledby="topic-picker-heading">
       <div>
-        <h3 className="text-sm font-semibold">{t('settings.pickerTitle')}</h3>
+        <h3 id="topic-picker-heading" className="text-sm font-semibold">
+          {t('settings.pickerTitle')}
+        </h3>
         <p className="text-xs text-muted-foreground">{t('settings.pickerDescription')}</p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {field('title_id', t('settings.pickerTitleId'), 80)}
-        {field('title_en', t('settings.pickerTitleEn'), 80)}
-        {field('hint_id', t('settings.pickerHintId'), 160)}
-        {field('hint_en', t('settings.pickerHintEn'), 160)}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <LockedForm
+          lock={lock}
+          name={t('settings.pickerTitle')}
+          className="flex flex-col gap-3"
+          confirmTitle={t('settings.pickerConfirmTitle')}
+          confirmBody={t('settings.pickerConfirmBody')}
+          saving={save.isPending}
+          canSave={changed}
+          onReset={() => setDraft(saved)}
+          onSave={() => save.mutateAsync(trimmed).then(() => toast.success(t('settings.pickerSaved')))}
+          onError={(error) => toast.error(errorText(error))}
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            {field('title_id', t('settings.pickerTitleId'), 80, pickerDefaults.title.id)}
+            {field('title_en', t('settings.pickerTitleEn'), 80, pickerDefaults.title.en)}
+            {field('hint_id', t('settings.pickerHintId'), 160, pickerDefaults.hint.id)}
+            {field('hint_en', t('settings.pickerHintEn'), 160, pickerDefaults.hint.en)}
+          </div>
+          <p className="text-xs text-muted-foreground">{t('settings.pickerEmptyHint')}</p>
+        </LockedForm>
+        <div className="flex flex-col gap-2" aria-label={t('settings.pickerPreview')} role="region">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">{t('settings.pickerPreview')}</span>
+            <div role="group" aria-label={t('settings.pickerPreviewLanguage')} className="flex gap-1">
+              {(['id', 'en'] as const).map((item) => (
+                <Button
+                  key={item}
+                  type="button"
+                  size="xs"
+                  variant={language === item ? 'secondary' : 'ghost'}
+                  aria-pressed={language === item}
+                  onClick={() => setLanguage(item)}
+                >
+                  {item.toUpperCase()}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <PickerPreview
+            title={title || pickerDefaults.title[language]}
+            hint={hint || pickerDefaults.hint[language]}
+            titleDefault={!title}
+            hintDefault={!hint}
+            topics={topics}
+            language={language}
+          />
+        </div>
       </div>
-      <FormError error={save.error} />
-      <div>
-        <Button type="submit" variant="outline" size="sm" disabled={save.isPending}>
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-          {t('settings.savePicker')}
-        </Button>
-      </div>
-    </form>
+    </section>
   )
 }
 
@@ -560,7 +666,9 @@ export function TopicsSection() {
         </Button>
       }
     >
-      {picker.data ? <PickerTextForm picker={picker.data} /> : null}
+      {picker.data ? (
+        <PickerTextForm key={JSON.stringify(picker.data)} picker={picker.data} topics={topics.data ?? []} />
+      ) : null}
       <QueryContent query={topics}>
         {(items) => (
           <Table>
