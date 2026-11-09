@@ -1,5 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronRightIcon, LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ChevronRightIcon,
+  GripVerticalIcon,
+  LoaderCircleIcon,
+  PlusIcon,
+} from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -25,9 +32,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAgent } from '@/features/auth/hooks'
 import { isSuperAdmin } from '@/features/presence/types'
 import { ticketPriorities } from '@/features/tickets/types'
+import { errorText } from '@/lib/error-text'
 import { cn } from '@/lib/utils'
 
-import { useAdminOptions, useSaveTopic, useSaveTopicPicker, useTopicConfigs, useTopicPicker } from '../hooks'
+import {
+  useAdminOptions,
+  useReorderTopics,
+  useSaveTopic,
+  useSaveTopicPicker,
+  useTopicConfigs,
+  useTopicPicker,
+} from '../hooks'
 import {
   topicFlags,
   topicIcons,
@@ -494,6 +509,20 @@ export function TopicsSection() {
   const picker = useTopicPicker()
   const [editing, setEditing] = useState<{ topic: TopicConfig | null; key: number } | null>(null)
   const [extras, setExtras] = useState<{ topic: TopicConfig; key: number } | null>(null)
+  const reorder = useReorderTopics()
+  const [dragging, setDragging] = useState<string | null>(null)
+  const [over, setOver] = useState<string | null>(null)
+  const move = (items: TopicConfig[], from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || to >= items.length) return
+    const codes = items.map((topic) => topic.code)
+    const [code] = codes.splice(from, 1)
+    if (code === undefined) return
+    codes.splice(to, 0, code)
+    reorder.mutate(codes, {
+      onSuccess: () => toast.success(t('settings.orderSaved')),
+      onError: (error) => toast.error(errorText(error)),
+    })
+  }
   const skillName = (code: string) => options.data?.skills.find((skill) => skill.code === code)?.name ?? code
   const english = i18n.language.startsWith('en')
   return (
@@ -529,12 +558,70 @@ export function TopicsSection() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((topic) => {
+              {items.map((topic, index) => {
                 const Glyph = iconGlyphs[topic.icon ?? 'help']
                 const description = english ? topic.description_en : topic.description_id
                 return (
-                  <TableRow key={topic.code}>
-                    <TableCell className="tabular text-right">{topic.sort_order}</TableCell>
+                  <TableRow
+                    key={topic.code}
+                    draggable={!reorder.isPending}
+                    data-dragging={dragging === topic.code || undefined}
+                    className={cn(
+                      dragging === topic.code && 'opacity-50',
+                      over === topic.code && dragging !== topic.code && 'bg-selected',
+                    )}
+                    onDragStart={(event) => {
+                      event.dataTransfer.effectAllowed = 'move'
+                      event.dataTransfer.setData('text/plain', topic.code)
+                      setDragging(topic.code)
+                    }}
+                    onDragOver={(event) => {
+                      if (!dragging) return
+                      event.preventDefault()
+                      setOver(topic.code)
+                    }}
+                    onDragLeave={() => setOver((current) => (current === topic.code ? null : current))}
+                    onDragEnd={() => {
+                      setDragging(null)
+                      setOver(null)
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault()
+                      const from = items.findIndex((item) => item.code === dragging)
+                      setDragging(null)
+                      setOver(null)
+                      move(items, from, index)
+                    }}
+                  >
+                    <TableCell className="tabular text-right">
+                      <span className="flex items-center justify-end gap-0.5">
+                        <span
+                          title={t('settings.dragToReorder')}
+                          className="cursor-grab text-muted-foreground"
+                        >
+                          <GripVerticalIcon className="size-4 shrink-0" aria-hidden="true" />
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={t('settings.moveUp', { name: topic.name_id })}
+                          disabled={index === 0 || reorder.isPending}
+                          onClick={() => move(items, index, index - 1)}
+                        >
+                          <ArrowUpIcon />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={t('settings.moveDown', { name: topic.name_id })}
+                          disabled={index === items.length - 1 || reorder.isPending}
+                          onClick={() => move(items, index, index + 1)}
+                        >
+                          <ArrowDownIcon />
+                        </Button>
+                        <span className="w-8">{topic.sort_order}</span>
+                      </span>
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{topic.code}</TableCell>
                     <TableCell>
                       <span className="flex items-center gap-2">

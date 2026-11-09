@@ -155,6 +155,34 @@ export function useSaveTopicExtras() {
   })
 }
 
+export function useReorderTopics() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (codes: string[]) => settingsApi.reorderTopics(codes),
+    onMutate: (codes) => {
+      const previous = client.getQueryData<TopicConfig[]>(settingsKeys.topics)
+      if (previous) {
+        const byCode = new Map(previous.map((topic) => [topic.code, topic]))
+        client.setQueryData(
+          settingsKeys.topics,
+          codes.flatMap((code, index) => {
+            const topic = byCode.get(code)
+            return topic ? [{ ...topic, sort_order: (index + 1) * 10 }] : []
+          }),
+        )
+      }
+      return { previous }
+    },
+    onError: (_error, _codes, context) => {
+      if (context?.previous) client.setQueryData(settingsKeys.topics, context.previous)
+    },
+    onSuccess: (topics) => {
+      client.setQueryData(settingsKeys.topics, topics)
+      void client.invalidateQueries({ queryKey: ['topics'] })
+    },
+  })
+}
+
 export function useTopicPicker() {
   return useQuery({ queryKey: settingsKeys.topicPicker, queryFn: settingsApi.topicPicker })
 }

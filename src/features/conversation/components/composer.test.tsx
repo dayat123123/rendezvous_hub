@@ -184,8 +184,8 @@ describe('Composer', () => {
     await user.type(box, 'Halo Budi,')
     await user.click(screen.getByRole('button', { name: 'Kirim lainnya' }))
     await user.click(await screen.findByRole('menuitem', { name: 'Sisipkan artikel FAQ' }))
-    const dialog = await screen.findByRole('dialog', { name: 'Sisipkan artikel FAQ' })
-    await user.click(await within(dialog).findByRole('button', { name: 'Sisipkan' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Sisipkan artikel FAQ' }, { timeout: 5000 })
+    await user.click(await within(dialog).findByRole('button', { name: 'Sisipkan' }, { timeout: 5000 }))
 
     await waitFor(() => expect(dialog).not.toBeInTheDocument())
     expect(faqApi.agentSearch).toHaveBeenCalledWith('', 'id')

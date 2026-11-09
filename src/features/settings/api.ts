@@ -99,6 +99,7 @@ export const settingsApi = {
       p_customer_replies: extras.customer_replies as unknown as Json,
       p_sop: extras.sop,
     }),
+  reorderTopics: (codes: string[]) => rpc<TopicConfig[]>('admin_reorder_topics', { p_codes: codes }),
   topicPicker: () => rpc<TopicPicker>('admin_topic_picker'),
   saveTopicPicker: (draft: TopicPickerDraft) =>
     rpc<TopicPicker>('admin_set_topic_picker', {

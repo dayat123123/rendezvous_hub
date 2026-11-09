@@ -21,6 +21,7 @@ vi.mock('../api', async (importOriginal) => {
       saveTopic: vi.fn(),
       topicPicker: vi.fn(),
       saveTopicPicker: vi.fn(),
+      reorderTopics: vi.fn(),
     },
   }
 })
@@ -126,5 +127,38 @@ describe('TopicsSection', () => {
         hint_en: '',
       }),
     )
+  })
+
+  it('moves a topic up and down and saves the whole order', async () => {
+    const account: TopicConfig = {
+      ...fraud,
+      code: 'account',
+      name_id: 'Akun & Login',
+      name_en: 'Account',
+      sort_order: 10,
+      style: 'normal',
+      flags: [],
+      icon: 'account',
+    }
+    vi.mocked(settingsApi.topics).mockResolvedValue([account, fraud])
+    vi.mocked(settingsApi.reorderTopics)
+      .mockReset()
+      .mockImplementation((codes) =>
+        Promise.resolve(
+          codes.map((code, index) => ({
+            ...(code === 'fraud' ? fraud : account),
+            sort_order: (index + 1) * 10,
+          })),
+        ),
+      )
+    const user = userEvent.setup()
+    renderWithProviders(<TopicsSection />, content)
+
+    expect(await screen.findByRole('button', { name: 'Naikkan Akun & Login' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Turunkan Laporkan Penipuan' })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'Naikkan Laporkan Penipuan' }))
+    await waitFor(() => expect(settingsApi.reorderTopics).toHaveBeenCalledWith(['fraud', 'account']))
+    const rows = screen.getAllByRole('row').slice(1)
+    expect(rows[0]).toHaveTextContent('Laporkan Penipuan')
   })
 })

@@ -98,6 +98,7 @@ export type Database = {
         Returns: Json
       }
       admin_reorder_ticket_labels: { Args: { p_ids: string[] }; Returns: Json }
+      admin_reorder_topics: { Args: { p_codes: string[] }; Returns: Json }
       admin_reset_password: { Args: { p_agent_id: string }; Returns: Json }
       admin_save_banner: {
         Args: {
