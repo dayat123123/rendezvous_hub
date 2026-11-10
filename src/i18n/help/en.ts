@@ -142,16 +142,15 @@ export const help: Translated<typeof source> = {
     sop: {
       noData: 'Do not mention any account data (email, phone number, accounts, balance, address).',
       resetOnly:
-        'Account help only through Reset password/PIN in the Customer account panel, which is sent to the registered email.',
+        'Account help only through Reset password/PIN from the Customer accounts menu (search the Login ID yourself), which is sent to the registered email.',
       noChanges:
         'Do not change the email, phone number or account data based on this chat; refer the customer to a branch office with ID.',
       noSecrets: 'Do not ask for or accept passwords, PINs or OTPs.',
     },
     customer: 'Guest (not logged in)',
     claimedLogin: 'Claimed Login ID: {{loginId}}',
-    noLoginId: 'No Login ID provided; ask for the Login ID or search in the Customer accounts menu.',
-    loginNotFound:
-      'Login ID {{loginId}} was not found in csAdmin. Ask for the Login ID again or search in the Customer accounts menu.',
+    accountHidden:
+      'Account data is not shown for guest complaints. Search the claimed Login ID yourself in the Customer accounts menu, then send Reset password/PIN from there if needed.',
     openNasabah: 'Open Customer accounts',
     settingTitle: 'Complaints without login',
     settingHint:

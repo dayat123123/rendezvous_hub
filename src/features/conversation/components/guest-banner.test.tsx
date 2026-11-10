@@ -25,7 +25,7 @@ describe('GuestBanner', () => {
         .map((item) => item.textContent),
     ).toEqual([
       'Jangan sebutkan data akun (email, nomor HP, rekening, saldo, alamat).',
-      'Bantuan akun hanya lewat Reset password/PIN di panel Akun Nasabah, yang dikirim ke email terdaftar.',
+      'Bantuan akun hanya lewat Reset password/PIN dari menu Akun Nasabah (cari sendiri Login ID-nya), yang dikirim ke email terdaftar.',
       'Jangan mengubah email, nomor HP, atau data akun berdasarkan chat ini; arahkan ke kantor cabang dengan identitas.',
       'Jangan minta atau terima password, PIN, OTP.',
     ])

@@ -140,16 +140,15 @@ export const help = {
     sop: {
       noData: 'Jangan sebutkan data akun (email, nomor HP, rekening, saldo, alamat).',
       resetOnly:
-        'Bantuan akun hanya lewat Reset password/PIN di panel Akun Nasabah, yang dikirim ke email terdaftar.',
+        'Bantuan akun hanya lewat Reset password/PIN dari menu Akun Nasabah (cari sendiri Login ID-nya), yang dikirim ke email terdaftar.',
       noChanges:
         'Jangan mengubah email, nomor HP, atau data akun berdasarkan chat ini; arahkan ke kantor cabang dengan identitas.',
       noSecrets: 'Jangan minta atau terima password, PIN, OTP.',
     },
     customer: 'Tamu (belum login)',
     claimedLogin: 'Login ID disebutkan: {{loginId}}',
-    noLoginId: 'Login ID tidak diisi; tanyakan Login ID atau cari lewat menu Akun Nasabah.',
-    loginNotFound:
-      'Login ID {{loginId}} tidak ditemukan di csAdmin. Tanyakan ulang Login ID atau cari lewat menu Akun Nasabah.',
+    accountHidden:
+      'Data akun tidak ditampilkan untuk pengaduan tamu. Cari sendiri Login ID yang disebutkan di menu Akun Nasabah, lalu kirim Reset password/PIN dari sana bila memang perlu.',
     openNasabah: 'Buka menu Akun Nasabah',
     settingTitle: 'Pengaduan tanpa login',
     settingHint:

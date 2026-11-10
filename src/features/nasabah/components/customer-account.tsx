@@ -177,10 +177,10 @@ export function CustomerAccount({ ticketId, guest = false }: { ticketId: string;
   const { t } = useTranslation()
   const agent = useAgent()
   const allowed = canViewProfiles(agent.nasabah_permissions)
-  const login = useTicketLogin(ticketId, allowed)
-  const loginId = login.data?.login_id ?? undefined
-  const profile = useOnlineUserProfile(allowed ? loginId : undefined)
+  const login = useTicketLogin(ticketId, allowed && !guest)
   const guestTicket = guest || login.data?.source === 'guest'
+  const loginId = guestTicket ? undefined : (login.data?.login_id ?? undefined)
+  const profile = useOnlineUserProfile(allowed ? loginId : undefined)
   const notFound = profile.isError && toApiError(profile.error).status === 404
 
   if (!allowed || (notFound && !guestTicket)) return null
@@ -188,14 +188,12 @@ export function CustomerAccount({ ticketId, guest = false }: { ticketId: string;
     <AccordionItem value="account">
       <AccordionTrigger>{t('customer.account')}</AccordionTrigger>
       <AccordionContent>
-        {login.isError ? (
+        {guestTicket ? (
+          <GuestHint text={t('help.guest.accountHidden')} />
+        ) : login.isError ? (
           <ErrorState error={login.error} onRetry={() => void login.refetch()} />
-        ) : guestTicket && login.isSuccess && !loginId ? (
-          <GuestHint text={t('help.guest.noLoginId')} />
         ) : !loginId || profile.isPending ? (
           <Loading />
-        ) : notFound ? (
-          <GuestHint text={t('help.guest.loginNotFound', { loginId })} />
         ) : profile.isError ? (
           <ErrorState error={profile.error} onRetry={() => void profile.refetch()} />
         ) : (
