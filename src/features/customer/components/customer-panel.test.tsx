@@ -142,6 +142,10 @@ describe('CustomerPanel', () => {
     expect(within(panel).getByText('Tamu (belum login)')).toBeInTheDocument()
     expect(within(panel).getByText('Login ID disebutkan: SARI01')).toBeInTheDocument()
     expect(within(panel).queryByText('@tamu_abc')).not.toBeInTheDocument()
+    expect(within(panel).queryByRole('button', { name: 'Riwayat tiket' })).not.toBeInTheDocument()
+    expect(within(panel).queryByRole('button', { name: 'Catatan internal' })).not.toBeInTheDocument()
+    expect(customerApi.history).not.toHaveBeenCalled()
+    expect(customerApi.notes).not.toHaveBeenCalled()
     unmount()
 
     renderWithProviders(

@@ -113,11 +113,16 @@ export function CustomerPanel({ ticket }: { ticket: Ticket }) {
   const { t } = useTranslation()
   const customerId = ticket.customer?.id
   const intake = ticket.intake ?? []
+  const guest = Boolean(ticket.guest)
   return (
     <aside aria-label={t('customer.title')} className="flex h-full flex-col bg-subtle">
       <CustomerHeader ticket={ticket} />
       <div className="min-h-0 flex-1 overflow-y-auto px-4">
-        {customerId ? (
+        {guest ? (
+          <Accordion type="multiple" defaultValue={['account']}>
+            <CustomerAccount ticketId={ticket.id} guest />
+          </Accordion>
+        ) : customerId ? (
           <Accordion type="multiple" defaultValue={['intake', 'account', 'history', 'notes']}>
             {intake.length > 0 ? (
               <AccordionItem value="intake">
@@ -135,7 +140,7 @@ export function CustomerPanel({ ticket }: { ticket: Ticket }) {
                 </AccordionContent>
               </AccordionItem>
             ) : null}
-            <CustomerAccount ticketId={ticket.id} guest={Boolean(ticket.guest)} />
+            <CustomerAccount ticketId={ticket.id} />
             <AccordionItem value="history">
               <AccordionTrigger>{t('customer.history')}</AccordionTrigger>
               <AccordionContent>
