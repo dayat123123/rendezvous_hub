@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuth } from '@/features/auth/hooks'
+import type * as SettingsApiModule from '@/features/settings/api'
+import { settingsApi } from '@/features/settings/api'
 import { monitorFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
 import { Toaster } from '@/test/toast'
@@ -10,6 +12,11 @@ import { Toaster } from '@/test/toast'
 import { pushApi } from '../api'
 import type { PushStatus } from '../types'
 import { PushSection } from './push-section'
+
+vi.mock('@/features/settings/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof SettingsApiModule>()
+  return { ...actual, settingsApi: { ...actual.settingsApi, settings: vi.fn() } }
+})
 
 vi.mock('../api', () => ({
   pushApi: {
@@ -108,6 +115,7 @@ function fileInput(container: HTMLElement) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.mocked(settingsApi.settings).mockResolvedValue([])
 })
 
 describe('PushSection', () => {

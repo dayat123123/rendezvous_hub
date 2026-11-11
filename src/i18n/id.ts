@@ -2431,6 +2431,15 @@ export const id = {
     testSent_one: 'Push uji dikirim ke {{count}} perangkat.',
     testSent_other: 'Push uji dikirim ke {{count}} perangkat.',
     platforms: { android: 'Android', ios: 'iOS', web: 'Web' },
+    digest: {
+      title: 'Jam ringkasan saham pantauan',
+      hint: 'Sekali sehari, nasabah yang memantau saham menerima satu notifikasi berisi jumlah postingan baru tentang saham pantauannya. Jam ini juga tampil di pengaturan notifikasi aplikasi.',
+      label: 'Jam kirim (WIB)',
+      note: 'Ringkasan dikirim paling banyak sekali per hari. Bila diubah setelah ringkasan hari ini terkirim, jam baru berlaku mulai besok.',
+      invalid: 'Isi jam dengan format HH:MM, 00:00–23:59.',
+      confirmTitle: 'Ubah jam ringkasan?',
+      confirmBody: 'Mulai sekarang ringkasan saham pantauan dikirim setiap hari pukul {{time}} WIB.',
+    },
   },
   legal: {
     title: 'Dokumen hukum',

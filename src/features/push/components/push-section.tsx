@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils'
 import { credentialsLoading, usePushStatus, usePushTest, usePushUsers, useSyncPushReady } from '../hooks'
 import type { PushDevice, PushStatus, PushUser } from '../types'
 import { CredentialsCard } from './credentials-card'
+import { DigestTimeCard } from './digest-time-card'
 import { PushStateBadge } from './push-state'
 
 const QUEUE_LATE_MINUTES = 5
@@ -239,6 +240,7 @@ export function PushSection() {
               {t('push.policy', { hours: data.ttl_hours, attempts: data.max_attempts })}
             </p>
             <TestCard active={data.state === 'active'} />
+            <DigestTimeCard />
           </div>
         )}
       </QueryContent>

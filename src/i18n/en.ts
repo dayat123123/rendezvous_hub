@@ -2424,6 +2424,15 @@ export const en: Translation = {
     testSent_one: 'Test push sent to {{count}} device.',
     testSent_other: 'Test push sent to {{count}} devices.',
     platforms: { android: 'Android', ios: 'iOS', web: 'Web' },
+    digest: {
+      title: 'Watchlist digest time',
+      hint: 'Once a day, customers who watch stocks get one notification with the number of new posts about their watched stocks. The app notification settings also show this time.',
+      label: 'Send time (WIB)',
+      note: 'The digest is sent at most once a day. If you change it after today’s digest went out, the new time applies from tomorrow.',
+      invalid: 'Enter a time as HH:MM, 00:00–23:59.',
+      confirmTitle: 'Change the digest time?',
+      confirmBody: 'From now on the watchlist digest is sent every day at {{time}} WIB.',
+    },
   },
   legal: {
     title: 'Legal documents',
