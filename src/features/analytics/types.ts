@@ -45,6 +45,9 @@ export const analyticsEvents = [
   'order_tap',
   'search',
   'share_chart',
+  'hide_room',
+  'delete_group',
+  'edit_message',
 ] as const
 export type AnalyticsEvent = (typeof analyticsEvents)[number]
 

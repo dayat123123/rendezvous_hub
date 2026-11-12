@@ -1271,6 +1271,7 @@ export const en: Translation = {
       community_appeal_decide: 'Appeal decided',
       community_zero_tolerance: 'Zero tolerance (CSAM)',
       community_private_message_view: 'User private message opened',
+      community_private_message_edits_view: 'User private message edit history opened',
     },
     words: {
       title: 'Banned words',

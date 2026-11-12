@@ -10,7 +10,7 @@ import { moderationErrorText } from '@/lib/error-text'
 import { stamp } from '@/lib/time'
 
 import { metaKey, useContentMeta, useDecideHeld, useHeldContent } from '../hooks'
-import { canEditHistory, heldAuthorName, heldDecisions } from '../logic'
+import { canEditHistory, heldAuthorName, heldDecisions, isEditHistoryType } from '../logic'
 import type { ContentMeta, ContentTarget, HeldContent, HeldDecision } from '../types'
 import { EditHistoryButton } from './edit-history'
 import { CategoryList, EditedMark, QueueHeader } from './moderation-ui'
@@ -78,8 +78,12 @@ function HeldItem({
           <Button size="xs" variant="ghost" onClick={() => onContent(heldTarget(row))}>
             {t('moderation.content.open')}
           </Button>
-          {history && meta?.edited_at && (row.target_type === 'post' || row.target_type === 'comment') ? (
-            <EditHistoryButton type={row.target_type} id={row.target_id} />
+          {history && meta?.edited_at && isEditHistoryType(row.target_type) ? (
+            <EditHistoryButton
+              type={row.target_type}
+              id={row.target_id}
+              audited={row.target_type === 'message' && !row.stock_code}
+            />
           ) : null}
           {heldDecisions.map((decision) => (
             <Button

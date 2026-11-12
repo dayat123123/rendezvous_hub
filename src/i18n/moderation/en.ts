@@ -100,8 +100,9 @@ export const moderation: Translated<typeof source> = {
   edits: {
     none: 'Never edited.',
     before: 'Content before the edit at {{time}}',
-    open: { post: 'Post edit history', comment: 'Comment edit history' },
+    open: { post: 'Post edit history', comment: 'Comment edit history', message: 'Message edit history' },
     hint: 'Old versions are kept as an archive. Newest first.',
+    privateHint: 'Opening the history of a private message is recorded in the audit trail.',
   },
   zero: {
     badge: 'Zero tolerance',

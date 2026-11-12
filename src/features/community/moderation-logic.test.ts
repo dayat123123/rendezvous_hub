@@ -53,7 +53,8 @@ describe('permission-gated community tabs and queues', () => {
 
   it('offers edit history for posts and comments to moderators', () => {
     expect(canEditHistory(['community.moderate'], 'post')).toBe(true)
-    expect(canEditHistory(['community.moderate'], 'message')).toBe(false)
+    expect(canEditHistory(['community.moderate'], 'message')).toBe(true)
+    expect(canEditHistory(['community.moderate'], 'sanction')).toBe(false)
     expect(canEditHistory(['community.sanction'], 'comment')).toBe(false)
   })
 })

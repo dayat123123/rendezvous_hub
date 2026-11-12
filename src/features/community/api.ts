@@ -41,6 +41,7 @@ import type {
   RoomState,
   ZeroToleranceResult,
 } from './types'
+import type { EditHistoryType } from './logic'
 import { MAX_AVATAR_BYTES } from './types'
 
 const extension: Record<string, string> = {
@@ -196,7 +197,7 @@ export const communityApi = {
       p_action: action,
       p_reason: reason,
     }),
-  editHistory: async (type: 'post' | 'comment', id: string) =>
+  editHistory: async (type: EditHistoryType, id: string) =>
     (await rpc<EditVersion[] | null>('community_edit_history', { p_target_type: type, p_target_id: id })) ??
     [],
   media: async (status: MediaStatus, cursor: number | null): Promise<MediaPage> => {

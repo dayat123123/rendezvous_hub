@@ -189,8 +189,13 @@ export function moderationQueuesFor(perms: Perms): ModerationQueue[] {
 
 export const heldDecisions: HeldDecision[] = ['approve', 'hide', 'remove']
 
-export const canEditHistory = (perms: Perms, type: string): type is 'post' | 'comment' =>
-  can(perms, 'community.moderate') && (type === 'post' || type === 'comment')
+export type EditHistoryType = 'post' | 'comment' | 'message'
+
+export const isEditHistoryType = (type: string): type is EditHistoryType =>
+  type === 'post' || type === 'comment' || type === 'message'
+
+export const canEditHistory = (perms: Perms, type: string): type is EditHistoryType =>
+  can(perms, 'community.moderate') && isEditHistoryType(type)
 
 export type AppealBlock = 'conflict' | 'needSanction' | 'needModerate' | null
 

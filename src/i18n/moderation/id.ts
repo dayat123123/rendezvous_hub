@@ -97,8 +97,9 @@ export const moderation = {
   edits: {
     none: 'Belum pernah diedit.',
     before: 'Isi sebelum diedit {{time}}',
-    open: { post: 'Riwayat edit postingan', comment: 'Riwayat edit komentar' },
+    open: { post: 'Riwayat edit postingan', comment: 'Riwayat edit komentar', message: 'Riwayat edit pesan' },
     hint: 'Versi lama disimpan sebagai arsip. Yang terbaru di atas.',
+    privateHint: 'Membuka riwayat pesan privat tercatat di jejak audit.',
   },
   zero: {
     badge: 'Toleransi nol',

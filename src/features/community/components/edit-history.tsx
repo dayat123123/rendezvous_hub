@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { stamp } from '@/lib/time'
 
 import { useEditHistory } from '../hooks'
+import type { EditHistoryType } from '../logic'
 
-function History({ type, id }: { type: 'post' | 'comment'; id: string }) {
+function History({ type, id }: { type: EditHistoryType; id: string }) {
   const { t } = useTranslation()
   const history = useEditHistory(type, id, true)
   if (history.isError) return <ErrorState error={history.error} onRetry={() => void history.refetch()} />
@@ -35,7 +36,15 @@ function History({ type, id }: { type: 'post' | 'comment'; id: string }) {
   )
 }
 
-export function EditHistoryButton({ type, id }: { type: 'post' | 'comment'; id: string }) {
+export function EditHistoryButton({
+  type,
+  id,
+  audited = false,
+}: {
+  type: EditHistoryType
+  id: string
+  audited?: boolean
+}) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const label = t(`moderation.edits.open.${type}`)
@@ -49,7 +58,10 @@ export function EditHistoryButton({ type, id }: { type: 'post' | 'comment'; id: 
         <DialogContent className="sm:max-w-lg" closeLabel={t('app.close')}>
           <DialogHeader>
             <DialogTitle>{label}</DialogTitle>
-            <DialogDescription>{t('moderation.edits.hint')}</DialogDescription>
+            <DialogDescription>
+              {t('moderation.edits.hint')}
+              {audited ? ` ${t('moderation.edits.privateHint')}` : ''}
+            </DialogDescription>
           </DialogHeader>
           {open ? <History type={type} id={id} /> : null}
         </DialogContent>

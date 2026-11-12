@@ -475,6 +475,53 @@ describe('opening content by id', () => {
     )
   })
 
+  it('shows the edit history of an edited private message with the audit note', async () => {
+    const user = userEvent.setup()
+    vi.mocked(communityApi.media).mockResolvedValue({
+      items: [
+        {
+          ...review,
+          used_in: [
+            {
+              type: 'message',
+              id: 'msg-dm',
+              room_id: 'room-dm',
+              room_type: 'direct',
+              created_at: review.created_at,
+              deleted: false,
+            },
+          ],
+        },
+      ],
+      next_cursor: null,
+      pending: 1,
+    })
+    vi.mocked(communityApi.content).mockResolvedValue({
+      type: 'message',
+      id: 'msg-dm',
+      body: 'Isi pesan setelah diedit',
+      attachments: [],
+      created_at: '2026-11-03T02:01:00.000Z',
+      edited_at: EDITED_AT,
+      deleted_at: null,
+      moderation_status: 'visible',
+      author: { id: 'u-1', username: 'baru_123', display_name: 'Baru' },
+      room: { id: 'room-dm', type: 'direct', name: null, stock_code: null },
+    })
+    vi.mocked(communityApi.editHistory).mockResolvedValue([
+      { body: 'Isi pesan asli', edited_at: EDITED_AT, edited_by: 'u-1' },
+    ])
+    render(<ModerationTab queue="media" />)
+
+    await user.click(await screen.findByRole('button', { name: 'Buka' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Detail konten' })
+    await user.click(await within(sheet).findByRole('button', { name: 'Riwayat edit pesan' }))
+    const history = await screen.findByRole('dialog', { name: 'Riwayat edit pesan' })
+    expect(communityApi.editHistory).toHaveBeenCalledWith('message', 'msg-dm')
+    expect(await within(history).findByText('Isi pesan asli')).toBeVisible()
+    expect(within(history).getByText(/tercatat di jejak audit/)).toBeVisible()
+  })
+
   it('opens the posts behind a coordinated posting alert', async () => {
     const user = userEvent.setup()
     const alert: ManipulationAlert = {

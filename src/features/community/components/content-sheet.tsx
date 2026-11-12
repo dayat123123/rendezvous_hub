@@ -115,7 +115,11 @@ function ContentBody({
             </Button>
           ) : null}
           {content.edited_at && canEditHistory(agent.community_permissions, content.type) ? (
-            <EditHistoryButton type={content.type === 'comment' ? 'comment' : 'post'} id={content.id} />
+            <EditHistoryButton
+              type={content.type}
+              id={content.id}
+              audited={content.type === 'message' && !!room && room.type !== 'stock'}
+            />
           ) : null}
         </div>
         {content.type === 'message' && room && room.type !== 'stock' ? (

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAgent } from '@/features/auth/hooks'
 
 import { communityApi } from './api'
-import { hasCommunity } from './logic'
+import { type EditHistoryType, hasCommunity } from './logic'
 import type {
   AlertStatus,
   AppealStatus,
@@ -290,7 +290,7 @@ export function useRoomState(code: string | null) {
   })
 }
 
-export function useEditHistory(type: 'post' | 'comment', id: string, enabled: boolean) {
+export function useEditHistory(type: EditHistoryType, id: string, enabled: boolean) {
   return useQuery({
     queryKey: communityKeys.edits(type, id),
     queryFn: () => communityApi.editHistory(type, id),

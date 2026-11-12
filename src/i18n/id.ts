@@ -1267,6 +1267,7 @@ export const id = {
       community_appeal_decide: 'Putuskan banding',
       community_zero_tolerance: 'Toleransi nol (CSAM)',
       community_private_message_view: 'Buka pesan pribadi pengguna',
+      community_private_message_edits_view: 'Buka riwayat edit pesan pribadi pengguna',
     },
     words: {
       title: 'Kata terlarang',

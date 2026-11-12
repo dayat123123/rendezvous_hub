@@ -63,6 +63,7 @@ export const auditActions = [
   'community.post_save',
   'community.post_submit',
   'community.post_unpin',
+  'community.private_message_edits_view',
   'community.private_message_view',
   'community.report_resolve',
   'community.room_pin',
