@@ -117,6 +117,7 @@ function Section({
 const featuresCampaignsTabIcons: Record<FeaturesCampaignsTab, Icon> = {
   features: FlagIcon,
   banners: PanelTopIcon,
+  stream: RowsIcon,
 }
 
 type SectionTarget =

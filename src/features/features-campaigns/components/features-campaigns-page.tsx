@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { SectionBoundary } from '@/components/states'
 import { BannersSection } from '@/features/client-config/components/banners-section'
 import { FeaturesSection } from '@/features/client-config/components/features-section'
+import { FeedFiltersSection } from '@/features/feed-filters/components/feed-filters-section'
 import { cn } from '@/lib/utils'
 
 import { featuresCampaignsTabs, isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '../types'
@@ -11,6 +12,7 @@ import { featuresCampaignsTabs, isFeaturesCampaignsTab, type FeaturesCampaignsTa
 const panels: Record<FeaturesCampaignsTab, () => React.ReactNode> = {
   features: () => <FeaturesSection />,
   banners: () => <BannersSection />,
+  stream: () => <FeedFiltersSection />,
 }
 
 export function FeaturesCampaignsPage() {

@@ -35,7 +35,7 @@ function appeal(overrides: Partial<Appeal> = {}): Appeal {
 
 describe('permission-gated community tabs and queues', () => {
   it('adds the stock room tab for moderators only', () => {
-    expect(communityTabsFor(['community.moderate'])).toEqual(['moderation', 'rooms'])
+    expect(communityTabsFor(['community.moderate'])).toEqual(['moderation', 'rooms', 'instruments'])
     expect(communityTabsFor(['community.sanction'])).toEqual(['moderation'])
   })
 

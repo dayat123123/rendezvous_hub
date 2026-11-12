@@ -10,6 +10,7 @@ import { formatNumber } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
 import { useCommunityOverview } from '../hooks'
+import { InstrumentsTab } from '../instruments/instruments-tab'
 import { communityPageTabs, hasCommunity } from '../logic'
 import type { CommunityTab, ModerationQueue } from '../types'
 import { AccountsTab } from './accounts-tab'
@@ -120,6 +121,9 @@ export function CommunityPage() {
               onStock={openRoom}
               onOpenAlerts={() => openQueue('alerts')}
             />
+          ) : null}
+          {tab === 'instruments' ? (
+            <InstrumentsTab onOpenRoom={tabs.includes('rooms') ? openRoom : undefined} />
           ) : null}
           {tab === 'accounts' ? <AccountsTab /> : null}
           {tab === 'analytics' ? (

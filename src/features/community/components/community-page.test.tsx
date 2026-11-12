@@ -10,6 +10,7 @@ import { Toaster } from '@/test/toast'
 
 import type * as ApiModule from '../api'
 import { communityApi } from '../api'
+import { instrumentsApi } from '../instruments/api'
 import type { CommunityPost, CommunityTab, OfficialAccount, ReportRow } from '../types'
 import { CommunityPage } from './community-page'
 import { ModerationTab } from './moderation-tab'
@@ -27,6 +28,10 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 
 vi.mock('@/features/analytics/api', () => ({
   analyticsApi: { community: vi.fn(() => new Promise(() => undefined)) },
+}))
+
+vi.mock('../instruments/api', () => ({
+  instrumentsApi: { list: vi.fn(), check: vi.fn(), save: vi.fn(), reorder: vi.fn(), remove: vi.fn() },
 }))
 
 vi.mock('../api', async (importOriginal) => {
@@ -153,6 +158,27 @@ describe('CommunityPage', () => {
     expect(tabNames()).toEqual(['Stream', 'Notifikasi', 'Akun resmi', 'Analitik'])
     expect(screen.getByRole('tab', { name: 'Analitik' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByRole('radio', { name: '30 hari' }, { timeout: 5_000 })).toBeVisible()
+  })
+
+  it('shows Indeks only to staff with the moderate permission', async () => {
+    vi.mocked(instrumentsApi.list).mockResolvedValue([])
+    route.search = { tab: 'instruments' }
+    const view = renderWithProviders(<CommunityPage />, {
+      ...agentFixture,
+      roles: ['community'],
+      community_permissions: ['community.moderate'],
+    })
+
+    expect(tabNames()).toEqual(['Moderasi', 'Room saham', 'Indeks'])
+    expect(screen.getByRole('tab', { name: 'Indeks' })).toHaveAttribute('aria-selected', 'true')
+    expect(await screen.findByText('Belum ada indeks.')).toBeVisible()
+    view.unmount()
+
+    renderWithProviders(<CommunityPage />, writer)
+    expect(tabNames()).not.toContain('Indeks')
+    expect(screen.getByRole('tab', { name: 'Stream' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.queryByText('Belum ada indeks.')).not.toBeInTheDocument()
+    expect(instrumentsApi.list).toHaveBeenCalledTimes(1)
   })
 
   it('keeps the tabs of community staff unchanged and ignores an analytics link', async () => {

@@ -1,4 +1,4 @@
-export const featuresCampaignsTabs = ['features', 'banners'] as const
+export const featuresCampaignsTabs = ['features', 'banners', 'stream'] as const
 export type FeaturesCampaignsTab = (typeof featuresCampaignsTabs)[number]
 
 export const isFeaturesCampaignsTab = (value: unknown): value is FeaturesCampaignsTab =>

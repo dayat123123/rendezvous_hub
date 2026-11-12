@@ -285,6 +285,38 @@ export function bannerErrorText(error: unknown): string {
   return among(bannerCodes, code) ? i18n.t(`platform.banners.errors.${code}`) : errorText(error)
 }
 
+const feedFilterCodes = [
+  'invalid_filter_key',
+  'invalid_filter_label',
+  'invalid_sort',
+  'invalid_filter_content',
+  'invalid_filter_icon',
+  'invalid_filter_order',
+  'filter_not_found',
+] as const
+
+export function feedFilterErrorText(error: unknown): string {
+  const code = toApiError(error).code
+  return among(feedFilterCodes, code) ? i18n.t(`platform.feedFilters.errors.${code}`) : errorText(error)
+}
+
+const instrumentCodes = [
+  'invalid_instrument_code',
+  'instrument_code_taken',
+  'instrument_alias_taken',
+  'invalid_instrument_alias',
+  'invalid_instrument_name',
+  'invalid_instrument_description',
+  'invalid_instrument_kind',
+  'invalid_instrument_order',
+  'instrument_not_found',
+] as const
+
+export function instrumentErrorText(error: unknown): string {
+  const code = toApiError(error).code
+  return among(instrumentCodes, code) ? i18n.t(`moderation.instruments.errors.${code}`) : errorText(error)
+}
+
 const attachmentCodes = [
   'kind_disabled',
   'policy_unavailable',

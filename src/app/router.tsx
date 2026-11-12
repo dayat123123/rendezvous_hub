@@ -9,6 +9,7 @@ import {
 import {
   communityTabs,
   moderationQueues,
+  stockCodePattern,
   type CommunityTab,
   type ModerationQueue,
 } from '@/features/community/types'
@@ -279,11 +280,11 @@ const communityRoute = createRoute({
   ): { tab?: CommunityTab; queue?: ModerationQueue; stock?: string } => {
     const tab = text(search.tab)
     const queue = text(search.queue)
-    const stock = text(search.stock)?.trim().toUpperCase()
+    const stock = text(search.stock)?.trim().replace(/^\$/, '').toUpperCase()
     return {
       tab: communityTabs.includes(tab as CommunityTab) ? (tab as CommunityTab) : undefined,
       queue: moderationQueues.includes(queue as ModerationQueue) ? (queue as ModerationQueue) : undefined,
-      stock: stock && /^[A-Z][A-Z0-9]{1,11}$/.test(stock) ? stock : undefined,
+      stock: stock && stockCodePattern.test(stock) ? stock : undefined,
     }
   },
   beforeLoad: ({ context }) => {

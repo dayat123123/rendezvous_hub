@@ -15,7 +15,13 @@ import { formatNumber, stamp } from '@/lib/time'
 
 import { useManipulationAlerts, useReviewAlert } from '../hooks'
 import { cleanStock, evidenceIds, evidenceNumber, evidenceText, stockCodePattern } from '../logic'
-import { alertStatuses, type AlertStatus, type ContentTarget, type ManipulationAlert } from '../types'
+import {
+  alertStatuses,
+  STOCK_CODE_INPUT_MAX,
+  type AlertStatus,
+  type ContentTarget,
+  type ManipulationAlert,
+} from '../types'
 import { QueueHeader } from './moderation-ui'
 import { ReasonDialog } from './shared'
 
@@ -244,7 +250,7 @@ export function AlertsQueue({
         <Input
           type="search"
           value={query}
-          maxLength={13}
+          maxLength={STOCK_CODE_INPUT_MAX}
           placeholder={t('moderation.alerts.stockFilter')}
           aria-label={t('moderation.alerts.stockFilter')}
           className="h-8 pl-8 uppercase"

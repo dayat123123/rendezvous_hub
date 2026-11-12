@@ -1827,7 +1827,7 @@ export const id = {
     subtitle:
       'Fitur sosial, kill switch, versi minimum aplikasi, serta kampanye banner dan popup untuk nasabah.',
     tabsLabel: 'Bagian Fitur & Kampanye',
-    tabs: { features: 'Fitur & versi', banners: 'Banner & popup' },
+    tabs: { features: 'Fitur & versi', banners: 'Banner & popup', stream: 'Tab Stream' },
   },
   command: {
     placeholder: 'Cari tiket, nasabah, atau perintah…',
@@ -1944,6 +1944,7 @@ export const id = {
       notifications: 'Notifikasi',
       moderation: 'Moderasi',
       rooms: 'Room saham',
+      instruments: 'Indeks',
       accounts: 'Akun resmi',
     },
     metrics: {
@@ -2287,7 +2288,7 @@ export const id = {
       titleLength: 'Judul 3–80 karakter',
       bodyLength: 'Isi 1–{{max}} karakter',
       notificationBody: 'Isi notifikasi 3–240 karakter',
-      stockInvalid: 'Kode saham tidak valid, contoh BBCA',
+      stockInvalid: 'Kode saham atau indeks tidak valid, contoh BBCA atau SRI-KEHATI',
       dateInvalid: 'Tanggal dan jam tidak valid',
       scheduleFuture: 'Pilih waktu di masa depan',
       tooManyImages: 'Maksimal {{max}} gambar',

@@ -37,6 +37,15 @@ export function lengthValid(text: string, min: number, max: number, optional = f
   return value.length >= min && value.length <= max
 }
 
+export function moveItem<T>(items: readonly T[], index: number, step: number): T[] {
+  const target = index + step
+  const next = [...items]
+  if (index < 0 || index >= items.length || target < 0 || target >= items.length) return next
+  const [moved] = next.splice(index, 1)
+  if (moved !== undefined) next.splice(target, 0, moved)
+  return next
+}
+
 export function isHttpsUrl(value: string) {
   try {
     return new URL(value).protocol === 'https:'

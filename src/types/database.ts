@@ -37,6 +37,7 @@ export type Database = {
       admin_banners: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_delete_banner: { Args: { p_id: string }; Returns: Json }
       admin_delete_feature_flag: { Args: { p_key: string }; Returns: Json }
+      admin_delete_feed_filter: { Args: { p_key: string }; Returns: Json }
       admin_delete_holiday: { Args: { p_day: string }; Returns: Json }
       admin_delete_topic: { Args: { p_code: string }; Returns: Json }
       admin_end_incident: { Args: { p_id: string }; Returns: Json }
@@ -82,6 +83,7 @@ export type Database = {
       }
       admin_faq_versions: { Args: { p_id: string }; Returns: Json }
       admin_feature_flags: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_feed_filters: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_help_report: {
         Args: { p_from: string; p_to: string }
         Returns: Json
@@ -98,6 +100,7 @@ export type Database = {
         Args: { p_from: string; p_to: string }
         Returns: Json
       }
+      admin_reorder_feed_filters: { Args: { p_keys: string[] }; Returns: Json }
       admin_reorder_ticket_labels: { Args: { p_ids: string[] }; Returns: Json }
       admin_reorder_topics: { Args: { p_codes: string[] }; Returns: Json }
       admin_reset_password: { Args: { p_agent_id: string }; Returns: Json }
@@ -121,6 +124,19 @@ export type Database = {
           p_priority?: number
           p_starts_at?: string
           p_title: string
+        }
+        Returns: Json
+      }
+      admin_save_feed_filter: {
+        Args: {
+          p_content?: string
+          p_enabled?: boolean
+          p_icon?: string
+          p_key: string
+          p_label_en: string
+          p_label_id: string
+          p_position?: number
+          p_sort: string
         }
         Returns: Json
       }
@@ -399,6 +415,7 @@ export type Database = {
         Returns: Json
       }
       community_content_meta: { Args: { p_targets: Json }; Returns: Json }
+      community_delete_instrument: { Args: { p_code: string }; Returns: Json }
       community_delete_post: {
         Args: { p_id: string; p_reason: string }
         Returns: Json
@@ -409,6 +426,11 @@ export type Database = {
       }
       community_find_users: { Args: { p_query: string }; Returns: Json }
       community_held_content: { Args: { p_limit?: number }; Returns: Json }
+      community_instrument_check: {
+        Args: { p_aliases?: string[]; p_code: string }
+        Returns: Json
+      }
+      community_instruments: { Args: Record<PropertyKey, never>; Returns: Json }
       community_manipulation_alerts: {
         Args: { p_limit?: number; p_status?: string; p_stock?: string }
         Returns: Json
@@ -440,6 +462,7 @@ export type Database = {
         Returns: Json
       }
       community_posts: { Args: { p_status?: string }; Returns: Json }
+      community_reorder_instruments: { Args: { p_codes: string[] }; Returns: Json }
       community_remove_room_moderator: {
         Args: { p_code: string; p_reason: string; p_user_id: string }
         Returns: Json
@@ -549,6 +572,19 @@ export type Database = {
           p_send_at?: string
           p_title: string
           p_version?: number
+        }
+        Returns: Json
+      }
+      community_save_instrument: {
+        Args: {
+          p_aliases?: string[]
+          p_code: string
+          p_description?: string
+          p_enabled?: boolean
+          p_kind?: string
+          p_name: string
+          p_position?: number
+          p_room_enabled?: boolean
         }
         Returns: Json
       }

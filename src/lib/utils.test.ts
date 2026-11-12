@@ -1,6 +1,21 @@
 import { describe, expect, it } from 'vitest'
 
-import { cn } from './utils'
+import { cn, moveItem } from './utils'
+
+describe('moveItem', () => {
+  it('moves an item up or down and ignores moves past the ends', () => {
+    expect(moveItem(['a', 'b', 'c'], 2, -1)).toEqual(['a', 'c', 'b'])
+    expect(moveItem(['a', 'b', 'c'], 0, 1)).toEqual(['b', 'a', 'c'])
+    expect(moveItem(['a', 'b', 'c'], 0, -1)).toEqual(['a', 'b', 'c'])
+    expect(moveItem(['a', 'b', 'c'], 2, 1)).toEqual(['a', 'b', 'c'])
+  })
+
+  it('returns a new array without touching the input', () => {
+    const items = ['a', 'b']
+    expect(moveItem(items, 0, 1)).not.toBe(items)
+    expect(items).toEqual(['a', 'b'])
+  })
+})
 
 describe('cn', () => {
   it('keeps custom font sizes next to text colors', () => {

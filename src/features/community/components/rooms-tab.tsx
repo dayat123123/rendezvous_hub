@@ -25,7 +25,7 @@ import {
   slowModeProblem,
   stockCodePattern,
 } from '../logic'
-import { SLOW_MODE_MAX, type RoomMessage, type RoomState } from '../types'
+import { SLOW_MODE_MAX, STOCK_CODE_INPUT_MAX, type RoomMessage, type RoomState } from '../types'
 import { EditedMark, QueueHeader } from './moderation-ui'
 
 const RoomModeratorsSection = lazy(
@@ -485,7 +485,7 @@ export function RoomsTab({
               id={`${id}-stock`}
               autoComplete="off"
               spellCheck={false}
-              maxLength={13}
+              maxLength={STOCK_CODE_INPUT_MAX}
               placeholder="BBCA"
               className="pl-8 font-mono uppercase"
               value={text}

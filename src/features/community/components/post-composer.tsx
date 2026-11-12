@@ -29,6 +29,7 @@ import { cleanStock, fromJakartaInput, jakartaInput, stockCodePattern } from '..
 import {
   MAX_POST_BODY,
   MAX_POST_IMAGES,
+  STOCK_CODE_INPUT_MAX,
   type CommunityPost,
   type PinScope,
   type PostAttachment,
@@ -324,7 +325,7 @@ export function PostComposer({
                     <Label htmlFor="post-stock">{t('community.stockCode')}</Label>
                     <Input
                       id="post-stock"
-                      maxLength={13}
+                      maxLength={STOCK_CODE_INPUT_MAX}
                       placeholder="BBCA"
                       value={stock}
                       aria-invalid={touched && errors.stock ? true : undefined}

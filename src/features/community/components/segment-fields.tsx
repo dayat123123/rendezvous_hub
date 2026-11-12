@@ -19,6 +19,7 @@ import { segmentProblem, segmentQuery, type SegmentInput } from '../logic'
 import {
   audiencePlatforms,
   audiences,
+  STOCK_CODE_INPUT_MAX,
   type AudiencePlatform,
   type AudienceQuery,
   type OfficialAccount,
@@ -72,7 +73,7 @@ export function SegmentFields({
         <Input
           aria-label={t('community.stockCode')}
           className="w-48"
-          maxLength={13}
+          maxLength={STOCK_CODE_INPUT_MAX}
           placeholder="BBCA"
           value={value.stock}
           aria-invalid={error ? true : undefined}

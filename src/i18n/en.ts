@@ -1831,7 +1831,7 @@ export const en: Translation = {
     subtitle:
       'Social features, kill switch, minimum app versions, and banner and popup campaigns for customers.',
     tabsLabel: 'Features & Campaigns sections',
-    tabs: { features: 'Features & versions', banners: 'Banners & popups' },
+    tabs: { features: 'Features & versions', banners: 'Banners & popups', stream: 'Stream tabs' },
   },
   command: {
     placeholder: 'Search tickets, customers, or commands…',
@@ -1948,6 +1948,7 @@ export const en: Translation = {
       notifications: 'Notifications',
       moderation: 'Moderation',
       rooms: 'Stock rooms',
+      instruments: 'Indices',
       accounts: 'Official accounts',
     },
     metrics: {
@@ -2284,7 +2285,7 @@ export const en: Translation = {
       titleLength: 'Title must be 3–80 characters',
       bodyLength: 'Body must be 1–{{max}} characters',
       notificationBody: 'Notification text must be 3–240 characters',
-      stockInvalid: 'Invalid stock code, e.g. BBCA',
+      stockInvalid: 'Invalid stock or index code, e.g. BBCA or SRI-KEHATI',
       dateInvalid: 'Invalid date and time',
       scheduleFuture: 'Choose a time in the future',
       tooManyImages: 'Up to {{max}} images',

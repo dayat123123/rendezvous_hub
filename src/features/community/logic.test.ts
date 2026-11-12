@@ -15,6 +15,7 @@ import {
   jakartaInput,
   reviewBlockedByFourEyes,
   staffMediaUrl,
+  stockCodePattern,
 } from './logic'
 
 const maya = { id: 'maya', perms: ['community.post'], fourEyes: true }
@@ -40,7 +41,7 @@ describe('communityPageTabs', () => {
     expect(communityPageTabs({ roles: ['cs_super_admin'], community_permissions: [] })).toEqual(['analytics'])
     expect(
       communityPageTabs({ roles: ['cs_super_admin'], community_permissions: ['community.moderate'] }),
-    ).toEqual(['moderation', 'rooms', 'analytics'])
+    ).toEqual(['moderation', 'rooms', 'instruments', 'analytics'])
     expect(communityPageTabs({ roles: ['community'], community_permissions: ['community.post'] })).toEqual([
       'stream',
       'notifications',
@@ -97,6 +98,16 @@ describe('helpers', () => {
 
   it('normalises stock codes', () => {
     expect(cleanStock(' $bbca ')).toBe('BBCA')
+    expect(cleanStock('$sri-kehati')).toBe('SRI-KEHATI')
+  })
+
+  it('accepts stock codes and hyphenated index codes of 2–24 characters', () => {
+    for (const code of ['BBCA', 'IHSG', 'LQ45', 'SRI-KEHATI', 'IDXSMC-LIQ', 'A1', 'BISNIS-27']) {
+      expect(stockCodePattern.test(code)).toBe(true)
+    }
+    for (const code of ['A', '1ABC', 'SRI-', '-IHSG', 'AB--C', 'bbca', 'BB CA', `A${'B'.repeat(24)}`]) {
+      expect(stockCodePattern.test(code)).toBe(false)
+    }
   })
 })
 
@@ -128,6 +139,7 @@ describe('campaign segments', () => {
   it('reports the missing parameter', () => {
     expect(segmentProblem(segmentQuery(input))).toBeNull()
     expect(segmentProblem(segmentQuery({ ...input, audience: 'stock', stock: '1' }))).toBe('stock')
+    expect(segmentProblem(segmentQuery({ ...input, audience: 'stock', stock: '$idxsmc-liq' }))).toBeNull()
     expect(segmentProblem(segmentQuery({ ...input, audience: 'inactive', days: '' }))).toBe('days')
     expect(segmentProblem(segmentQuery({ ...input, audience: 'platform' }))).toBe('platform')
     expect(segmentProblem(segmentQuery({ ...input, audience: 'followers' }))).toBe('account')

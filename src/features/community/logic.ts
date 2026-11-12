@@ -4,6 +4,7 @@ import { format } from '@/lib/time'
 import {
   AUDIENCE_DAYS_MAX,
   SLOW_MODE_MAX,
+  stockCodePattern,
   type Appeal,
   type AudienceQuery,
   type Campaign,
@@ -29,7 +30,7 @@ export function communityTabsFor(perms: Perms): CommunityTab[] {
   const tabs: CommunityTab[] = []
   if (can(perms, 'community.post') || can(perms, 'community.publish')) tabs.push('stream', 'notifications')
   if (can(perms, 'community.moderate') || can(perms, 'community.sanction')) tabs.push('moderation')
-  if (can(perms, 'community.moderate')) tabs.push('rooms')
+  if (can(perms, 'community.moderate')) tabs.push('rooms', 'instruments')
   if (can(perms, 'community.accounts')) tabs.push('accounts')
   return tabs
 }
@@ -165,7 +166,7 @@ export function staffMediaUrl(url: string | null, publicBase: string | undefined
   return url
 }
 
-export const stockCodePattern = /^[A-Z][A-Z0-9]{1,11}$/
+export { stockCodePattern }
 
 export function cleanStock(value: string) {
   return value.trim().replace(/^\$/, '').toUpperCase()

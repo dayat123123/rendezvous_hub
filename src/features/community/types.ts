@@ -14,6 +14,7 @@ export const communityTabs = [
   'notifications',
   'moderation',
   'rooms',
+  'instruments',
   'accounts',
   'analytics',
 ] as const
@@ -27,6 +28,10 @@ export type AccountRef = {
 }
 
 export type StaffRef = { id: string; name: string | null } | null
+
+export const STOCK_CODE_INPUT_MAX = 25
+
+export const stockCodePattern = /^(?=.{2,24}$)[A-Z][A-Z0-9]{0,19}(?:-[A-Z0-9]{1,19})*$/
 
 export type OfficialAccount = AccountRef & {
   bio: string | null
