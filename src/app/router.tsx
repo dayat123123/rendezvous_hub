@@ -18,10 +18,13 @@ import { caseStates, type CaseState } from '@/features/compliance/types'
 import { isContentTab, type ContentTab } from '@/features/content/types'
 import { isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
 import { systemTabs, type SystemTab } from '@/features/system/types'
+import { tradeShareTabs, type TradeShareTab } from '@/features/trade-share/types'
 import {
   canManageContent,
   canManageFeatures,
   canOpenCommunity,
+  canOpenTradeShare,
+  canOperateRelay,
   canViewTickets,
   hasCommunityAccess,
   hasNasabah,
@@ -70,6 +73,8 @@ const homeRoute = createRoute({
     if (hasCommunityAccess(context.agent)) throw redirect({ to: '/community' })
     if (canManageFeatures(context.agent)) throw redirect({ to: '/features' })
     if (canManageContent(context.agent)) throw redirect({ to: '/content' })
+    if (canOpenTradeShare(context.agent)) throw redirect({ to: '/compliance/trade-share' })
+    if (canOperateRelay(context.agent)) throw redirect({ to: '/system' })
   },
   loader: () => loadStrings('labels', 'replies', 'help'),
   component: Home,
@@ -250,15 +255,40 @@ const complianceEvidenceRoute = createRoute({
   ),
 })
 
+const complianceTradeShareRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compliance/trade-share',
+  beforeLoad: ({ context }) => {
+    if (!canOpenTradeShare(context.agent)) throw redirect({ to: '/' })
+  },
+  validateSearch: (search: Record<string, unknown>): { tab?: TradeShareTab; profile?: string } => {
+    const tab = text(search.tab)
+    const profile = text(search.profile)
+    return {
+      tab: tradeShareTabs.includes(tab as TradeShareTab) ? (tab as TradeShareTab) : undefined,
+      profile: profile && uuidPattern.test(profile) ? profile : undefined,
+    }
+  },
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/trade-share/components/trade-share-page'), 'trade'),
+    'TradeSharePage',
+  ),
+})
+
 const systemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/system',
-  beforeLoad: superAdminOnly,
+  beforeLoad: ({ context }) => {
+    if (!canOperateRelay(context.agent)) throw redirect({ to: '/' })
+  },
   validateSearch: (search: Record<string, unknown>): { tab?: SystemTab } => {
     const tab = text(search.tab)
     return systemTabs.includes(tab as SystemTab) ? { tab: tab as SystemTab } : {}
   },
-  component: lazyRouteComponent(() => import('@/features/system/components/system-page'), 'SystemPage'),
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/system/components/system-page'), 'trade'),
+    'SystemPage',
+  ),
 })
 
 const nasabahRoute = createRoute({
@@ -322,6 +352,7 @@ const routeTree = rootRoute.addChildren([
   complianceContentRoute,
   complianceLegalRoute,
   complianceEvidenceRoute,
+  complianceTradeShareRoute,
   systemRoute,
   nasabahRoute,
   communityRoute,

@@ -218,6 +218,7 @@ describe('ProfileDialog', () => {
       max_active_tickets: 5,
       nasabah_permissions: ['online_user.view'],
       community_permissions: ['community.post', 'unknown.code'],
+      trade_permissions: ['trade_relay.operate'],
       created_at: '2026-01-15T03:00:00Z',
       password_changed_at: '2026-11-02T02:53:24Z',
     })
@@ -232,6 +233,7 @@ describe('ProfileDialog', () => {
     expect(screen.getByText('Bahasa Indonesia, English')).toBeInTheDocument()
     expect(screen.getByText('Tulis postingan resmi')).toBeInTheDocument()
     expect(screen.getByText('Lihat nasabah online')).toBeInTheDocument()
+    expect(screen.getByText('Operasikan Relay Trade')).toBeInTheDocument()
     expect(screen.queryByText('unknown.code')).not.toBeInTheDocument()
     expect(screen.getByText('15 Jan 2026')).toBeInTheDocument()
     expect(screen.getByText('2 Nov 2026, 09.53 WIB')).toBeInTheDocument()

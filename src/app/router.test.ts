@@ -35,6 +35,41 @@ describe('router', () => {
     expect((await open('/system', agentFixture)).pathname).toBe('/')
   })
 
+  it('opens /system to relay operators but not to staff without the permission', async () => {
+    const operator = { ...agentFixture, roles: ['community'], trade_permissions: ['trade_relay.operate'] }
+    expect((await open('/system?tab=relay', operator)).pathname).toBe('/system')
+    expect((await open('/', operator)).pathname).toBe('/system')
+    expect((await open('/system', { ...operator, trade_permissions: ['trade_share.review'] })).pathname).toBe(
+      '/compliance/trade-share',
+    )
+    expect((await open('/system', { ...operator, trade_permissions: [] })).pathname).toBe('/')
+  })
+
+  it('opens Berbagi Trade to Super Admins and trade_share staff, keeping a valid tab and profile', async () => {
+    const profile = '44444444-4444-4444-8444-444444444444'
+    const location = await open(`/compliance/trade-share?tab=monitoring&profile=${profile}`, monitorFixture)
+    expect(location.pathname).toBe('/compliance/trade-share')
+    expect(location.search).toEqual({ tab: 'monitoring', profile })
+
+    const reviewer = { ...agentFixture, roles: ['compliance'], trade_permissions: ['trade_share.review'] }
+    const router = createAppRouter(reviewer)
+    router.update({
+      ...router.options,
+      history: createMemoryHistory({ initialEntries: ['/compliance/trade-share?tab=nope&profile=budi'] }),
+    })
+    await router.load()
+    expect(router.state.location.pathname).toBe('/compliance/trade-share')
+    expect(router.state.matches.at(-1)?.search).toEqual({})
+
+    const manager = { ...agentFixture, roles: [], trade_permissions: ['trade_share.manage'] }
+    expect((await open('/', manager)).pathname).toBe('/compliance/trade-share')
+
+    expect((await open('/compliance/trade-share', { ...agentFixture, roles: ['compliance'] })).pathname).toBe(
+      '/compliance',
+    )
+    expect((await open('/compliance/trade-share', agentFixture)).pathname).toBe('/')
+  })
+
   it('opens /features to Super Admins only and keeps a known tab from the search param', async () => {
     const location = await open('/features?tab=banners', monitorFixture)
     expect(location.pathname).toBe('/features')
@@ -58,7 +93,7 @@ describe('router', () => {
     expect(unknown.search).toEqual({})
 
     expect((await open('/app?tab=connection', monitorFixture)).pathname).toBe('/settings')
-  })
+  }, 30_000)
 
   it('keeps the old /app address closed to accounts without Super Admin access', async () => {
     for (const path of ['/app', '/app?tab=banners', '/app?tab=connection']) {

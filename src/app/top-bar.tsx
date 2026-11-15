@@ -45,6 +45,8 @@ import {
   canManageContent,
   canManageFeatures,
   canOpenCommunity,
+  canOpenTradeShare,
+  canOperateRelay,
   canViewTickets,
   hasNasabah,
   isCompliance,
@@ -76,6 +78,7 @@ type NavTarget =
   | '/compliance/content'
   | '/compliance/legal'
   | '/compliance/evidence'
+  | '/compliance/trade-share'
   | '/nasabah'
   | '/community'
   | '/system'
@@ -261,6 +264,8 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
   const superAdmin = isSuperAdmin(agent)
   const compliance = isCompliance(agent)
   const showSystem = superAdmin && SHOW_SYSTEM_HEALTH_NAV
+  const tradeShare = canOpenTradeShare(agent)
+  const relayOnly = canOperateRelay(agent) && !superAdmin
   const watchesCases = compliance || superAdmin
   const unseenNotices = useComplianceNotices(watchesCases).data?.unseen ?? 0
   const communityCount = useCommunityBadge()
@@ -289,6 +294,10 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
         {canManageContent(agent) ? <NavLink to="/content" label={t('nav.content')} /> : null}
         {canManageFeatures(agent) ? <NavLink to="/features" label={t('nav.featuresCampaigns')} /> : null}
         {superAdmin ? <NavLink to="/settings" label={t('nav.settings')} /> : null}
+        {tradeShare && !compliance ? (
+          <NavLink to="/compliance/trade-share" label={t('nav.tradeShare')} />
+        ) : null}
+        {relayOnly ? <NavLink to="/system" label={t('nav.tradeRelay')} /> : null}
         {showSystem ? (
           <NavLink
             to="/system"
@@ -323,6 +332,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
             <NavLink to="/compliance/words" label={t('nav.words')} />
             <NavLink to="/compliance/content" label={t('nav.contentPolicy')} />
             <NavLink to="/compliance/legal" label={t('nav.legal')} />
+            {tradeShare ? <NavLink to="/compliance/trade-share" label={t('nav.tradeShare')} /> : null}
             <NavLink to="/compliance/evidence" label={t('nav.evidence')} />
           </>
         ) : null}

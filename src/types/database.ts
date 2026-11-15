@@ -256,6 +256,10 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_set_trade_permissions: {
+        Args: { p_agent_id: string; p_permissions: string[] }
+        Returns: Json
+      }
       admin_settings: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_survey_config: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_ticket_labels: { Args: Record<PropertyKey, never>; Returns: Json }
@@ -1107,6 +1111,110 @@ export type Database = {
       }
       ticket_transcript: { Args: { p_ticket_id: string }; Returns: Json }
       topics: { Args: { p_language?: string }; Returns: Json }
+      trade_notify_set_enabled: {
+        Args: { p_enabled: boolean; p_reason: string }
+        Returns: Json
+      }
+      trade_relay_clear_aes: { Args: { p_reason: string }; Returns: Json }
+      trade_relay_command: {
+        Args: { p_action: string; p_reason: string }
+        Returns: Json
+      }
+      trade_relay_get: { Args: Record<PropertyKey, never>; Returns: Json }
+      trade_relay_set_aes: {
+        Args: { p_iv: string; p_key: string; p_mode: string; p_reason: string }
+        Returns: Json
+      }
+      trade_relay_update: {
+        Args: {
+          p_heartbeat_seconds: number
+          p_identity: string
+          p_iproxy_addr: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      trade_share_dashboard: { Args: Record<PropertyKey, never>; Returns: Json }
+      trade_share_decide: {
+        Args: { p_decision: string; p_profile: string; p_reason?: string }
+        Returns: Json
+      }
+      trade_share_detail: { Args: { p_profile: string }; Returns: Json }
+      trade_share_exclude_account: {
+        Args: { p_cust_id: string; p_reason: string }
+        Returns: Json
+      }
+      trade_share_exclude_stock: {
+        Args: { p_reason: string; p_stock: string; p_until?: string }
+        Returns: Json
+      }
+      trade_share_excluded_accounts: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      trade_share_excluded_stocks: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      trade_share_export: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
+      trade_share_find_profiles: { Args: { p_query: string }; Returns: Json }
+      trade_share_flags: {
+        Args: { p_limit?: number; p_status?: string }
+        Returns: Json
+      }
+      trade_share_list: {
+        Args: { p_before?: string; p_limit?: number; p_status?: string }
+        Returns: Json
+      }
+      trade_share_pilot_invites: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      trade_share_reinstate: {
+        Args: { p_profile: string; p_reason: string }
+        Returns: Json
+      }
+      trade_share_review_flag: {
+        Args: { p_id: number; p_note: string }
+        Returns: Json
+      }
+      trade_share_revoke: {
+        Args: { p_profile: string; p_reason: string }
+        Returns: Json
+      }
+      trade_share_set_pilot_invite: {
+        Args: { p_invited: boolean; p_profile: string }
+        Returns: Json
+      }
+      trade_share_settings: { Args: Record<PropertyKey, never>; Returns: Json }
+      trade_share_subscribers: {
+        Args: {
+          p_before?: string
+          p_limit?: number
+          p_status?: string
+          p_trader: string
+        }
+        Returns: Json
+      }
+      trade_share_suspend: {
+        Args: { p_profile: string; p_reason: string; p_until?: string }
+        Returns: Json
+      }
+      trade_share_unexclude_account: {
+        Args: { p_cust_id: string; p_reason: string }
+        Returns: Json
+      }
+      trade_share_unexclude_stock: {
+        Args: { p_reason: string; p_stock: string }
+        Returns: Json
+      }
+      trade_share_update_setting: {
+        Args: { p_key: string; p_reason: string; p_value: Json }
+        Returns: Json
+      }
       wait_customer: {
         Args: { p_ticket_id: string; p_version?: number }
         Returns: Json

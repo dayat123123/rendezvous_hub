@@ -21,6 +21,7 @@ export const sampleAgent: AgentProfile = {
   skills: {},
   nasabah_permissions: [],
   community_permissions: [],
+  trade_permissions: [],
   settings: defaultSettings,
 }
 

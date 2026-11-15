@@ -7,6 +7,7 @@ import {
   LEGAL_SUMMARY_MAX,
   LEGAL_TITLE_MAX,
   LEGAL_TITLE_MIN,
+  featureLegalKinds,
   legalKinds,
   type DraftInput,
   type DraftStatus,
@@ -102,6 +103,8 @@ export function draftActions(
     approve: !pending ? 'hidden' : !mine ? 'allowed' : fourEyes ? 'blocked' : 'self',
   }
 }
+
+export const isFeatureKind = (kind: LegalKind) => featureLegalKinds.includes(kind)
 
 export function toggleRequired(current: readonly LegalKind[], kind: LegalKind, required: boolean) {
   const next = new Set(current)

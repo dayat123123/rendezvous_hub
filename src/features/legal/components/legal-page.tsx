@@ -28,7 +28,7 @@ import { formatNumber, stamp } from '@/lib/time'
 
 import { legalApi } from '../api'
 import { legalKeys, useCancelScheduled, useLegalOverview, useSetRequired } from '../hooks'
-import { draftFromDocument, sortDrafts, toggleRequired, wibStamp } from '../logic'
+import { draftFromDocument, isFeatureKind, sortDrafts, toggleRequired, wibStamp } from '../logic'
 import type { LegalDocument, LegalDraft, LegalKindState, LegalOverview } from '../types'
 import { DocumentSheet } from './document-sheet'
 import { DraftSheet, type DraftTarget } from './draft-sheet'
@@ -190,8 +190,13 @@ function KindCard({
         <h2 id={titleId} className="text-panel font-semibold">
           {t(`legal.kinds.${state.kind}`)}
         </h2>
-        <RequiredSwitch state={state} overview={overview} />
+        {isFeatureKind(state.kind) ? null : <RequiredSwitch state={state} overview={overview} />}
       </div>
+      {isFeatureKind(state.kind) ? (
+        <p className="text-xs text-muted-foreground">
+          {t(`legal.featureNotes.${state.kind as 'trade_share_terms'}`)}
+        </p>
+      ) : null}
       {current ? (
         <div className="flex flex-col gap-2">
           <div className="min-w-0">
@@ -206,7 +211,10 @@ function KindCard({
               {t('legal.approvedBy', { name: current.approved_by ?? '–' })}
             </p>
           </div>
-          <AcceptanceMeter accepted={current.accepted} activeUsers={overview.active_users} />
+          <AcceptanceMeter
+            accepted={current.accepted}
+            activeUsers={isFeatureKind(state.kind) ? 0 : overview.active_users}
+          />
         </div>
       ) : (
         <p className="text-row text-muted-foreground">{t('legal.noCurrent')}</p>

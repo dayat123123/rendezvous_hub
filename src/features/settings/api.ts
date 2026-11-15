@@ -38,6 +38,7 @@ function account(raw: StaffAccount): StaffAccount {
     status: raw.status ?? 'offline',
     nasabah_permissions: raw.nasabah_permissions ?? [],
     community_permissions: raw.community_permissions ?? [],
+    trade_permissions: raw.trade_permissions ?? [],
   }
 }
 
@@ -67,6 +68,13 @@ export const settingsApi = {
   setCommunityPermissions: async (id: string, permissions: string[]) =>
     account(
       await rpc<StaffAccount>('admin_set_community_permissions', {
+        p_agent_id: id,
+        p_permissions: permissions,
+      }),
+    ),
+  setTradePermissions: async (id: string, permissions: string[]) =>
+    account(
+      await rpc<StaffAccount>('admin_set_trade_permissions', {
         p_agent_id: id,
         p_permissions: permissions,
       }),

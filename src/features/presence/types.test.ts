@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest'
 
+import { agentFixture } from '@/test/fixtures'
+
 import {
   actionBlock,
   canManageFeatures,
+  canManageTradeShare,
+  canOpenTradeShare,
+  canOperateRelay,
+  canReviewTradeShare,
   canViewTickets,
   isMonitor,
   isSuperAdmin,
+  normalizeAgent,
   worksTickets,
+  type AgentProfile,
   type AgentStatus,
 } from './types'
 
@@ -21,6 +29,25 @@ describe('staff roles', () => {
     expect([agent, monitor, both, compliance].map(canViewTickets)).toEqual([true, true, true, false])
     expect([agent, monitor, both, compliance].map(isMonitor)).toEqual([false, true, false, false])
     expect([agent, monitor, both, compliance].map(isSuperAdmin)).toEqual([false, true, true, false])
+  })
+})
+
+describe('trade permissions', () => {
+  it('reads trade_permissions from agent_me and gates each Berbagi Trade area', () => {
+    const raw = { ...agentFixture, trade_permissions: undefined } as unknown as AgentProfile
+    expect(normalizeAgent(raw).trade_permissions).toEqual([])
+
+    const reviewer = { roles: ['compliance'], trade_permissions: ['trade_share.review'] }
+    const manager = { roles: ['community'], trade_permissions: ['trade_share.manage'] }
+    const operator = { roles: ['cs_agent'], trade_permissions: ['trade_relay.operate'] }
+    const admin = { roles: ['cs_super_admin'], trade_permissions: [] }
+    const plain = { roles: ['compliance'], trade_permissions: [] }
+    const all = [reviewer, manager, operator, admin, plain]
+
+    expect(all.map(canOpenTradeShare)).toEqual([true, true, false, true, false])
+    expect(all.map(canReviewTradeShare)).toEqual([true, false, false, true, false])
+    expect(all.map(canManageTradeShare)).toEqual([false, true, false, true, false])
+    expect(all.map(canOperateRelay)).toEqual([false, false, true, true, false])
   })
 })
 

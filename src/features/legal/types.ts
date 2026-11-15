@@ -1,5 +1,13 @@
-export const legalKinds = ['terms', 'community_guidelines', 'privacy'] as const
+export const legalKinds = [
+  'terms',
+  'community_guidelines',
+  'privacy',
+  'trade_share_terms',
+  'trade_share_risk',
+] as const
 export type LegalKind = (typeof legalKinds)[number]
+
+export const featureLegalKinds: readonly LegalKind[] = ['trade_share_terms', 'trade_share_risk']
 
 export const draftStatuses = ['draft', 'pending', 'rejected', 'published'] as const
 export type DraftStatus = (typeof draftStatuses)[number]

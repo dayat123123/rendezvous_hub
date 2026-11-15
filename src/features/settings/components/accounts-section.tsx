@@ -37,6 +37,7 @@ import { useAgent } from '@/features/auth/hooks'
 import { useNasabahLabels } from '@/features/nasabah/labels'
 import { communityPermissions } from '@/features/community/types'
 import { nasabahPermissions } from '@/features/nasabah/types'
+import { tradePermissions } from '@/features/trade-share/types'
 import { errorText } from '@/lib/error-text'
 import { toApiError } from '@/lib/errors'
 import { stamp } from '@/lib/time'
@@ -64,6 +65,7 @@ const editSchema = z.object({
   active: z.boolean(),
   nasabah: z.array(z.string()),
   community: z.array(z.string()),
+  trade: z.array(z.string()),
 })
 
 const createSchema = editSchema.extend({
@@ -118,6 +120,7 @@ function AccountDialog({
       active: account ? account.disabled_at === null : true,
       nasabah: account?.nasabah_permissions ?? [],
       community: account?.community_permissions ?? [],
+      trade: account?.trade_permissions ?? [],
     },
   })
   const errors = form.formState.errors
@@ -140,7 +143,8 @@ function AccountDialog({
         ? nasabahPermissions.filter((permission) => values.nasabah.includes(permission))
         : []
       const community = communityPermissions.filter((permission) => values.community.includes(permission))
-      const result = await save.mutateAsync({ id: account?.id ?? null, draft, nasabah, community })
+      const trade = tradePermissions.filter((permission) => values.trade.includes(permission))
+      const result = await save.mutateAsync({ id: account?.id ?? null, draft, nasabah, community, trade })
       onClose()
       if ('temporary_password' in result && typeof result.temporary_password === 'string') {
         onCreated({ agent: result.agent, temporary_password: result.temporary_password })
@@ -323,6 +327,39 @@ function AccountDialog({
                         <span className="block">{t(`community.permissions.${permission}`)}</span>
                         <span className="block text-xs text-muted-foreground">
                           {t(`community.permissionHints.${permission}`)}
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            />
+          </fieldset>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 text-sm font-medium">{t('settings.tradeAccess')}</legend>
+            <p className="text-xs text-muted-foreground">{t('settings.tradeHint')}</p>
+            <Controller
+              control={form.control}
+              name="trade"
+              render={({ field }) => (
+                <div className="flex flex-col gap-1.5">
+                  {tradePermissions.map((permission) => (
+                    <label key={permission} className="flex items-start gap-2 text-row">
+                      <Checkbox
+                        className="mt-0.5"
+                        checked={field.value.includes(permission)}
+                        onCheckedChange={(value) =>
+                          field.onChange(
+                            value === true
+                              ? [...field.value, permission]
+                              : field.value.filter((item) => item !== permission),
+                          )
+                        }
+                      />
+                      <span>
+                        <span className="block">{t(`tradePermissions.${permission}`)}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {t(`tradePermissionHints.${permission}`)}
                         </span>
                       </span>
                     </label>

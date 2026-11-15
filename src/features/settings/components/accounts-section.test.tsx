@@ -21,6 +21,7 @@ vi.mock('../api', async (importOriginal) => {
       resetPassword: vi.fn(),
       updateAccount: vi.fn(),
       setCommunityPermissions: vi.fn(),
+      setTradePermissions: vi.fn(),
     },
   }
 })
@@ -39,6 +40,7 @@ function staff(overrides: Partial<StaffAccount>): StaffAccount {
     active_tickets: 1,
     nasabah_permissions: [],
     community_permissions: [],
+    trade_permissions: [],
     created_at: '2026-10-01T02:00:00.000Z',
     ...overrides,
   }
@@ -145,6 +147,33 @@ describe('AccountsSection', () => {
     await waitFor(() =>
       expect(settingsApi.setCommunityPermissions).toHaveBeenCalledWith(monitorFixture.id, [
         'community.accounts',
+      ]),
+    )
+  })
+
+  it('grants Berbagi Trade permissions to any staff account', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsApi.updateAccount).mockResolvedValue(nadia)
+    vi.mocked(settingsApi.setTradePermissions).mockResolvedValue({
+      ...nadia,
+      trade_permissions: ['trade_relay.operate', 'trade_share.review'],
+    })
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    await user.click(
+      within(await screen.findByRole('row', { name: /Nadia/ })).getByRole('button', { name: 'Ubah' }),
+    )
+    const form = await screen.findByRole('dialog', { name: 'Ubah akun Nadia' })
+    const group = within(form).getByRole('group', { name: 'Izin Berbagi Trade' })
+    expect(within(group).getAllByRole('checkbox')).toHaveLength(3)
+    await user.click(within(group).getByRole('checkbox', { name: /Operasikan Relay Trade/ }))
+    await user.click(within(group).getByRole('checkbox', { name: /Tinjau Berbagi Trade/ }))
+    await user.click(within(form).getByRole('button', { name: 'Simpan' }))
+
+    await waitFor(() =>
+      expect(settingsApi.setTradePermissions).toHaveBeenCalledWith('nadia', [
+        'trade_share.review',
+        'trade_relay.operate',
       ]),
     )
   })

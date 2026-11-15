@@ -19,9 +19,11 @@ import {
   MessageSquareTextIcon,
   MoonIcon,
   PanelTopIcon,
+  RadioTowerIcon,
   RowsIcon,
   ScrollTextIcon,
   SettingsIcon,
+  ShareIcon,
   ShieldCheckIcon,
   ShieldIcon,
   SlidersHorizontalIcon,
@@ -53,6 +55,8 @@ import {
   agentStatuses,
   canManageContent,
   canManageFeatures,
+  canOpenTradeShare,
+  canOperateRelay,
   canViewTickets,
   hasNasabah,
   isCompliance,
@@ -135,6 +139,7 @@ type SectionTarget =
   | '/compliance/content'
   | '/compliance/legal'
   | '/compliance/evidence'
+  | '/compliance/trade-share'
   | '/nasabah'
   | '/system'
 
@@ -226,6 +231,12 @@ function PaletteBody({
           { label: t('nav.legal'), icon: FileTextIcon, to: '/compliance/legal' as const },
           { label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const },
         ]
+      : []),
+    ...(canOpenTradeShare(agent)
+      ? [{ label: t('nav.tradeShare'), icon: ShareIcon, to: '/compliance/trade-share' as const }]
+      : []),
+    ...(canOperateRelay(agent) && !(superAdmin && SHOW_SYSTEM_HEALTH_NAV)
+      ? [{ label: t('nav.tradeRelay'), icon: RadioTowerIcon, to: '/system' as const }]
       : []),
   ]
   const navigation: PaletteItem[] = [

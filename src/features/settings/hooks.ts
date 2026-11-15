@@ -99,11 +99,13 @@ export function useSaveAccount() {
       draft,
       nasabah,
       community,
+      trade,
     }: {
       id: string | null
       draft: AccountDraft
       nasabah?: string[]
       community?: string[]
+      trade?: string[]
     }) => {
       let saved =
         id === null
@@ -114,6 +116,9 @@ export function useSaveAccount() {
       }
       if (community && !sameSet(community, saved.agent.community_permissions)) {
         saved = { ...saved, agent: await settingsApi.setCommunityPermissions(saved.agent.id, community) }
+      }
+      if (trade && !sameSet(trade, saved.agent.trade_permissions)) {
+        saved = { ...saved, agent: await settingsApi.setTradePermissions(saved.agent.id, trade) }
       }
       return saved
     },

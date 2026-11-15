@@ -1,5 +1,7 @@
-export const systemTabs = ['status', 'healer', 'backup', 'alerts'] as const
+export const systemTabs = ['status', 'healer', 'backup', 'alerts', 'relay'] as const
 export type SystemTab = (typeof systemTabs)[number]
+
+export const relayOnlyTabs: readonly SystemTab[] = ['relay']
 
 export type Severity = 'warning' | 'critical'
 export type OverallStatus = 'ok' | 'warning' | 'critical'

@@ -23,6 +23,7 @@ export type StaffAccount = {
   active_tickets: number
   nasabah_permissions: string[]
   community_permissions: string[]
+  trade_permissions: string[]
   created_at: string | null
 }
 

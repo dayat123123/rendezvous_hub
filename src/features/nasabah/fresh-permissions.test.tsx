@@ -38,4 +38,17 @@ describe('useFreshPermissions', () => {
     const phase = useAuth.getState().phase
     expect(phase.kind === 'ready' && phase.agent.status).toBe('online')
   })
+
+  it('picks up Berbagi Trade permissions granted after sign-in', async () => {
+    vi.mocked(presenceApi.me).mockResolvedValue({
+      ...agentFixture,
+      trade_permissions: ['trade_relay.operate'],
+    })
+    renderWithProviders(<Probe />, agentFixture)
+
+    await waitFor(() => {
+      const phase = useAuth.getState().phase
+      expect(phase.kind === 'ready' && phase.agent.trade_permissions).toEqual(['trade_relay.operate'])
+    })
+  })
 })

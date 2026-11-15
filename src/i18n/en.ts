@@ -120,6 +120,24 @@ export const en: Translation = {
     product: 'Features & campaigns',
     cs_content: 'Service content',
   },
+  tradePermissions: {
+    trade_share: {
+      review: 'Review Trade Sharing',
+      manage: 'Manage Trade Sharing',
+    },
+    trade_relay: {
+      operate: 'Operate the Trade Relay',
+    },
+  },
+  tradePermissionHints: {
+    trade_share: {
+      review: 'Approve or reject trader applications, suspend, revoke, reinstate, and review flags.',
+      manage: 'Settings and the kill switch, excluded accounts and stocks, pilot invites, and CSV export.',
+    },
+    trade_relay: {
+      operate: 'See the relay status and run Reconnect or Restart. Suited to on-call IT staff.',
+    },
+  },
   nav: {
     nasabah: 'Customer accounts',
     tickets: 'Customer service',
@@ -152,6 +170,8 @@ export const en: Translation = {
     contentPolicy: 'Content policy',
     systemCritical: '{{count}} critical alerts not handled',
     systemWarning: '{{count}} warnings not handled',
+    tradeShare: 'Trade Sharing',
+    tradeRelay: 'Trade Relay',
   },
   tickets: {
     filter: 'Filter',
@@ -527,6 +547,9 @@ export const en: Translation = {
   settings: {
     communityAccess: 'Community permissions',
     communityHint: 'For staff who manage the community stream. Can be granted to any role.',
+    tradeAccess: 'Trade Sharing permissions',
+    tradeHint:
+      'Compliance → Trade Sharing and System → Trade Relay. Super Admins always hold all of these. Can be granted to any role.',
     nasabahAccess: 'Customer account access',
     nasabahHint:
       'Permissions for the Customer accounts menu (data from the Customer API), CS-role accounts only. Empty means the menu is hidden.',
@@ -1231,6 +1254,28 @@ export const en: Translation = {
       alerts_email_set: 'Email alerts configured',
       alerts_options_set: 'Alert label and link changed',
       alerts_test_sent: 'Test alert sent',
+      agent_trade_permissions: 'Trade Sharing permissions changed',
+      trade_share_view: 'Trade Sharing trader opened',
+      trade_share_propose: 'Trader approval proposed (four eyes)',
+      trade_share_approve: 'Trade Sharing trader approved',
+      trade_share_reject: 'Trade Sharing application rejected',
+      trade_share_suspend: 'Trade Sharing trader suspended',
+      trade_share_reinstate: 'Trade Sharing trader reinstated',
+      trade_share_revoke: 'Trade Sharing trader revoked',
+      trade_share_subscribers_view: 'Trader subscribers viewed',
+      trade_share_exclude_account: 'Account excluded from Trade Sharing',
+      trade_share_unexclude_account: 'Account removed from the excluded list',
+      trade_share_exclude_stock: 'Stock excluded from Trade Sharing',
+      trade_share_unexclude_stock: 'Stock removed from the excluded list',
+      trade_share_pilot_invite: 'Trade Sharing pilot invite changed',
+      trade_share_setting: 'Trade Sharing setting changed',
+      trade_share_flag_review: 'Trade Sharing flag reviewed',
+      trade_share_export: 'Trade Sharing CSV exported',
+      trade_relay_config: 'Trade Relay configuration changed',
+      trade_relay_aes_set: 'Trade Relay AES key set',
+      trade_relay_aes_cleared: 'Trade Relay AES key removed',
+      trade_relay_command: 'Trade Relay command',
+      trade_notify_enabled: 'Order owner trade notifications changed',
       health_alert_acknowledged: 'Alert marked as handled',
       backup_target_set: 'Backup target changed',
       backup_schedule_set: 'Backup schedule changed',
@@ -2439,11 +2484,19 @@ export const en: Translation = {
   legal: {
     title: 'Legal documents',
     subtitle:
-      'Terms & Conditions, Community Guidelines, and Privacy Policy that customers accept in the app. Every new version starts as a draft and is approved by compliance staff before it is published.',
+      'Terms & Conditions, Community Guidelines, Privacy Policy, and the Trade Sharing Terms and Risk Statement that customers accept in the app. Every new version starts as a draft and is approved by compliance staff before it is published.',
     kinds: {
       terms: 'Terms & Conditions',
       community_guidelines: 'Community Guidelines',
       privacy: 'Privacy Policy',
+      trade_share_terms: 'Trade Sharing Terms',
+      trade_share_risk: 'Trade Sharing Risk Statement',
+    },
+    featureNotes: {
+      trade_share_terms:
+        'Customers accept this when they apply as a Trade Sharing trader, not when they open the app. The accepted version is recorded per application.',
+      trade_share_risk:
+        'Subscribers accept this the first time they turn on a trader’s trade notifications. The accepted version is recorded per subscription.',
     },
     status: {
       draft: 'Draft',
@@ -2607,6 +2660,8 @@ export const en: Translation = {
       invalid_legal_title: 'Title must be 3–150 characters.',
       invalid_legal_body: 'Document text must be 50–100,000 characters.',
       invalid_legal_summary: 'The change summary can be at most 2,000 characters.',
+      legal_kind_not_global:
+        'The Trade Sharing Terms and Risk Statement are accepted only in the Trade Sharing flow, so they cannot be made mandatory for every user.',
     },
   },
   system: {
@@ -2614,7 +2669,13 @@ export const en: Translation = {
     subtitle:
       'Service status, alerts, database backups, and notification channels. Data refreshes automatically every 15 seconds.',
     tabsLabel: 'System health sections',
-    tabs: { status: 'Status', healer: 'Auto restart', backup: 'Backup', alerts: 'Alerts' },
+    tabs: {
+      status: 'Status',
+      healer: 'Auto restart',
+      backup: 'Backup',
+      alerts: 'Alerts',
+      relay: 'Trade Relay',
+    },
     healer: {
       title: 'Auto restart',
       subtitle:

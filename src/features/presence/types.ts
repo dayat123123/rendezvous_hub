@@ -28,6 +28,7 @@ export type AgentProfile = {
   skills: Record<string, number>
   nasabah_permissions: string[]
   community_permissions: string[]
+  trade_permissions: string[]
   settings: AgentSettings
 }
 
@@ -60,6 +61,7 @@ export function normalizeAgent(raw: AgentProfile): AgentProfile {
     roles: raw.roles ?? [],
     nasabah_permissions: raw.nasabah_permissions ?? [],
     community_permissions: raw.community_permissions ?? [],
+    trade_permissions: raw.trade_permissions ?? [],
     settings: { ...defaultSettings, ...raw.settings },
   }
 }
@@ -80,6 +82,14 @@ export const canOpenCommunity = (agent: Pick<AgentProfile, 'roles' | 'community_
   hasCommunityAccess(agent) || isSuperAdmin(agent)
 export const canViewTickets = (agent: Pick<AgentProfile, 'roles'>) =>
   worksTickets(agent) || isSuperAdmin(agent)
+type TradeAgent = Pick<AgentProfile, 'roles' | 'trade_permissions'>
+const hasTrade = (agent: TradeAgent, permission: string) =>
+  isSuperAdmin(agent) || agent.trade_permissions.includes(permission)
+export const canOpenTradeShare = (agent: TradeAgent) =>
+  isSuperAdmin(agent) || agent.trade_permissions.some((permission) => permission.startsWith('trade_share.'))
+export const canReviewTradeShare = (agent: TradeAgent) => hasTrade(agent, 'trade_share.review')
+export const canManageTradeShare = (agent: TradeAgent) => hasTrade(agent, 'trade_share.manage')
+export const canOperateRelay = (agent: TradeAgent) => hasTrade(agent, 'trade_relay.operate')
 export const atCapacity = (agent: Pick<AgentProfile, 'active_tickets' | 'max_active_tickets'>) =>
   agent.active_tickets >= agent.max_active_tickets
 

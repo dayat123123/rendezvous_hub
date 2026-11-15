@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { communityPermissions, type CommunityPermission } from '@/features/community/types'
 import { nasabahPermissions, type NasabahPermission } from '@/features/nasabah/types'
 import { isStaffRole } from '@/features/settings/types'
+import { tradePermissions, type TradePermission } from '@/features/trade-share/types'
 import { format, shortDate } from '@/lib/time'
 
 import { useMyProfile } from '../hooks'
@@ -18,6 +19,9 @@ const isCommunityPermission = (value: string): value is CommunityPermission =>
 
 const isNasabahPermission = (value: string): value is NasabahPermission =>
   (nasabahPermissions as readonly string[]).includes(value)
+
+const isTradePermission = (value: string): value is TradePermission =>
+  (tradePermissions as readonly string[]).includes(value)
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -48,6 +52,9 @@ function ProfileDetails({ profile }: { profile: MyProfile }) {
   const nasabah = profile.nasabah_permissions
     .filter(isNasabahPermission)
     .map((code) => t(`nasabah.permissions.${code.replace('.', '_') as 'online_user_view'}`))
+  const trade = profile.trade_permissions
+    .filter(isTradePermission)
+    .map((code) => t(`tradePermissions.${code}`))
   const languages = profile.languages.map((code) =>
     code === 'en' || code === 'id' ? t(`account.languageNames.${code}`) : code,
   )
@@ -72,6 +79,9 @@ function ProfileDetails({ profile }: { profile: MyProfile }) {
       </Row>
       <Row label={t('account.profile.nasabahPermissions')}>
         <List items={nasabah} empty={none} />
+      </Row>
+      <Row label={t('settings.tradeAccess')}>
+        <List items={trade} empty={none} />
       </Row>
       <Row label={t('account.profile.createdAt')}>
         {profile.created_at ? shortDate(profile.created_at) : t('app.none')}

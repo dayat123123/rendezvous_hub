@@ -163,6 +163,48 @@ describe('LegalPage', () => {
     )
   })
 
+  it('explains when the server refuses to make a Trade Sharing document mandatory', async () => {
+    const user = userEvent.setup()
+    vi.mocked(legalApi.overview).mockResolvedValue(overview())
+    vi.mocked(legalApi.setRequired).mockRejectedValue(new ApiError('legal_kind_not_global', 'x', 400))
+    renderPage()
+
+    const privacy = await screen.findByRole('region', { name: 'Kebijakan Privasi' })
+    await user.click(within(privacy).getByRole('switch', { name: 'Wajib disetujui' }))
+    await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Wajibkan' }))
+
+    expect(await screen.findByText(/hanya disetujui di alur Berbagi Trade/)).toBeInTheDocument()
+  })
+
+  it('lists the Trade Sharing documents without a mandatory switch', async () => {
+    const terms: LegalDocument = {
+      ...termsV2,
+      id: 'doc-trade-terms-1',
+      kind: 'trade_share_terms',
+      version: 1,
+      title: 'S&K Berbagi Trade',
+      accepted: 3,
+    }
+    vi.mocked(legalApi.overview).mockResolvedValue(
+      overview({
+        kinds: [
+          ...overview().kinds,
+          { kind: 'trade_share_terms', required: false, current: terms, scheduled: null, history: [terms] },
+          { kind: 'trade_share_risk', required: false, current: null, scheduled: null, history: [] },
+        ],
+      }),
+    )
+    renderPage()
+
+    const trade = await screen.findByRole('region', { name: 'S&K Berbagi Trade' })
+    expect(within(trade).queryByRole('switch', { name: 'Wajib disetujui' })).not.toBeInTheDocument()
+    expect(within(trade).getByText(/saat mengajukan sebagai trader/)).toBeInTheDocument()
+    expect(within(trade).getByText('3 pengguna sudah menyetujui')).toBeInTheDocument()
+    const risk = screen.getByRole('region', { name: 'Pernyataan Risiko Berbagi Trade' })
+    expect(within(risk).getByText(/menyalakan notifikasi trade/)).toBeInTheDocument()
+    expect(within(risk).queryByRole('switch')).not.toBeInTheDocument()
+  })
+
   it('warns how many users would be blocked when a document with a current version becomes mandatory', async () => {
     const user = userEvent.setup()
     vi.mocked(legalApi.overview).mockResolvedValue(

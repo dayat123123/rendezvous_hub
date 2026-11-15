@@ -1,7 +1,7 @@
 import type * as RouterModule from '@tanstack/react-router'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { AgentProfile } from '@/features/presence/types'
 import { agentFixture, monitorFixture } from '@/test/fixtures'
@@ -136,6 +136,10 @@ function tabNames() {
     .getAllByRole('tab')
     .map((tab) => tab.textContent)
 }
+
+beforeAll(async () => {
+  await import('@/features/analytics/components/analytics-tab')
+}, 60_000)
 
 describe('CommunityPage', () => {
   it('opens Analitik as the only tab for a Super Admin without community permissions', async () => {

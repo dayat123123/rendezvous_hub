@@ -86,6 +86,7 @@ const legalCodes = [
   'invalid_legal_title',
   'invalid_legal_body',
   'invalid_legal_summary',
+  'legal_kind_not_global',
 ] as const
 
 type LegalCode = (typeof legalCodes)[number]
@@ -315,6 +316,46 @@ const instrumentCodes = [
 export function instrumentErrorText(error: unknown): string {
   const code = toApiError(error).code
   return among(instrumentCodes, code) ? i18n.t(`moderation.instruments.errors.${code}`) : errorText(error)
+}
+
+const tradeCodes = [
+  'trade_forbidden',
+  'invalid_permission',
+  'invalid_status',
+  'invalid_decision',
+  'invalid_until',
+  'invalid_cust_id',
+  'invalid_stock',
+  'invalid_range',
+  'invalid_setting',
+  'invalid_action',
+  'invalid_iproxy_addr',
+  'invalid_identity',
+  'invalid_heartbeat',
+  'invalid_aes_mode',
+  'invalid_aes_key',
+  'invalid_aes_iv',
+  'aes_not_configured',
+  'reason_required',
+  'reason_too_long',
+  'trader_not_found',
+  'profile_not_found',
+  'flag_not_found',
+  'not_excluded',
+  'setting_not_found',
+  'not_pending',
+  'not_active',
+  'not_suspended',
+  'not_sharing',
+  'no_active_accounts',
+  'four_eyes_same_agent',
+  'command_rate_limited',
+  'invalid_query',
+] as const
+
+export function tradeErrorText(error: unknown): string {
+  const code = toApiError(error).code
+  return among(tradeCodes, code) ? i18n.t(`trade.errors.${code}`) : errorText(error)
 }
 
 const attachmentCodes = [

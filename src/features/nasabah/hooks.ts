@@ -53,6 +53,7 @@ export function useFreshPermissions(enabled = true) {
     if (
       sameSet(phase.agent.nasabah_permissions, me.data.nasabah_permissions) &&
       sameSet(phase.agent.community_permissions, me.data.community_permissions) &&
+      sameSet(phase.agent.trade_permissions, me.data.trade_permissions) &&
       phase.agent.settings.nasabah_ready === ready &&
       phase.agent.settings.community_four_eyes === fourEyes &&
       phase.agent.settings.community_push_ready === pushReady
@@ -62,6 +63,7 @@ export function useFreshPermissions(enabled = true) {
       ...phase.agent,
       nasabah_permissions: me.data.nasabah_permissions,
       community_permissions: me.data.community_permissions,
+      trade_permissions: me.data.trade_permissions,
       settings: {
         ...phase.agent.settings,
         nasabah_ready: ready,

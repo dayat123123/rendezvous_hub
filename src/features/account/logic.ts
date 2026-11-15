@@ -86,6 +86,7 @@ export function normalizeProfile(raw: Partial<MyProfile> | null): MyProfile {
     max_active_tickets: count(raw?.max_active_tickets),
     nasabah_permissions: strings(raw?.nasabah_permissions),
     community_permissions: strings(raw?.community_permissions),
+    trade_permissions: strings(raw?.trade_permissions),
     created_at: raw?.created_at ?? null,
     password_changed_at: raw?.password_changed_at ?? null,
   }

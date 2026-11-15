@@ -2,9 +2,12 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import { SectionBoundary } from '@/components/states'
+import { useAgent } from '@/features/auth/hooks'
+import { isSuperAdmin } from '@/features/presence/types'
+import { RelayTab } from '@/features/trade-share/relay/components/relay-tab'
 import { cn } from '@/lib/utils'
 
-import { systemTabs, type SystemTab } from '../types'
+import { relayOnlyTabs, systemTabs, type SystemTab } from '../types'
 import { AlertsTab } from './alerts-tab'
 import { BackupTab } from './backup-tab'
 import { HealerTab } from './healer-tab'
@@ -15,13 +18,16 @@ const panels: Record<SystemTab, () => React.ReactNode> = {
   healer: () => <HealerTab />,
   backup: () => <BackupTab />,
   alerts: () => <AlertsTab />,
+  relay: () => <RelayTab />,
 }
 
 export function SystemPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const agent = useAgent()
   const search: { tab?: string } = useSearch({ strict: false })
-  const tab: SystemTab = systemTabs.find((item) => item === search.tab) ?? 'status'
+  const tabs = isSuperAdmin(agent) ? systemTabs : relayOnlyTabs
+  const tab: SystemTab = tabs.find((item) => item === search.tab) ?? tabs[0] ?? 'relay'
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-5 lg:px-6">
@@ -34,7 +40,7 @@ export function SystemPage() {
           aria-label={t('system.tabsLabel')}
           className="flex gap-4 overflow-x-auto border-b"
         >
-          {systemTabs.map((item) => (
+          {tabs.map((item) => (
             <button
               key={item}
               id={`system-tab-${item}`}
@@ -45,11 +51,8 @@ export function SystemPage() {
               tabIndex={tab === item ? 0 : -1}
               onKeyDown={(event) => {
                 if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
-                const index = systemTabs.indexOf(item)
-                const next =
-                  systemTabs[
-                    (index + (event.key === 'ArrowRight' ? 1 : systemTabs.length - 1)) % systemTabs.length
-                  ]
+                const index = tabs.indexOf(item)
+                const next = tabs[(index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]
                 if (!next) return
                 void navigate({ to: '/system', search: { tab: next } })
                 document.getElementById(`system-tab-${next}`)?.focus()

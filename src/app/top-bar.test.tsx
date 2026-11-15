@@ -96,8 +96,14 @@ describe('TopBar', () => {
       'Konten Layanan',
       'Fitur & Kampanye',
       'Pengaturan',
+      'Berbagi Trade',
     ])
     expect(screen.getByRole('link', { name: 'Komunitas' })).toHaveAttribute('href', '/community')
+    expect(screen.getByRole('link', { name: 'Berbagi Trade' })).toHaveAttribute(
+      'href',
+      '/compliance/trade-share',
+    )
+    expect(screen.queryByRole('link', { name: 'Relay Trade' })).not.toBeInTheDocument()
   })
 
   it('shows Fitur & Kampanye right before Pengaturan to Super Admins only', () => {
@@ -129,6 +135,7 @@ describe('TopBar', () => {
       'Konten Layanan',
       'Fitur & Kampanye',
       'Pengaturan',
+      'Berbagi Trade',
     ])
   })
 
@@ -152,8 +159,45 @@ describe('TopBar', () => {
       'Konten Layanan',
       'Fitur & Kampanye',
       'Pengaturan',
+      'Berbagi Trade',
       'Kesehatan sistem',
     ])
+  })
+
+  it('adds Berbagi Trade to the compliance menus only with a trade permission', () => {
+    const { unmount } = renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
+      ...agentFixture,
+      roles: ['compliance'],
+      trade_permissions: ['trade_share.review'],
+    })
+    const links = navLinks()
+    expect(links.indexOf('Berbagi Trade')).toBe(links.indexOf('Dokumen hukum') + 1)
+    unmount()
+
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
+      ...agentFixture,
+      roles: ['compliance'],
+      trade_permissions: ['trade_relay.operate'],
+    })
+    expect(screen.queryByRole('link', { name: 'Berbagi Trade' })).not.toBeInTheDocument()
+  })
+
+  it('gives relay operators a Relay Trade menu that opens the system page', () => {
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
+      ...agentFixture,
+      roles: ['community'],
+      trade_permissions: ['trade_relay.operate'],
+    })
+    expect(navLinks()).toEqual(['Relay Trade'])
+    expect(screen.getByRole('link', { name: 'Relay Trade' })).toHaveAttribute('href', '/system')
+  })
+
+  it('shows Berbagi Trade to non-compliance staff who manage trade sharing', () => {
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
+      ...agentFixture,
+      trade_permissions: ['trade_share.manage'],
+    })
+    expect(navLinks()).toEqual(['Layanan Nasabah', 'Berbagi Trade'])
   })
 
   it('shows only Komunitas to community staff, with the items they can act on', async () => {

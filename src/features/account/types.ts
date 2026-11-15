@@ -18,6 +18,7 @@ export type MyProfile = {
   max_active_tickets: number
   nasabah_permissions: string[]
   community_permissions: string[]
+  trade_permissions: string[]
   created_at: string | null
   password_changed_at: string | null
 }

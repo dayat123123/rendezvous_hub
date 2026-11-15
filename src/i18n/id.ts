@@ -117,6 +117,26 @@ export const id = {
     product: 'Fitur & Kampanye',
     cs_content: 'Konten Layanan',
   },
+  tradePermissions: {
+    trade_share: {
+      review: 'Tinjau Berbagi Trade',
+      manage: 'Kelola Berbagi Trade',
+    },
+    trade_relay: {
+      operate: 'Operasikan Relay Trade',
+    },
+  },
+  tradePermissionHints: {
+    trade_share: {
+      review:
+        'Menyetujui atau menolak pengajuan trader, menangguhkan, mencabut, mengaktifkan kembali, dan meninjau penanda.',
+      manage:
+        'Pengaturan dan tombol darurat, daftar rekening dan saham dikecualikan, undangan pilot, serta ekspor CSV.',
+    },
+    trade_relay: {
+      operate: 'Melihat status relay dan menjalankan Sambung ulang atau Restart. Cocok untuk staf IT jaga.',
+    },
+  },
   nav: {
     nasabah: 'Akun Nasabah',
     tickets: 'Layanan Nasabah',
@@ -149,6 +169,8 @@ export const id = {
     contentPolicy: 'Kebijakan konten',
     systemCritical: '{{count}} alert kritis belum ditangani',
     systemWarning: '{{count}} peringatan belum ditangani',
+    tradeShare: 'Berbagi Trade',
+    tradeRelay: 'Relay Trade',
   },
   tickets: {
     filter: 'Filter',
@@ -523,6 +545,9 @@ export const id = {
   settings: {
     communityAccess: 'Izin Komunitas',
     communityHint: 'Untuk staf yang mengelola stream komunitas. Bisa diberikan ke peran apa pun.',
+    tradeAccess: 'Izin Berbagi Trade',
+    tradeHint:
+      'Menu Kepatuhan → Berbagi Trade dan Sistem → Relay Trade. Super Admin selalu punya semua izin ini. Bisa diberikan ke peran apa pun.',
     nasabahAccess: 'Akses Akun Nasabah',
     nasabahHint:
       'Izin menu Akun Nasabah (data dari API Nasabah), khusus akun berperan CS. Kosong berarti menu tidak tampil.',
@@ -1227,6 +1252,28 @@ export const id = {
       alerts_email_set: 'Atur alert email',
       alerts_options_set: 'Atur label dan tautan alert',
       alerts_test_sent: 'Kirim alert uji',
+      agent_trade_permissions: 'Ubah izin Berbagi Trade',
+      trade_share_view: 'Buka detail trader Berbagi Trade',
+      trade_share_propose: 'Usulkan persetujuan trader (empat mata)',
+      trade_share_approve: 'Setujui trader Berbagi Trade',
+      trade_share_reject: 'Tolak pengajuan Berbagi Trade',
+      trade_share_suspend: 'Tangguhkan trader Berbagi Trade',
+      trade_share_reinstate: 'Aktifkan kembali trader Berbagi Trade',
+      trade_share_revoke: 'Cabut trader Berbagi Trade',
+      trade_share_subscribers_view: 'Lihat pelanggan trader',
+      trade_share_exclude_account: 'Kecualikan rekening dari Berbagi Trade',
+      trade_share_unexclude_account: 'Hapus rekening dari daftar dikecualikan',
+      trade_share_exclude_stock: 'Kecualikan saham dari Berbagi Trade',
+      trade_share_unexclude_stock: 'Hapus saham dari daftar dikecualikan',
+      trade_share_pilot_invite: 'Ubah undangan pilot Berbagi Trade',
+      trade_share_setting: 'Ubah pengaturan Berbagi Trade',
+      trade_share_flag_review: 'Tinjau penanda Berbagi Trade',
+      trade_share_export: 'Ekspor CSV Berbagi Trade',
+      trade_relay_config: 'Ubah konfigurasi Relay Trade',
+      trade_relay_aes_set: 'Atur kunci AES Relay Trade',
+      trade_relay_aes_cleared: 'Hapus kunci AES Relay Trade',
+      trade_relay_command: 'Perintah Relay Trade',
+      trade_notify_enabled: 'Ubah notifikasi trade ke pemilik order',
       health_alert_acknowledged: 'Tandai alert sudah ditangani',
       backup_target_set: 'Atur tujuan backup',
       backup_schedule_set: 'Atur jadwal backup',
@@ -2446,11 +2493,19 @@ export const id = {
   legal: {
     title: 'Dokumen hukum',
     subtitle:
-      'Syarat & Ketentuan, Pedoman Komunitas, dan Kebijakan Privasi yang disetujui nasabah di aplikasi. Setiap versi baru disusun sebagai draf dan disetujui staf kepatuhan sebelum terbit.',
+      'Syarat & Ketentuan, Pedoman Komunitas, Kebijakan Privasi, serta S&K dan Pernyataan Risiko Berbagi Trade yang disetujui nasabah di aplikasi. Setiap versi baru disusun sebagai draf dan disetujui staf kepatuhan sebelum terbit.',
     kinds: {
       terms: 'Syarat & Ketentuan',
       community_guidelines: 'Pedoman Komunitas',
       privacy: 'Kebijakan Privasi',
+      trade_share_terms: 'S&K Berbagi Trade',
+      trade_share_risk: 'Pernyataan Risiko Berbagi Trade',
+    },
+    featureNotes: {
+      trade_share_terms:
+        'Disetujui nasabah saat mengajukan sebagai trader Berbagi Trade, bukan saat masuk aplikasi. Versi yang disetujui dicatat per pengajuan.',
+      trade_share_risk:
+        'Disetujui pelanggan saat pertama kali menyalakan notifikasi trade seorang trader. Versi yang disetujui dicatat per langganan.',
     },
     status: {
       draft: 'Draf',
@@ -2615,6 +2670,8 @@ export const id = {
       invalid_legal_title: 'Judul 3–150 karakter.',
       invalid_legal_body: 'Isi dokumen 50–100.000 karakter.',
       invalid_legal_summary: 'Ringkasan perubahan maksimal 2.000 karakter.',
+      legal_kind_not_global:
+        'S&K dan Pernyataan Risiko Berbagi Trade hanya disetujui di alur Berbagi Trade, jadi tidak bisa dijadikan wajib untuk semua pengguna.',
     },
   },
   system: {
@@ -2622,7 +2679,13 @@ export const id = {
     subtitle:
       'Status layanan, alert, backup database, dan kanal pemberitahuan. Data diperbarui otomatis setiap 15 detik.',
     tabsLabel: 'Bagian kesehatan sistem',
-    tabs: { status: 'Status', healer: 'Restart otomatis', backup: 'Backup', alerts: 'Alert' },
+    tabs: {
+      status: 'Status',
+      healer: 'Restart otomatis',
+      backup: 'Backup',
+      alerts: 'Alert',
+      relay: 'Relay Trade',
+    },
     healer: {
       title: 'Restart otomatis',
       subtitle:
