@@ -1,3 +1,5 @@
+import { SHOW_TRADE_SHARE } from '@/lib/nav-config'
+
 export const agentStatuses = ['online', 'busy', 'break', 'offline'] as const
 export type AgentStatus = (typeof agentStatuses)[number]
 
@@ -86,10 +88,12 @@ type TradeAgent = Pick<AgentProfile, 'roles' | 'trade_permissions'>
 const hasTrade = (agent: TradeAgent, permission: string) =>
   isSuperAdmin(agent) || agent.trade_permissions.includes(permission)
 export const canOpenTradeShare = (agent: TradeAgent) =>
-  isSuperAdmin(agent) || agent.trade_permissions.some((permission) => permission.startsWith('trade_share.'))
+  SHOW_TRADE_SHARE &&
+  (isSuperAdmin(agent) || agent.trade_permissions.some((permission) => permission.startsWith('trade_share.')))
 export const canReviewTradeShare = (agent: TradeAgent) => hasTrade(agent, 'trade_share.review')
 export const canManageTradeShare = (agent: TradeAgent) => hasTrade(agent, 'trade_share.manage')
-export const canOperateRelay = (agent: TradeAgent) => hasTrade(agent, 'trade_relay.operate')
+export const canOperateRelay = (agent: TradeAgent) =>
+  SHOW_TRADE_SHARE && hasTrade(agent, 'trade_relay.operate')
 export const atCapacity = (agent: Pick<AgentProfile, 'active_tickets' | 'max_active_tickets'>) =>
   agent.active_tickets >= agent.max_active_tickets
 

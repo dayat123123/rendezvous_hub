@@ -1,5 +1,7 @@
 import { createMemoryHistory } from '@tanstack/react-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/lib/nav-config', () => ({ SHOW_SYSTEM_HEALTH_NAV: false, SHOW_TRADE_SHARE: true }))
 
 import type { AgentProfile } from '@/features/presence/types'
 import { agentFixture, monitorFixture } from '@/test/fixtures'

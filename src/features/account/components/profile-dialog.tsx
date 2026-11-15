@@ -8,6 +8,7 @@ import { communityPermissions, type CommunityPermission } from '@/features/commu
 import { nasabahPermissions, type NasabahPermission } from '@/features/nasabah/types'
 import { isStaffRole } from '@/features/settings/types'
 import { tradePermissions, type TradePermission } from '@/features/trade-share/types'
+import { SHOW_TRADE_SHARE } from '@/lib/nav-config'
 import { format, shortDate } from '@/lib/time'
 
 import { useMyProfile } from '../hooks'
@@ -80,9 +81,11 @@ function ProfileDetails({ profile }: { profile: MyProfile }) {
       <Row label={t('account.profile.nasabahPermissions')}>
         <List items={nasabah} empty={none} />
       </Row>
-      <Row label={t('settings.tradeAccess')}>
-        <List items={trade} empty={none} />
-      </Row>
+      {SHOW_TRADE_SHARE ? (
+        <Row label={t('settings.tradeAccess')}>
+          <List items={trade} empty={none} />
+        </Row>
+      ) : null}
       <Row label={t('account.profile.createdAt')}>
         {profile.created_at ? shortDate(profile.created_at) : t('app.none')}
       </Row>

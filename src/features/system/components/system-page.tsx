@@ -7,7 +7,7 @@ import { isSuperAdmin } from '@/features/presence/types'
 import { RelayTab } from '@/features/trade-share/relay/components/relay-tab'
 import { cn } from '@/lib/utils'
 
-import { relayOnlyTabs, systemTabs, type SystemTab } from '../types'
+import { relayOnlyTabs, superAdminTabs, type SystemTab } from '../types'
 import { AlertsTab } from './alerts-tab'
 import { BackupTab } from './backup-tab'
 import { HealerTab } from './healer-tab'
@@ -26,8 +26,8 @@ export function SystemPage() {
   const navigate = useNavigate()
   const agent = useAgent()
   const search: { tab?: string } = useSearch({ strict: false })
-  const tabs = isSuperAdmin(agent) ? systemTabs : relayOnlyTabs
-  const tab: SystemTab = tabs.find((item) => item === search.tab) ?? tabs[0] ?? 'relay'
+  const tabs = isSuperAdmin(agent) ? superAdminTabs : relayOnlyTabs
+  const tab: SystemTab = tabs.find((item) => item === search.tab) ?? tabs[0] ?? 'status'
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-4 py-5 lg:px-6">

@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test'
 
+import { SHOW_TRADE_SHARE } from '../src/lib/nav-config'
 import { signIn } from './support/staff'
+
+test.skip(!SHOW_TRADE_SHARE, 'Berbagi Trade is hidden')
 
 test('Super Admin membuka Berbagi Trade dan Relay Trade', async ({ page }) => {
   await signIn(page, 'Sinta')

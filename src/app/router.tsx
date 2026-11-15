@@ -289,7 +289,7 @@ const systemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/system',
   beforeLoad: ({ context }) => {
-    if (!canOperateRelay(context.agent)) throw redirect({ to: '/' })
+    if (!isSuperAdmin(context.agent) && !canOperateRelay(context.agent)) throw redirect({ to: '/' })
   },
   validateSearch: (search: Record<string, unknown>): { tab?: SystemTab } => {
     const tab = text(search.tab)

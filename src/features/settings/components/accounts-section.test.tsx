@@ -2,6 +2,8 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+vi.mock('@/lib/nav-config', () => ({ SHOW_SYSTEM_HEALTH_NAV: false, SHOW_TRADE_SHARE: true }))
+
 import { ApiError } from '@/lib/errors'
 import { monitorFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'

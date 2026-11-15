@@ -9,7 +9,7 @@ import { renderWithProviders } from '@/test/render'
 import { useOverlays } from '../bus'
 import { CommandPalette } from './command-palette'
 
-const nav = vi.hoisted(() => ({ SHOW_SYSTEM_HEALTH_NAV: false }))
+const nav = vi.hoisted(() => ({ SHOW_SYSTEM_HEALTH_NAV: false, SHOW_TRADE_SHARE: true }))
 const navigate = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/nav-config', () => nav)

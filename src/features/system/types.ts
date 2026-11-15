@@ -1,7 +1,13 @@
+import { SHOW_TRADE_SHARE } from '@/lib/nav-config'
+
 export const systemTabs = ['status', 'healer', 'backup', 'alerts', 'relay'] as const
 export type SystemTab = (typeof systemTabs)[number]
 
 export const relayOnlyTabs: readonly SystemTab[] = ['relay']
+
+export const superAdminTabs: readonly SystemTab[] = SHOW_TRADE_SHARE
+  ? systemTabs
+  : systemTabs.filter((tab) => tab !== 'relay')
 
 export type Severity = 'warning' | 'critical'
 export type OverallStatus = 'ok' | 'warning' | 'critical'

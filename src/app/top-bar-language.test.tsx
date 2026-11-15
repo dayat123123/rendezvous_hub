@@ -10,7 +10,7 @@ import { renderWithProviders } from '@/test/render'
 
 import { TopBar } from './top-bar'
 
-vi.mock('@/lib/nav-config', () => ({ SHOW_SYSTEM_HEALTH_NAV: false }))
+vi.mock('@/lib/nav-config', () => ({ SHOW_SYSTEM_HEALTH_NAV: false, SHOW_TRADE_SHARE: false }))
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof RouterModule>()

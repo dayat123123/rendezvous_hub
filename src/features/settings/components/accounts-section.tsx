@@ -38,6 +38,7 @@ import { useNasabahLabels } from '@/features/nasabah/labels'
 import { communityPermissions } from '@/features/community/types'
 import { nasabahPermissions } from '@/features/nasabah/types'
 import { tradePermissions } from '@/features/trade-share/types'
+import { SHOW_TRADE_SHARE } from '@/lib/nav-config'
 import { errorText } from '@/lib/error-text'
 import { toApiError } from '@/lib/errors'
 import { stamp } from '@/lib/time'
@@ -335,39 +336,41 @@ function AccountDialog({
               )}
             />
           </fieldset>
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-medium">{t('settings.tradeAccess')}</legend>
-            <p className="text-xs text-muted-foreground">{t('settings.tradeHint')}</p>
-            <Controller
-              control={form.control}
-              name="trade"
-              render={({ field }) => (
-                <div className="flex flex-col gap-1.5">
-                  {tradePermissions.map((permission) => (
-                    <label key={permission} className="flex items-start gap-2 text-row">
-                      <Checkbox
-                        className="mt-0.5"
-                        checked={field.value.includes(permission)}
-                        onCheckedChange={(value) =>
-                          field.onChange(
-                            value === true
-                              ? [...field.value, permission]
-                              : field.value.filter((item) => item !== permission),
-                          )
-                        }
-                      />
-                      <span>
-                        <span className="block">{t(`tradePermissions.${permission}`)}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {t(`tradePermissionHints.${permission}`)}
+          {SHOW_TRADE_SHARE ? (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 text-sm font-medium">{t('settings.tradeAccess')}</legend>
+              <p className="text-xs text-muted-foreground">{t('settings.tradeHint')}</p>
+              <Controller
+                control={form.control}
+                name="trade"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-1.5">
+                    {tradePermissions.map((permission) => (
+                      <label key={permission} className="flex items-start gap-2 text-row">
+                        <Checkbox
+                          className="mt-0.5"
+                          checked={field.value.includes(permission)}
+                          onCheckedChange={(value) =>
+                            field.onChange(
+                              value === true
+                                ? [...field.value, permission]
+                                : field.value.filter((item) => item !== permission),
+                            )
+                          }
+                        />
+                        <span>
+                          <span className="block">{t(`tradePermissions.${permission}`)}</span>
+                          <span className="block text-xs text-muted-foreground">
+                            {t(`tradePermissionHints.${permission}`)}
+                          </span>
                         </span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            />
-          </fieldset>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              />
+            </fieldset>
+          ) : null}
           {editing ? (
             <div className="flex flex-col gap-2">
               <Controller

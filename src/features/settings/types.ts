@@ -1,3 +1,4 @@
+import { SHOW_TRADE_SHARE } from '@/lib/nav-config'
 import type { AgentStatus } from '@/features/presence/types'
 
 export const staffRoles = [
@@ -159,9 +160,13 @@ export type SettingsSection = (typeof settingsGroups)[SettingsGroup][number]
 
 export const settingsGroupOrder: readonly SettingsGroup[] = ['service', 'community', 'integration', 'system']
 
-export const settingsSections: readonly SettingsSection[] = settingsGroupOrder.flatMap(
-  (group) => settingsGroups[group],
-)
+const hiddenSettingsSections: readonly SettingsSection[] = SHOW_TRADE_SHARE ? [] : ['tradeRelay']
+
+export const visibleSettingsSections = (group: SettingsGroup): readonly SettingsSection[] =>
+  settingsGroups[group].filter((section) => !hiddenSettingsSections.includes(section))
+
+export const settingsSections: readonly SettingsSection[] =
+  settingsGroupOrder.flatMap(visibleSettingsSections)
 
 export const isSettingsSection = (value: unknown): value is SettingsSection =>
   (settingsSections as readonly unknown[]).includes(value)

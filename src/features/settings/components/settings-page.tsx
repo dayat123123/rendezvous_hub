@@ -32,7 +32,12 @@ import { SurveySection } from '@/features/survey/components/survey-section'
 import { RelaySettingsSection } from '@/features/trade-share/relay/components/relay-settings-section'
 import { cn } from '@/lib/utils'
 
-import { isSettingsSection, settingsGroupOrder, settingsGroups, type SettingsSection } from '../types'
+import {
+  isSettingsSection,
+  settingsGroupOrder,
+  type SettingsSection,
+  visibleSettingsSections,
+} from '../types'
 import { AccountsSection } from './accounts-section'
 import { AlertsSection } from './alerts-section'
 import { AttachmentsSection } from './attachments-section'
@@ -118,7 +123,7 @@ export function SettingsPage() {
             >
               {t(`settings.groups.${group}`)}
             </h2>
-            {settingsGroups[group].map((id) => {
+            {visibleSettingsSections(group).map((id) => {
               const Icon = icons[id]
               return (
                 <button

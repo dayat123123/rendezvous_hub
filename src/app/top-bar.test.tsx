@@ -9,7 +9,7 @@ import { renderWithProviders } from '@/test/render'
 
 import { TopBar } from './top-bar'
 
-const nav = vi.hoisted(() => ({ SHOW_SYSTEM_HEALTH_NAV: false }))
+const nav = vi.hoisted(() => ({ SHOW_SYSTEM_HEALTH_NAV: false, SHOW_TRADE_SHARE: true }))
 
 vi.mock('@/lib/nav-config', () => nav)
 
