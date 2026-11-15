@@ -89,6 +89,11 @@ describe('RelaySettingsSection', () => {
     expect(screen.getByLabelText('Identity')).toHaveValue('social_trade_relay')
     expect(screen.getByLabelText('Heartbeat (detik)')).toHaveValue('4')
     expect(screen.getByText('tcp://10.0.0.5:9990')).toBeInTheDocument()
+    for (const field of ['Host', 'Port', 'Identity', 'Heartbeat (detik)', 'Kunci AES', 'IV']) {
+      expect(screen.getByLabelText(field)).toBeDisabled()
+    }
+    expect(screen.getByRole('switch', { name: 'Notifikasi trade ke pemilik order' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Simpan' })).not.toBeInTheDocument()
 
     const live = screen.getByRole('complementary', { name: 'Status relay saat ini' })
     expect(within(live).getByText('Terhubung')).toBeInTheDocument()
@@ -110,7 +115,9 @@ describe('RelaySettingsSection', () => {
     )
     renderSection()
 
-    const host = await screen.findByLabelText('Host')
+    await user.click(await screen.findByRole('button', { name: 'Ubah Konfigurasi' }))
+    const host = screen.getByLabelText('Host')
+    expect(host).toHaveFocus()
     const port = screen.getByLabelText('Port')
     await user.clear(host)
     await user.type(host, 'olt uat')
@@ -144,6 +151,24 @@ describe('RelaySettingsSection', () => {
     ).toBeInTheDocument()
   })
 
+  it('restores the stored values and locks the form again on cancel', async () => {
+    const user = userEvent.setup()
+    vi.mocked(relayApi.get).mockResolvedValue(view())
+    renderSection()
+
+    await user.click(await screen.findByRole('button', { name: 'Ubah Konfigurasi' }))
+    expect(screen.queryByRole('button', { name: 'Putuskan relay' })).not.toBeInTheDocument()
+    const host = screen.getByLabelText('Host')
+    await user.clear(host)
+    await user.type(host, 'olt-lain.local')
+    await user.click(screen.getByRole('button', { name: 'Batal' }))
+
+    expect(screen.getByLabelText('Host')).toHaveValue('10.0.0.5')
+    expect(screen.getByLabelText('Host')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Ubah Konfigurasi' })).toHaveFocus()
+    expect(relayApi.update).not.toHaveBeenCalled()
+  })
+
   it('disconnects the relay by saving an empty address after a confirmation', async () => {
     const user = userEvent.setup()
     vi.mocked(relayApi.get).mockResolvedValue(view({ heartbeat_seconds: 6, identity: 'relay_b' }))
@@ -173,7 +198,8 @@ describe('RelaySettingsSection', () => {
     vi.mocked(relayApi.update).mockRejectedValue(new ApiError('invalid_identity', 'x', 400))
     renderSection()
 
-    const identity = await screen.findByLabelText('Identity')
+    await user.click(await screen.findByRole('button', { name: 'Ubah Konfigurasi' }))
+    const identity = screen.getByLabelText('Identity')
     await user.clear(identity)
     await user.type(identity, 'relay_c')
     await user.click(screen.getByRole('button', { name: 'Simpan' }))
@@ -200,6 +226,8 @@ describe('RelaySettingsSection', () => {
     renderSection()
 
     expect(await screen.findByText('a1b2c3d4')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Hapus kunci' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Ubah Enkripsi AES' }))
     const key = screen.getByLabelText('Kunci AES')
     const iv = screen.getByLabelText('IV')
     expect(key).toHaveAttribute('type', 'password')
@@ -225,6 +253,7 @@ describe('RelaySettingsSection', () => {
       ),
     )
     await waitFor(() => expect(screen.getByLabelText('Kunci AES')).toHaveValue(''))
+    expect(screen.getByLabelText('Kunci AES')).toBeDisabled()
   })
 
   it('warns about duplicate pushes before turning on owner notifications', async () => {
@@ -234,7 +263,9 @@ describe('RelaySettingsSection', () => {
     renderSection()
 
     expect(await screen.findByText(/notifEngine OLT mungkin sudah mengirim/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Ubah Notifikasi trade ke pemilik order' }))
     await user.click(screen.getByRole('switch', { name: 'Notifikasi trade ke pemilik order' }))
+    await user.click(screen.getByRole('button', { name: 'Simpan' }))
     const confirm = await screen.findByRole('dialog', { name: 'Nyalakan notifikasi trade ke pemilik order?' })
     await user.type(within(confirm).getByRole('textbox', { name: 'Alasan' }), 'OLT sudah mematikan')
     await user.click(within(confirm).getByRole('button', { name: 'Nyalakan' }))

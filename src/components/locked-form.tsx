@@ -2,6 +2,7 @@ import { LoaderCircleIcon, PencilIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { ReasonDialog } from '@/components/reason-dialog'
 import { Button } from '@/components/ui/button'
 import { Confirm } from '@/features/nasabah/components/confirm'
 import type { LockedEdit } from '@/hooks/use-locked-edit'
@@ -38,8 +39,11 @@ export function EditButton({
   )
 }
 
+type ReasonSpec = { label: string; hint?: string; min?: number; max?: number }
+
 export function LockedForm({
   lock,
+  reason,
   name,
   confirmTitle,
   confirmBody,
@@ -60,6 +64,7 @@ export function LockedForm({
   children,
 }: {
   lock: LockedEdit
+  reason?: ReasonSpec
   name: string
   confirmTitle: string
   confirmBody: string
@@ -69,7 +74,7 @@ export function LockedForm({
   saveLabel?: string
   canSave?: boolean
   onCheck?: () => boolean
-  onSave: () => Promise<unknown>
+  onSave: (reason?: string) => Promise<unknown>
   onError?: (error: unknown) => void
   onReset: () => void
   status?: React.ReactNode
@@ -97,8 +102,8 @@ export function LockedForm({
     setEditing(false)
   }
 
-  const confirm = () =>
-    void onSave().then(
+  const confirm = (text?: string) =>
+    void onSave(text).then(
       (result) => {
         setConfirming(false)
         if (result !== false) setEditing(false)
@@ -109,7 +114,7 @@ export function LockedForm({
       },
     )
 
-  return (
+  const form = (
     <form
       className={className}
       noValidate
@@ -147,16 +152,39 @@ export function LockedForm({
         {actions}
         {status}
       </div>
-      <Confirm
+      {reason ? null : (
+        <Confirm
+          open={confirming}
+          title={confirmTitle}
+          body={confirmBody}
+          action={confirmAction ?? saveLabel ?? t('app.save')}
+          pending={saving}
+          destructive={destructive}
+          onClose={() => setConfirming(false)}
+          onConfirm={() => confirm()}
+        />
+      )}
+    </form>
+  )
+
+  if (!reason) return form
+  return (
+    <>
+      {form}
+      <ReasonDialog
         open={confirming}
         title={confirmTitle}
-        body={confirmBody}
+        description={confirmBody}
+        label={reason.label}
+        hint={reason.hint}
+        min={reason.min}
+        max={reason.max}
         action={confirmAction ?? saveLabel ?? t('app.save')}
         pending={saving}
         destructive={destructive}
         onClose={() => setConfirming(false)}
-        onConfirm={confirm}
+        onSubmit={confirm}
       />
-    </form>
+    </>
   )
 }
