@@ -1,3 +1,4 @@
+import type * as RouterModule from '@tanstack/react-router'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -10,6 +11,11 @@ import { settingsApi } from '../api'
 import type { IntegrationStatus } from '../types'
 import { IntegrationSection } from './integration-section'
 import { SettingsPage } from './settings-page'
+
+vi.mock('@tanstack/react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof RouterModule>()
+  return { ...actual, useNavigate: () => vi.fn(), useSearch: () => ({}) }
+})
 
 vi.mock('../api', async (importOriginal) => {
   const actual = await importOriginal<typeof ApiModule>()

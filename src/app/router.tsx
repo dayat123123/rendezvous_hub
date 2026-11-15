@@ -17,6 +17,7 @@ import { policyTabs, type PolicyTab } from '@/features/content-policy/types'
 import { caseStates, type CaseState } from '@/features/compliance/types'
 import { isContentTab, type ContentTab } from '@/features/content/types'
 import { isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
+import { isSettingsSection, type SettingsSection } from '@/features/settings/types'
 import { systemTabs, type SystemTab } from '@/features/system/types'
 import { tradeShareTabs, type TradeShareTab } from '@/features/trade-share/types'
 import {
@@ -113,8 +114,17 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   beforeLoad: superAdminOnly,
+  validateSearch: (search: Record<string, unknown>): { section?: SettingsSection } => ({
+    section: isSettingsSection(search.section) ? search.section : undefined,
+  }),
   component: lazyRouteComponent(
-    withStrings(() => import('@/features/settings/components/settings-page'), 'platform', 'labels', 'help'),
+    withStrings(
+      () => import('@/features/settings/components/settings-page'),
+      'platform',
+      'labels',
+      'help',
+      'trade',
+    ),
     'SettingsPage',
   ),
 })

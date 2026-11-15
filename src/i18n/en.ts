@@ -798,6 +798,7 @@ export const en: Translation = {
       'Super Admins are alerted when a ticket is unclaimed for more than {{unclaimed}} minutes, or {{p1}} minutes for P1 tickets.',
     integration: 'Customer API integration',
     apiKeys: 'Notification API',
+    tradeRelay: 'Trade Relay',
     appIntegration: 'App integration',
     backup: 'Backup',
     backupDescription:

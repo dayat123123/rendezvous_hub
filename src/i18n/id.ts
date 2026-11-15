@@ -798,6 +798,7 @@ export const id = {
       'Super Admin diberi tahu bila tiket belum diambil lebih dari {{unclaimed}} menit, atau {{p1}} menit untuk tiket P1.',
     integration: 'Integrasi API Nasabah',
     apiKeys: 'API Notifikasi',
+    tradeRelay: 'Relay Trade',
     appIntegration: 'Integrasi aplikasi',
     backup: 'Backup',
     backupDescription:

@@ -151,7 +151,7 @@ export const settingsGroups = {
     'survey',
   ],
   community: ['community'],
-  integration: ['integration', 'appIntegration', 'apiKeys', 'push'],
+  integration: ['integration', 'appIntegration', 'apiKeys', 'tradeRelay', 'push'],
   system: ['backup', 'alerts'],
 } as const
 export type SettingsGroup = keyof typeof settingsGroups
@@ -162,6 +162,9 @@ export const settingsGroupOrder: readonly SettingsGroup[] = ['service', 'communi
 export const settingsSections: readonly SettingsSection[] = settingsGroupOrder.flatMap(
   (group) => settingsGroups[group],
 )
+
+export const isSettingsSection = (value: unknown): value is SettingsSection =>
+  (settingsSections as readonly unknown[]).includes(value)
 
 export type IntegrationStatus = {
   url: string

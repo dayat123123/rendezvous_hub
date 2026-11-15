@@ -1,6 +1,7 @@
+import type * as RouterModule from '@tanstack/react-router'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { monitorFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
@@ -23,6 +24,25 @@ vi.mock('../api', async (importOriginal) => {
 vi.mock('@/features/app-integration/components/app-integration-section', () => ({
   AppIntegrationSection: () => <p>app-integration-section</p>,
 }))
+
+vi.mock('@/features/trade-share/relay/components/relay-settings-section', () => ({
+  RelaySettingsSection: () => <p>relay-settings-section</p>,
+}))
+
+const router = vi.hoisted(() => {
+  const search: { section?: string } = {}
+  return { navigate: vi.fn(), search }
+})
+
+vi.mock('@tanstack/react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof RouterModule>()
+  return { ...actual, useNavigate: () => router.navigate, useSearch: () => router.search }
+})
+
+beforeEach(() => {
+  router.search = {}
+  router.navigate.mockReset()
+})
 
 const ready = {
   ...monitorFixture,
@@ -61,6 +81,7 @@ describe('SettingsPage', () => {
       'Integrasi API Nasabah',
       'Integrasi aplikasi',
       'API Notifikasi',
+      'Relay Trade',
       'Push notification',
     ])
     expect(groupItems('Sistem')).toEqual(['Backup', 'Alert'])
@@ -87,17 +108,40 @@ describe('SettingsPage', () => {
     expect(integration.getByRole('button', { name: /^Push notification .+/ })).toBeVisible()
   })
 
-  it('opens Integrasi aplikasi from the Integrasi group', async () => {
+  it('keeps the chosen section in the address', async () => {
     const user = userEvent.setup()
     renderWithProviders(<SettingsPage />, ready)
 
     const integration = within(screen.getByRole('group', { name: 'Integrasi' }))
     await user.click(integration.getByRole('button', { name: 'Integrasi aplikasi' }))
 
+    expect(router.navigate).toHaveBeenCalledWith({ to: '/settings', search: { section: 'appIntegration' } })
+  })
+
+  it('opens the section named in the address', () => {
+    router.search = { section: 'appIntegration' }
+    renderWithProviders(<SettingsPage />, ready)
+
+    const integration = within(screen.getByRole('group', { name: 'Integrasi' }))
     expect(integration.getByRole('button', { name: 'Integrasi aplikasi' })).toHaveAttribute(
       'aria-current',
       'page',
     )
     expect(screen.getByText('app-integration-section')).toBeVisible()
+  })
+
+  it('opens Relay Trade from the address used by Sistem → Relay Trade', () => {
+    router.search = { section: 'tradeRelay' }
+    renderWithProviders(<SettingsPage />, ready)
+
+    expect(screen.getByRole('button', { name: 'Relay Trade' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByText('relay-settings-section')).toBeVisible()
+  })
+
+  it('falls back to Akun CS for an unknown section', () => {
+    router.search = { section: 'nope' }
+    renderWithProviders(<SettingsPage />, ready)
+
+    expect(screen.getByRole('button', { name: 'Akun CS' })).toHaveAttribute('aria-current', 'page')
   })
 })

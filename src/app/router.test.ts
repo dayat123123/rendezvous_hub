@@ -70,6 +70,22 @@ describe('router', () => {
     expect((await open('/compliance/trade-share', agentFixture)).pathname).toBe('/')
   })
 
+  it('opens a Pengaturan section from the address and drops unknown sections', async () => {
+    const location = await open('/settings?section=tradeRelay', monitorFixture)
+    expect(location.pathname).toBe('/settings')
+    expect(location.search).toEqual({ section: 'tradeRelay' })
+
+    const router = createAppRouter(monitorFixture)
+    router.update({
+      ...router.options,
+      history: createMemoryHistory({ initialEntries: ['/settings?section=nope'] }),
+    })
+    await router.load()
+    expect(router.state.matches.at(-1)?.search).toEqual({})
+
+    expect((await open('/settings?section=tradeRelay', agentFixture)).pathname).toBe('/')
+  }, 30_000)
+
   it('opens /features to Super Admins only and keeps a known tab from the search param', async () => {
     const location = await open('/features?tab=banners', monitorFixture)
     expect(location.pathname).toBe('/features')

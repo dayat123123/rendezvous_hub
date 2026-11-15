@@ -1,3 +1,4 @@
+import type * as RouterModule from '@tanstack/react-router'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -10,6 +11,24 @@ import { findToast, Toaster } from '@/test/toast'
 import { relayApi } from '../api'
 import type { RelayView } from '../types'
 import { RelayTab } from './relay-tab'
+
+vi.mock('@tanstack/react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof RouterModule>()
+  const { createElement } = await import('react')
+  return {
+    ...actual,
+    Link: ({
+      to,
+      search,
+      children,
+    }: {
+      to: string
+      search?: Record<string, string>
+      children: React.ReactNode
+    }) =>
+      createElement('a', { href: search ? `${to}?${new URLSearchParams(search).toString()}` : to }, children),
+  }
+})
 
 vi.mock('../api', () => ({
   relayApi: {
@@ -142,88 +161,17 @@ describe('RelayTab', () => {
     expect(screen.getByText(/Perintah berikutnya bisa dalam \d+ detik/)).toBeInTheDocument()
   })
 
-  it('shows only the AES fingerprint and writes a new key from password fields', async () => {
-    const user = userEvent.setup()
+  it('points Super Admins to Pengaturan for the connection, AES key, and owner notifications', async () => {
     vi.mocked(relayApi.get).mockResolvedValue(view())
-    vi.mocked(relayApi.setAes).mockResolvedValue(view())
     renderTab()
 
-    expect(await screen.findByText('a1b2c3d4')).toBeInTheDocument()
-    const key = screen.getByLabelText('Kunci AES')
-    const iv = screen.getByLabelText('IV')
-    expect(key).toHaveAttribute('type', 'password')
-    expect(key).toHaveValue('')
-    expect(iv).toHaveAttribute('type', 'password')
-
-    await user.type(key, 'short')
-    await user.click(screen.getByRole('button', { name: 'Ganti kunci' }))
-    expect(screen.getByText(/Kunci harus 16, 24, atau 32 karakter/)).toBeInTheDocument()
-
-    await user.clear(key)
-    await user.type(key, 'K'.repeat(32))
-    await user.type(iv, 'I'.repeat(16))
-    await user.click(screen.getByRole('button', { name: 'Ganti kunci' }))
-    const confirm = await screen.findByRole('dialog', { name: 'Simpan kunci AES?' })
-    await user.type(within(confirm).getByRole('textbox', { name: 'Alasan' }), 'Rotasi kunci')
-    await user.click(within(confirm).getByRole('button', { name: 'Simpan kunci' }))
-
-    await waitFor(() =>
-      expect(relayApi.setAes).toHaveBeenCalledWith(
-        { mode: 'cbc', key: 'K'.repeat(32), iv: 'I'.repeat(16) },
-        'Rotasi kunci',
-      ),
+    expect(await screen.findByText(/diatur di Pengaturan → Integrasi → Relay Trade/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Buka pengaturan relay' })).toHaveAttribute(
+      'href',
+      '/settings?section=tradeRelay',
     )
-    await waitFor(() => expect(screen.getByLabelText('Kunci AES')).toHaveValue(''))
-  })
-
-  it('warns about duplicate pushes before turning on owner notifications', async () => {
-    const user = userEvent.setup()
-    vi.mocked(relayApi.get).mockResolvedValue(view())
-    vi.mocked(relayApi.setNotify).mockResolvedValue(view({ trade_notify_enabled: true }))
-    renderTab()
-
-    expect(await screen.findByText(/notifEngine OLT mungkin sudah mengirim/)).toBeInTheDocument()
-    await user.click(screen.getByRole('switch', { name: 'Notifikasi trade ke pemilik order' }))
-    const confirm = await screen.findByRole('dialog', { name: 'Nyalakan notifikasi trade ke pemilik order?' })
-    await user.type(within(confirm).getByRole('textbox', { name: 'Alasan' }), 'OLT sudah mematikan')
-    await user.click(within(confirm).getByRole('button', { name: 'Nyalakan' }))
-
-    await waitFor(() => expect(relayApi.setNotify).toHaveBeenCalledWith(true, 'OLT sudah mematikan'))
-  })
-
-  it('names who last changed the configuration', async () => {
-    vi.mocked(relayApi.get).mockResolvedValue(
-      view({ updated_by: '99999999-9999-4999-8999-999999999999', updated_by_name: 'Adi' }),
-    )
-    renderTab()
-
-    expect(await screen.findByText(/Versi config 5 · diubah .+ oleh Adi/)).toBeInTheDocument()
-  })
-
-  it('saves the iProxy configuration after validation and a reason', async () => {
-    const user = userEvent.setup()
-    vi.mocked(relayApi.get).mockResolvedValue(view())
-    vi.mocked(relayApi.update).mockResolvedValue(view({ iproxy_addr: 'tcp://olt-uat:9990', version: 6 }))
-    renderTab()
-
-    const address = await screen.findByLabelText('Alamat iProxy')
-    await user.clear(address)
-    await user.type(address, 'olt-uat:9990')
-    expect(screen.getByText('Alamat harus berbentuk tcp://host:port.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Simpan' })).toBeDisabled()
-
-    await user.clear(address)
-    await user.type(address, 'tcp://olt-uat:9990')
-    await user.click(screen.getByRole('button', { name: 'Simpan' }))
-    const confirm = await screen.findByRole('dialog', { name: 'Simpan konfigurasi relay?' })
-    await user.type(within(confirm).getByRole('textbox', { name: 'Alasan' }), 'Pindah ke UAT')
-    await user.click(within(confirm).getByRole('button', { name: 'Simpan' }))
-
-    await waitFor(() =>
-      expect(relayApi.update).toHaveBeenCalledWith(
-        { iproxyAddr: 'tcp://olt-uat:9990', identity: 'social_trade_relay', heartbeatSeconds: 4 },
-        'Pindah ke UAT',
-      ),
-    )
+    expect(screen.queryByLabelText('Kunci AES')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Host')).not.toBeInTheDocument()
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
   })
 })

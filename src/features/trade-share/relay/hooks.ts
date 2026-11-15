@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { relayApi } from './api'
-import { commandPending } from './logic'
+import { relayPending } from './logic'
 import type { AesInput, RelayCommand, RelayConfigInput, RelayView } from './types'
 
 export const relayKeys = { view: ['trade-relay', 'view'] as const }
@@ -10,7 +10,7 @@ export function useRelayView() {
   return useQuery({
     queryKey: relayKeys.view,
     queryFn: relayApi.get,
-    refetchInterval: (query) => (commandPending(query.state.data) ? 5_000 : 15_000),
+    refetchInterval: (query) => (relayPending(query.state.data) ? 5_000 : 15_000),
     staleTime: 3_000,
   })
 }

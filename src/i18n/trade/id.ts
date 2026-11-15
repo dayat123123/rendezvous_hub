@@ -439,15 +439,44 @@ export const trade = {
     subtitle:
       'Relay mendengarkan realtime order dan trade dari iProxy OLT, menyaring rekening yang disetujui, lalu meneruskannya ke server. Perintah dari sini dijalankan relay pada tarikan config berikutnya (maksimal 15 detik).',
     superAdminOnly: 'Konfigurasi, kunci AES, dan notifikasi ke pemilik order hanya bisa diubah Super Admin.',
+    settingsMoved:
+      'Koneksi, kunci AES, dan notifikasi pemilik diatur di Pengaturan → Integrasi → Relay Trade.',
+    openSettings: 'Buka pengaturan relay',
+    settingsDescription:
+      'Koneksi relay ke iProxy OLT, kunci AES untuk paket terenkripsi, dan notifikasi trade ke pemilik order. Status dan perintah Sambung ulang/Restart ada di Sistem → Relay Trade. Setiap perubahan wajib beralasan dan tercatat di jejak audit.',
+    liveTitle: 'Status relay saat ini',
+    instance: 'Instance',
+    liveState: 'Keadaan',
+    pickup: {
+      no_relay: 'Belum ada relay yang melapor. Config versi {{version}} dipakai saat relay berjalan.',
+      pending: 'Menunggu relay memuat config versi {{version}} (biasanya kurang dari 30 detik).',
+      reported: 'Relay sudah melapor setelah config versi {{version}} disimpan.',
+      stale:
+        'Relay tidak melapor lebih dari 2 menit, jadi belum bisa dipastikan config versi {{version}} terpakai.',
+    },
+    addressGroup: 'Alamat iProxy',
+    host: 'Host',
+    hostHint: 'Nama host atau IP iProxy OLT, tanpa tcp:// dan tanpa port.',
+    port: 'Port',
+    addressPreview: 'Alamat akhir:',
+    heartbeatHint: '1–60 detik, bawaan 4.',
+    disconnect: 'Putuskan relay',
+    disconnected: 'Relay diputus dari iProxy',
+    notConnectedHint: 'Relay belum diarahkan ke iProxy.',
+    disconnectTitle: 'Putuskan relay dari iProxy?',
+    disconnectBody:
+      'Alamat iProxy dikosongkan. Relay menutup koneksi pada tarikan config berikutnya dan berhenti menerima order dan trade sampai alamat diisi lagi.',
+    configConfirmBodyAddress:
+      'Relay tersambung ke {{address}} pada tarikan config berikutnya (maksimal 15 detik) dan menyambung ulang bila alamat atau identity berubah.',
     statusTitle: 'Status',
     statusHint:
       'Instance yang melapor dalam 24 jam terakhir. Laporan lebih lama dari 2 menit dianggap tidak melapor.',
     tradeShare: 'Berbagi Trade',
     tradeNotify: 'Notifikasi trade ke pemilik order',
     address: 'Alamat iProxy',
-    addressHint: 'Format tcp://host:port. Kosongkan untuk memutus relay dari iProxy.',
     identity: 'Identity',
-    identityHint: '3–63 karakter. Tidak boleh sama dengan identity proses OLT lain.',
+    identityHint:
+      '3–63 karakter, unik per konsumen iProxy (tidak boleh sama dengan proses OLT lain). Kosongkan untuk bawaan {{identity}}.',
     heartbeat: 'Heartbeat (detik)',
     notConfigured: 'Belum diatur',
     noInstances: 'Belum ada relay yang melapor dalam 24 jam terakhir.',
@@ -455,6 +484,7 @@ export const trade = {
       connected: 'Terhubung',
       disconnected: 'Terputus',
       stale: 'Tidak melapor',
+      idle: 'Belum diatur',
     },
     version: 'Versi {{version}}',
     lastPacket: 'Paket terakhir',
@@ -539,11 +569,9 @@ export const trade = {
     configVersion: 'Versi config {{version}} · diubah {{time}}',
     configVersionBy: 'Versi config {{version}} · diubah {{time}} oleh {{name}}',
     configConfirmTitle: 'Simpan konfigurasi relay?',
-    configConfirmBody:
-      'Relay memakai konfigurasi baru pada tarikan berikutnya dan menyambung ulang bila alamat atau identity berubah.',
     configSaved: 'Konfigurasi relay disimpan',
     problems: {
-      address: 'Alamat harus berbentuk tcp://host:port.',
+      host: 'Host 1–253 karakter huruf, angka, titik, garis bawah, atau strip.',
       port: 'Port harus 1–65535.',
       identity: 'Identity 3–63 karakter huruf, angka, titik, garis bawah, atau strip.',
       heartbeat: 'Heartbeat 1–60 detik.',

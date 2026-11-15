@@ -46,6 +46,7 @@ export const relayDailyMetrics = [
 ] as const
 
 export const COMMAND_COOLDOWN_SECONDS = 60
+export const CONFIG_WATCH_SECONDS = 300
 export const RELAY_STALE_SECONDS = 120
 
 export type RelayInstance = {

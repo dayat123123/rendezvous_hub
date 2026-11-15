@@ -8,6 +8,7 @@ import {
   MessagesSquareIcon,
   PaperclipIcon,
   PlugZapIcon,
+  RadioTowerIcon,
   SirenIcon,
   SmilePlusIcon,
   TriangleAlertIcon,
@@ -16,7 +17,7 @@ import {
   TagIcon,
   UsersIcon,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import { SectionBoundary } from '@/components/states'
@@ -28,9 +29,10 @@ import { PushSection } from '@/features/push/components/push-section'
 import { PushInactiveBadge } from '@/features/push/components/push-state'
 import { IncidentsSection } from '@/features/incidents/components/incidents-section'
 import { SurveySection } from '@/features/survey/components/survey-section'
+import { RelaySettingsSection } from '@/features/trade-share/relay/components/relay-settings-section'
 import { cn } from '@/lib/utils'
 
-import { settingsGroupOrder, settingsGroups, type SettingsSection } from '../types'
+import { isSettingsSection, settingsGroupOrder, settingsGroups, type SettingsSection } from '../types'
 import { AccountsSection } from './accounts-section'
 import { AlertsSection } from './alerts-section'
 import { AttachmentsSection } from './attachments-section'
@@ -56,6 +58,7 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
   integration: PlugZapIcon,
   appIntegration: SmartphoneIcon,
   apiKeys: KeyRoundIcon,
+  tradeRelay: RadioTowerIcon,
   push: BellRingIcon,
   backup: DatabaseBackupIcon,
   alerts: SirenIcon,
@@ -76,13 +79,17 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   integration: () => <IntegrationSection />,
   appIntegration: () => <AppIntegrationSection />,
   apiKeys: () => <IntegrationKeysSection />,
+  tradeRelay: () => <RelaySettingsSection />,
   backup: () => <BackupSection />,
   alerts: () => <AlertsSection />,
 }
 
 export function SettingsPage() {
   const { t } = useTranslation()
-  const [section, setSection] = useState<SettingsSection>('accounts')
+  const navigate = useNavigate()
+  const search: { section?: string } = useSearch({ strict: false })
+  const section: SettingsSection = isSettingsSection(search.section) ? search.section : 'accounts'
+  const setSection = (next: SettingsSection) => void navigate({ to: '/settings', search: { section: next } })
   const settings = useAgent().settings
   const badges: Partial<Record<SettingsSection, React.ReactNode>> = {
     integration: settings.nasabah_ready ? null : <IntegrationBadge configured={false} />,

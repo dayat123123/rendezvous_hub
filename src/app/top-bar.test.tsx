@@ -95,8 +95,8 @@ describe('TopBar', () => {
       'Komunitas',
       'Konten Layanan',
       'Fitur & Kampanye',
-      'Pengaturan',
       'Berbagi Trade',
+      'Pengaturan',
     ])
     expect(screen.getByRole('link', { name: 'Komunitas' })).toHaveAttribute('href', '/community')
     expect(screen.getByRole('link', { name: 'Berbagi Trade' })).toHaveAttribute(
@@ -106,11 +106,12 @@ describe('TopBar', () => {
     expect(screen.queryByRole('link', { name: 'Relay Trade' })).not.toBeInTheDocument()
   })
 
-  it('shows Fitur & Kampanye right before Pengaturan to Super Admins only', () => {
+  it('shows Fitur & Kampanye before Berbagi Trade and Pengaturan to Super Admins only', () => {
     const { unmount } = renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
     expect(screen.getByRole('link', { name: 'Fitur & Kampanye' })).toHaveAttribute('href', '/features')
     const links = navLinks()
-    expect(links.indexOf('Fitur & Kampanye')).toBe(links.indexOf('Pengaturan') - 1)
+    expect(links.indexOf('Fitur & Kampanye')).toBe(links.indexOf('Berbagi Trade') - 1)
+    expect(links.indexOf('Berbagi Trade')).toBe(links.indexOf('Pengaturan') - 1)
     unmount()
 
     for (const roles of [['cs_agent'], ['compliance'], ['community']]) {
@@ -134,8 +135,8 @@ describe('TopBar', () => {
       'Komunitas',
       'Konten Layanan',
       'Fitur & Kampanye',
-      'Pengaturan',
       'Berbagi Trade',
+      'Pengaturan',
     ])
   })
 
@@ -147,7 +148,7 @@ describe('TopBar', () => {
     expect(systemApi.badge).not.toHaveBeenCalled()
   })
 
-  it('shows Kesehatan sistem last for Super Admins when the switch is on', () => {
+  it('shows Kesehatan sistem right before Pengaturan for Super Admins when the switch is on', () => {
     nav.SHOW_SYSTEM_HEALTH_NAV = true
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
 
@@ -158,10 +159,25 @@ describe('TopBar', () => {
       'Komunitas',
       'Konten Layanan',
       'Fitur & Kampanye',
-      'Pengaturan',
       'Berbagi Trade',
       'Kesehatan sistem',
+      'Pengaturan',
     ])
+  })
+
+  it('keeps Pengaturan as the rightmost menu, after the compliance menus too', () => {
+    nav.SHOW_SYSTEM_HEALTH_NAV = true
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
+      ...monitorFixture,
+      roles: ['cs_super_admin', 'compliance'],
+      trade_permissions: ['trade_share.review'],
+    })
+
+    const links = navLinks()
+    expect(links.at(-1)).toBe('Pengaturan')
+    expect(links.at(-2)).toBe('Bukti')
+    expect(links.indexOf('Berbagi Trade')).toBe(links.indexOf('Dokumen hukum') + 1)
+    expect(links.indexOf('Kesehatan sistem')).toBeLessThan(links.indexOf('Pengaturan'))
   })
 
   it('adds Berbagi Trade to the compliance menus only with a trade permission', () => {

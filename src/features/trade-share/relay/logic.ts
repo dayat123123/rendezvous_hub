@@ -1,5 +1,6 @@
 import {
   COMMAND_COOLDOWN_SECONDS,
+  CONFIG_WATCH_SECONDS,
   RELAY_STALE_SECONDS,
   relayCounterNames,
   type AesMode,
@@ -55,30 +56,62 @@ export function instanceStale(instance: Pick<RelayInstance, 'reported_at'>, now:
   return now.getTime() - Date.parse(instance.reported_at) > RELAY_STALE_SECONDS * 1000
 }
 
-export type InstanceHealth = 'connected' | 'disconnected' | 'stale'
+export type InstanceHealth = 'connected' | 'disconnected' | 'stale' | 'idle'
 
 export function instanceHealth(instance: RelayInstance, now: Date = new Date()): InstanceHealth {
   if (instanceStale(instance, now)) return 'stale'
+  if (!instance.connected && instance.state === 'not_configured') return 'idle'
   return instance.connected ? 'connected' : 'disconnected'
 }
 
-export type ConfigProblem = 'address' | 'port' | 'identity' | 'heartbeat'
+export function newestInstance(view: Pick<RelayView, 'instances'>): RelayInstance | null {
+  return [...view.instances].sort((a, b) => Date.parse(b.reported_at) - Date.parse(a.reported_at))[0] ?? null
+}
 
-const addressPattern = /^tcp:\/\/[A-Za-z0-9._-]{1,253}:(\d{1,5})$/
+export type ConfigPickup = 'no_relay' | 'pending' | 'reported' | 'stale'
+
+export function configPickup(view: RelayView, now: Date = new Date()): ConfigPickup {
+  const instance = newestInstance(view)
+  if (!instance) return 'no_relay'
+  if (instanceStale(instance, now)) return 'stale'
+  return Date.parse(instance.reported_at) < Date.parse(view.updated_at) ? 'pending' : 'reported'
+}
+
+export function relayPending(view: RelayView | undefined, now: Date = new Date()) {
+  if (!view) return false
+  const recent = now.getTime() - Date.parse(view.updated_at) < CONFIG_WATCH_SECONDS * 1000
+  return commandPending(view) || (recent && configPickup(view, now) === 'pending')
+}
+
+export const DEFAULT_RELAY_IDENTITY = 'social_trade_relay'
+
+export type RelayAddress = { host: string; port: string }
+
+const addressPattern = /^tcp:\/\/(.+):(\d{1,5})$/
+const hostPattern = /^[A-Za-z0-9._-]{1,253}$/
 const identityPattern = /^[A-Za-z0-9._-]{3,63}$/
 
-export function configProblems(input: {
-  iproxyAddr: string
+export function parseAddress(address: string | null | undefined): RelayAddress {
+  const match = addressPattern.exec((address ?? '').trim())
+  return match ? { host: match[1] ?? '', port: match[2] ?? '' } : { host: '', port: '' }
+}
+
+export function composeAddress({ host, port }: RelayAddress) {
+  return `tcp://${host.trim()}:${port.trim()}`
+}
+
+export type ConnectionField = 'host' | 'port' | 'identity' | 'heartbeat'
+
+export function connectionProblems(input: {
+  host: string
+  port: string
   identity: string
   heartbeat: string
-}): Partial<Record<'iproxyAddr' | 'identity' | 'heartbeat', ConfigProblem>> {
-  const problems: Partial<Record<'iproxyAddr' | 'identity' | 'heartbeat', ConfigProblem>> = {}
-  const address = input.iproxyAddr.trim()
-  if (address) {
-    const match = addressPattern.exec(address)
-    if (!match) problems.iproxyAddr = 'address'
-    else if (Number(match[1]) < 1 || Number(match[1]) > 65535) problems.iproxyAddr = 'port'
-  }
+}): Partial<Record<ConnectionField, ConnectionField>> {
+  const problems: Partial<Record<ConnectionField, ConnectionField>> = {}
+  if (!hostPattern.test(input.host.trim())) problems.host = 'host'
+  const port = input.port.trim()
+  if (!/^\d{1,5}$/.test(port) || Number(port) < 1 || Number(port) > 65535) problems.port = 'port'
   const identity = input.identity.trim()
   if (identity && !identityPattern.test(identity)) problems.identity = 'identity'
   const heartbeat = input.heartbeat.trim()

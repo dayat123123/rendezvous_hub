@@ -293,7 +293,6 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
         ) : null}
         {canManageContent(agent) ? <NavLink to="/content" label={t('nav.content')} /> : null}
         {canManageFeatures(agent) ? <NavLink to="/features" label={t('nav.featuresCampaigns')} /> : null}
-        {superAdmin ? <NavLink to="/settings" label={t('nav.settings')} /> : null}
         {tradeShare && !compliance ? (
           <NavLink to="/compliance/trade-share" label={t('nav.tradeShare')} />
         ) : null}
@@ -336,6 +335,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
             <NavLink to="/compliance/evidence" label={t('nav.evidence')} />
           </>
         ) : null}
+        {superAdmin ? <NavLink to="/settings" label={t('nav.settings')} /> : null}
       </nav>
       <div className="hidden min-w-0 flex-1 justify-center px-2 lg:flex">
         <button

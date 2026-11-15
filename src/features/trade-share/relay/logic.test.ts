@@ -4,11 +4,16 @@ import {
   aesProblems,
   commandPending,
   commandProgress,
-  configProblems,
+  composeAddress,
+  configPickup,
+  connectionProblems,
   cooldownSeconds,
   counterEntries,
   instanceCommandState,
   instanceHealth,
+  newestInstance,
+  parseAddress,
+  relayPending,
 } from './logic'
 import type { RelayInstance, RelayView } from './types'
 
@@ -104,6 +109,16 @@ describe('relay health', () => {
     )
   })
 
+  it('shows a relay without an iProxy address as not configured instead of disconnected', () => {
+    const now = new Date('2026-11-15T03:02:30.000Z')
+    expect(
+      instanceHealth(
+        instance({ reported_at: '2026-11-15T03:02:00.000Z', connected: false, state: 'not_configured' }),
+        now,
+      ),
+    ).toBe('idle')
+  })
+
   it('keeps numeric counters only, in the relay order with unknown ones last', () => {
     expect(
       counterEntries({ zeta: 2, config_errors: 3, received: 10, decode_errors: 1, alpha: 4, note: 'x' }),
@@ -119,20 +134,70 @@ describe('relay health', () => {
 })
 
 describe('relay inputs', () => {
-  it('validates the iProxy address, identity, and heartbeat like the server', () => {
+  it('splits a stored tcp://host:port address and composes it back', () => {
+    expect(parseAddress('tcp://olt-uat.local:9990')).toEqual({ host: 'olt-uat.local', port: '9990' })
+    expect(parseAddress(' tcp://10.0.0.5:1 ')).toEqual({ host: '10.0.0.5', port: '1' })
+    expect(parseAddress(null)).toEqual({ host: '', port: '' })
+    expect(parseAddress('10.0.0.5:9990')).toEqual({ host: '', port: '' })
+    expect(composeAddress({ host: ' 10.0.0.5 ', port: ' 9990 ' })).toBe('tcp://10.0.0.5:9990')
+    expect(composeAddress(parseAddress('tcp://a.b:7'))).toBe('tcp://a.b:7')
+  })
+
+  it('validates host, port, identity, and heartbeat like the server', () => {
     expect(
-      configProblems({ iproxyAddr: 'tcp://10.0.0.5:9990', identity: 'social_trade_relay', heartbeat: '4' }),
+      connectionProblems({ host: '10.0.0.5', port: '9990', identity: 'social_trade_relay', heartbeat: '4' }),
     ).toEqual({})
-    expect(configProblems({ iproxyAddr: '', identity: '', heartbeat: '4' })).toEqual({})
-    expect(configProblems({ iproxyAddr: 'http://x:1', identity: 'ab', heartbeat: '61' })).toEqual({
-      iproxyAddr: 'address',
+    expect(connectionProblems({ host: 'olt', port: '1', identity: '', heartbeat: '60' })).toEqual({})
+    expect(connectionProblems({ host: '', port: '', identity: 'ab', heartbeat: '61' })).toEqual({
+      host: 'host',
+      port: 'port',
       identity: 'identity',
       heartbeat: 'heartbeat',
     })
-    expect(configProblems({ iproxyAddr: 'tcp://x:70000', identity: 'abc', heartbeat: '0' })).toEqual({
-      iproxyAddr: 'port',
+    expect(connectionProblems({ host: 'olt uat', port: '70000', identity: 'abc', heartbeat: '0' })).toEqual({
+      host: 'host',
+      port: 'port',
       heartbeat: 'heartbeat',
     })
+    expect(connectionProblems({ host: 'h'.repeat(254), port: '0', identity: 'abc', heartbeat: '4' })).toEqual(
+      {
+        host: 'host',
+        port: 'port',
+      },
+    )
+  })
+
+  it('tells whether the relay reported after the last config change', () => {
+    const now = new Date('2026-11-15T03:01:00.000Z')
+    const base = view({ updated_at: '2026-11-15T03:00:30.000Z' })
+    expect(configPickup({ ...base, instances: [] }, now)).toBe('no_relay')
+    expect(
+      configPickup({ ...base, instances: [instance({ reported_at: '2026-11-15T03:00:10.000Z' })] }, now),
+    ).toBe('pending')
+    expect(
+      configPickup({ ...base, instances: [instance({ reported_at: '2026-11-15T03:00:50.000Z' })] }, now),
+    ).toBe('reported')
+    expect(
+      configPickup({ ...base, instances: [instance({ reported_at: '2026-11-15T02:55:00.000Z' })] }, now),
+    ).toBe('stale')
+    expect(
+      relayPending({ ...base, instances: [instance({ reported_at: '2026-11-15T03:00:10.000Z' })] }, now),
+    ).toBe(true)
+    expect(
+      relayPending(
+        { ...base, instances: [instance({ reported_at: '2026-11-15T03:00:10.000Z' })] },
+        new Date('2026-11-15T03:20:00.000Z'),
+      ),
+    ).toBe(false)
+    expect(relayPending(undefined, now)).toBe(false)
+    expect(
+      newestInstance({
+        instances: [
+          instance({ instance: 'a', reported_at: '2026-11-15T03:00:00.000Z' }),
+          instance({ instance: 'b', reported_at: '2026-11-15T03:00:40.000Z' }),
+        ],
+      })?.instance,
+    ).toBe('b')
   })
 
   it('accepts AES keys of 16, 24, or 32 printable characters and a 16-character IV', () => {

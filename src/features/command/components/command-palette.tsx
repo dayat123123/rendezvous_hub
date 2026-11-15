@@ -213,7 +213,6 @@ function PaletteBody({
     ...(canManageContent(agent)
       ? [{ label: t('nav.content'), icon: LibraryIcon, to: '/content' as const }]
       : []),
-    ...(superAdmin ? [{ label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const }] : []),
     ...(superAdmin && !compliance
       ? [{ label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const }]
       : []),
@@ -238,6 +237,7 @@ function PaletteBody({
     ...(canOperateRelay(agent) && !(superAdmin && SHOW_SYSTEM_HEALTH_NAV)
       ? [{ label: t('nav.tradeRelay'), icon: RadioTowerIcon, to: '/system' as const }]
       : []),
+    ...(superAdmin ? [{ label: t('nav.settings'), icon: SettingsIcon, to: '/settings' as const }] : []),
   ]
   const navigation: PaletteItem[] = [
     ...tabs.map((item) => ({

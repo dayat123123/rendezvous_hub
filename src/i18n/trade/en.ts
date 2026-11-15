@@ -445,15 +445,44 @@ export const trade: Translated<typeof source> = {
       'The relay listens to OLT iProxy realtime orders and trades, filters approved accounts, and forwards them to the server. Commands from here run on the relay’s next config pull (at most 15 seconds).',
     superAdminOnly:
       'Only Super Admins can change the configuration, the AES key, and order owner notifications.',
+    settingsMoved:
+      'The connection, AES key, and owner notifications are set in Settings → Integration → Trade Relay.',
+    openSettings: 'Open relay settings',
+    settingsDescription:
+      'The relay connection to OLT iProxy, the AES key for encrypted packets, and trade notifications to order owners. Status and Reconnect/Restart are in System → Trade Relay. Every change needs a reason and is recorded in the audit trail.',
+    liveTitle: 'Current relay status',
+    instance: 'Instance',
+    liveState: 'State',
+    pickup: {
+      no_relay: 'No relay has reported yet. Config version {{version}} is used once the relay runs.',
+      pending: 'Waiting for the relay to load config version {{version}} (usually under 30 seconds).',
+      reported: 'The relay has reported since config version {{version}} was saved.',
+      stale:
+        'The relay has not reported for over 2 minutes, so config version {{version}} cannot be confirmed yet.',
+    },
+    addressGroup: 'iProxy address',
+    host: 'Host',
+    hostHint: 'OLT iProxy host name or IP, without tcp:// and without the port.',
+    port: 'Port',
+    addressPreview: 'Final address:',
+    heartbeatHint: '1–60 seconds, default 4.',
+    disconnect: 'Disconnect relay',
+    disconnected: 'Relay disconnected from iProxy',
+    notConnectedHint: 'The relay is not pointed at iProxy yet.',
+    disconnectTitle: 'Disconnect the relay from iProxy?',
+    disconnectBody:
+      'The iProxy address is cleared. The relay closes its connection on its next config pull and stops receiving orders and trades until an address is set again.',
+    configConfirmBodyAddress:
+      'The relay connects to {{address}} on its next config pull (at most 15 seconds) and reconnects if the address or identity changed.',
     statusTitle: 'Status',
     statusHint:
       'Instances that reported in the last 24 hours. A report older than 2 minutes counts as not reporting.',
     tradeShare: 'Trade Sharing',
     tradeNotify: 'Trade notifications to order owners',
     address: 'iProxy address',
-    addressHint: 'Format tcp://host:port. Leave empty to disconnect the relay from iProxy.',
     identity: 'Identity',
-    identityHint: '3–63 characters. Must differ from every other OLT process identity.',
+    identityHint:
+      '3–63 characters, unique per iProxy consumer (must differ from every other OLT process). Leave empty for the default {{identity}}.',
     heartbeat: 'Heartbeat (seconds)',
     notConfigured: 'Not set',
     noInstances: 'No relay has reported in the last 24 hours.',
@@ -461,6 +490,7 @@ export const trade: Translated<typeof source> = {
       connected: 'Connected',
       disconnected: 'Disconnected',
       stale: 'Not reporting',
+      idle: 'Not configured',
     },
     version: 'Version {{version}}',
     lastPacket: 'Last packet',
@@ -545,11 +575,9 @@ export const trade: Translated<typeof source> = {
     configVersion: 'Config version {{version}} · changed {{time}}',
     configVersionBy: 'Config version {{version}} · changed {{time}} by {{name}}',
     configConfirmTitle: 'Save the relay configuration?',
-    configConfirmBody:
-      'The relay uses the new configuration on its next pull and reconnects if the address or identity changed.',
     configSaved: 'Relay configuration saved',
     problems: {
-      address: 'The address must look like tcp://host:port.',
+      host: 'Host: 1–253 letters, digits, dots, underscores, or hyphens.',
       port: 'The port must be 1–65535.',
       identity: 'Identity: 3–63 letters, digits, dots, underscores, or hyphens.',
       heartbeat: 'Heartbeat 1–60 seconds.',
