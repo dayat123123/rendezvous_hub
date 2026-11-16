@@ -153,7 +153,7 @@ export const settingsGroups = {
   ],
   community: ['community'],
   integration: ['integration', 'appIntegration', 'apiKeys', 'tradeRelay', 'push'],
-  system: ['backup', 'alerts'],
+  system: ['systemHealth', 'backup', 'alerts'],
 } as const
 export type SettingsGroup = keyof typeof settingsGroups
 export type SettingsSection = (typeof settingsGroups)[SettingsGroup][number]

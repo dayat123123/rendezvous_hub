@@ -801,6 +801,9 @@ export const en: Translation = {
     apiKeys: 'Notification API',
     tradeRelay: 'Trade Relay',
     appIntegration: 'App integration',
+    systemHealth: 'System health',
+    systemHealthDescription:
+      'Service map, service status, and auto restart. Data refreshes every few seconds.',
     backup: 'Backup',
     backupDescription:
       'Destination, encryption password, schedule, and retention for database and file backups. Full backup and restore test results appear here.',

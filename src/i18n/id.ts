@@ -801,6 +801,9 @@ export const id = {
     apiKeys: 'API Notifikasi',
     tradeRelay: 'Relay Trade',
     appIntegration: 'Integrasi aplikasi',
+    systemHealth: 'Kesehatan sistem',
+    systemHealthDescription:
+      'Peta layanan, status layanan, dan restart otomatis. Data diperbarui otomatis setiap beberapa detik.',
     backup: 'Backup',
     backupDescription:
       'Tujuan, password enkripsi, jadwal, dan retensi backup database dan file. Hasil backup penuh dan uji restore tampil di sini.',

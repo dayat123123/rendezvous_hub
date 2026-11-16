@@ -216,9 +216,7 @@ function PaletteBody({
     ...(superAdmin && !compliance
       ? [{ label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const }]
       : []),
-    ...(superAdmin && SHOW_SYSTEM_HEALTH_NAV
-      ? [{ label: t('nav.system'), icon: ActivityIcon, to: '/system' as const }]
-      : []),
+    ...(superAdmin ? [{ label: t('nav.system'), icon: ActivityIcon, to: '/system' as const }] : []),
     ...(compliance
       ? [
           { label: t('nav.overview'), icon: GaugeIcon, to: '/compliance' as const },

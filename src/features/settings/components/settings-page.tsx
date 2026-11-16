@@ -1,4 +1,5 @@
 import {
+  ActivityIcon,
   BellRingIcon,
   CalendarClockIcon,
   DatabaseBackupIcon,
@@ -10,11 +11,11 @@ import {
   PlugZapIcon,
   RadioTowerIcon,
   SirenIcon,
-  SmilePlusIcon,
-  TriangleAlertIcon,
   SlidersHorizontalIcon,
   SmartphoneIcon,
+  SmilePlusIcon,
   TagIcon,
+  TriangleAlertIcon,
   UsersIcon,
 } from 'lucide-react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
@@ -43,6 +44,7 @@ import { AlertsSection } from './alerts-section'
 import { AttachmentsSection } from './attachments-section'
 import { AssignmentSection } from './assignment-section'
 import { BackupSection } from './backup-section'
+import { SystemHealthSection } from './system-health-section'
 import { CommunitySection } from './community-section'
 import { HoursSection } from './hours-section'
 import { IntegrationBadge, IntegrationSection } from './integration-section'
@@ -65,6 +67,7 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
   apiKeys: KeyRoundIcon,
   tradeRelay: RadioTowerIcon,
   push: BellRingIcon,
+  systemHealth: ActivityIcon,
   backup: DatabaseBackupIcon,
   alerts: SirenIcon,
 }
@@ -85,6 +88,7 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   appIntegration: () => <AppIntegrationSection />,
   apiKeys: () => <IntegrationKeysSection />,
   tradeRelay: () => <RelaySettingsSection />,
+  systemHealth: () => <SystemHealthSection />,
   backup: () => <BackupSection />,
   alerts: () => <AlertsSection />,
 }

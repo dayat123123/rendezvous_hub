@@ -86,7 +86,7 @@ describe('SettingsPage', () => {
       'Relay Trade',
       'Push notification',
     ])
-    expect(groupItems('Sistem')).toEqual(['Backup', 'Alert'])
+    expect(groupItems('Sistem')).toEqual(['Kesehatan sistem', 'Backup', 'Alert'])
     expect(screen.getByRole('button', { name: 'Akun CS' })).toHaveAttribute('aria-current', 'page')
   })
 

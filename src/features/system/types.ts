@@ -9,6 +9,10 @@ export const superAdminTabs: readonly SystemTab[] = SHOW_TRADE_SHARE
   ? systemTabs
   : systemTabs.filter((tab) => tab !== 'relay')
 
+export const healthTabs: readonly SystemTab[] = superAdminTabs.filter(
+  (tab) => tab !== 'backup' && tab !== 'alerts',
+)
+
 export type Severity = 'warning' | 'critical'
 export type OverallStatus = 'ok' | 'warning' | 'critical'
 

@@ -18,7 +18,7 @@ import { caseStates, type CaseState } from '@/features/compliance/types'
 import { isContentTab, type ContentTab } from '@/features/content/types'
 import { isFeaturesCampaignsTab, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
 import { isSettingsSection, type SettingsSection } from '@/features/settings/types'
-import { systemTabs, type SystemTab } from '@/features/system/types'
+import { healthTabs, systemTabs, type SystemTab } from '@/features/system/types'
 import { tradeShareTabs, type TradeShareTab } from '@/features/trade-share/types'
 import {
   canManageContent,
@@ -114,9 +114,13 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   beforeLoad: superAdminOnly,
-  validateSearch: (search: Record<string, unknown>): { section?: SettingsSection } => ({
-    section: isSettingsSection(search.section) ? search.section : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { section?: SettingsSection; tab?: SystemTab } => {
+    const tab = text(search.tab)
+    return {
+      section: isSettingsSection(search.section) ? search.section : undefined,
+      ...(systemTabs.includes(tab as SystemTab) ? { tab: tab as SystemTab } : {}),
+    }
+  },
   component: lazyRouteComponent(
     withStrings(
       () => import('@/features/settings/components/settings-page'),
@@ -288,8 +292,17 @@ const complianceTradeShareRoute = createRoute({
 const systemRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/system',
-  beforeLoad: ({ context }) => {
-    if (!isSuperAdmin(context.agent) && !canOperateRelay(context.agent)) throw redirect({ to: '/' })
+  beforeLoad: ({ context, search }) => {
+    if (isSuperAdmin(context.agent)) {
+      throw redirect({
+        to: '/settings',
+        search: {
+          section: 'systemHealth',
+          ...(search.tab && healthTabs.includes(search.tab) ? { tab: search.tab } : {}),
+        },
+      })
+    }
+    if (!canOperateRelay(context.agent)) throw redirect({ to: '/' })
   },
   validateSearch: (search: Record<string, unknown>): { tab?: SystemTab } => {
     const tab = text(search.tab)

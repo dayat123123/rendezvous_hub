@@ -269,7 +269,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
   const watchesCases = compliance || superAdmin
   const unseenNotices = useComplianceNotices(watchesCases).data?.unseen ?? 0
   const communityCount = useCommunityBadge()
-  const health = badgeView(useHealthBadge(showSystem).data)
+  const health = badgeView(useHealthBadge(superAdmin).data)
   const [dialog, setDialog] = useState<AccountDialog | null>(null)
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3 lg:px-4">
@@ -335,7 +335,21 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
             <NavLink to="/compliance/evidence" label={t('nav.evidence')} />
           </>
         ) : null}
-        {superAdmin ? <NavLink to="/settings" label={t('nav.settings')} /> : null}
+        {superAdmin ? (
+          <NavLink
+            to="/settings"
+            label={t('nav.settings')}
+            count={showSystem ? undefined : health?.count}
+            tone={health?.tone === 'warn' ? 'warning' : 'danger'}
+            countLabel={
+              !showSystem && health
+                ? t(health.severity === 'critical' ? 'nav.systemCritical' : 'nav.systemWarning', {
+                    count: health.count,
+                  })
+                : undefined
+            }
+          />
+        ) : null}
       </nav>
       <div className="hidden min-w-0 flex-1 justify-center px-2 lg:flex">
         <button

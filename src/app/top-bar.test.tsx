@@ -1,5 +1,5 @@
 import type * as RouterModule from '@tanstack/react-router'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -140,12 +140,13 @@ describe('TopBar', () => {
     ])
   })
 
-  it('hides Kesehatan sistem and skips the system badge while the switch is off', () => {
-    vi.mocked(systemApi.badge).mockClear()
+  it('hides Kesehatan sistem and shows open system problems on Pengaturan instead', async () => {
+    vi.mocked(systemApi.badge).mockResolvedValue({ critical: 1, warning: 2, open: 3 })
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
 
     expect(screen.queryByRole('link', { name: /Kesehatan sistem/ })).not.toBeInTheDocument()
-    expect(systemApi.badge).not.toHaveBeenCalled()
+    const settings = await screen.findByRole('link', { name: /Pengaturan/ })
+    await waitFor(() => expect(settings).toHaveTextContent(/Pengaturans*1/))
   })
 
   it('shows Kesehatan sistem right before Pengaturan for Super Admins when the switch is on', () => {

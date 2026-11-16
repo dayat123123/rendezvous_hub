@@ -47,11 +47,11 @@ describe('CommandPalette', () => {
     expect(navigate).toHaveBeenCalledWith({ to: '/community', search: { tab: 'analytics' } })
   })
 
-  it('hides Kesehatan sistem while the switch is off', () => {
+  it('keeps Kesehatan sistem reachable from the palette while it lives in Pengaturan', () => {
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
 
     expect(screen.getByRole('option', { name: 'Buka Pengaturan' })).toBeInTheDocument()
-    expect(screen.queryByRole('option', { name: 'Buka Kesehatan sistem' })).not.toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Buka Kesehatan sistem' })).toBeInTheDocument()
   })
 
   it('lists Kesehatan sistem again when the switch is on', () => {

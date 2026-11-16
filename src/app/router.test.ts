@@ -32,8 +32,11 @@ describe('router', () => {
     expect((await open('/community', agentFixture)).pathname).toBe('/')
   })
 
-  it('keeps /system reachable by Super Admins while it is hidden from navigation', async () => {
-    expect((await open('/system', monitorFixture)).pathname).toBe('/system')
+  it('sends Super Admins from /system to Pengaturan > Kesehatan sistem, keeping a health tab', async () => {
+    const location = await open('/system?tab=healer', monitorFixture)
+    expect(location.pathname).toBe('/settings')
+    expect(location.search).toEqual({ section: 'systemHealth', tab: 'healer' })
+    expect((await open('/system?tab=backup', monitorFixture)).search).toEqual({ section: 'systemHealth' })
     expect((await open('/system', agentFixture)).pathname).toBe('/')
   })
 
