@@ -15,6 +15,6 @@ describe('trade sharing while hidden', () => {
     expect([admin, staff].map(canOperateRelay)).toEqual([false, false])
     expect(visibleSettingsSections('integration')).not.toContain('tradeRelay')
     expect(settingsSections).not.toContain('tradeRelay')
-    expect(superAdminTabs).toEqual(['status', 'healer', 'backup', 'alerts'])
+    expect(superAdminTabs).toEqual(['map', 'status', 'healer', 'backup', 'alerts'])
   })
 })

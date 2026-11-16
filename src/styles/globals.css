@@ -173,6 +173,38 @@
 
   --animate-leave: ticket-leave 150ms cubic-bezier(0, 0, 0.2, 1) 1450ms forwards;
   --animate-flash: message-flash 1400ms cubic-bezier(0, 0, 0.2, 1);
+  --animate-flow: map-flow 1.4s linear infinite;
+  --animate-beacon: map-beacon 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-rise: map-rise 420ms cubic-bezier(0, 0, 0.2, 1) both;
+
+  @keyframes map-flow {
+    to {
+      stroke-dashoffset: -18;
+    }
+  }
+
+  @keyframes map-beacon {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    80%,
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes map-rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 
   @keyframes message-flash {
     0%,
@@ -232,6 +264,26 @@
 @layer utilities {
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+  .map-canvas {
+    background-color: var(--bg-subtle);
+    background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .map-glow-ok {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--success) 22%, transparent),
+      0 6px 18px -10px color-mix(in srgb, var(--success) 45%, transparent);
+  }
+  .map-glow-warn {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--warning) 45%, transparent),
+      0 8px 22px -10px color-mix(in srgb, var(--warning) 60%, transparent);
+  }
+  .map-glow-bad {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--danger) 55%, transparent),
+      0 8px 26px -8px color-mix(in srgb, var(--danger) 65%, transparent);
   }
 }
 

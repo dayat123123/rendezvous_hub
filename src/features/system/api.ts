@@ -12,6 +12,7 @@ import type {
   HealerOverview,
   HealthBadge,
   SystemHealth,
+  SystemNodes,
   TelegramInput,
 } from './types'
 
@@ -32,6 +33,16 @@ export const systemApi = {
     }
   },
   badge: () => rpc<HealthBadge>('system_health_badge'),
+  nodes: async (): Promise<SystemNodes> => {
+    const raw = await rpc<SystemNodes>('system_nodes')
+    return {
+      ...raw,
+      report: { ...raw.report, containers: raw.report?.containers ?? [] },
+      probes: raw.probes ?? [],
+      restarts: raw.restarts ?? [],
+      versions: raw.versions ?? {},
+    }
+  },
   healer: async (): Promise<HealerOverview> => {
     const raw = await rpc<HealerOverview>('healer_overview')
     const state = raw.state

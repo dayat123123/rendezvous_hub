@@ -1095,6 +1095,7 @@ export type Database = {
       support_home: { Args: Record<PropertyKey, never>; Returns: Json }
       system_health: { Args: Record<PropertyKey, never>; Returns: Json }
       system_health_badge: { Args: Record<PropertyKey, never>; Returns: Json }
+      system_nodes: { Args: Record<PropertyKey, never>; Returns: Json }
       ticket_customer_login: { Args: { p_ticket_id: string }; Returns: Json }
       ticket_detail: { Args: { p_ticket_id: string }; Returns: Json }
       ticket_labels: { Args: Record<PropertyKey, never>; Returns: Json }

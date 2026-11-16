@@ -19,6 +19,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   return { ...actual, useNavigate: () => router.navigate, useSearch: () => router.search }
 })
 
+vi.mock('./map-tab', () => ({ MapTab: () => <p>map-tab</p> }))
 vi.mock('./status-tab', () => ({ StatusTab: () => <p>status-tab</p> }))
 vi.mock('./healer-tab', () => ({ HealerTab: () => <p>healer-tab</p> }))
 vi.mock('./backup-tab', () => ({ BackupTab: () => <p>backup-tab</p> }))
@@ -36,17 +37,18 @@ describe('SystemPage', () => {
     expect(screen.getByText('backup-tab')).toBeVisible()
   })
 
-  it('falls back to the status tab for an unknown tab', () => {
+  it('opens the service map first and falls back to it for an unknown tab', () => {
     router.search = { tab: 'nope' }
     renderWithProviders(<SystemPage />, monitorFixture)
-    expect(screen.getByText('status-tab')).toBeVisible()
+    expect(screen.getByText('map-tab')).toBeVisible()
+    expect(screen.getAllByRole('tab')[0]).toHaveTextContent('Peta layanan')
   })
 
   it('lists Relay Trade among the Super Admin tabs', () => {
     router.search = { tab: 'relay' }
     renderWithProviders(<SystemPage />, monitorFixture)
     expect(screen.getByText('relay-tab')).toBeVisible()
-    expect(screen.getAllByRole('tab')).toHaveLength(5)
+    expect(screen.getAllByRole('tab')).toHaveLength(6)
   })
 
   it('shows relay operators only the Relay Trade tab', () => {

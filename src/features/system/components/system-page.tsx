@@ -11,9 +11,11 @@ import { relayOnlyTabs, superAdminTabs, type SystemTab } from '../types'
 import { AlertsTab } from './alerts-tab'
 import { BackupTab } from './backup-tab'
 import { HealerTab } from './healer-tab'
+import { MapTab } from './map-tab'
 import { StatusTab } from './status-tab'
 
 const panels: Record<SystemTab, () => React.ReactNode> = {
+  map: () => <MapTab />,
   status: () => <StatusTab />,
   healer: () => <HealerTab />,
   backup: () => <BackupTab />,

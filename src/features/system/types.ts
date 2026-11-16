@@ -1,6 +1,6 @@
 import { SHOW_TRADE_SHARE } from '@/lib/nav-config'
 
-export const systemTabs = ['status', 'healer', 'backup', 'alerts', 'relay'] as const
+export const systemTabs = ['map', 'status', 'healer', 'backup', 'alerts', 'relay'] as const
 export type SystemTab = (typeof systemTabs)[number]
 
 export const relayOnlyTabs: readonly SystemTab[] = ['relay']
@@ -330,4 +330,60 @@ export type HealerOverview = {
   state: HealerState | null
   events: HealerEvent[]
   counts: HealerCounts
+}
+
+export type NodeContainer = {
+  service: string
+  name: string
+  replica: number
+  host: string
+  state: string
+  health: string
+  started_at: string | null
+  finished_at: string | null
+  exit_code: number
+  restarts: number
+  image: string
+  autoheal: boolean
+  cpu_percent: number | null
+  memory_bytes: number | null
+  memory_limit_bytes: number | null
+}
+
+export type NodeHost = {
+  name: string
+  cpus: number
+  memory_bytes: number
+  os: string
+  docker_version: string
+}
+
+export type NodesReport = {
+  read_error?: string
+  version?: string
+  project?: string
+  checked_at?: string
+  host?: NodeHost
+  containers: NodeContainer[]
+  error?: string
+}
+
+export type NodeProbe = {
+  name: string
+  ok: boolean
+  latency_ms: number | null
+  checked_at: string
+  failing_since: string | null
+}
+
+export type NodeRestarts = { service: string; count: number; last_at: string }
+
+export type SystemNodes = {
+  now: string
+  reported_at: string | null
+  stale: boolean
+  report: NodesReport
+  probes: NodeProbe[]
+  restarts: NodeRestarts[]
+  versions: Record<string, string>
 }
