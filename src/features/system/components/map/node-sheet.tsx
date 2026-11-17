@@ -1,3 +1,4 @@
+import { InfoIcon, TriangleAlertIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Sheet, SheetContent } from '@/components/ui/overlay'
@@ -117,6 +118,8 @@ export function NodeSheet({
   const { t } = useTranslation()
   const now = useNow(1_000).getTime()
   const role = node ? t(`system.map.roles.${node.service}`, { defaultValue: '' }) : ''
+  const about = node ? t(`system.map.about.${node.service}`, { defaultValue: '' }) : ''
+  const impact = node ? t(`system.map.impact.${node.service}`, { defaultValue: '' }) : ''
   return (
     <Sheet open={node !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
@@ -142,6 +145,33 @@ export function NodeSheet({
               </div>
               <StatusPill tone={node.tone} />
             </header>
+            {about ? (
+              <section
+                aria-label={t('system.map.aboutTitle')}
+                className="flex flex-col gap-3 rounded-lg border bg-subtle p-3"
+              >
+                <div className="flex gap-2.5">
+                  <InfoIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <h3 className="text-xs font-medium text-muted-foreground">
+                      {t('system.map.aboutTitle')}
+                    </h3>
+                    <p className="text-row">{about}</p>
+                  </div>
+                </div>
+                {impact ? (
+                  <div className="flex gap-2.5">
+                    <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <h3 className="text-xs font-medium text-muted-foreground">
+                        {t('system.map.impactTitle')}
+                      </h3>
+                      <p className="text-row">{impact}</p>
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
             <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               <Fact label={t('system.map.replicasTitle')}>
                 {t('system.map.replicas', { running: node.running, total: node.replicas.length })}

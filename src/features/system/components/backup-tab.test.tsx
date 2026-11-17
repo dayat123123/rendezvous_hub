@@ -421,8 +421,16 @@ describe('BackupTab', () => {
     vi.mocked(systemApi.setBackupSchedule).mockResolvedValue(configured)
     renderWithProviders(<BackupTab />, monitorFixture)
 
-    const days = await screen.findByLabelText('Simpan backup harian')
+    const days = await screen.findByLabelText('Simpan salinan harian selama (hari)')
     expect(days).toBeDisabled()
+    expect(screen.getByText('Satu salinan per hari untuk 7 hari terakhir. Isi 1–60.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Data bisa dikembalikan ke menit mana pun selama 7 hari terakhir. Isi 1–35.'),
+    ).toBeInTheDocument()
+    const summary = screen.getByRole('region', { name: 'Dengan pengaturan ini' })
+    expect(summary).toHaveTextContent('Data bisa dikembalikan ke menit mana pun dalam 7 hari terakhir.')
+    expect(summary).toHaveTextContent('Ke satu hari per bulan sampai 6 bulan lalu.')
+    expect(summary).toHaveTextContent('data yang mungkin hilang paling banyak 5 menit terakhir')
     await unlock(user, 'Jadwal & retensi')
     await user.clear(days)
     await user.type(days, '3')
@@ -439,6 +447,10 @@ describe('BackupTab', () => {
 
     await user.clear(days)
     await user.type(days, '14')
+    expect(screen.getByText('Satu salinan per hari untuk 14 hari terakhir. Isi 1–60.')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Dengan pengaturan ini' })).toHaveTextContent(
+      '(jam 02:00) dalam 14 hari terakhir',
+    )
     await user.click(screen.getByRole('radio', { name: 'Sabtu' }))
     await user.click(screen.getByRole('button', { name: 'Simpan jadwal' }))
     expect(systemApi.setBackupSchedule).not.toHaveBeenCalled()

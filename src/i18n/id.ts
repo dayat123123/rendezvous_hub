@@ -2759,6 +2759,97 @@ export const id = {
         'dummy-olt': 'OLT tiruan',
         'dummy-iproxy': 'iProxy tiruan',
       },
+      aboutTitle: 'Fungsinya',
+      impactTitle: 'Bila bermasalah',
+      about: {
+        traefik:
+          'Pintu masuk dari internet. Menerima semua koneksi HTTPS dari aplikasi nasabah dan Hub, mengurus sertifikat keamanan, dan membatasi permintaan berlebihan dari satu alamat.',
+        kong: 'Gerbang API. Meneruskan setiap permintaan ke layanan yang tepat (data, login, chat langsung, file) dan memeriksa kunci aksesnya.',
+        'cs-console': 'Web Rendezvous Hub yang dipakai staf: tiket CS, komunitas, kepatuhan, dan pengaturan.',
+        rest: 'API utama. Melayani hampir semua permintaan aplikasi dan Hub (feed, chat, profil, tiket) langsung ke database, dengan aturan siapa boleh melihat apa.',
+        auth: 'Akun dan sesi login. Membuat dan memperpanjang sesi, termasuk login staf ke Hub.',
+        'auth-bridge':
+          'Jembatan login dari aplikasi OLT. Menukar token dari OLT menjadi sesi fitur sosial, sehingga nasabah tidak perlu login dua kali.',
+        realtime:
+          'Pengantar pesan langsung. Mengirim chat baru, status mengetik, dan pembaruan secara seketika ke aplikasi dan Hub.',
+        storage: 'Penyimpanan file: foto profil, gambar postingan, dan lampiran chat CS.',
+        functions: 'Fungsi tambahan untuk Hub, misalnya membuat akun staf dan reset password.',
+        integration:
+          'Pintu untuk sistem OLT mengirim notifikasi transaksi ke nasabah dan postingan dari akun bot resmi.',
+        'nasabah-gateway':
+          'Jembatan menu Akun Nasabah di Hub ke csAdmin OLT, untuk melihat dan membantu akun nasabah.',
+        media:
+          'Penerima unggahan. Memeriksa setiap file dari nasabah (jenis file, virus, konten tidak pantas) dan membuang data lokasi foto sebelum disimpan.',
+        classifier:
+          'Pemindai gambar dengan model AI lokal di server sendiri. Menilai apakah gambar mengandung konten tidak senonoh sebelum boleh tampil.',
+        clamav: 'Pemindai virus untuk dokumen dan file yang dikirim di chat CS.',
+        imgproxy: 'Pengolah gambar. Mengecilkan dan menyesuaikan ukuran gambar supaya cepat dimuat di HP.',
+        notifier: 'Pengirim push notification ke HP nasabah lewat Firebase.',
+        janitor:
+          'Pembersih file. Menghapus file yang sudah tidak dipakai, misalnya lampiran dari akun yang dihapus.',
+        'link-preview':
+          'Pembuat pratinjau tautan. Menampilkan judul dan gambar saat nasabah membagikan link, dengan pengamanan dari link berbahaya.',
+        'trade-relay':
+          'Relay Berbagi Trade. Mendengarkan order dan trade realtime dari OLT. Saat ini sengaja dimatikan karena fitur dijeda.',
+        pgbouncer:
+          'Pengatur antrean koneksi database. Membagi koneksi supaya database tidak kewalahan saat ramai.',
+        db: 'Database. Menyimpan semua data (akun, chat, tiket, postingan) beserta aturan bisnisnya. Bagian paling penting di sistem.',
+        valkey:
+          'Penyimpanan cepat untuk hitungan batas permintaan login, supaya serangan coba-coba password bisa dibatasi.',
+        sentinel:
+          'Pemantau. Memeriksa semua layanan, disk, dan database setiap ±30 detik, membuat alert, mengirimnya ke Telegram/email, dan mengirim data peta ini.',
+        healer:
+          'Restart otomatis. Menyalakan ulang layanan yang hidup tetapi macet, dan membaca daftar container untuk peta ini.',
+        backup:
+          'Backup. Menyalin database dan file ke repositori terenkripsi secara terus-menerus, dan menjalankan uji restore mingguan.',
+        migrate:
+          'Pemasang perubahan database. Berjalan sekali setiap update lalu selesai; status "Selesai" itu normal.',
+        'volume-init':
+          'Penyiap folder penyimpanan. Berjalan sekali saat sistem dinyalakan lalu selesai; status "Selesai" itu normal.',
+        tools:
+          'Alat operasional (backup sesaat, uji, data contoh) yang dijalankan tim IT sesekali lalu selesai.',
+        meta: 'Pendukung Supabase Studio untuk membaca struktur database. Hanya untuk tim teknis.',
+        studio:
+          'Supabase Studio, dashboard database untuk tim teknis. Di server produksi sebaiknya dimatikan kecuali sedang dipakai.',
+        'dummy-olt': 'Server OLT tiruan untuk pengembangan dan uji login. Tidak dipakai di produksi.',
+        'dummy-iproxy': 'Simulator iProxy OLT untuk uji Berbagi Trade. Dijeda bersama fiturnya.',
+      },
+      impact: {
+        traefik: 'Aplikasi dan Hub tidak bisa dibuka sama sekali.',
+        kong: 'Semua fitur di aplikasi dan Hub berhenti.',
+        'cs-console': 'Staf tidak bisa membuka Hub. Aplikasi nasabah tetap berjalan.',
+        rest: 'Sebagian besar fitur gagal dimuat.',
+        auth: 'Staf tidak bisa masuk ke Hub dan sesi yang habis tidak bisa diperpanjang.',
+        'auth-bridge':
+          'Nasabah tidak bisa masuk ke fitur sosial. Yang sudah masuk tetap bisa memakai sampai sesinya habis.',
+        realtime: 'Chat tetap tersimpan, tetapi baru muncul setelah halaman dimuat ulang.',
+        storage: 'Gambar dan lampiran tidak tampil dan tidak bisa diunggah.',
+        functions: 'Pengelolaan akun staf di Hub gagal. Fitur lain tetap berjalan.',
+        integration: 'Notifikasi dari OLT tidak masuk ke aplikasi.',
+        'nasabah-gateway': 'Menu Akun Nasabah di Hub tidak bisa dipakai.',
+        media: 'Unggah gambar dan dokumen gagal.',
+        classifier: 'Unggahan gambar ditolak demi keamanan.',
+        clamav: 'Unggahan dokumen ditolak.',
+        imgproxy: 'Gambar lambat atau gagal tampil.',
+        notifier:
+          'Push ke HP tertunda. Notifikasi tetap ada di kotak notifikasi aplikasi dan dikirim setelah layanan menyala.',
+        janitor: 'Tidak terasa langsung; file sisa menumpuk sampai layanan menyala lagi.',
+        'link-preview': 'Tautan tampil tanpa pratinjau.',
+        'trade-relay': 'Tidak ada dampak selama Berbagi Trade dijeda.',
+        pgbouncer: 'Layanan tidak bisa menghubungi database; sebagian besar fitur gagal.',
+        db: 'Seluruh sistem berhenti. Data tetap aman di disk dan di backup.',
+        valkey: 'Login tetap berjalan dengan pembatas sementara di masing-masing layanan.',
+        sentinel: 'Alert dan peta ini berhenti diperbarui.',
+        healer: 'Tidak ada restart otomatis dan peta ini berhenti diperbarui.',
+        backup: 'Backup berhenti dan alert muncul. Sistem yang sedang berjalan tidak terganggu.',
+        migrate: 'Bila gagal saat update, perubahan database tidak terpasang dan update perlu diulang.',
+        'volume-init': 'Bila gagal, beberapa layanan tidak bisa menulis file.',
+        tools: 'Tidak berdampak ke sistem yang berjalan.',
+        meta: 'Studio tidak bisa dipakai. Tidak berdampak ke nasabah atau staf.',
+        studio: 'Tidak berdampak ke nasabah atau staf.',
+        'dummy-olt': 'Hanya berdampak ke uji di lingkungan development.',
+        'dummy-iproxy': 'Tidak ada dampak.',
+      },
       status: {
         healthy: 'Sehat',
         running: 'Berjalan',
@@ -3113,21 +3204,42 @@ export const id = {
       },
       schedule: {
         title: 'Jadwal & retensi',
-        hint: 'Semua jam dalam WIB.',
-        baseTime: 'Jam backup penuh harian',
-        baseTimeHint: 'Pilih jam sepi pengguna.',
-        offsiteMinutes: 'Kirim WAL ke repositori (menit)',
-        walDays: 'Simpan WAL (hari)',
-        retentionDaily: 'Simpan backup harian',
-        retentionWeekly: 'Simpan backup mingguan',
-        retentionMonthly: 'Simpan backup bulanan',
+        hint: 'Kapan backup dibuat dan berapa lama disimpan. Semua jam dalam WIB.',
+        baseTime: 'Jam backup penuh setiap hari',
+        baseTimeHint:
+          'Salinan lengkap database dan file dibuat jam ini setiap hari. Pilih jam sepi pengguna.',
+        offsiteMinutes: 'Kirim perubahan data ke backup setiap (menit)',
+        walDays: 'Bisa dipulihkan ke menit tertentu selama (hari)',
+        retentionDaily: 'Simpan salinan harian selama (hari)',
+        retentionWeekly: 'Simpan satu salinan per minggu selama (minggu)',
+        retentionMonthly: 'Simpan satu salinan per bulan selama (bulan)',
         range: '{{min}}–{{max}}',
+        explain: {
+          offsiteMinutes:
+            'Bila server rusak total, data yang mungkin hilang paling banyak {{value}} menit terakhir. Isi {{min}}–{{max}}.',
+          walDays:
+            'Data bisa dikembalikan ke menit mana pun selama {{value}} hari terakhir. Isi {{min}}–{{max}}.',
+          retentionDaily: 'Satu salinan per hari untuk {{value}} hari terakhir. Isi {{min}}–{{max}}.',
+          retentionWeekly:
+            'Satu salinan per minggu sampai {{value}} minggu lalu. 0 = tidak disimpan. Isi {{min}}–{{max}}.',
+          retentionMonthly:
+            'Satu salinan per bulan sampai {{value}} bulan lalu. 0 = tidak disimpan. Isi {{min}}–{{max}}.',
+        },
+        summaryTitle: 'Dengan pengaturan ini',
+        summary: {
+          minute: 'Data bisa dikembalikan ke **menit mana pun** dalam {{days}} hari terakhir.',
+          daily: 'Ke kondisi satu hari tertentu (jam {{time}}) dalam {{days}} hari terakhir.',
+          weekly: 'Ke satu hari per minggu sampai {{weeks}} minggu lalu.',
+          monthly: 'Ke satu hari per bulan sampai {{months}} bulan lalu.',
+          loss: 'Bila server rusak total, data yang mungkin hilang paling banyak {{minutes}} menit terakhir.',
+          older: 'Salinan yang lebih lama dihapus otomatis untuk menghemat tempat.',
+        },
         timeInvalid: 'Jam tidak valid (JJ:MM).',
         restoreTitle: 'Uji restore mingguan',
         restoreTest: 'Jalankan uji restore otomatis',
         restoreHint:
           'Backup terbaru dipulihkan ke database sementara untuk memastikan backup benar-benar bisa dipakai.',
-        weekday: 'Hari',
+        weekday: 'Hari uji restore',
         restoreTime: 'Jam uji restore',
         save: 'Simpan jadwal',
         saved: 'Jadwal backup disimpan.',

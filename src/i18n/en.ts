@@ -2749,6 +2749,94 @@ export const en: Translation = {
         'dummy-olt': 'Simulated OLT',
         'dummy-iproxy': 'Simulated iProxy',
       },
+      aboutTitle: 'What it does',
+      impactTitle: 'If it fails',
+      about: {
+        traefik:
+          'Entry point from the internet. Receives every HTTPS connection from the customer app and the Hub, manages certificates, and limits excessive requests from one address.',
+        kong: 'API gateway. Routes each request to the right service (data, login, live chat, files) and checks its access key.',
+        'cs-console':
+          'The Rendezvous Hub website used by staff: CS tickets, community, compliance, and settings.',
+        rest: 'Main API. Serves almost every app and Hub request (feed, chat, profiles, tickets) straight from the database, with rules on who may see what.',
+        auth: 'Accounts and login sessions, including staff sign-in to the Hub.',
+        'auth-bridge':
+          'Login bridge from the OLT app. Exchanges the OLT token for a social session so customers do not sign in twice.',
+        realtime:
+          'Live delivery. Pushes new chats, typing status, and updates to the app and the Hub instantly.',
+        storage: 'File storage: profile photos, post images, and CS chat attachments.',
+        functions: 'Extra functions for the Hub, such as creating staff accounts and resetting passwords.',
+        integration:
+          'Entry point for OLT systems to send transaction notifications to customers and posts from official bot accounts.',
+        'nasabah-gateway': 'Bridge from the Hub Customer Accounts menu to OLT csAdmin.',
+        media:
+          'Upload receiver. Checks every customer file (type, viruses, inappropriate content) and strips photo location data before storing it.',
+        classifier:
+          'Image scanner using a local AI model on our own server. Rates whether an image is explicit before it may be shown.',
+        clamav: 'Virus scanner for documents and files sent in CS chat.',
+        imgproxy: 'Image processor. Shrinks and resizes images so they load fast on phones.',
+        notifier: 'Sends push notifications to customer phones through Firebase.',
+        janitor:
+          'File cleaner. Deletes files that are no longer used, such as attachments of deleted accounts.',
+        'link-preview':
+          'Link previews. Shows a title and image when a customer shares a link, with protection against dangerous links.',
+        'trade-relay':
+          'Trade sharing relay. Listens to live OLT orders and trades. Turned off on purpose while the feature is paused.',
+        pgbouncer:
+          'Database connection queue. Shares connections so the database is not overwhelmed at busy times.',
+        db: 'Database. Stores all data (accounts, chats, tickets, posts) and the business rules. The most important part of the system.',
+        valkey: 'Fast store for login request counters, so password-guessing attacks can be limited.',
+        sentinel:
+          'Monitor. Checks every service, disk, and the database every ±30 seconds, raises alerts, sends them to Telegram/email, and feeds this map.',
+        healer:
+          'Auto restart. Restarts services that are running but stuck, and reads the container list for this map.',
+        backup:
+          'Backup. Copies the database and files to an encrypted repository continuously and runs the weekly restore test.',
+        migrate: 'Applies database changes. Runs once per update and then finishes; "Done" is normal.',
+        'volume-init': 'Prepares storage folders. Runs once at start-up and then finishes; "Done" is normal.',
+        tools: 'Operations tools (quick backups, tests, sample data) run by IT now and then.',
+        meta: 'Helper for Supabase Studio to read the database structure. Technical team only.',
+        studio:
+          'Supabase Studio, a database dashboard for the technical team. Keep it off in production unless in use.',
+        'dummy-olt': 'Simulated OLT server for development and login tests. Not used in production.',
+        'dummy-iproxy': 'Simulated OLT iProxy for trade sharing tests. Paused with the feature.',
+      },
+      impact: {
+        traefik: 'The app and the Hub cannot be opened at all.',
+        kong: 'Every feature in the app and the Hub stops.',
+        'cs-console': 'Staff cannot open the Hub. The customer app keeps working.',
+        rest: 'Most features fail to load.',
+        auth: 'Staff cannot sign in and expired sessions cannot be renewed.',
+        'auth-bridge':
+          'Customers cannot enter the social features. Those already in keep working until their session ends.',
+        realtime: 'Chats are still saved but only appear after a reload.',
+        storage: 'Images and attachments do not show and cannot be uploaded.',
+        functions: 'Staff account management in the Hub fails. Other features keep working.',
+        integration: 'Notifications from OLT do not reach the app.',
+        'nasabah-gateway': 'The Customer Accounts menu in the Hub cannot be used.',
+        media: 'Image and document uploads fail.',
+        classifier: 'Image uploads are rejected for safety.',
+        clamav: 'Document uploads are rejected.',
+        imgproxy: 'Images load slowly or fail to show.',
+        notifier:
+          'Phone pushes are delayed. Notifications stay in the in-app inbox and are sent once the service is back.',
+        janitor: 'Not felt right away; leftover files pile up until it is back.',
+        'link-preview': 'Links show without a preview.',
+        'trade-relay': 'No impact while trade sharing is paused.',
+        pgbouncer: 'Services cannot reach the database; most features fail.',
+        db: 'The whole system stops. Data stays safe on disk and in backups.',
+        valkey: 'Login keeps working with temporary per-service limits.',
+        sentinel: 'Alerts and this map stop updating.',
+        healer: 'No automatic restarts and this map stops updating.',
+        backup: 'Backups stop and an alert opens. The running system is not affected.',
+        migrate:
+          'If it fails during an update, database changes are not applied and the update must be repeated.',
+        'volume-init': 'If it fails, some services cannot write files.',
+        tools: 'No impact on the running system.',
+        meta: 'Studio cannot be used. No impact on customers or staff.',
+        studio: 'No impact on customers or staff.',
+        'dummy-olt': 'Only affects development testing.',
+        'dummy-iproxy': 'No impact.',
+      },
       status: {
         healthy: 'Healthy',
         running: 'Running',
@@ -3106,21 +3194,42 @@ export const en: Translation = {
       },
       schedule: {
         title: 'Schedule & retention',
-        hint: 'All times are WIB.',
-        baseTime: 'Daily full backup time',
-        baseTimeHint: 'Pick a quiet hour.',
-        offsiteMinutes: 'Send WAL to the repository (minutes)',
-        walDays: 'Keep WAL (days)',
-        retentionDaily: 'Keep daily backups',
-        retentionWeekly: 'Keep weekly backups',
-        retentionMonthly: 'Keep monthly backups',
+        hint: 'When backups are made and how long they are kept. All times are WIB.',
+        baseTime: 'Full backup time, every day',
+        baseTimeHint:
+          'A full copy of the database and files is made at this time every day. Pick a quiet hour.',
+        offsiteMinutes: 'Send data changes to the backup every (minutes)',
+        walDays: 'Restore to any minute within (days)',
+        retentionDaily: 'Keep daily copies for (days)',
+        retentionWeekly: 'Keep one copy per week for (weeks)',
+        retentionMonthly: 'Keep one copy per month for (months)',
         range: '{{min}}–{{max}}',
+        explain: {
+          offsiteMinutes:
+            'If the server is lost, at most the last {{value}} minutes of data are lost. Allowed: {{min}}–{{max}}.',
+          walDays:
+            'Data can be restored to any minute within the last {{value}} days. Allowed: {{min}}–{{max}}.',
+          retentionDaily: 'One copy per day for the last {{value}} days. Allowed: {{min}}–{{max}}.',
+          retentionWeekly:
+            'One copy per week going back {{value}} weeks. 0 = none kept. Allowed: {{min}}–{{max}}.',
+          retentionMonthly:
+            'One copy per month going back {{value}} months. 0 = none kept. Allowed: {{min}}–{{max}}.',
+        },
+        summaryTitle: 'With these settings',
+        summary: {
+          minute: 'Data can be restored to **any minute** within the last {{days}} days.',
+          daily: 'To a given day (at {{time}}) within the last {{days}} days.',
+          weekly: 'To one day per week going back {{weeks}} weeks.',
+          monthly: 'To one day per month going back {{months}} months.',
+          loss: 'If the server is lost, at most the last {{minutes}} minutes of data are lost.',
+          older: 'Older copies are deleted automatically to save space.',
+        },
         timeInvalid: 'Invalid time (HH:MM).',
         restoreTitle: 'Weekly restore test',
         restoreTest: 'Run the restore test automatically',
         restoreHint:
           'The latest backup is restored into a temporary database to prove the backups actually work.',
-        weekday: 'Day',
+        weekday: 'Restore test day',
         restoreTime: 'Restore test time',
         save: 'Save schedule',
         saved: 'Backup schedule saved.',

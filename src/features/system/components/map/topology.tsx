@@ -18,7 +18,7 @@ type Path = { from: string; to: string; tone: NodeTone; d: string }
 
 const laneLayout: Record<MapLane, { area: string; grid: string }> = {
   edge: { area: 'lg:col-start-1 lg:row-start-1', grid: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-1' },
-  api: { area: 'lg:col-start-2 lg:row-start-1', grid: 'grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3' },
+  api: { area: 'lg:col-start-2 lg:row-start-1', grid: 'grid-cols-1 sm:grid-cols-2' },
   data: { area: 'lg:col-start-3 lg:row-start-1', grid: 'grid-cols-1 sm:grid-cols-3 lg:grid-cols-1' },
   workers: { area: 'lg:col-span-3 lg:row-start-2', grid: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' },
   ops: { area: 'lg:col-span-3 lg:row-start-3', grid: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' },

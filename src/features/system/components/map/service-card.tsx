@@ -27,12 +27,14 @@ export function ServiceCard({
 }) {
   const { t } = useTranslation()
   const role = t(`system.map.roles.${node.service}`, { defaultValue: '' })
+  const about = t(`system.map.about.${node.service}`, { defaultValue: '' })
   const inactive = node.tone === 'off' || node.tone === 'done'
   const total = node.replicas.length
   return (
     <button
       type="button"
       data-node={node.service}
+      title={about || undefined}
       aria-label={t('system.map.open', { name: node.service })}
       onClick={() => onOpen(node.service)}
       onMouseEnter={() => onHover(node.service)}

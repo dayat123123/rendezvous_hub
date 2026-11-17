@@ -612,6 +612,42 @@ function scheduleForm(config: BackupConfig): ScheduleForm {
   }
 }
 
+function Strong({ text }: { text: string }) {
+  const parts = text.split('**')
+  return <>{parts.map((part, index) => (index % 2 === 1 ? <strong key={index}>{part}</strong> : part))}</>
+}
+
+function ScheduleSummary({ input }: { input: BackupScheduleInput }) {
+  const { t } = useTranslation()
+  const lines = [
+    t('system.backup.schedule.summary.minute', { days: input.walDays }),
+    t('system.backup.schedule.summary.daily', { days: input.retentionDaily, time: input.baseTime }),
+    input.retentionWeekly > 0
+      ? t('system.backup.schedule.summary.weekly', { weeks: input.retentionWeekly })
+      : null,
+    input.retentionMonthly > 0
+      ? t('system.backup.schedule.summary.monthly', { months: input.retentionMonthly })
+      : null,
+    t('system.backup.schedule.summary.loss', { minutes: input.offsiteMinutes }),
+    t('system.backup.schedule.summary.older'),
+  ].filter((line): line is string => line !== null)
+  return (
+    <section
+      aria-label={t('system.backup.schedule.summaryTitle')}
+      className="rounded-lg border bg-subtle p-3"
+    >
+      <h3 className="text-row font-semibold">{t('system.backup.schedule.summaryTitle')}</h3>
+      <ul className="mt-1.5 flex list-disc flex-col gap-1 pl-5 text-row text-muted-foreground">
+        {lines.map((line) => (
+          <li key={line}>
+            <Strong text={line} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 function ScheduleCard({ config }: { config: BackupConfig }) {
   const { t, i18n } = useTranslation()
   const ids = useId()
@@ -649,7 +685,11 @@ function ScheduleCard({ config }: { config: BackupConfig }) {
         inputMode="numeric"
         onChange={(value) => set(key, value)}
         error={shown[key] ? t('system.backup.schedule.range', { min, max }) : undefined}
-        hint={t('system.backup.schedule.range', { min, max })}
+        hint={
+          Number.isNaN(input[key])
+            ? t('system.backup.schedule.range', { min, max })
+            : t(`system.backup.schedule.explain.${key}`, { value: input[key], min, max })
+        }
       />
     )
   }
@@ -697,6 +737,7 @@ function ScheduleCard({ config }: { config: BackupConfig }) {
           {numberField('retentionWeekly')}
           {numberField('retentionMonthly')}
         </div>
+        {Object.keys(problems).length === 0 ? <ScheduleSummary input={input} /> : null}
         <fieldset className="flex flex-col gap-3 rounded-lg border p-3">
           <legend className="px-1 text-row font-semibold">{t('system.backup.schedule.restoreTitle')}</legend>
           <div className="flex items-center gap-2">

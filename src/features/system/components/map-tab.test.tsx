@@ -103,6 +103,10 @@ describe('MapTab', () => {
     await user.click(await screen.findByRole('button', { name: 'Buka detail rest' }))
     const sheet = await screen.findByRole('dialog', { name: 'rest' })
     expect(within(sheet).getByText('olt-social-rest-1')).toBeInTheDocument()
+    expect(within(sheet).getByRole('region', { name: 'Fungsinya' })).toHaveTextContent(
+      /API utama. Melayani hampir semua permintaan/,
+    )
+    expect(within(sheet).getByText('Sebagian besar fitur gagal dimuat.')).toBeInTheDocument()
     expect(within(sheet).getByText('olt-social-rest-2')).toBeInTheDocument()
     expect(within(sheet).getByText('Tidak sehat')).toBeInTheDocument()
     expect(within(sheet).getByText('7 ms')).toBeInTheDocument()
