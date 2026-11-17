@@ -37,7 +37,7 @@ Rendezvous Hub adalah aplikasi web internal untuk staf OLT: CS, Super Admin, Kep
 
 ## Fitur per menu
 
-Menu di bar atas mengikuti peran dan izin akun. Satu akun bisa punya beberapa peran; menunya digabung, dan Pengaturan selalu paling kanan. Panduan pemakaian untuk staf ada di [docs/panduan-hub.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan-hub.md) monorepo.
+Menu di bar atas mengikuti peran dan izin akun. Satu akun bisa punya beberapa peran; menunya digabung, dan Pengaturan selalu paling kanan. Panduan pemakaian untuk staf ada di [docs/panduan/hub-untuk-staf.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan/hub-untuk-staf.md) monorepo.
 
 | Menu                                          | Peran                                                         | Isi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -153,7 +153,7 @@ make up PROFILE=single CS=1                  # produksi satu server; Windows: .\
 - Profil cluster memakai `${REGISTRY}/olt-social/cs-console:0.1.1` dari registry.
 - Bila tag image dinaikkan, ubah juga tag di `docker/compose.yml` dan `docker/stack.cluster.yml` monorepo.
 
-Detail: [docs/PRODUCTION.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/PRODUCTION.md) dan [docs/server-install.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/server-install.md).
+Detail: [docs/panduan/produksi.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan/produksi.md) dan [docs/panduan/instalasi-server.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan/instalasi-server.md).
 
 ## Struktur folder
 
@@ -208,12 +208,12 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)):
 
 Dokumen desain dan keputusan tetap di monorepo `chat_service_supabase`:
 
-- [docs/panduan-hub.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan-hub.md): panduan staf
+- [docs/panduan/hub-untuk-staf.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/panduan/hub-untuk-staf.md): panduan staf
 - [docs/cs-chat/README.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/cs-chat/README.md): chat customer care (tiket, claim, rating)
 - [docs/cs-chat/kepatuhan.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/cs-chat/kepatuhan.md): menu Kepatuhan
 - [docs/nasabah/README.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/nasabah/README.md): menu Akun Nasabah
 - [docs/content-safety.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/content-safety.md): kebijakan konten
-- [docs/PROMPT-CS-CONSOLE-REACT.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/PROMPT-CS-CONSOLE-REACT.md) dan [docs/cs-ui-audit.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/cs-ui-audit.md): rencana dan audit tampilan
+- [docs/archive/PROMPT-CS-CONSOLE-REACT.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/archive/PROMPT-CS-CONSOLE-REACT.md) dan [docs/archive/cs-ui-audit.md](https://github.com/dayat123123/chat_service_supabase/blob/main/docs/archive/cs-ui-audit.md): rencana dan audit tampilan
 
 Riwayat git repo ini berasal dari `apps/cs-console-react` di monorepo, dipisah dengan `git subtree split` pada 5 Nov 2026.
 
