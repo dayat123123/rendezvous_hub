@@ -9,14 +9,25 @@ import { Textarea } from '@/components/ui/textarea'
 import { FieldText, ToneBadge } from '@/features/system/components/system-ui'
 import { policyErrorText } from '@/lib/error-text'
 
+import { usePolicyState } from '@/features/compliance/policy-versions/hooks'
+
 import { useTestContent } from '../hooks'
 import { contentCategories, TEST_TEXT_MAX, testSurfaces, type ContentTest, type TestSurface } from '../types'
 import { ActionBadge, PolicyCard } from './policy-ui'
 
 const bannedTones = { allow: 'ok', censor: 'warn', block: 'late' } as const
 
+function outcomeOf(result: ContentTest) {
+  if (result.banned_words === 'block' || result.action === 'block') return 'block'
+  if (result.action === 'hold') return 'hold'
+  if (result.banned_words === 'censor' || result.action === 'censor') return 'censor'
+  return 'allow'
+}
+
 function Result({ result }: { result: ContentTest }) {
   const { t } = useTranslation()
+  const outcome = outcomeOf(result)
+  const counted = result.banned_word_total != null && result.promo_phrase_total != null
   const categoryLabel = (category: string) =>
     (contentCategories as readonly string[]).includes(category)
       ? t(`policy.categories.${category as (typeof contentCategories)[number]}`)
@@ -29,6 +40,14 @@ function Result({ result }: { result: ContentTest }) {
       aria-label={t('policy.tester.result')}
       className="flex flex-col gap-3 rounded-lg border p-4"
     >
+      <p className="text-row font-medium">
+        {outcome === 'allow' && counted
+          ? t('policy.tester.summary.allowCounted', {
+              words: result.banned_word_total,
+              phrases: result.promo_phrase_total,
+            })
+          : t(`policy.tester.summary.${outcome}`)}
+      </p>
       <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="flex flex-col gap-1">
           <dt className="text-xs text-muted-foreground">{t('policy.tester.action')}</dt>
@@ -79,12 +98,19 @@ export function TesterTab() {
   const { t } = useTranslation()
   const id = useId()
   const test = useTestContent()
+  const policy = usePolicyState()
+  const drafted = policy.data?.draft?.diff.total ?? 0
   const [text, setText] = useState('')
   const [surface, setSurface] = useState<TestSurface>('post')
   const [checked, setChecked] = useState(false)
   const valid = text.length >= 1 && text.length <= TEST_TEXT_MAX && text.trim() !== ''
   return (
     <PolicyCard title={t('policy.tester.title')} subtitle={t('policy.tester.subtitle')}>
+      {drafted > 0 ? (
+        <p role="status" className="rounded-lg border border-warning/50 bg-warning/5 px-3 py-2 text-row">
+          {t('policy.tester.draftWarning', { count: drafted })}
+        </p>
+      ) : null}
       <form
         className="flex flex-col gap-3"
         noValidate

@@ -58,23 +58,58 @@ export const policy: Translated<typeof source> = {
   },
   newAccount: {
     title: 'New-account period',
-    subtitle:
-      'New accounts cannot attach images, cannot share links other than trusted domains, and DMs to people who do not follow each other always go through message requests.',
+    subtitle: 'How long a newly registered account is treated as new and restricted.',
+    points: {
+      one: 'New accounts cannot attach images.',
+      two: 'New accounts cannot share links other than trusted domains.',
+      three: 'DMs from new accounts to people who do not follow each other always go to Message requests.',
+      four: 'Accounts with trust level 0, including accounts that just rejoined after deletion, always count as new.',
+    },
     label: 'Days since sign-up',
-    hint: '0–30 days. Accounts with trust level 0 always count as new.',
+    hint: 'Enter 0–30 days.',
     problem: 'Enter a whole number from 0 to {{max}}.',
+    none: '0 days',
+    amount_one: '{{count}} day',
+    amount_other: '{{count}} days',
+    meaning_zero: 'Meaning: only accounts with trust level 0 are restricted.',
+    meaning_one: 'Meaning: accounts are restricted for the first {{value}} after sign-up.',
+    meaning_other: 'Meaning: accounts are restricted for the first {{value}} after sign-up.',
     saved_one: 'New-account period set to {{count}} day',
     saved_other: 'New-account period set to {{count}} days',
   },
   rejoinCooldown: {
     title: 'Rejoin wait after account deletion',
     subtitle:
-      'After a community account is deleted, the same login can open the community again only after this wait. When it rejoins, the account starts as a new account. During the wait, the customer can still contact CS through the guest complaint form.',
+      'How long a customer must wait after deleting the community account before the same login can open the community again.',
+    points: {
+      one: 'During the wait the customer cannot open Stream, chat, or CS chat in the app. The app shows the remaining time and a Contact CS button (guest complaint without login).',
+      two: 'After the wait the customer comes back as a new, empty account with the New-account period restrictions.',
+      three:
+        'Changes apply to every deleted account, counted from its deletion time. Apps that are open recheck within 5 minutes.',
+      four: 'The goal is to stop people from deleting the account and reappearing right away, for example to escape reports.',
+    },
     label: 'Hours',
-    hint: '0–720 hours (30 days). 0 = can rejoin immediately. Default 72 hours.',
+    hint: 'Enter 0–720 hours (at most 30 days). 24 hours = 1 day.',
     problem: 'Enter a whole number from 0 to {{max}}.',
+    none: 'No wait',
+    amount_one: '{{count}} hour',
+    amount_other: '{{count}} hours',
+    amountDays: '{{count}} hours ({{days}} days)',
+    meaning_zero: 'Meaning: a deleted account can rejoin right away.',
+    meaning_one: 'Meaning: a deleted account can rejoin {{value}} after deletion.',
+    meaning_other: 'Meaning: a deleted account can rejoin {{value}} after deletion.',
     saved_one: 'Rejoin wait set to {{count}} hour',
     saved_other: 'Rejoin wait set to {{count}} hours',
+  },
+  setting: {
+    live: 'In effect now: {{value}}.',
+    draft: 'In your draft: {{value}}, not in effect until the draft is activated in Versions & approval.',
+    draftFourEyes:
+      'In your draft: {{value}}, not in effect until the draft is submitted and approved by another Compliance staff member in Versions & approval.',
+    savedDraft: '{{value}} added to the draft. Activate it in Versions & approval to apply it.',
+    savedDraftFourEyes:
+      '{{value}} added to the draft. Submit it in Versions & approval; it applies after another Compliance staff member approves it.',
+    presets: 'Quick picks:',
   },
   domains: {
     title: 'Blocked domains',
@@ -311,6 +346,19 @@ export const policy: Translated<typeof source> = {
     body: 'Text after the rules',
     normalized: 'Normalized text (used for matching)',
     note: 'The result uses the rules in effect, not your draft. To test the draft, use Simulate in the Versions & approval tab.',
+    summary: {
+      allowCounted:
+        'Passes. This text matches none of the {{words}} banned words and {{phrases}} promotional phrases in effect, and triggers no link or contact category. Words that are not on the list always pass, so add profanity or porn terms in Banned words.',
+      allow:
+        'Passes. This text matches nothing in Banned words, promotional phrases, or the link and contact categories. Words that are not on the list always pass.',
+      censor: 'Censored. Matching parts are replaced with asterisks; the rest is sent.',
+      hold: 'Held. The content is kept for moderator review before it shows.',
+      block: 'Blocked. The content is rejected and the sender sees an error.',
+    },
+    draftWarning_one:
+      'You have a draft with {{count}} change that is not in effect yet. The test uses the rules in effect, so words or phrases only in the draft are not tested. Use Simulate in Versions & approval to test the draft.',
+    draftWarning_other:
+      'You have a draft with {{count}} changes that are not in effect yet. The test uses the rules in effect, so words or phrases only in the draft are not tested. Use Simulate in Versions & approval to test the draft.',
   },
   versions: {
     title: 'Versions & approval',

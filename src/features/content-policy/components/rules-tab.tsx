@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { usePolicyState } from '@/features/compliance/policy-versions/hooks'
+import type { PolicyDiff } from '@/features/compliance/policy-versions/types'
 import { QueryContent } from '@/features/settings/components/settings-ui'
 import { FieldText } from '@/features/system/components/system-ui'
 import { policyErrorText } from '@/lib/error-text'
@@ -98,19 +100,66 @@ type NumberSettingProps = {
   value: number
   max: number
   i18nKey: 'newAccount' | 'rejoinCooldown'
+  settingKey: string
+  presets: readonly number[]
   pending: boolean
   onSave: (value: number) => Promise<unknown>
 }
 
-function NumberSettingCard({ value: current, max, i18nKey, pending, onSave }: NumberSettingProps) {
+function NumberSettingCard({
+  value: current,
+  max,
+  i18nKey,
+  settingKey,
+  presets,
+  pending,
+  onSave,
+}: NumberSettingProps) {
   const { t } = useTranslation()
   const id = useId()
+  const state = usePolicyState()
   const [text, setText] = useState(String(current))
   const [checked, setChecked] = useState(false)
   const value = Number(text.trim())
   const valid = /^\d{1,4}$/.test(text.trim()) && value >= 0 && value <= max
+  const amount = (count: number) => {
+    if (count === 0) return t(`policy.${i18nKey}.none`)
+    if (i18nKey === 'rejoinCooldown' && count % 24 === 0) {
+      return t('policy.rejoinCooldown.amountDays', { count, days: count / 24 })
+    }
+    return t(`policy.${i18nKey}.amount`, { count })
+  }
+  const drafted = draftSetting(state.data?.draft?.diff, settingKey)
+  const live = drafted ? Number(drafted.from) : current
+  const points = (['one', 'two', 'three', 'four'] as const).map((key) => t(`policy.${i18nKey}.points.${key}`))
+  const save = (next: number) =>
+    onSave(next)
+      .then(() => {
+        toast.success(
+          t(state.data?.four_eyes ? 'policy.setting.savedDraftFourEyes' : 'policy.setting.savedDraft', {
+            value: amount(next),
+          }),
+        )
+        setChecked(false)
+      })
+      .catch((error: unknown) => toast.error(policyErrorText(error)))
   return (
     <PolicyCard title={t(`policy.${i18nKey}.title`)} subtitle={t(`policy.${i18nKey}.subtitle`)}>
+      <ul className="flex max-w-3xl list-disc flex-col gap-1 pl-5 text-row text-muted-foreground">
+        {points.map((point) => (
+          <li key={point}>{point}</li>
+        ))}
+      </ul>
+      <p className="text-row">
+        {t('policy.setting.live', { value: amount(live) })}
+        {drafted ? (
+          <span className="ml-1 font-medium text-warning">
+            {t(state.data?.four_eyes ? 'policy.setting.draftFourEyes' : 'policy.setting.draft', {
+              value: amount(current),
+            })}
+          </span>
+        ) : null}
+      </p>
       <form
         className="flex flex-wrap items-start gap-3"
         noValidate
@@ -118,12 +167,7 @@ function NumberSettingCard({ value: current, max, i18nKey, pending, onSave }: Nu
           event.preventDefault()
           setChecked(true)
           if (!valid || value === current) return
-          onSave(value)
-            .then(() => {
-              toast.success(t(`policy.${i18nKey}.saved`, { count: value }))
-              setChecked(false)
-            })
-            .catch((error: unknown) => toast.error(policyErrorText(error)))
+          void save(value)
         }}
       >
         <div className="flex w-40 flex-col gap-1.5">
@@ -144,11 +188,35 @@ function NumberSettingCard({ value: current, max, i18nKey, pending, onSave }: Nu
         <FieldText
           id={`${id}-value-text`}
           error={checked && !valid ? t(`policy.${i18nKey}.problem`, { max }) : undefined}
-          hint={t(`policy.${i18nKey}.hint`)}
+          hint={
+            valid
+              ? `${t(`policy.${i18nKey}.meaning`, { value: amount(value), count: value })} ${t(`policy.${i18nKey}.hint`)}`
+              : t(`policy.${i18nKey}.hint`)
+          }
         />
       </form>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">{t('policy.setting.presets')}</span>
+        {presets.map((preset) => (
+          <Button
+            key={preset}
+            type="button"
+            variant="outline"
+            size="xs"
+            aria-pressed={value === preset}
+            disabled={pending}
+            onClick={() => setText(String(preset))}
+          >
+            {amount(preset)}
+          </Button>
+        ))}
+      </div>
     </PolicyCard>
   )
+}
+
+function draftSetting(diff: PolicyDiff | undefined, key: string) {
+  return diff?.sections.settings?.items?.find((item) => item.key === key)
 }
 
 function NewAccountCard({ days }: { days: number }) {
@@ -158,6 +226,8 @@ function NewAccountCard({ days }: { days: number }) {
       value={days}
       max={NEW_ACCOUNT_DAYS_MAX}
       i18nKey="newAccount"
+      settingKey="safety.new_account_days"
+      presets={[0, 1, 3, 7, 14]}
       pending={save.isPending}
       onSave={(value) => save.mutateAsync(value)}
     />
@@ -171,6 +241,8 @@ function RejoinCooldownCard({ hours }: { hours: number }) {
       value={hours}
       max={REJOIN_COOLDOWN_HOURS_MAX}
       i18nKey="rejoinCooldown"
+      settingKey="account.rejoin_cooldown_hours"
+      presets={[0, 24, 72, 168, 720]}
       pending={save.isPending}
       onSave={(value) => save.mutateAsync(value)}
     />

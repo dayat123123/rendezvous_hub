@@ -95,6 +95,8 @@ export type ContentTest = {
   body: string
   banned_words: 'allow' | 'censor' | 'block'
   normalized: string
+  banned_word_total?: number
+  promo_phrase_total?: number
 }
 
 export type ManipulationSettings = Record<string, unknown>

@@ -56,23 +56,58 @@ export const policy = {
   },
   newAccount: {
     title: 'Masa akun baru',
-    subtitle:
-      'Akun baru tidak boleh melampirkan gambar, tidak boleh membagikan tautan selain domain tepercaya, dan DM ke orang yang tidak saling mengikuti selalu lewat permintaan pesan.',
+    subtitle: 'Berapa lama akun yang baru daftar diperlakukan sebagai akun baru dan diberi batasan.',
+    points: {
+      one: 'Akun baru tidak boleh melampirkan gambar.',
+      two: 'Akun baru tidak boleh membagikan tautan selain domain tepercaya.',
+      three: 'DM akun baru ke orang yang tidak saling mengikuti selalu masuk ke Permintaan pesan.',
+      four: 'Akun dengan tingkat kepercayaan 0, termasuk akun yang baru bergabung lagi setelah dihapus, selalu dianggap baru.',
+    },
     label: 'Hari sejak daftar',
-    hint: '0–30 hari. Akun dengan tingkat kepercayaan 0 selalu dianggap baru.',
+    hint: 'Isi 0–30 hari.',
     problem: 'Isi angka bulat 0–{{max}}.',
+    none: '0 hari',
+    amount_one: '{{count}} hari',
+    amount_other: '{{count}} hari',
+    meaning_zero: 'Artinya: hanya akun dengan tingkat kepercayaan 0 yang dibatasi.',
+    meaning_one: 'Artinya: akun dibatasi selama {{value}} pertama sejak daftar.',
+    meaning_other: 'Artinya: akun dibatasi selama {{value}} pertama sejak daftar.',
     saved_one: 'Masa akun baru menjadi {{count}} hari',
     saved_other: 'Masa akun baru menjadi {{count}} hari',
   },
   rejoinCooldown: {
     title: 'Jeda bergabung lagi setelah hapus akun',
     subtitle:
-      'Setelah menghapus akun komunitas, login yang sama baru bisa membuka komunitas lagi setelah jeda ini. Saat bergabung lagi, akun dimulai sebagai akun baru. Selama jeda, nasabah tetap bisa menghubungi CS lewat pengaduan tamu.',
+      'Berapa lama nasabah harus menunggu setelah menghapus akun komunitas sebelum bisa membuka komunitas lagi dengan login yang sama.',
+    points: {
+      one: 'Selama jeda, nasabah tidak bisa membuka Stream, chat, dan chat CS di app. App menampilkan sisa waktunya dan tombol Hubungi CS (pengaduan tamu tanpa login).',
+      two: 'Setelah jeda, nasabah masuk lagi sebagai akun baru yang kosong dan kena batasan Masa akun baru.',
+      three:
+        'Perubahan berlaku untuk semua akun yang sudah dihapus, dihitung dari waktu hapusnya. App yang sedang terbuka memeriksa ulang paling lama 5 menit.',
+      four: 'Tujuannya mencegah orang menghapus akun lalu langsung muncul lagi, misalnya untuk menghindari laporan.',
+    },
     label: 'Jam',
-    hint: '0–720 jam (30 hari). 0 = langsung bisa bergabung lagi. Bawaan 72 jam.',
+    hint: 'Isi 0–720 jam (maksimal 30 hari). 24 jam = 1 hari.',
     problem: 'Isi angka bulat 0–{{max}}.',
+    none: 'Tanpa jeda',
+    amount_one: '{{count}} jam',
+    amount_other: '{{count}} jam',
+    amountDays: '{{count}} jam ({{days}} hari)',
+    meaning_zero: 'Artinya: akun yang dihapus bisa langsung bergabung lagi.',
+    meaning_one: 'Artinya: akun yang dihapus baru bisa bergabung lagi {{value}} setelah dihapus.',
+    meaning_other: 'Artinya: akun yang dihapus baru bisa bergabung lagi {{value}} setelah dihapus.',
     saved_one: 'Jeda bergabung lagi menjadi {{count}} jam',
     saved_other: 'Jeda bergabung lagi menjadi {{count}} jam',
+  },
+  setting: {
+    live: 'Berlaku sekarang: {{value}}.',
+    draft: 'Di draf Anda: {{value}}, belum berlaku sampai draf diaktifkan di tab Versi & persetujuan.',
+    draftFourEyes:
+      'Di draf Anda: {{value}}, belum berlaku sampai draf diajukan dan disetujui staf Kepatuhan lain di tab Versi & persetujuan.',
+    savedDraft: '{{value}} masuk ke draf. Aktifkan di tab Versi & persetujuan agar berlaku.',
+    savedDraftFourEyes:
+      '{{value}} masuk ke draf. Ajukan di tab Versi & persetujuan; berlaku setelah disetujui staf Kepatuhan lain.',
+    presets: 'Pilihan cepat:',
   },
   domains: {
     title: 'Domain diblokir',
@@ -308,6 +343,19 @@ export const policy = {
     body: 'Teks setelah aturan',
     normalized: 'Teks ternormalisasi (untuk pencocokan)',
     note: 'Hasil memakai aturan yang sedang berlaku, bukan draf. Untuk menguji draf, pakai Simulasi di tab Versi & persetujuan.',
+    summary: {
+      allowCounted:
+        'Lolos. Teks ini tidak cocok dengan {{words}} kata terlarang dan {{phrases}} frasa promosi yang berlaku, dan tidak memicu kategori tautan atau kontak. Kata yang belum ada di daftar selalu lolos, jadi tambahkan kata kasar atau porno di menu Kata terlarang.',
+      allow:
+        'Lolos. Teks ini tidak cocok dengan daftar Kata terlarang, frasa promosi, maupun kategori tautan atau kontak. Kata yang belum ada di daftar selalu lolos.',
+      censor: 'Disensor. Bagian yang cocok diganti bintang, sisanya tetap terkirim.',
+      hold: 'Ditahan. Konten disimpan untuk ditinjau moderator sebelum tampil.',
+      block: 'Diblokir. Konten ditolak dan pengirim melihat pesan error.',
+    },
+    draftWarning_one:
+      'Anda punya draf berisi {{count}} perubahan yang belum berlaku. Uji teks memakai aturan yang berlaku, jadi kata atau frasa yang baru ada di draf belum ikut diuji. Pakai Simulasi di tab Versi & persetujuan untuk menguji draf.',
+    draftWarning_other:
+      'Anda punya draf berisi {{count}} perubahan yang belum berlaku. Uji teks memakai aturan yang berlaku, jadi kata atau frasa yang baru ada di draf belum ikut diuji. Pakai Simulasi di tab Versi & persetujuan untuk menguji draf.',
   },
   versions: {
     title: 'Versi & persetujuan',

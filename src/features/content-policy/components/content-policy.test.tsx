@@ -6,6 +6,9 @@ import { agentFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
 import { Toaster } from '@/test/toast'
 
+import { policyVersionsApi } from '@/features/compliance/policy-versions/api'
+import type { PolicyState } from '@/features/compliance/policy-versions/types'
+
 import { contentPolicyApi } from '../api'
 import type { ContentRules, ImageThresholds } from '../types'
 import { DomainsTab } from './domains-tab'
@@ -35,7 +38,52 @@ vi.mock('../api', () => ({
   },
 }))
 
+vi.mock('@/features/compliance/policy-versions/api', () => ({
+  policyVersionsApi: { state: vi.fn() },
+}))
+
 const kirana = { ...agentFixture, roles: ['compliance'], display_name: 'Kirana' }
+
+const version = {
+  version: 7,
+  source: 'change',
+  reason: null,
+  change_id: null,
+  restored_from: null,
+  created_by: null,
+  created_at: '2026-11-03T01:00:00.000Z',
+  diff: { total: 0, sections: {} },
+} as unknown as PolicyState['current']
+
+const idleState: PolicyState = {
+  four_eyes: true,
+  current: version,
+  draft: null,
+  pending: 0,
+  pending_mine: 0,
+  pending_to_review: 0,
+}
+
+const draftState: PolicyState = {
+  ...idleState,
+  draft: {
+    id: 3,
+    base_version: 7,
+    created_at: '2026-11-03T01:00:00.000Z',
+    updated_at: '2026-11-03T01:00:00.000Z',
+    diff: {
+      total: 1,
+      sections: {
+        settings: {
+          added: 0,
+          removed: 0,
+          changed: 1,
+          items: [{ key: 'account.rejoin_cooldown_hours', op: 'changed', from: 72, to: 0 }],
+        },
+      },
+    },
+  },
+}
 
 const rules: ContentRules = {
   categories: [
@@ -93,6 +141,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(contentPolicyApi.rules).mockResolvedValue(rules)
   vi.mocked(contentPolicyApi.imageThresholds).mockResolvedValue(thresholds)
+  vi.mocked(policyVersionsApi.state).mockResolvedValue(idleState)
 })
 
 describe('content policy', () => {
@@ -117,7 +166,46 @@ describe('content policy', () => {
     await user.type(hours, '24')
     await user.click(within(card).getByRole('button', { name: 'Simpan' }))
     await waitFor(() => expect(contentPolicyApi.setRejoinCooldownHours).toHaveBeenCalledWith(24))
-    expect(await screen.findByText('Jeda bergabung lagi menjadi 24 jam')).toBeVisible()
+    expect(
+      await screen.findByText(
+        '24 jam (1 hari) masuk ke draf. Ajukan di tab Versi & persetujuan; berlaku setelah disetujui staf Kepatuhan lain.',
+      ),
+    ).toBeVisible()
+  })
+
+  it('explains the rejoin wait in days and offers quick picks', async () => {
+    const user = userEvent.setup()
+    renderWith(<RulesTab />)
+
+    const hours = await screen.findByLabelText('Jam')
+    const card = hours.closest('section')!
+    expect(within(card).getByText('Berlaku sekarang: 72 jam (3 hari).')).toBeVisible()
+    expect(
+      within(card).getByText(/akun yang dihapus baru bisa bergabung lagi 72 jam \(3 hari\) setelah dihapus/),
+    ).toBeVisible()
+
+    await user.click(within(card).getByRole('button', { name: 'Tanpa jeda' }))
+    expect(hours).toHaveValue('0')
+    expect(within(card).getByText(/akun yang dihapus bisa langsung bergabung lagi/)).toBeVisible()
+    await user.click(within(card).getByRole('button', { name: '168 jam (7 hari)' }))
+    expect(hours).toHaveValue('168')
+  })
+
+  it('shows the value in effect next to a drafted rejoin wait', async () => {
+    vi.mocked(policyVersionsApi.state).mockResolvedValue(draftState)
+    vi.mocked(contentPolicyApi.rules).mockResolvedValue({ ...rules, rejoin_cooldown_hours: 0 })
+    renderWith(<RulesTab />)
+
+    const hours = await screen.findByLabelText('Jam')
+    const card = hours.closest('section')!
+    expect(
+      await within(card).findByText('Berlaku sekarang: 72 jam (3 hari).', { exact: false }),
+    ).toBeVisible()
+    expect(
+      within(card).getByText(
+        'Di draf Anda: Tanpa jeda, belum berlaku sampai draf diajukan dan disetujui staf Kepatuhan lain di tab Versi & persetujuan.',
+      ),
+    ).toBeVisible()
   })
 
   it('hides the rejoin wait on a server without it', async () => {
@@ -227,5 +315,31 @@ describe('content policy', () => {
     expect(within(result).getByText('Grup chat & messenger, Nomor HP')).toBeVisible()
     expect(within(result).getByText('Ada tautan tidak tepercaya')).toBeVisible()
     expect(within(result).getByText('gabung t me grup atau wa')).toBeVisible()
+    expect(
+      within(result).getByText('Ditahan. Konten disimpan untuk ditinjau moderator sebelum tampil.'),
+    ).toBeVisible()
+  })
+
+  it('explains a passing text and warns that drafts are not tested', async () => {
+    const user = userEvent.setup()
+    vi.mocked(policyVersionsApi.state).mockResolvedValue(draftState)
+    vi.mocked(contentPolicyApi.test).mockResolvedValue({
+      action: 'allow',
+      categories: [],
+      links: false,
+      body: 'video porno',
+      banned_words: 'allow',
+      normalized: 'video porno',
+      banned_word_total: 6,
+      promo_phrase_total: 2,
+    })
+    renderWith(<TesterTab />)
+
+    expect(await screen.findByText(/Anda punya draf berisi 1 perubahan yang belum berlaku/)).toBeVisible()
+    await user.type(screen.getByLabelText('Teks'), 'video porno')
+    await user.click(screen.getByRole('button', { name: 'Uji' }))
+    const result = await screen.findByRole('region', { name: 'Hasil uji' })
+    expect(within(result).getByText(/tidak cocok dengan 6 kata terlarang dan 2 frasa promosi/)).toBeVisible()
+    expect(within(result).getByText(/tambahkan kata kasar atau porno di menu Kata terlarang/)).toBeVisible()
   })
 })
