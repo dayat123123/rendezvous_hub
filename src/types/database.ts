@@ -37,7 +37,6 @@ export type Database = {
       admin_banners: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_delete_banner: { Args: { p_id: string }; Returns: Json }
       admin_delete_feature_flag: { Args: { p_key: string }; Returns: Json }
-      admin_delete_feed_filter: { Args: { p_key: string }; Returns: Json }
       admin_delete_holiday: { Args: { p_day: string }; Returns: Json }
       admin_delete_topic: { Args: { p_code: string }; Returns: Json }
       admin_end_incident: { Args: { p_id: string }; Returns: Json }
@@ -100,7 +99,6 @@ export type Database = {
         Args: { p_from: string; p_to: string }
         Returns: Json
       }
-      admin_reorder_feed_filters: { Args: { p_keys: string[] }; Returns: Json }
       admin_reorder_ticket_labels: { Args: { p_ids: string[] }; Returns: Json }
       admin_reorder_topics: { Args: { p_codes: string[] }; Returns: Json }
       admin_reset_password: { Args: { p_agent_id: string }; Returns: Json }
@@ -120,23 +118,11 @@ export type Database = {
           p_link_url?: string
           p_max_app_version?: string
           p_min_app_version?: string
+          p_notify?: boolean
           p_platforms?: string[]
           p_priority?: number
           p_starts_at?: string
           p_title: string
-        }
-        Returns: Json
-      }
-      admin_save_feed_filter: {
-        Args: {
-          p_content?: string
-          p_enabled?: boolean
-          p_icon?: string
-          p_key: string
-          p_label_en: string
-          p_label_id: string
-          p_position?: number
-          p_sort: string
         }
         Returns: Json
       }
@@ -215,6 +201,10 @@ export type Database = {
           p_platforms?: string[]
           p_user_ids?: string[]
         }
+        Returns: Json
+      }
+      admin_set_feed_filter_enabled: {
+        Args: { p_enabled: boolean; p_key: string }
         Returns: Json
       }
       admin_set_kill_switch: {

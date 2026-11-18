@@ -94,6 +94,7 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
   const settings = useBannerSettings()
   const schemes = settings.data?.deep_link_schemes ?? []
   const initial = bannerDraft(editing)
+  const [notify, setNotify] = useState(true)
   const [draft, setDraft] = useState<BannerDraft>(initial)
   const [linkText, setLinkText] = useState(initial.link_url ?? '')
   const [ctaText, setCtaText] = useState(initial.cta_label ?? '')
@@ -177,9 +178,12 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
             id: editing?.id ?? null,
             draft: current,
             image: popup && image.kind === 'new' ? image.blob : null,
+            notify: !editing && notify,
           })
-          .then(() => {
-            toast.success(t('platform.banners.saved'))
+          .then((saved) => {
+            toast.success(
+              saved.campaign_id ? t('platform.banners.savedWithNotification') : t('platform.banners.saved'),
+            )
             onClose()
           })
           .catch((error: unknown) => toast.error(bannerErrorText(error)))
@@ -449,6 +453,17 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
             </span>
           </span>
         </label>
+        {editing ? null : (
+          <label className="flex items-start gap-2 text-row">
+            <Switch className="mt-0.5" checked={notify} onCheckedChange={setNotify} />
+            <span>
+              <span className="block font-medium">{t('platform.banners.fields.notify')}</span>
+              <span className="block text-xs text-muted-foreground">
+                {t('platform.banners.hints.notify')}
+              </span>
+            </span>
+          </label>
+        )}
       </div>
       <div className="sm:sticky sm:top-0 sm:self-start">
         <BannerPreview

@@ -102,6 +102,7 @@ export type BannerSettings = {
 }
 
 export type AppBanner = {
+  campaign_id?: string | null
   id: string
   title: string
   body: string

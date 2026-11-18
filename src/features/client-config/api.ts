@@ -69,7 +69,7 @@ export function bannerImageUrl(path: string) {
 
 export const bannersApi = {
   list: async () => ((await rpc<AppBanner[] | null>('admin_banners')) ?? []).map(normalizeBanner),
-  save: async (id: string | null, draft: BannerDraft) =>
+  save: async (id: string | null, draft: BannerDraft, notify = false) =>
     normalizeBanner(
       await rpc<AppBanner>('admin_save_banner', {
         p_id: id,
@@ -90,6 +90,7 @@ export const bannersApi = {
         p_frequency: draft.display === 'popup' ? draft.frequency : 'once',
         p_audience: draft.audience,
         p_audience_days: draft.audience_days,
+        p_notify: id === null && notify,
       }),
     ),
   remove: (id: string) => rpc<{ id: string; deleted: boolean }>('admin_delete_banner', { p_id: id }),

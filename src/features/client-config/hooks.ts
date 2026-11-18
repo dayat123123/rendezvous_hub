@@ -51,10 +51,12 @@ function useBannerMutation<TArgs, TResult>(run: (args: TArgs) => Promise<TResult
 }
 
 export const useSaveBanner = () =>
-  useBannerMutation(async (args: { id: string | null; draft: BannerDraft; image?: Blob | null }) => {
-    const imageUrl = args.image ? await bannersApi.uploadImage(args.image) : args.draft.image_url
-    return bannersApi.save(args.id, { ...args.draft, image_url: imageUrl })
-  })
+  useBannerMutation(
+    async (args: { id: string | null; draft: BannerDraft; image?: Blob | null; notify?: boolean }) => {
+      const imageUrl = args.image ? await bannersApi.uploadImage(args.image) : args.draft.image_url
+      return bannersApi.save(args.id, { ...args.draft, image_url: imageUrl }, args.notify ?? false)
+    },
+  )
 
 export const useDeleteBanner = () => useBannerMutation((id: string) => bannersApi.remove(id))
 

@@ -199,26 +199,89 @@ describe('BannersSection', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(bannersApi.uploadImage).not.toHaveBeenCalled()
-    expect(bannersApi.save).toHaveBeenLastCalledWith(null, {
-      title: 'Gangguan login',
-      body: '',
-      link_url: 'https://olt.example/status',
-      level: 'info',
-      display: 'strip',
-      image_url: null,
-      cta_label: null,
-      frequency: 'once',
-      audience: 'all',
-      audience_days: 7,
-      starts_at: null,
-      ends_at: '2030-01-01T00:00:00.000Z',
-      platforms: ['android'],
-      min_app_version: null,
-      max_app_version: '3.1',
-      dismissible: true,
-      priority: 0,
-    })
+    expect(bannersApi.save).toHaveBeenLastCalledWith(
+      null,
+      {
+        title: 'Gangguan login',
+        body: '',
+        link_url: 'https://olt.example/status',
+        level: 'info',
+        display: 'strip',
+        image_url: null,
+        cta_label: null,
+        frequency: 'once',
+        audience: 'all',
+        audience_days: 7,
+        starts_at: null,
+        ends_at: '2030-01-01T00:00:00.000Z',
+        platforms: ['android'],
+        min_app_version: null,
+        max_app_version: '3.1',
+        dismissible: true,
+        priority: 0,
+      },
+      true,
+    )
     expect(await screen.findByText('Banner disimpan')).toBeVisible()
+  })
+
+  it('sends a new banner as a notification too unless the switch is turned off', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.save)
+      .mockResolvedValueOnce(banner({ id: 'banner-5', title: 'Promo', campaign_id: 'camp-1' }))
+      .mockResolvedValueOnce(banner({ id: 'banner-6', title: 'Info diam' }))
+    renderSection()
+
+    await user.click(await screen.findByRole('button', { name: 'Tambah banner' }))
+    let dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
+    expect(within(dialog).getByRole('switch', { name: /Kirim juga sebagai notifikasi/ })).toBeChecked()
+    await user.type(within(dialog).getByLabelText('Judul'), 'Promo')
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(bannersApi.save).toHaveBeenLastCalledWith(null, expect.objectContaining({ title: 'Promo' }), true)
+    expect(
+      await screen.findByText(
+        'Banner disimpan. Notifikasinya menunggu persetujuan di Komunitas › Notifikasi.',
+      ),
+    ).toBeVisible()
+
+    await user.click(screen.getByRole('button', { name: 'Tambah banner' }))
+    dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
+    await user.type(within(dialog).getByLabelText('Judul'), 'Info diam')
+    await user.click(within(dialog).getByRole('switch', { name: /Kirim juga sebagai notifikasi/ }))
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(bannersApi.save).toHaveBeenLastCalledWith(
+      null,
+      expect.objectContaining({ title: 'Info diam' }),
+      false,
+    )
+  })
+
+  it('does not offer a notification when editing a banner', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.save).mockResolvedValueOnce(banner())
+    renderSection()
+    await user.click(await screen.findByRole('button', { name: 'Ubah banner Pemeliharaan sistem' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Ubah banner' })
+    expect(
+      within(dialog).queryByRole('switch', { name: /Kirim juga sebagai notifikasi/ }),
+    ).not.toBeInTheDocument()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(bannersApi.save).toHaveBeenCalled())
+    expect(bannersApi.save).toHaveBeenLastCalledWith('banner-1', expect.anything(), false)
+  })
+
+  it('shows why the notification could not be made', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.save).mockRejectedValueOnce(new ApiError('no_official_account', 'x', 400))
+    renderSection()
+    await user.click(await screen.findByRole('button', { name: 'Tambah banner' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
+    await user.type(within(dialog).getByLabelText('Judul'), 'Promo')
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    expect(await screen.findByText(/Belum ada akun resmi aktif untuk mengirim notifikasi/)).toBeVisible()
+    expect(within(dialog).getByRole('switch', { name: /Kirim juga sebagai notifikasi/ })).toBeChecked()
   })
 
   it('builds a center popup with a phone preview, frequency, and new-user audience', async () => {
@@ -266,6 +329,7 @@ describe('BannersSection', () => {
         audience_days: 14,
         image_url: null,
       }),
+      true,
     )
   })
 

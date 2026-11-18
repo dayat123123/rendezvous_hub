@@ -279,6 +279,8 @@ const bannerCodes = [
   'invalid_audience',
   'invalid_link_schemes',
   'banner_not_found',
+  'no_official_account',
+  'notification_title_short',
 ] as const
 
 export function bannerErrorText(error: unknown): string {
@@ -286,15 +288,7 @@ export function bannerErrorText(error: unknown): string {
   return among(bannerCodes, code) ? i18n.t(`platform.banners.errors.${code}`) : errorText(error)
 }
 
-const feedFilterCodes = [
-  'invalid_filter_key',
-  'invalid_filter_label',
-  'invalid_sort',
-  'invalid_filter_content',
-  'invalid_filter_icon',
-  'invalid_filter_order',
-  'filter_not_found',
-] as const
+const feedFilterCodes = ['filter_not_found'] as const
 
 export function feedFilterErrorText(error: unknown): string {
   const code = toApiError(error).code
