@@ -335,9 +335,9 @@ export const platform: Translated<typeof source> = {
     generated: 'Computed {{time}} (WIB).',
   },
   banners: {
-    pageTitle: 'App banners',
+    pageTitle: 'Banners & Popups',
     pageDescription:
-      'Announcements in the customer app: a strip at the top or a popup in the middle of the screen. The app reads active banners when it opens. Every change is recorded in the audit trail.',
+      'Announcements and promos in the customer app: a strip at the top or a popup in the middle of the screen, with schedule, audience, and view statistics. The app reads active banners when it opens. Every change is recorded in the audit trail. Features & versions and Stream tabs are in the Community menu.',
     title: 'Banners',
     subtitle:
       'Active and scheduled first, ended at the bottom. The app receives at most 10 active banners, ordered by priority.',

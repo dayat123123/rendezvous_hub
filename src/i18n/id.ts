@@ -1878,11 +1878,6 @@ export const id = {
     helpfulYes: 'Membantu',
     helpfulNo: 'Tidak membantu',
   },
-  featuresCampaigns: {
-    title: 'Banner & Popup',
-    subtitle:
-      'Kampanye banner strip dan popup promo di aplikasi nasabah: jadwal, sasaran platform, gambar, tombol, dan statistik tayang. Fitur & versi serta Tab Stream ada di menu Komunitas.',
-  },
   command: {
     placeholder: 'Cari tiket, nasabah, atau perintah…',
     label: 'Command palette',

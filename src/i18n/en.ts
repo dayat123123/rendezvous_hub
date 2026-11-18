@@ -1880,11 +1880,6 @@ export const en: Translation = {
     helpfulYes: 'Helpful',
     helpfulNo: 'Not helpful',
   },
-  featuresCampaigns: {
-    title: 'Banners & Popups',
-    subtitle:
-      'Strip banner and promo popup campaigns in the customer app: schedule, platforms, image, button, and view statistics. Features & versions and Stream tabs are in the Community menu.',
-  },
   command: {
     placeholder: 'Search tickets, customers, or commands…',
     label: 'Command palette',

@@ -343,9 +343,9 @@ export const platform = {
     generated: 'Dihitung {{time}} (WIB).',
   },
   banners: {
-    pageTitle: 'Banner aplikasi',
+    pageTitle: 'Banner & Popup',
     pageDescription:
-      'Pengumuman di aplikasi nasabah: strip di bagian atas atau popup di tengah layar. Aplikasi membaca banner aktif saat dibuka. Setiap perubahan tercatat di jejak audit.',
+      'Pengumuman dan promo di aplikasi nasabah: strip di bagian atas atau popup di tengah layar, dengan jadwal, sasaran, dan statistik tayang. Aplikasi membaca banner aktif saat dibuka. Setiap perubahan tercatat di jejak audit. Fitur & versi serta Tab Stream ada di menu Komunitas.',
     title: 'Daftar banner',
     subtitle:
       'Aktif dan terjadwal di atas, yang sudah selesai di bawah. Aplikasi menerima paling banyak 10 banner aktif, urut prioritas.',

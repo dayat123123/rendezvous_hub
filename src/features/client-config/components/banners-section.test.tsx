@@ -113,6 +113,13 @@ describe('BannersSection', () => {
     expect(within(ended).getByText('CTR –')).toBeVisible()
   })
 
+  it('titles the page Banner & Popup once and points to Komunitas for the moved tabs', async () => {
+    renderSection()
+    await screen.findByRole('table', { name: 'Daftar banner' })
+    expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Banner & Popup'])
+    expect(screen.getByText(/Fitur & versi serta Tab Stream ada di menu Komunitas/)).toBeVisible()
+  })
+
   it('validates the form and shows a live preview per level', async () => {
     const user = userEvent.setup()
     renderSection()

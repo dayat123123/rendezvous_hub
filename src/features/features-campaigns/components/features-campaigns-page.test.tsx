@@ -11,11 +11,10 @@ vi.mock('@/features/client-config/components/banners-section', () => ({
 }))
 
 describe('FeaturesCampaignsPage', () => {
-  it('shows only the banner and popup campaigns, and points to Komunitas for the moved tabs', () => {
+  it('leaves the page title to the banner section so it is not shown twice', () => {
     renderWithProviders(<FeaturesCampaignsPage />, monitorFixture)
 
-    expect(screen.getByRole('heading', { name: 'Banner & Popup', level: 1 })).toBeVisible()
-    expect(screen.getByText(/Fitur & versi serta Tab Stream ada di menu Komunitas/)).toBeVisible()
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument()
     expect(screen.getByText('banners-section')).toBeVisible()
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
   })
