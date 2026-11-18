@@ -8,7 +8,7 @@ import { renderWithProviders } from '@/test/render'
 import { Toaster } from '@/test/toast'
 
 import { bannersApi } from '../api'
-import type { AppBanner, BannerSettings } from '../types'
+import type { AppBanner, BannerNotice, BannerSettings } from '../types'
 import { BannersSection } from './banners-section'
 
 vi.mock('../api', () => ({
@@ -20,8 +20,38 @@ vi.mock('../api', () => ({
     settings: vi.fn(),
     setLinkSchemes: vi.fn(),
     uploadImage: vi.fn(),
+    noticePreview: vi.fn(),
+    reviewNotice: vi.fn(),
+    cancelNotice: vi.fn(),
   },
 }))
+
+async function confirmNotice(user: ReturnType<typeof userEvent.setup>, action = 'Simpan & kirim') {
+  const confirm = await screen.findByRole('alertdialog')
+  await user.click(within(confirm).getByRole('button', { name: action }))
+}
+
+function notice(overrides: Partial<BannerNotice> = {}): BannerNotice {
+  return {
+    id: 'notice-1',
+    banner_id: 'banner-1',
+    title: 'Pemeliharaan sistem',
+    status: 'pending',
+    send_at: '2026-11-03T03:00:00.000Z',
+    created_by: { id: 'adi', name: 'Adi' },
+    reviewed_by: null,
+    reviewed_at: null,
+    review_note: null,
+    targeted: 0,
+    recipients: 0,
+    opened: 0,
+    tapped: 0,
+    error: null,
+    created_at: '2026-11-03T01:00:00.000Z',
+    finished_at: null,
+    ...overrides,
+  }
+}
 
 function banner(overrides: Partial<AppBanner> = {}): AppBanner {
   return {
@@ -90,6 +120,7 @@ beforeEach(() => {
     }),
   ])
   vi.mocked(bannersApi.settings).mockResolvedValue(settings)
+  vi.mocked(bannersApi.noticePreview).mockResolvedValue({ recipients: 1234, four_eyes: false })
 })
 
 describe('BannersSection', () => {
@@ -194,9 +225,11 @@ describe('BannersSection', () => {
     await user.click(within(dialog).getByRole('checkbox', { name: 'Android' }))
     await user.type(within(dialog).getByLabelText('Versi maksimum'), '3.1')
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await confirmNotice(user)
 
     expect(await screen.findByText('Waktu berakhir harus setelah waktu mulai.')).toBeVisible()
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await confirmNotice(user)
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(bannersApi.uploadImage).not.toHaveBeenCalled()
     expect(bannersApi.save).toHaveBeenLastCalledWith(
@@ -228,7 +261,7 @@ describe('BannersSection', () => {
   it('sends a new banner as a notification too unless the switch is turned off', async () => {
     const user = userEvent.setup()
     vi.mocked(bannersApi.save)
-      .mockResolvedValueOnce(banner({ id: 'banner-5', title: 'Promo', campaign_id: 'camp-1' }))
+      .mockResolvedValueOnce(banner({ id: 'banner-5', title: 'Promo', notice: notice({ status: 'queued' }) }))
       .mockResolvedValueOnce(banner({ id: 'banner-6', title: 'Info diam' }))
     renderSection()
 
@@ -237,12 +270,17 @@ describe('BannersSection', () => {
     expect(within(dialog).getByRole('switch', { name: /Kirim juga sebagai notifikasi/ })).toBeChecked()
     await user.type(within(dialog).getByLabelText('Judul'), 'Promo')
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    const confirm = await screen.findByRole('alertdialog', {
+      name: 'Kirim notifikasi info ke ±1.234 nasabah?',
+    })
+    expect(within(confirm).getByText(/langsung masuk ke daftar notifikasi dan push/)).toBeVisible()
+    expect(bannersApi.noticePreview).toHaveBeenCalledWith('all', 7)
+    expect(bannersApi.save).not.toHaveBeenCalled()
+    await confirmNotice(user)
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(bannersApi.save).toHaveBeenLastCalledWith(null, expect.objectContaining({ title: 'Promo' }), true)
     expect(
-      await screen.findByText(
-        'Banner disimpan. Notifikasinya menunggu persetujuan di Komunitas › Notifikasi.',
-      ),
+      await screen.findByText('Banner disimpan. Notifikasi info sedang dikirim ke nasabah.'),
     ).toBeVisible()
 
     await user.click(screen.getByRole('button', { name: 'Tambah banner' }))
@@ -270,6 +308,7 @@ describe('BannersSection', () => {
     await user.type(within(dialog).getByLabelText('Judul'), 'Pemeliharaan')
     await user.click(within(frequency).getByRole('radio', { name: 'Sekali sehari' }))
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await confirmNotice(user)
     await waitFor(() => expect(bannersApi.save).toHaveBeenCalled())
     expect(bannersApi.save).toHaveBeenLastCalledWith(
       null,
@@ -293,16 +332,83 @@ describe('BannersSection', () => {
     expect(bannersApi.save).toHaveBeenLastCalledWith('banner-1', expect.anything(), false)
   })
 
-  it('shows why the notification could not be made', async () => {
+  it('submits the notification for approval when the four-eyes rule is on', async () => {
     const user = userEvent.setup()
-    vi.mocked(bannersApi.save).mockRejectedValueOnce(new ApiError('no_official_account', 'x', 400))
+    vi.mocked(bannersApi.noticePreview).mockResolvedValueOnce({ recipients: 80, four_eyes: true })
+    vi.mocked(bannersApi.save).mockResolvedValueOnce(banner({ id: 'banner-8', notice: notice() }))
     renderSection()
     await user.click(await screen.findByRole('button', { name: 'Tambah banner' }))
     const dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
     await user.type(within(dialog).getByLabelText('Judul'), 'Promo')
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
-    expect(await screen.findByText(/Belum ada akun resmi aktif untuk mengirim notifikasi/)).toBeVisible()
-    expect(within(dialog).getByRole('switch', { name: /Kirim juga sebagai notifikasi/ })).toBeChecked()
+    const confirm = await screen.findByRole('alertdialog', { name: 'Kirim notifikasi info ke ±80 nasabah?' })
+    expect(within(confirm).getByText(/Aturan empat mata aktif/)).toBeVisible()
+    await confirmNotice(user, 'Simpan & ajukan')
+    expect(
+      await screen.findByText(
+        'Banner disimpan. Notifikasi info menunggu persetujuan staf lain di halaman ini.',
+      ),
+    ).toBeVisible()
+  })
+
+  it('approves, rejects, and cancels a banner notification from its row', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.list).mockResolvedValue([
+      banner({ notice: notice() }),
+      banner({
+        id: 'banner-2',
+        title: 'Promo akhir tahun',
+        notice: notice({ id: 'notice-2', status: 'scheduled', send_at: '2030-01-01T01:00:00.000Z' }),
+      }),
+      banner({
+        id: 'banner-3',
+        title: 'Libur bursa',
+        notice: notice({ id: 'notice-3', status: 'sent', recipients: 1200, opened: 300, tapped: 45 }),
+      }),
+    ])
+    vi.mocked(bannersApi.reviewNotice).mockResolvedValue(notice({ status: 'queued' }))
+    vi.mocked(bannersApi.cancelNotice).mockResolvedValue(notice({ id: 'notice-2', status: 'cancelled' }))
+    renderSection()
+
+    const table = await screen.findByRole('table', { name: 'Daftar banner' })
+    expect(screen.getByText(/1 notifikasi info menunggu persetujuan/)).toBeVisible()
+    const pending = within(table).getByRole('row', { name: /Pemeliharaan sistem/ })
+    expect(within(pending).getByText('Notifikasi: menunggu persetujuan')).toBeVisible()
+    const sent = within(table).getByRole('row', { name: /Libur bursa/ })
+    expect(
+      within(sent).getByText('Notifikasi: terkirim ke 1.200 nasabah · dibuka 300 · diketuk 45'),
+    ).toBeVisible()
+    expect(within(sent).queryByRole('button', { name: 'Batalkan notifikasi' })).not.toBeInTheDocument()
+
+    await user.click(within(pending).getByRole('button', { name: 'Tolak' }))
+    const reject = await screen.findByRole('dialog', { name: 'Tolak notifikasi?' })
+    await user.type(within(reject).getByRole('textbox'), 'Isi belum final')
+    await user.click(within(reject).getByRole('button', { name: 'Tolak' }))
+    await waitFor(() =>
+      expect(bannersApi.reviewNotice).toHaveBeenCalledWith('notice-1', false, 'Isi belum final'),
+    )
+
+    await user.click(within(pending).getByRole('button', { name: 'Setujui' }))
+    const approve = await screen.findByRole('alertdialog', { name: 'Setujui dan kirim notifikasi?' })
+    await user.click(within(approve).getByRole('button', { name: 'Setujui' }))
+    await waitFor(() => expect(bannersApi.reviewNotice).toHaveBeenLastCalledWith('notice-1', true, null))
+
+    const later = within(table).getByRole('row', { name: /Promo akhir tahun/ })
+    await user.click(within(later).getByRole('button', { name: 'Batalkan notifikasi' }))
+    const cancel = await screen.findByRole('alertdialog', { name: 'Batalkan notifikasi?' })
+    await user.click(within(cancel).getByRole('button', { name: 'Batalkan notifikasi' }))
+    await waitFor(() => expect(bannersApi.cancelNotice).toHaveBeenCalledWith('notice-2'))
+  })
+
+  it('lets only another staff member approve a pending notification', async () => {
+    vi.mocked(bannersApi.list).mockResolvedValue([
+      banner({ notice: notice({ created_by: { id: monitorFixture.id, name: 'Sinta' } }) }),
+    ])
+    renderSection()
+    const row = await screen.findByRole('row', { name: /Pemeliharaan sistem/ })
+    expect(within(row).getByText('Perlu disetujui staf lain')).toBeVisible()
+    expect(within(row).queryByRole('button', { name: 'Setujui' })).not.toBeInTheDocument()
+    expect(within(row).getByRole('button', { name: 'Batalkan notifikasi' })).toBeVisible()
   })
 
   it('builds a center popup with a phone preview, frequency, and new-user audience', async () => {
@@ -337,7 +443,9 @@ describe('BannersSection', () => {
     expect(within(card).getByLabelText('Tutup banner')).toBeInTheDocument()
 
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await confirmNotice(user)
     await waitFor(() => expect(bannersApi.save).toHaveBeenCalled())
+    expect(bannersApi.noticePreview).toHaveBeenCalledWith('new_users', 14)
     expect(bannersApi.save).toHaveBeenLastCalledWith(
       null,
       expect.objectContaining({

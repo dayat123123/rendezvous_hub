@@ -7,7 +7,10 @@ import {
   BANNER_IMAGE_MAX_BYTES,
   type AppBanner,
   type AppPlatform,
+  type BannerAudience,
   type BannerDraft,
+  type BannerNotice,
+  type BannerNoticePreview,
   type BannerSettings,
   type BannerStatsDetail,
   type ClientConfig,
@@ -94,6 +97,11 @@ export const bannersApi = {
       }),
     ),
   remove: (id: string) => rpc<{ id: string; deleted: boolean }>('admin_delete_banner', { p_id: id }),
+  noticePreview: (audience: BannerAudience, days: number) =>
+    rpc<BannerNoticePreview>('admin_banner_notice_preview', { p_audience: audience, p_audience_days: days }),
+  reviewNotice: (id: string, approve: boolean, note: string | null) =>
+    rpc<BannerNotice>('admin_review_banner_notice', { p_id: id, p_approve: approve, p_note: note }),
+  cancelNotice: (id: string) => rpc<BannerNotice>('admin_cancel_banner_notice', { p_id: id }),
   stats: async (id: string) => {
     const raw = await rpc<BannerStatsDetail>('admin_banner_stats', { p_id: id })
     return { ...raw, days: raw.days ?? [] }

@@ -21,7 +21,10 @@ import { FieldText } from '@/features/system/components/system-ui'
 import { bannerErrorText } from '@/lib/error-text'
 import { appEnv } from '@/lib/supabase'
 
-import { useBannerSettings, useSaveBanner } from '../hooks'
+import { Confirm } from '@/features/nasabah/components/confirm'
+import { formatNumber } from '@/lib/time'
+
+import { useBannerSettings, useNoticePreview, useSaveBanner } from '../hooks'
 import { bannerDraft, bannerProblems, type BannerProblems } from '../logic'
 import {
   appPlatforms,
@@ -36,6 +39,8 @@ import {
   bannerLevels,
   type AppBanner,
   type BannerAudience,
+  type BannerNotice,
+  type BannerNoticePreview,
   type BannerDisplay,
   type BannerDraft,
   type BannerFrequency,
@@ -95,6 +100,8 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
   const schemes = settings.data?.deep_link_schemes ?? []
   const initial = bannerDraft(editing)
   const [notify, setNotify] = useState(true)
+  const preview = useNoticePreview()
+  const [confirming, setConfirming] = useState<(BannerNoticePreview & { scheduled: boolean }) | null>(null)
   const [draft, setDraft] = useState<BannerDraft>(initial)
   const [linkText, setLinkText] = useState(initial.link_url ?? '')
   const [ctaText, setCtaText] = useState(initial.cta_label ?? '')
@@ -165,6 +172,33 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
     )
   }
 
+  const persist = () =>
+    void save
+      .mutateAsync({
+        id: editing?.id ?? null,
+        draft: current,
+        image: popup && image.kind === 'new' ? image.blob : null,
+        notify: !editing && notify,
+      })
+      .then((saved) => {
+        toast.success(savedText(saved.notice))
+        setConfirming(null)
+        onClose()
+      })
+      .catch((error: unknown) => {
+        setConfirming(null)
+        toast.error(bannerErrorText(error))
+      })
+
+  const savedText = (notice: BannerNotice | null | undefined) =>
+    !notice
+      ? t('platform.banners.saved')
+      : notice.status === 'pending'
+        ? t('platform.banners.savedNoticePending')
+        : notice.status === 'scheduled'
+          ? t('platform.banners.savedNoticeScheduled')
+          : t('platform.banners.savedNoticeSending')
+
   return (
     <form
       className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_15rem]"
@@ -173,20 +207,19 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
         event.preventDefault()
         setChecked(true)
         if (Object.keys(problems).length > 0) return
-        save
-          .mutateAsync({
-            id: editing?.id ?? null,
-            draft: current,
-            image: popup && image.kind === 'new' ? image.blob : null,
-            notify: !editing && notify,
-          })
-          .then((saved) => {
-            toast.success(
-              saved.campaign_id ? t('platform.banners.savedWithNotification') : t('platform.banners.saved'),
+        if (!editing && notify) {
+          preview
+            .mutateAsync({ audience: current.audience, days: current.audience_days })
+            .then((result) =>
+              setConfirming({
+                ...result,
+                scheduled: current.starts_at !== null && new Date(current.starts_at).getTime() > Date.now(),
+              }),
             )
-            onClose()
-          })
-          .catch((error: unknown) => toast.error(bannerErrorText(error)))
+            .catch((error: unknown) => toast.error(bannerErrorText(error)))
+          return
+        }
+        persist()
       }}
     >
       <div className="flex min-w-0 flex-col gap-4">
@@ -479,11 +512,28 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
         <Button type="button" variant="outline" disabled={save.isPending} onClick={onClose}>
           {t('app.cancel')}
         </Button>
-        <Button type="submit" disabled={save.isPending}>
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
+        <Button type="submit" disabled={save.isPending || preview.isPending}>
+          {save.isPending || preview.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
           {t('app.save')}
         </Button>
       </DialogFooter>
+      <Confirm
+        open={confirming !== null}
+        title={t('platform.banners.noticeConfirmTitle', {
+          recipients: formatNumber(confirming?.recipients ?? 0),
+        })}
+        body={
+          confirming?.four_eyes
+            ? t('platform.banners.noticeConfirmPending')
+            : confirming?.scheduled
+              ? t('platform.banners.noticeConfirmScheduled')
+              : t('platform.banners.noticeConfirmNow')
+        }
+        action={confirming?.four_eyes ? t('platform.banners.noticeSubmit') : t('platform.banners.noticeSend')}
+        pending={save.isPending}
+        onClose={() => setConfirming(null)}
+        onConfirm={persist}
+      />
     </form>
   )
 }

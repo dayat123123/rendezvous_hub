@@ -31,6 +31,35 @@ function FourEyesCard({ items }: { items: SettingEntry[] }) {
   )
 }
 
+function BannerNoticeFourEyesCard({ items }: { items: SettingEntry[] }) {
+  const { t } = useTranslation()
+  const save = useSaveSettings()
+  const entry = findSetting(items, 'banners.notice_four_eyes')
+  if (!entry) return null
+  const enabled = entry.value === true
+  return (
+    <SettingsCard
+      title={t('settings.bannerNoticeFourEyes')}
+      subtitle={t('settings.bannerNoticeFourEyesHint')}
+    >
+      <ToggleForm
+        key={`${String(enabled)}-${entry.version}`}
+        label={t('settings.bannerNoticeFourEyes')}
+        saved={enabled}
+        saving={save.isPending}
+        confirmTitle={(next) =>
+          t(next ? 'settings.bannerNoticeFourEyesOnTitle' : 'settings.bannerNoticeFourEyesOffTitle')
+        }
+        confirmBody={(next) =>
+          t(next ? 'settings.bannerNoticeFourEyesOnBody' : 'settings.bannerNoticeFourEyesOffBody')
+        }
+        status={<ChangedBy entry={entry} />}
+        onSave={(next) => save.mutateAsync({ 'banners.notice_four_eyes': next })}
+      />
+    </SettingsCard>
+  )
+}
+
 function PolicyFourEyesForm({ setting }: { setting: FourEyesSetting }) {
   const { t } = useTranslation()
   const save = useSetPolicyFourEyes()
@@ -75,6 +104,7 @@ export function CommunitySection() {
     <SectionFrame title={t('settings.community')} description={t('settings.communityDescription')}>
       <QueryContent query={settings}>{(items) => <FourEyesCard items={items} />}</QueryContent>
       <PolicyFourEyesCard />
+      <QueryContent query={settings}>{(items) => <BannerNoticeFourEyesCard items={items} />}</QueryContent>
     </SectionFrame>
   )
 }

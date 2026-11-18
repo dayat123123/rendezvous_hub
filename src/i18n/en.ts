@@ -576,7 +576,7 @@ export const en: Translation = {
     selectAllOf: 'Select all {{group}}',
     clearAllOf: 'Clear {{group}}',
     title: 'Settings',
-    groups: { service: 'CS service', community: 'Community', integration: 'Integrations', system: 'System' },
+    groups: { service: 'CS service', community: 'Approvals', integration: 'Integrations', system: 'System' },
     accounts: 'CS accounts',
     topics: 'Topics',
     quickReplies: 'Quick replies',
@@ -831,9 +831,19 @@ export const en: Translation = {
     alerts: 'Alerts',
     alertsDescription:
       'Where system alerts are delivered: Telegram and/or email. Fill in at least one channel, then press Send test.',
-    community: 'Approval rules',
-    communityDescription: 'Approval rules for official posts and notifications.',
-    fourEyes: 'Four-eyes rule',
+    community: 'Four-eyes rules',
+    communityDescription:
+      'What another staff member must approve before it applies: Community posts and notifications, content policy, and Banners & Popups info notifications.',
+    bannerNoticeFourEyes: 'Four-eyes for Banners & Popups info notifications',
+    bannerNoticeFourEyesHint:
+      'Off by default: an info notification from a banner is sent once its creator confirms the recipient count. When on, it is sent after another Super Admin or Features & banners staff member approves it in Banners & Popups.',
+    bannerNoticeFourEyesOnTitle: 'Turn on four-eyes for info notifications?',
+    bannerNoticeFourEyesOnBody:
+      'New info notifications from banners must be approved by another staff member before sending. Already scheduled notifications still go out.',
+    bannerNoticeFourEyesOffTitle: 'Turn off four-eyes for info notifications?',
+    bannerNoticeFourEyesOffBody:
+      'New info notifications from banners are sent once their creator confirms. Notifications already waiting still need approval.',
+    fourEyes: 'Community four-eyes',
     fourEyesHint:
       'On by default. Official posts and notifications must be approved by another staff member, not their author. When off, staff with "Approve & publish" can publish their own work directly.',
     policyFourEyes: 'Content policy four-eyes',

@@ -32,9 +32,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      admin_banner_notice_preview: {
+        Args: { p_audience?: string; p_audience_days?: number }
+        Returns: Json
+      }
+      admin_banner_notices: { Args: { p_limit?: number }; Returns: Json }
       admin_banner_settings: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_banner_stats: { Args: { p_id: string }; Returns: Json }
       admin_banners: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_cancel_banner_notice: { Args: { p_id: string }; Returns: Json }
       admin_delete_banner: { Args: { p_id: string }; Returns: Json }
       admin_delete_feature_flag: { Args: { p_key: string }; Returns: Json }
       admin_delete_holiday: { Args: { p_day: string }; Returns: Json }
@@ -100,6 +106,10 @@ export type Database = {
         Returns: Json
       }
       admin_reorder_ticket_labels: { Args: { p_ids: string[] }; Returns: Json }
+      admin_review_banner_notice: {
+        Args: { p_approve: boolean; p_id: string; p_note?: string }
+        Returns: Json
+      }
       admin_reorder_topics: { Args: { p_codes: string[] }; Returns: Json }
       admin_reset_password: { Args: { p_agent_id: string }; Returns: Json }
       admin_save_banner: {

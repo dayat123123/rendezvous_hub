@@ -388,7 +388,44 @@ export const platform = {
       'Banner hilang dari aplikasi saat pengaturan dibaca berikutnya. Statistik dan gambarnya ikut dihapus. Tindakan ini tercatat di jejak audit.',
     deleted: 'Banner dihapus',
     saved: 'Banner disimpan',
-    savedWithNotification: 'Banner disimpan. Notifikasinya menunggu persetujuan di Komunitas › Notifikasi.',
+    savedNoticeSending: 'Banner disimpan. Notifikasi info sedang dikirim ke nasabah.',
+    savedNoticeScheduled: 'Banner disimpan. Notifikasi info dikirim saat banner mulai berlaku.',
+    savedNoticePending: 'Banner disimpan. Notifikasi info menunggu persetujuan staf lain di halaman ini.',
+    noticeConfirmTitle: 'Kirim notifikasi info ke ±{{recipients}} nasabah?',
+    noticeConfirmNow:
+      'Judul dan isi banner langsung masuk ke daftar notifikasi dan push nasabah sasaran. Notifikasi yang sudah terkirim tidak bisa ditarik.',
+    noticeConfirmScheduled:
+      'Notifikasi dikirim otomatis saat banner mulai berlaku. Sebelum itu masih bisa dibatalkan dari daftar banner.',
+    noticeConfirmPending:
+      'Aturan empat mata aktif: notifikasi baru dikirim setelah disetujui Super Admin atau staf Fitur & Banner lain.',
+    noticeSend: 'Simpan & kirim',
+    noticeSubmit: 'Simpan & ajukan',
+    notice: {
+      pending: 'Notifikasi: menunggu persetujuan',
+      waitingOther: 'Perlu disetujui staf lain',
+      waitingCount:
+        '{{count}} notifikasi info menunggu persetujuan. Setujui atau tolak dari baris bannernya.',
+      scheduled: 'Notifikasi: terjadwal {{time}}',
+      sending: 'Notifikasi: sedang dikirim ({{recipients}} terkirim)',
+      sent: 'Notifikasi: terkirim ke {{recipients}} nasabah · dibuka {{opened}} · diketuk {{tapped}}',
+      rejected: 'Notifikasi ditolak {{name}}: {{note}}',
+      cancelled: 'Notifikasi dibatalkan',
+      failed: 'Notifikasi gagal dikirim. Hubungi IT.',
+      approve: 'Setujui',
+      reject: 'Tolak',
+      cancel: 'Batalkan notifikasi',
+      approveTitle: 'Setujui dan kirim notifikasi?',
+      approveBody:
+        'Notifikasi info “{{title}}” dikirim ke nasabah sasaran. Notifikasi yang sudah terkirim tidak bisa ditarik.',
+      approved: 'Notifikasi disetujui',
+      rejectTitle: 'Tolak notifikasi?',
+      rejectBody: 'Notifikasi info “{{title}}” tidak dikirim. Bannernya tetap tampil.',
+      rejectReason: 'Alasan penolakan (5–500 karakter)',
+      rejectedToast: 'Notifikasi ditolak',
+      cancelTitle: 'Batalkan notifikasi?',
+      cancelBody:
+        'Notifikasi info “{{title}}” berhenti dikirim. Nasabah yang sudah menerimanya tetap melihatnya. Bannernya tetap tampil.',
+    },
     addTitle: 'Tambah banner',
     editTitle: 'Ubah banner',
     formHint:
@@ -435,7 +472,7 @@ export const platform = {
       version: 'Opsional, angka seperti 2.4.0 (inklusif).',
       dismissible: 'Bila mati, tombol tutup tidak ditampilkan.',
       notify:
-        'Judul, isi, dan tautan https ikut dikirim ke daftar notifikasi (dan push) nasabah atas nama akun resmi utama, ke sasaran yang sama. Notifikasi terkirim setelah disetujui di Komunitas › Notifikasi; deep link aplikasi tidak ikut.',
+        'Judul, isi, gambar, dan tautan banner dikirim sebagai notifikasi info ke daftar notifikasi dan push nasabah sasaran (bukan lewat Komunitas). Diketuk, nasabah melihat halaman info di aplikasi. Dikirim saat banner mulai berlaku.',
       priority: 'Angka lebih besar tampil lebih dulu.',
     },
     image: {
@@ -505,9 +542,10 @@ export const platform = {
       invalid_audience: 'Sasaran tidak dikenal atau jumlah hari di luar 1–90.',
       invalid_link_schemes: 'Daftar skema deep link tidak valid.',
       banner_not_found: 'Banner tidak ditemukan. Daftar dimuat ulang.',
-      no_official_account:
-        'Belum ada akun resmi aktif untuk mengirim notifikasi. Buat di Komunitas › Akun resmi, atau matikan Kirim juga sebagai notifikasi.',
-      notification_title_short: 'Judul minimal 3 karakter bila dikirim juga sebagai notifikasi.',
+      notice_not_found: 'Notifikasi tidak ditemukan. Daftar dimuat ulang.',
+      invalid_status: 'Status notifikasi sudah berubah. Daftar dimuat ulang.',
+      four_eyes: 'Notifikasi harus disetujui staf lain, bukan pembuatnya.',
+      note_required: 'Alasan penolakan 5–500 karakter.',
     },
   },
   feedFilters: {

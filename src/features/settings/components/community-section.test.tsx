@@ -52,18 +52,18 @@ describe('CommunitySection', () => {
     const user = userEvent.setup()
     renderWithProviders(<CommunitySection />, monitorFixture)
 
-    const toggle = await screen.findByRole('switch', { name: 'Aturan empat mata' })
+    const toggle = await screen.findByRole('switch', { name: 'Empat mata Komunitas' })
     expect(toggle).toBeChecked()
     expect(toggle).toBeDisabled()
 
-    await user.click(screen.getByRole('button', { name: 'Ubah Aturan empat mata' }))
+    await user.click(screen.getByRole('button', { name: 'Ubah Empat mata Komunitas' }))
     await user.click(toggle)
     expect(toggle).not.toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Batal' }))
     expect(toggle).toBeChecked()
     expect(toggle).toBeDisabled()
 
-    await user.click(screen.getByRole('button', { name: 'Ubah Aturan empat mata' }))
+    await user.click(screen.getByRole('button', { name: 'Ubah Empat mata Komunitas' }))
     await user.click(toggle)
     await user.click(screen.getByRole('button', { name: 'Simpan' }))
     const dialog = await screen.findByRole('alertdialog', { name: 'Matikan aturan empat mata?' })
@@ -96,5 +96,45 @@ describe('CommunitySection', () => {
     await waitFor(() =>
       expect(screen.getByRole('switch', { name: 'Empat mata kebijakan konten' })).toBeDisabled(),
     )
+  })
+
+  it('turns on four-eyes for banner info notifications only after confirmation', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsApi.settings).mockResolvedValue([
+      {
+        key: 'community.four_eyes',
+        value: true,
+        description: null,
+        version: 1,
+        updated_at: null,
+        updated_by: null,
+      },
+      {
+        key: 'banners.notice_four_eyes',
+        value: false,
+        description: null,
+        version: 1,
+        updated_at: null,
+        updated_by: null,
+      },
+    ])
+    renderWithProviders(<CommunitySection />, monitorFixture)
+
+    const toggle = await screen.findByRole('switch', { name: 'Empat mata notifikasi info Banner & Popup' })
+    expect(toggle).not.toBeChecked()
+    expect(screen.getByText(/Default mati: notifikasi info dari banner langsung dikirim/)).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Ubah Empat mata notifikasi info Banner & Popup' }))
+    await user.click(toggle)
+    const card = toggle.closest('section') as HTMLElement
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Nyalakan empat mata notifikasi info?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(settingsApi.setSetting).toHaveBeenCalledWith('banners.notice_four_eyes', true))
+  })
+
+  it('hides the banner notification rule on servers that do not have it', async () => {
+    renderWithProviders(<CommunitySection />, monitorFixture)
+    await screen.findByRole('switch', { name: 'Empat mata Komunitas' })
+    expect(screen.queryByRole('switch', { name: /Banner & Popup/ })).not.toBeInTheDocument()
   })
 })

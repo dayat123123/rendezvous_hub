@@ -15,6 +15,7 @@ import { useBanners, useBannerSettings, useDeleteBanner } from '../hooks'
 import { ctrText } from '../logic'
 import type { AppBanner, BannerStatus } from '../types'
 import { BannerDialog } from './banner-dialog'
+import { BannerNoticeLine } from './banner-notice'
 import { BannerStatsDialog } from './banner-stats-dialog'
 
 const statusTone: Record<BannerStatus, 'ok' | 'warn' | 'neutral'> = {
@@ -52,12 +53,21 @@ function BannersTable({ banners }: { banners: AppBanner[] }) {
   const [editing, setEditing] = useState<AppBanner | 'new' | null>(null)
   const [removing, setRemoving] = useState<AppBanner | null>(null)
   const [viewing, setViewing] = useState<AppBanner | null>(null)
+  const waiting = banners.filter((banner) => banner.notice?.status === 'pending').length
   return (
     <SettingsCard title={t('platform.banners.title')} subtitle={t('platform.banners.subtitle')}>
       <Button size="sm" variant="outline" className="self-start" onClick={() => setEditing('new')}>
         <PlusIcon />
         {t('platform.banners.add')}
       </Button>
+      {waiting > 0 ? (
+        <p
+          role="status"
+          className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-row text-warning"
+        >
+          {t('platform.banners.notice.waitingCount', { count: waiting })}
+        </p>
+      ) : null}
       {banners.length === 0 ? (
         <p className="border-y py-6 text-center text-row text-muted-foreground">
           {t('platform.banners.empty')}
@@ -101,6 +111,7 @@ function BannersTable({ banners }: { banners: AppBanner[] }) {
                   {banner.body ? (
                     <p className="line-clamp-2 max-w-80 text-xs text-muted-foreground">{banner.body}</p>
                   ) : null}
+                  {banner.notice ? <BannerNoticeLine notice={banner.notice} title={banner.title} /> : null}
                 </TableCell>
                 <TableCell className="py-2">
                   <ToneBadge tone={statusTone[banner.status]}>

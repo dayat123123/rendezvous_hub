@@ -101,8 +101,44 @@ export type BannerSettings = {
   updated_by: StaffRef
 }
 
+export const bannerNoticeStatuses = [
+  'pending',
+  'scheduled',
+  'queued',
+  'sending',
+  'sent',
+  'rejected',
+  'cancelled',
+  'failed',
+] as const
+export type BannerNoticeStatus = (typeof bannerNoticeStatuses)[number]
+
+export type BannerNotice = {
+  id: string
+  banner_id: string | null
+  title: string
+  status: BannerNoticeStatus
+  send_at: string
+  created_by: StaffRef
+  reviewed_by: StaffRef
+  reviewed_at: string | null
+  review_note: string | null
+  targeted: number
+  recipients: number
+  opened: number
+  tapped: number
+  error: string | null
+  created_at: string
+  finished_at: string | null
+}
+
+export type BannerNoticePreview = { recipients: number; four_eyes: boolean }
+
+export const noticeCancellable = (status: BannerNoticeStatus) =>
+  status === 'pending' || status === 'scheduled' || status === 'queued' || status === 'sending'
+
 export type AppBanner = {
-  campaign_id?: string | null
+  notice?: BannerNotice | null
   id: string
   title: string
   body: string

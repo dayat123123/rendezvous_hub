@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { bannersApi, clientConfigApi } from './api'
-import type { AppPlatform, BannerDraft, ClientConfig } from './types'
+import type { AppPlatform, BannerAudience, BannerDraft, ClientConfig } from './types'
 
 export const clientConfigKeys = {
   config: ['client-config'] as const,
@@ -59,6 +59,19 @@ export const useSaveBanner = () =>
   )
 
 export const useDeleteBanner = () => useBannerMutation((id: string) => bannersApi.remove(id))
+
+export const useNoticePreview = () =>
+  useMutation({
+    mutationFn: (args: { audience: BannerAudience; days: number }) =>
+      bannersApi.noticePreview(args.audience, args.days),
+  })
+
+export const useReviewNotice = () =>
+  useBannerMutation((args: { id: string; approve: boolean; note?: string | null }) =>
+    bannersApi.reviewNotice(args.id, args.approve, args.note ?? null),
+  )
+
+export const useCancelNotice = () => useBannerMutation((id: string) => bannersApi.cancelNotice(id))
 
 export function useBannerStats(id: string) {
   return useQuery({

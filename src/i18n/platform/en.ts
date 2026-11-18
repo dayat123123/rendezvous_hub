@@ -380,8 +380,45 @@ export const platform: Translated<typeof source> = {
       'The banner disappears from the app the next time it reads its settings. Its stats and image are deleted too. This is recorded in the audit trail.',
     deleted: 'Banner deleted',
     saved: 'Banner saved',
-    savedWithNotification:
-      'Banner saved. Its notification is waiting for approval in Community › Notifications.',
+    savedNoticeSending: 'Banner saved. The info notification is being sent to customers.',
+    savedNoticeScheduled: 'Banner saved. The info notification is sent when the banner starts.',
+    savedNoticePending:
+      'Banner saved. The info notification is waiting for another staff member to approve it on this page.',
+    noticeConfirmTitle: 'Send the info notification to about {{recipients}} customers?',
+    noticeConfirmNow:
+      'The banner title and body go straight to the target customers’ notification list and push. A sent notification cannot be recalled.',
+    noticeConfirmScheduled:
+      'The notification is sent automatically when the banner starts. Until then it can be cancelled from the banner list.',
+    noticeConfirmPending:
+      'Four-eyes rule is on: the notification is sent after another Super Admin or Features & banners staff member approves it.',
+    noticeSend: 'Save & send',
+    noticeSubmit: 'Save & submit',
+    notice: {
+      pending: 'Notification: waiting for approval',
+      waitingOther: 'Needs another staff member',
+      waitingCount:
+        '{{count}} info notifications are waiting for approval. Approve or reject them from their banner row.',
+      scheduled: 'Notification: scheduled {{time}}',
+      sending: 'Notification: sending ({{recipients}} sent)',
+      sent: 'Notification: sent to {{recipients}} customers · opened {{opened}} · tapped {{tapped}}',
+      rejected: 'Notification rejected by {{name}}: {{note}}',
+      cancelled: 'Notification cancelled',
+      failed: 'The notification failed to send. Contact IT.',
+      approve: 'Approve',
+      reject: 'Reject',
+      cancel: 'Cancel notification',
+      approveTitle: 'Approve and send the notification?',
+      approveBody:
+        'The info notification “{{title}}” goes to the target customers. A sent notification cannot be recalled.',
+      approved: 'Notification approved',
+      rejectTitle: 'Reject the notification?',
+      rejectBody: 'The info notification “{{title}}” is not sent. The banner keeps showing.',
+      rejectReason: 'Reason (5–500 characters)',
+      rejectedToast: 'Notification rejected',
+      cancelTitle: 'Cancel the notification?',
+      cancelBody:
+        'The info notification “{{title}}” stops sending. Customers who already received it still see it. The banner keeps showing.',
+    },
     addTitle: 'Add banner',
     editTitle: 'Edit banner',
     formHint:
@@ -428,7 +465,7 @@ export const platform: Translated<typeof source> = {
       version: 'Optional, digits like 2.4.0 (inclusive).',
       dismissible: 'When off, no close button is shown.',
       notify:
-        "The title, body, and https link also go to customers' notification list (and push) from the main official account, to the same audience. It is sent after approval in Community › Notifications; app deep links are not included.",
+        'The banner title, body, image, and link are sent as an info notification to the target customers’ notification list and push (not through Community). Tapping it opens an info page in the app. Sent when the banner starts.',
       priority: 'Higher numbers show first.',
     },
     image: {
@@ -498,9 +535,10 @@ export const platform: Translated<typeof source> = {
       invalid_audience: 'Unknown audience or days outside 1–90.',
       invalid_link_schemes: 'Invalid list of deep link schemes.',
       banner_not_found: 'Banner not found. The list was reloaded.',
-      no_official_account:
-        'No active official account to send the notification from. Create one in Community › Official accounts, or turn off Also send as a notification.',
-      notification_title_short: 'The title needs at least 3 characters to be sent as a notification.',
+      notice_not_found: 'Notification not found. The list was reloaded.',
+      invalid_status: 'The notification status changed. The list was reloaded.',
+      four_eyes: 'Another staff member must approve the notification, not its creator.',
+      note_required: 'The rejection reason must be 5–500 characters.',
     },
   },
   feedFilters: {

@@ -573,7 +573,7 @@ export const id = {
     selectAllOf: 'Pilih semua {{group}}',
     clearAllOf: 'Kosongkan {{group}}',
     title: 'Pengaturan',
-    groups: { service: 'Layanan CS', community: 'Komunitas', integration: 'Integrasi', system: 'Sistem' },
+    groups: { service: 'Layanan CS', community: 'Persetujuan', integration: 'Integrasi', system: 'Sistem' },
     accounts: 'Akun CS',
     topics: 'Topik',
     quickReplies: 'Quick reply',
@@ -830,9 +830,19 @@ export const id = {
     alerts: 'Alert',
     alertsDescription:
       'Ke mana alert gangguan sistem dikirim: Telegram dan/atau email. Isi minimal satu kanal, lalu tekan Kirim uji.',
-    community: 'Aturan persetujuan',
-    communityDescription: 'Aturan persetujuan postingan dan notifikasi resmi.',
-    fourEyes: 'Aturan empat mata',
+    community: 'Aturan empat mata',
+    communityDescription:
+      'Siapa yang wajib disetujui staf lain sebelum berlaku: postingan dan notifikasi Komunitas, kebijakan konten, dan notifikasi info Banner & Popup.',
+    bannerNoticeFourEyes: 'Empat mata notifikasi info Banner & Popup',
+    bannerNoticeFourEyesHint:
+      'Default mati: notifikasi info dari banner langsung dikirim setelah pembuatnya mengonfirmasi jumlah penerima. Bila dinyalakan, notifikasi baru dikirim setelah disetujui Super Admin atau staf Fitur & Banner lain di menu Banner & Popup.',
+    bannerNoticeFourEyesOnTitle: 'Nyalakan empat mata notifikasi info?',
+    bannerNoticeFourEyesOnBody:
+      'Notifikasi info dari banner baru wajib disetujui staf lain sebelum dikirim. Notifikasi yang sudah terjadwal tetap jalan.',
+    bannerNoticeFourEyesOffTitle: 'Matikan empat mata notifikasi info?',
+    bannerNoticeFourEyesOffBody:
+      'Notifikasi info dari banner baru langsung dikirim setelah pembuatnya mengonfirmasi. Notifikasi yang sedang menunggu tetap perlu disetujui.',
+    fourEyes: 'Empat mata Komunitas',
     fourEyesHint:
       'Default aktif. Postingan dan notifikasi resmi wajib disetujui staf lain, bukan pembuatnya. Bila dimatikan, staf dengan izin "Setujui & terbitkan" bisa langsung menerbitkan buatannya sendiri.',
     policyFourEyes: 'Empat mata kebijakan konten',

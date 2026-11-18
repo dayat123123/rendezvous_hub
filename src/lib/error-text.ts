@@ -279,8 +279,10 @@ const bannerCodes = [
   'invalid_audience',
   'invalid_link_schemes',
   'banner_not_found',
-  'no_official_account',
-  'notification_title_short',
+  'notice_not_found',
+  'invalid_status',
+  'four_eyes',
+  'note_required',
 ] as const
 
 export function bannerErrorText(error: unknown): string {

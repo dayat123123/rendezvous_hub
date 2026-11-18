@@ -66,7 +66,7 @@ describe('SettingsPage', () => {
       within(nav)
         .getAllByRole('group')
         .map((group) => within(group).getByRole('heading').textContent),
-    ).toEqual(['Layanan CS', 'Komunitas', 'Integrasi', 'Sistem'])
+    ).toEqual(['Layanan CS', 'Persetujuan', 'Integrasi', 'Sistem'])
     expect(groupItems('Layanan CS')).toEqual([
       'Akun CS',
       'Quick reply',
@@ -78,7 +78,7 @@ describe('SettingsPage', () => {
       'Status layanan / gangguan',
       'Survei kepuasan',
     ])
-    expect(groupItems('Komunitas')).toEqual(['Aturan persetujuan'])
+    expect(groupItems('Persetujuan')).toEqual(['Aturan empat mata'])
     expect(groupItems('Integrasi')).toEqual([
       'Integrasi API Nasabah',
       'Integrasi aplikasi',
