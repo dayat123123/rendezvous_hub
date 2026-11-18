@@ -45,7 +45,9 @@ import { stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
 import { useAccounts, useAdminOptions, useResetPassword, useSaveAccount } from '../hooks'
-import { isStaffRole, staffRoles, type CreatedAccount, type StaffAccount } from '../types'
+import { coveredBySuperAdmin, pickableRoles, rolesToSave, shownRoles } from '../roles'
+import { isStaffRole, type CreatedAccount, type StaffAccount } from '../types'
+import { PermissionGroup } from './permission-group'
 import { ActiveBadge, FieldMessage, FormError, QueryContent, SectionFrame } from './settings-ui'
 import { copyText } from '@/lib/clipboard'
 
@@ -54,10 +56,10 @@ const emailPattern = /^[^\s@]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/
 type Message =
   'settings.invalidEmail' | 'settings.invalidName' | 'settings.rolesRequired' | 'settings.requiredField'
 
-const editSchema = z.object({
+const baseSchema = z.object({
   email: z.string().trim(),
   display_name: z.string().trim().min(2, 'settings.invalidName').max(40, 'settings.invalidName'),
-  roles: z.array(z.string()).min(1, 'settings.rolesRequired'),
+  roles: z.array(z.string()),
   team: z.string().min(1, 'settings.requiredField'),
   limit: z
     .string()
@@ -69,11 +71,17 @@ const editSchema = z.object({
   trade: z.array(z.string()),
 })
 
-const createSchema = editSchema.extend({
-  email: z.string().trim().regex(emailPattern, 'settings.invalidEmail'),
-})
+const hasAccess = (values: z.infer<typeof baseSchema>) =>
+  rolesToSave(values.roles, values.community).length > 0
+const accessRule = { message: 'settings.rolesRequired', path: ['roles'] }
 
-type AccountForm = z.infer<typeof editSchema>
+const editSchema = baseSchema.refine(hasAccess, accessRule)
+
+const createSchema = baseSchema
+  .extend({ email: z.string().trim().regex(emailPattern, 'settings.invalidEmail') })
+  .refine(hasAccess, accessRule)
+
+type AccountForm = z.infer<typeof baseSchema>
 
 type IssuedPassword = CreatedAccount & { reason: 'created' | 'reset' }
 
@@ -134,7 +142,7 @@ function AccountDialog({
     const draft = {
       ...(editing ? {} : { email: values.email.trim().toLowerCase() }),
       display_name: values.display_name.trim(),
-      roles: staffRoles.filter((role) => values.roles.includes(role)),
+      roles: rolesToSave(values.roles, values.community),
       team: values.team,
       max_active_tickets: Number(values.limit),
       disabled: !values.active,
@@ -197,25 +205,28 @@ function AccountDialog({
             />
           </div>
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1.5 text-sm font-medium">{t('settings.roles')}</legend>
+            <legend className="mb-1 text-sm font-medium">{t('settings.roles')}</legend>
+            <p className="text-xs text-muted-foreground">{t('settings.rolesHint')}</p>
             <Controller
               control={form.control}
               name="roles"
               render={({ field }) => (
-                <div className="grid grid-cols-2 gap-2">
-                  {staffRoles.map((role) => {
-                    const locked = self && role === 'cs_super_admin'
-                    const checked = field.value.includes(role)
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {pickableRoles.map((role) => {
+                    const covered = coveredBySuperAdmin(role, field.value)
+                    const locked = (self && role === 'cs_super_admin') || covered
+                    const checked = covered || field.value.includes(role)
                     return (
                       <label
                         key={role}
                         className={cn(
-                          'flex items-center gap-2 rounded-md border px-3 py-2 text-sm',
+                          'flex items-start gap-2 rounded-md border px-3 py-2 text-sm',
                           checked && 'border-primary/50 bg-primary/5',
-                          locked && 'opacity-60',
+                          locked && 'opacity-70',
                         )}
                       >
                         <Checkbox
+                          className="mt-0.5"
                           checked={checked}
                           disabled={locked}
                           onCheckedChange={(value) =>
@@ -226,7 +237,14 @@ function AccountDialog({
                             )
                           }
                         />
-                        <RoleLabel role={role} />
+                        <span className="min-w-0">
+                          <span className="block font-medium">
+                            <RoleLabel role={role} />
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            {covered ? t('settings.includedInSuperAdmin') : t(`settings.roleHints.${role}`)}
+                          </span>
+                        </span>
                       </label>
                     )
                   })}
@@ -235,141 +253,104 @@ function AccountDialog({
             />
             <FieldMessage error={message(errors.roles?.message)} />
           </fieldset>
-          <div className="grid grid-cols-[1fr_auto] gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="account-team">{t('settings.team')}</Label>
-              <Controller
-                control={form.control}
-                name="team"
-                render={({ field }) => (
-                  <Select
-                    value={teams.some((team) => team.code === field.value) ? field.value : undefined}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger id="account-team" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {teams.map((team) => (
-                        <SelectItem key={team.code} value={team.code}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-            <div className="flex w-40 flex-col gap-1.5">
-              <Label htmlFor="account-limit">{t('settings.ticketLimit')}</Label>
-              <Input
-                id="account-limit"
-                inputMode="numeric"
-                maxLength={2}
-                aria-invalid={errors.limit ? true : undefined}
-                {...form.register('limit')}
-              />
-              <FieldMessage
-                error={errors.limit ? t('settings.numberRange', { min: 1, max: 20 }) : undefined}
-              />
-            </div>
-          </div>
           {csAccount ? (
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-1 text-sm font-medium">{t('settings.nasabahAccess')}</legend>
-              <p className="text-xs text-muted-foreground">{t('settings.nasabahHint')}</p>
+            <div className="flex flex-col gap-3 rounded-md border p-3">
+              <div>
+                <p className="text-sm font-medium">{t('settings.csSection')}</p>
+                <p className="text-xs text-muted-foreground">{t('settings.csSectionHint')}</p>
+              </div>
+              <div className="grid grid-cols-[1fr_auto] gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="account-team">{t('settings.team')}</Label>
+                  <Controller
+                    control={form.control}
+                    name="team"
+                    render={({ field }) => (
+                      <Select
+                        value={teams.some((team) => team.code === field.value) ? field.value : undefined}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger id="account-team" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {teams.map((team) => (
+                            <SelectItem key={team.code} value={team.code}>
+                              {team.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="flex w-40 flex-col gap-1.5">
+                  <Label htmlFor="account-limit">{t('settings.ticketLimit')}</Label>
+                  <Input
+                    id="account-limit"
+                    inputMode="numeric"
+                    maxLength={2}
+                    aria-invalid={errors.limit ? true : undefined}
+                    {...form.register('limit')}
+                  />
+                  <FieldMessage
+                    error={errors.limit ? t('settings.numberRange', { min: 1, max: 20 }) : undefined}
+                  />
+                </div>
+              </div>
               <Controller
                 control={form.control}
                 name="nasabah"
                 render={({ field }) => (
-                  <div className="flex flex-col gap-1.5">
-                    {nasabahPermissions.map((permission) => (
-                      <label key={permission} className="flex items-center gap-2 text-row">
-                        <Checkbox
-                          checked={field.value.includes(permission)}
-                          onCheckedChange={(value) =>
-                            field.onChange(
-                              value === true
-                                ? [...field.value, permission]
-                                : field.value.filter((item) => item !== permission),
-                            )
-                          }
-                        />
-                        {nasabahLabel.permission(permission)}
-                      </label>
-                    ))}
-                  </div>
+                  <PermissionGroup
+                    title={t('settings.nasabahAccess')}
+                    hint={t('settings.nasabahHint')}
+                    options={nasabahPermissions.map((permission) => ({
+                      value: permission,
+                      label: nasabahLabel.permission(permission),
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 )}
               />
-            </fieldset>
+            </div>
           ) : null}
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-medium">{t('settings.communityAccess')}</legend>
-            <p className="text-xs text-muted-foreground">{t('settings.communityHint')}</p>
+          <Controller
+            control={form.control}
+            name="community"
+            render={({ field }) => (
+              <PermissionGroup
+                title={t('settings.communityAccess')}
+                hint={t('settings.communityHint')}
+                options={communityPermissions.map((permission) => ({
+                  value: permission,
+                  label: t(`community.permissions.${permission}`),
+                  hint: t(`community.permissionHints.${permission}`),
+                }))}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          {SHOW_TRADE_SHARE ? (
             <Controller
               control={form.control}
-              name="community"
+              name="trade"
               render={({ field }) => (
-                <div className="flex flex-col gap-1.5">
-                  {communityPermissions.map((permission) => (
-                    <label key={permission} className="flex items-start gap-2 text-row">
-                      <Checkbox
-                        className="mt-0.5"
-                        checked={field.value.includes(permission)}
-                        onCheckedChange={(value) =>
-                          field.onChange(
-                            value === true
-                              ? [...field.value, permission]
-                              : field.value.filter((item) => item !== permission),
-                          )
-                        }
-                      />
-                      <span>
-                        <span className="block">{t(`community.permissions.${permission}`)}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {t(`community.permissionHints.${permission}`)}
-                        </span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                <PermissionGroup
+                  title={t('settings.tradeAccess')}
+                  hint={t('settings.tradeHint')}
+                  options={tradePermissions.map((permission) => ({
+                    value: permission,
+                    label: t(`tradePermissions.${permission}`),
+                    hint: t(`tradePermissionHints.${permission}`),
+                  }))}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               )}
             />
-          </fieldset>
-          {SHOW_TRADE_SHARE ? (
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-1 text-sm font-medium">{t('settings.tradeAccess')}</legend>
-              <p className="text-xs text-muted-foreground">{t('settings.tradeHint')}</p>
-              <Controller
-                control={form.control}
-                name="trade"
-                render={({ field }) => (
-                  <div className="flex flex-col gap-1.5">
-                    {tradePermissions.map((permission) => (
-                      <label key={permission} className="flex items-start gap-2 text-row">
-                        <Checkbox
-                          className="mt-0.5"
-                          checked={field.value.includes(permission)}
-                          onCheckedChange={(value) =>
-                            field.onChange(
-                              value === true
-                                ? [...field.value, permission]
-                                : field.value.filter((item) => item !== permission),
-                            )
-                          }
-                        />
-                        <span>
-                          <span className="block">{t(`tradePermissions.${permission}`)}</span>
-                          <span className="block text-xs text-muted-foreground">
-                            {t(`tradePermissionHints.${permission}`)}
-                          </span>
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              />
-            </fieldset>
           ) : null}
           {editing ? (
             <div className="flex flex-col gap-2">
@@ -570,16 +551,18 @@ function AccountsTable({
             </TableCell>
             <TableCell>{account.email ?? '–'}</TableCell>
             <TableCell>
-              {account.roles.map((role, index) => (
+              {shownRoles(account.roles).map((role, index) => (
                 <span key={role}>
                   {index > 0 ? ', ' : null}
                   <RoleLabel role={role} />
                 </span>
               ))}
             </TableCell>
-            <TableCell>{account.team ?? '–'}</TableCell>
+            <TableCell>{account.roles.includes('cs_agent') ? (account.team ?? '–') : '–'}</TableCell>
             <TableCell className="tabular text-right">
-              {account.active_tickets}/{account.max_active_tickets}
+              {account.roles.includes('cs_agent')
+                ? `${account.active_tickets}/${account.max_active_tickets}`
+                : '–'}
             </TableCell>
             <TableCell>
               {account.disabled_at ? (

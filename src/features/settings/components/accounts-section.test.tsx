@@ -65,6 +65,14 @@ const sinta = staff({
   roles: ['cs_super_admin'],
 })
 
+const communityAll = [
+  'community.post',
+  'community.publish',
+  'community.moderate',
+  'community.sanction',
+  'community.accounts',
+]
+
 async function confirmReset(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole('button', { name: 'Reset password Nadia' }))
   const confirm = screen.getByRole('alertdialog', { name: 'Reset password Nadia?' })
@@ -178,6 +186,117 @@ describe('AccountsSection', () => {
         'trade_relay.operate',
       ]),
     )
+  })
+
+  it('explains each role, hides the Komunitas role, and marks roles Super Admin already covers', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsApi.accounts).mockResolvedValue([
+      { ...sinta, roles: ['cs_super_admin', 'product', 'community'] },
+      nadia,
+    ])
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    expect(await screen.findByRole('cell', { name: 'Super Admin' })).toBeInTheDocument()
+    await user.click(within(screen.getByRole('row', { name: /Sinta/ })).getByRole('button', { name: 'Ubah' }))
+    const form = await screen.findByRole('dialog', { name: 'Ubah akun Sinta' })
+    const roles = within(form).getByRole('group', { name: 'Peran' })
+    expect(
+      within(roles)
+        .getAllByRole('checkbox')
+        .map((box) => box.closest('label')?.querySelector('.font-medium')?.textContent),
+    ).toEqual(['CS', 'Super Admin', 'Kepatuhan', 'Fitur & Banner', 'Pusat Bantuan'])
+    const product = within(roles).getByRole('checkbox', { name: /^Fitur & Banner/ })
+    expect(product).toBeChecked()
+    expect(product).toBeDisabled()
+    expect(within(roles).getAllByText('Sudah termasuk dalam Super Admin.')).toHaveLength(2)
+    expect(within(form).queryByLabelText('Tim')).not.toBeInTheDocument()
+  })
+
+  it('saves only the roles that still add access', async () => {
+    const user = userEvent.setup()
+    const admin = { ...sinta, roles: ['cs_super_admin', 'product', 'community', 'cs_content'] }
+    vi.mocked(settingsApi.accounts).mockResolvedValue([admin, nadia])
+    vi.mocked(settingsApi.updateAccount).mockReset().mockResolvedValue(admin)
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    await user.click(
+      within(await screen.findByRole('row', { name: /Sinta/ })).getByRole('button', { name: 'Ubah' }),
+    )
+    const form = await screen.findByRole('dialog', { name: 'Ubah akun Sinta' })
+    await user.click(within(form).getByRole('button', { name: 'Simpan' }))
+
+    await waitFor(() =>
+      expect(settingsApi.updateAccount).toHaveBeenCalledWith(
+        monitorFixture.id,
+        expect.objectContaining({ roles: ['cs_super_admin'] }),
+      ),
+    )
+  })
+
+  it('turns an account with only community permissions into community staff', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsApi.updateAccount)
+      .mockReset()
+      .mockResolvedValue({ ...nadia, roles: ['community'] })
+    vi.mocked(settingsApi.setCommunityPermissions).mockResolvedValue({
+      ...nadia,
+      roles: ['community'],
+      community_permissions: communityAll,
+    })
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    await user.click(
+      within(await screen.findByRole('row', { name: /Nadia/ })).getByRole('button', { name: 'Ubah' }),
+    )
+    const form = await screen.findByRole('dialog', { name: 'Ubah akun Nadia' })
+    await user.click(within(form).getByRole('checkbox', { name: /^CS/ }))
+    expect(within(form).queryByRole('group', { name: 'Akses Akun Nasabah' })).not.toBeInTheDocument()
+    await user.click(within(form).getByRole('button', { name: 'Simpan' }))
+    expect(await within(form).findByText('Pilih minimal satu peran atau satu Izin Komunitas')).toBeVisible()
+    expect(settingsApi.updateAccount).not.toHaveBeenCalled()
+
+    await user.click(within(form).getByRole('button', { name: 'Pilih semua Izin Komunitas' }))
+    const group = within(form).getByRole('group', { name: 'Izin Komunitas' })
+    expect(
+      within(group)
+        .getAllByRole('checkbox')
+        .every((box) => box.getAttribute('aria-checked') === 'true'),
+    ).toBe(true)
+    expect(within(group).getByText('5/5 dipilih')).toBeVisible()
+    await user.click(within(form).getByRole('button', { name: 'Simpan' }))
+
+    await waitFor(() =>
+      expect(settingsApi.updateAccount).toHaveBeenCalledWith(
+        'nadia',
+        expect.objectContaining({ roles: ['community'] }),
+      ),
+    )
+    await waitFor(() =>
+      expect(settingsApi.setCommunityPermissions).toHaveBeenCalledWith('nadia', communityAll),
+    )
+  })
+
+  it('selects and clears every customer account permission at once', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    await user.click(
+      within(await screen.findByRole('row', { name: /Nadia/ })).getByRole('button', { name: 'Ubah' }),
+    )
+    const form = await screen.findByRole('dialog', { name: 'Ubah akun Nadia' })
+    const group = within(form).getByRole('group', { name: 'Akses Akun Nasabah' })
+    const clear = within(group).getByRole('button', { name: 'Kosongkan Akses Akun Nasabah' })
+    expect(clear).toBeDisabled()
+    await user.click(within(group).getByRole('button', { name: 'Pilih semua Akses Akun Nasabah' }))
+    const boxes = within(group).getAllByRole('checkbox')
+    expect(boxes.every((box) => box.getAttribute('aria-checked') === 'true')).toBe(true)
+    expect(within(group).getByRole('button', { name: 'Pilih semua Akses Akun Nasabah' })).toBeDisabled()
+    await user.click(clear)
+    expect(
+      within(group)
+        .getAllByRole('checkbox')
+        .some((box) => box.getAttribute('aria-checked') === 'true'),
+    ).toBe(false)
   })
 
   it.each([

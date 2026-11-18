@@ -548,13 +548,33 @@ export const en: Translation = {
   },
   settings: {
     communityAccess: 'Community permissions',
-    communityHint: 'For staff who manage the community stream. Can be granted to any role.',
+    communityHint:
+      'Opens the Community menu; the tabs shown follow the permissions ticked. Can be given to any role. An account without any other role becomes community staff automatically.',
     tradeAccess: 'Trade Sharing permissions',
     tradeHint:
       'Compliance → Trade Sharing and System → Trade Relay. Super Admins always hold all of these. Can be granted to any role.',
     nasabahAccess: 'Customer account access',
-    nasabahHint:
-      'Permissions for the Customer accounts menu (data from the Customer API), CS-role accounts only. Empty means the menu is hidden.',
+    nasabahHint: 'Customer Accounts menu (data from the Customer API). Empty means the menu is hidden.',
+    rolesHint: 'Tick everything that applies; the account menus combine every role and permission.',
+    roleHints: {
+      cs_agent:
+        'Handles customer chat tickets. Unlocks Team, Ticket limit, and Customer Account access below.',
+      cs_super_admin:
+        'Manages staff accounts, Settings, Dashboard, and Reports; monitors tickets. Already includes Features & banners and Help Center. Without the CS role it only monitors and does not reply.',
+      compliance:
+        'Complaints, cases, content policy, deadlines & retention, legal documents, audit trail, and evidence.',
+      community: 'Community staff without any other role; menus follow the Community permissions.',
+      product: 'Community › Features & versions and Stream tabs, plus the Banners & Popups menu.',
+      cs_content: 'Help Center menu: CS chat topics and help articles.',
+    },
+    includedInSuperAdmin: 'Already included in Super Admin.',
+    csSection: 'CS settings',
+    csSectionHint: 'For the CS role only.',
+    permissionCount: '{{chosen}}/{{total}} selected',
+    selectAll: 'Select all',
+    clearAll: 'Clear',
+    selectAllOf: 'Select all {{group}}',
+    clearAllOf: 'Clear {{group}}',
     title: 'Settings',
     groups: { service: 'CS service', community: 'Community', integration: 'Integrations', system: 'System' },
     accounts: 'CS accounts',
@@ -591,7 +611,7 @@ export const en: Translation = {
     colActions: 'Actions',
     disabledSince: 'Disabled {{time}}',
     accountDisabled: 'Disabled',
-    addAccountTitle: 'Add CS account',
+    addAccountTitle: 'Add staff account',
     editAccountTitle: 'Edit {{name}}',
     displayName: 'Display name',
     displayNameHint: 'Visible to customers, 2–40 characters',
@@ -604,7 +624,7 @@ export const en: Translation = {
       'This account can no longer sign in. Its {{count}} active tickets return to the queue marked "Akun CS dinonaktifkan".',
     selfLocked: 'You cannot disable your own account or remove your own Super Admin role.',
     createAccount: 'Create account',
-    rolesRequired: 'Pick at least one role',
+    rolesRequired: 'Pick at least one role or one Community permission',
     invalidEmail: 'Invalid email format',
     invalidName: 'Name must be 2–40 characters',
     numberRange: 'Enter a number {{min}}–{{max}}',

@@ -546,13 +546,32 @@ export const id = {
   },
   settings: {
     communityAccess: 'Izin Komunitas',
-    communityHint: 'Untuk staf yang mengelola stream komunitas. Bisa diberikan ke peran apa pun.',
+    communityHint:
+      'Membuka menu Komunitas; tab yang tampil mengikuti izin yang dicentang. Bisa diberikan ke peran apa pun. Akun tanpa peran lain otomatis menjadi staf Komunitas.',
     tradeAccess: 'Izin Berbagi Trade',
     tradeHint:
       'Menu Kepatuhan → Berbagi Trade dan Sistem → Relay Trade. Super Admin selalu punya semua izin ini. Bisa diberikan ke peran apa pun.',
     nasabahAccess: 'Akses Akun Nasabah',
-    nasabahHint:
-      'Izin menu Akun Nasabah (data dari API Nasabah), khusus akun berperan CS. Kosong berarti menu tidak tampil.',
+    nasabahHint: 'Menu Akun Nasabah (data dari API Nasabah). Kosong berarti menu tidak tampil.',
+    rolesHint: 'Centang semua yang sesuai; menu akun digabung dari setiap peran dan izin.',
+    roleHints: {
+      cs_agent: 'Menangani tiket chat nasabah. Membuka Tim, Batas tiket, dan Akses Akun Nasabah di bawah.',
+      cs_super_admin:
+        'Mengelola akun staf, Pengaturan, Dashboard, dan Laporan; memantau tiket. Sudah termasuk Fitur & Banner dan Pusat Bantuan. Tanpa peran CS hanya memantau, tidak membalas.',
+      compliance:
+        'Pengaduan, kasus, kebijakan konten, tenggat & retensi, dokumen hukum, jejak audit, dan bukti.',
+      community: 'Staf Komunitas tanpa peran lain; menunya mengikuti Izin Komunitas.',
+      product: 'Komunitas › Fitur & versi dan Tab Stream, serta menu Banner & Popup.',
+      cs_content: 'Menu Pusat Bantuan: topik chat CS dan artikel bantuan.',
+    },
+    includedInSuperAdmin: 'Sudah termasuk dalam Super Admin.',
+    csSection: 'Pengaturan CS',
+    csSectionHint: 'Hanya untuk peran CS.',
+    permissionCount: '{{chosen}}/{{total}} dipilih',
+    selectAll: 'Pilih semua',
+    clearAll: 'Kosongkan',
+    selectAllOf: 'Pilih semua {{group}}',
+    clearAllOf: 'Kosongkan {{group}}',
     title: 'Pengaturan',
     groups: { service: 'Layanan CS', community: 'Komunitas', integration: 'Integrasi', system: 'Sistem' },
     accounts: 'Akun CS',
@@ -589,7 +608,7 @@ export const id = {
     colActions: 'Aksi',
     disabledSince: 'Dinonaktifkan {{time}}',
     accountDisabled: 'Nonaktif',
-    addAccountTitle: 'Tambah akun CS',
+    addAccountTitle: 'Tambah akun staf',
     editAccountTitle: 'Ubah akun {{name}}',
     displayName: 'Nama tampilan',
     displayNameHint: 'Terlihat oleh nasabah, 2–40 karakter',
@@ -602,7 +621,7 @@ export const id = {
       'Akun ini langsung tidak bisa login. {{count}} tiket aktifnya kembali ke antrean dengan tanda "Akun CS dinonaktifkan".',
     selfLocked: 'Anda tidak bisa menonaktifkan akun sendiri atau melepas peran Super Admin Anda.',
     createAccount: 'Buat akun',
-    rolesRequired: 'Pilih minimal satu peran',
+    rolesRequired: 'Pilih minimal satu peran atau satu Izin Komunitas',
     invalidEmail: 'Format email tidak valid',
     invalidName: 'Nama 2–40 karakter',
     numberRange: 'Isi angka {{min}}–{{max}}',
