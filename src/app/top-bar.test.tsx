@@ -84,6 +84,15 @@ describe('TopBar', () => {
     expect(screen.queryByText('Mode pantau')).not.toBeInTheDocument()
   })
 
+  it('keeps the search button named and its shortcut on one line when the bar is crowded', () => {
+    renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
+
+    const search = screen.getByRole('button', { name: 'Cari tiket atau nasabah… (Ctrl K)' })
+    const shortcut = within(search).getByText('Ctrl K')
+    expect(shortcut).toHaveClass('whitespace-nowrap', 'shrink-0')
+    expect(search.parentElement).toHaveClass('@container')
+  })
+
   it('shows monitor mode and admin menus to Super Admins without status or capacity', () => {
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
 

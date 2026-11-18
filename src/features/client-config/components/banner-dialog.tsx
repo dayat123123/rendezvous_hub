@@ -130,7 +130,7 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
     link_url: optional(linkText),
     cta_label: optional(ctaText),
     image_url: popup && image.kind === 'keep' ? initial.image_url : null,
-    frequency: popup ? draft.frequency : 'once',
+    frequency: draft.frequency,
     audience_days:
       draft.audience === 'new_users'
         ? daysText.trim() === ''
@@ -280,26 +280,24 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
             <FieldText id={`${id}-cta-text`} error={text.cta} hint={t('platform.banners.hints.cta')} />
           </div>
         </div>
-        {popup ? (
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-medium">{t('platform.banners.fields.frequency')}</legend>
-            <RadioGroup
-              value={draft.frequency}
-              onValueChange={(value) =>
-                setDraft((item) => ({ ...item, frequency: value as BannerFrequency }))
-              }
-              className="flex flex-wrap gap-4"
-            >
-              {bannerFrequencies.map((frequency) => (
-                <label key={frequency} className="flex items-center gap-2 text-row">
-                  <RadioGroupItem value={frequency} />
-                  {t(`platform.banners.frequencies.${frequency}`)}
-                </label>
-              ))}
-            </RadioGroup>
-            <p className="text-xs text-muted-foreground">{t('platform.banners.hints.frequency')}</p>
-          </fieldset>
-        ) : null}
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-medium">{t('platform.banners.fields.frequency')}</legend>
+          <RadioGroup
+            value={draft.frequency}
+            onValueChange={(value) => setDraft((item) => ({ ...item, frequency: value as BannerFrequency }))}
+            className="flex flex-wrap gap-4"
+          >
+            {bannerFrequencies.map((frequency) => (
+              <label key={frequency} className="flex items-center gap-2 text-row">
+                <RadioGroupItem value={frequency} />
+                {t(`platform.banners.frequencies.${frequency}`)}
+              </label>
+            ))}
+          </RadioGroup>
+          <p className="text-xs text-muted-foreground">
+            {popup ? t('platform.banners.hints.frequency') : t('platform.banners.hints.frequencyStrip')}
+          </p>
+        </fieldset>
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 text-sm font-medium">{t('platform.banners.fields.audience')}</legend>
           <RadioGroup

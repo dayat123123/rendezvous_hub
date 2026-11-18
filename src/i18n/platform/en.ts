@@ -416,6 +416,8 @@ export const platform: Translated<typeof source> = {
       cta: 'When empty, the app uses its default label. Only used when there is a link.',
       image: 'JPEG, PNG, or WebP. Cropped to {{ratio}} and shrunk below 2 MB automatically.',
       frequency: 'How often the popup appears for the same user.',
+      frequencyStrip:
+        'How often the strip appears for the same user. Once shown, it stays until the app closes; after that it follows this frequency. A strip the user dismissed does not come back on that device.',
       audience:
         'New users are counted from the profile creation date. Visitors who are not signed in only see banners for all users.',
       audienceDays: '1–90 days.',

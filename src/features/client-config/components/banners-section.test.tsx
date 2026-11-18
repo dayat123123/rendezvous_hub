@@ -99,7 +99,7 @@ describe('BannersSection', () => {
     const active = within(table).getByRole('row', { name: /Pemeliharaan sistem/ })
     expect(within(active).getByText('Aktif')).toBeVisible()
     expect(within(active).getByText('Strip')).toBeVisible()
-    expect(within(active).getByText('Peringatan · Tidak bisa ditutup')).toBeVisible()
+    expect(within(active).getByText('Peringatan · Sekali per pengguna · Tidak bisa ditutup')).toBeVisible()
     expect(within(active).getByText('Android, iOS')).toBeVisible()
     expect(within(active).getByText('Versi ≥ 2.4.0')).toBeVisible()
     expect(within(active).getByText('1.200 tayang · 84 klik')).toBeVisible()
@@ -258,6 +258,27 @@ describe('BannersSection', () => {
     )
   })
 
+  it('lets a strip banner choose how often it shows, like a popup', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.save).mockResolvedValueOnce(banner({ id: 'banner-7', frequency: 'daily' }))
+    renderSection()
+    await user.click(await screen.findByRole('button', { name: 'Tambah banner' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
+    const frequency = within(dialog).getByRole('group', { name: 'Frekuensi' })
+    expect(within(frequency).getByRole('radio', { name: 'Sekali per pengguna' })).toBeChecked()
+    expect(within(dialog).getByText(/Berapa kali strip muncul untuk pengguna yang sama/)).toBeVisible()
+    await user.type(within(dialog).getByLabelText('Judul'), 'Pemeliharaan')
+    await user.click(within(frequency).getByRole('radio', { name: 'Sekali sehari' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(bannersApi.save).toHaveBeenCalled())
+    expect(bannersApi.save).toHaveBeenLastCalledWith(
+      null,
+      expect.objectContaining({ display: 'strip', frequency: 'daily' }),
+      true,
+    )
+    expect(await screen.findByText('Peringatan · Sekali per pengguna · Tidak bisa ditutup')).toBeVisible()
+  })
+
   it('does not offer a notification when editing a banner', async () => {
     const user = userEvent.setup()
     vi.mocked(bannersApi.save).mockResolvedValueOnce(banner())
@@ -290,7 +311,7 @@ describe('BannersSection', () => {
     renderSection()
     await user.click(await screen.findByRole('button', { name: 'Tambah banner' }))
     const dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
-    expect(within(dialog).queryByRole('radio', { name: 'Sekali sehari' })).not.toBeInTheDocument()
+    expect(within(dialog).getByRole('radio', { name: 'Sekali sehari' })).toBeInTheDocument()
     await user.click(within(dialog).getByRole('radio', { name: 'Popup tengah' }))
     expect(within(dialog).getByRole('button', { name: 'Pilih gambar' })).toBeVisible()
     expect(within(dialog).getByRole('radio', { name: '4:5 (disarankan)' })).toBeChecked()

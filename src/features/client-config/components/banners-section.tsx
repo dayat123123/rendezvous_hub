@@ -92,9 +92,7 @@ function BannersTable({ banners }: { banners: AppBanner[] }) {
                   <p className="text-xs text-muted-foreground">
                     {[
                       t(`platform.banners.levels.${banner.level}`),
-                      banner.display === 'popup'
-                        ? t(`platform.banners.frequencies.${banner.frequency}`)
-                        : null,
+                      t(`platform.banners.frequencies.${banner.frequency}`),
                       banner.dismissible ? null : t('platform.banners.notDismissible'),
                     ]
                       .filter(Boolean)

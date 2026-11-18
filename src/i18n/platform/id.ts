@@ -423,6 +423,8 @@ export const platform = {
       cta: 'Bila kosong, aplikasi memakai label bawaan. Hanya dipakai bila ada tautan.',
       image: 'JPEG, PNG, atau WebP. Dipotong {{ratio}} dan dikecilkan otomatis sampai di bawah 2 MB.',
       frequency: 'Berapa kali popup muncul untuk pengguna yang sama.',
+      frequencyStrip:
+        'Berapa kali strip muncul untuk pengguna yang sama. Sekali muncul, strip tetap tampil sampai aplikasi ditutup; setelah itu mengikuti frekuensi ini. Strip yang ditutup pengguna tidak muncul lagi di perangkatnya.',
       audience:
         'Pengguna baru dihitung dari tanggal profil dibuat. Pengunjung yang belum login hanya melihat banner untuk semua pengguna.',
       audienceDays: '1–90 hari.',

@@ -403,17 +403,19 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
           />
         ) : null}
       </nav>
-      <div className="hidden min-w-0 flex-1 justify-center px-2 lg:flex">
+      <div className="@container hidden min-w-12 flex-1 justify-center px-2 lg:flex">
         <button
           type="button"
           onClick={() => setPalette(true)}
-          className="flex h-8 w-full max-w-[360px] items-center gap-2 rounded-md bg-muted px-2.5 text-row text-muted-foreground transition-colors outline-none hover:bg-selected focus-visible:ring-2 focus-visible:ring-ring/50"
+          aria-label={`${tickets ? t('nav.searchHint') : t('nav.commandHint')} (Ctrl K)`}
+          title={`${tickets ? t('nav.searchHint') : t('nav.commandHint')} (Ctrl K)`}
+          className="flex h-8 w-full max-w-[360px] items-center justify-center gap-2 rounded-md bg-muted px-2.5 text-row text-muted-foreground transition-colors outline-none hover:bg-selected focus-visible:ring-2 focus-visible:ring-ring/50 @min-[12rem]:justify-start"
         >
-          <SearchIcon className="size-4" />
-          <span className="flex-1 truncate text-left">
+          <SearchIcon className="size-4 shrink-0" />
+          <span className="hidden flex-1 truncate text-left @min-[12rem]:block">
             {tickets ? t('nav.searchHint') : t('nav.commandHint')}
           </span>
-          <Kbd>Ctrl K</Kbd>
+          <Kbd className="hidden shrink-0 whitespace-nowrap @min-[6rem]:inline-flex">Ctrl K</Kbd>
         </button>
       </div>
       <div className="ml-auto flex items-center gap-1 lg:ml-0">

@@ -87,7 +87,7 @@ export const bannersApi = {
         p_display: draft.display,
         p_image_url: draft.display === 'popup' ? draft.image_url : null,
         p_cta_label: draft.link_url ? draft.cta_label : null,
-        p_frequency: draft.display === 'popup' ? draft.frequency : 'once',
+        p_frequency: draft.frequency,
         p_audience: draft.audience,
         p_audience_days: draft.audience_days,
         p_notify: id === null && notify,
