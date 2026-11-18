@@ -1,6 +1,7 @@
 import type { StaffRef } from '@/features/community/types'
 
 export const policyTabs = [
+  'words',
   'rules',
   'domains',
   'terms',

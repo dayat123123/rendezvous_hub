@@ -140,6 +140,7 @@ export const en: Translation = {
     },
   },
   nav: {
+    complianceMenu: 'Compliance',
     nasabah: 'Customer accounts',
     tickets: 'Customer service',
     dashboard: 'Dashboard',
@@ -159,7 +160,7 @@ export const en: Translation = {
     overview: 'Overview',
     cases: 'Cases',
     audit: 'Audit trail',
-    policy: 'Policies',
+    policy: 'Deadlines & retention',
     words: 'Banned words',
     caseAttention: '{{count}} cases need attention',
     community: 'Community',
@@ -894,7 +895,7 @@ export const en: Translation = {
       stale: 'Refresh failed, data may be out of date',
       policyBanner:
         '{{count}} policies are not confirmed by Compliance yet, so the proposed values are in use.',
-      openPolicy: 'Open Policies',
+      openPolicy: 'Open Deadlines & retention',
       activeComplaints: 'Active complaints',
       dueSoon: 'Due within 1 business day',
       overdue: 'Past deadline',
@@ -1414,7 +1415,7 @@ export const en: Translation = {
       },
     },
     policy: {
-      title: 'Policies',
+      title: 'Deadlines & retention',
       subtitle: 'Values that Compliance must confirm. Super Admins cannot change them.',
       names: {
         complaint_days: 'Complaint deadline',

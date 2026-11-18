@@ -7,6 +7,7 @@ export const policy: Translated<typeof source> = {
     'Community content safety rules: links, contacts, promotion phrases, new accounts, image moderation, and stock manipulation detection. Enforced on the server for every app. Every change is recorded in the audit trail.',
   tabsLabel: 'Content policy sections',
   tabs: {
+    words: 'Banned words',
     rules: 'Categories',
     domains: 'Domains',
     terms: 'Phrases & exceptions',
@@ -348,7 +349,7 @@ export const policy: Translated<typeof source> = {
     note: 'The result uses the rules in effect, not your draft. To test the draft, use Simulate in the Versions & approval tab.',
     summary: {
       allowCounted:
-        'Passes. This text matches none of the {{words}} banned words and {{phrases}} promotional phrases in effect, and triggers no link or contact category. Words that are not on the list always pass, so add profanity or porn terms in Banned words.',
+        'Passes. This text matches none of the {{words}} banned words and {{phrases}} promotional phrases in effect, and triggers no link or contact category. Words that are not on the list always pass, so add profanity or porn terms in the Banned words tab.',
       allow:
         'Passes. This text matches nothing in Banned words, promotional phrases, or the link and contact categories. Words that are not on the list always pass.',
       censor: 'Censored. Matching parts are replaced with asterisks; the rest is sent.',

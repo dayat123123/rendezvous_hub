@@ -4,6 +4,7 @@ export const policy = {
     'Aturan keamanan konten komunitas: tautan, kontak, frasa promosi, akun baru, moderasi gambar, dan deteksi manipulasi saham. Berlaku di server untuk semua aplikasi. Semua perubahan tercatat di jejak audit.',
   tabsLabel: 'Bagian kebijakan konten',
   tabs: {
+    words: 'Kata terlarang',
     rules: 'Kategori',
     domains: 'Domain',
     terms: 'Frasa & pengecualian',
@@ -345,7 +346,7 @@ export const policy = {
     note: 'Hasil memakai aturan yang sedang berlaku, bukan draf. Untuk menguji draf, pakai Simulasi di tab Versi & persetujuan.',
     summary: {
       allowCounted:
-        'Lolos. Teks ini tidak cocok dengan {{words}} kata terlarang dan {{phrases}} frasa promosi yang berlaku, dan tidak memicu kategori tautan atau kontak. Kata yang belum ada di daftar selalu lolos, jadi tambahkan kata kasar atau porno di menu Kata terlarang.',
+        'Lolos. Teks ini tidak cocok dengan {{words}} kata terlarang dan {{phrases}} frasa promosi yang berlaku, dan tidak memicu kategori tautan atau kontak. Kata yang belum ada di daftar selalu lolos, jadi tambahkan kata kasar atau porno di tab Kata terlarang.',
       allow:
         'Lolos. Teks ini tidak cocok dengan daftar Kata terlarang, frasa promosi, maupun kategori tautan atau kontak. Kata yang belum ada di daftar selalu lolos.',
       censor: 'Disensor. Bagian yang cocok diganti bintang, sisanya tetap terkirim.',

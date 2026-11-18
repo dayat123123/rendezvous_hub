@@ -1,7 +1,8 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import {
   BellIcon,
   BellOffIcon,
+  ChevronDownIcon,
   GaugeIcon,
   KeyboardIcon,
   KeyRoundIcon,
@@ -122,6 +123,47 @@ function NavLink({
         </span>
       ) : null}
     </Link>
+  )
+}
+
+type NavItem = { to: NavTarget; label: string; count?: number; countLabel?: string }
+
+const navTriggerClass =
+  'relative inline-flex h-12 shrink-0 items-center gap-1.5 px-2 text-row whitespace-nowrap text-muted-foreground transition-colors outline-none after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset data-[current=true]:font-medium data-[current=true]:text-foreground data-[current=true]:after:bg-foreground'
+
+function NavMenu({ label, items }: { label: string; items: NavItem[] }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const current = items.some((item) =>
+    item.to === '/compliance'
+      ? pathname === item.to
+      : pathname === item.to || pathname.startsWith(`${item.to}/`),
+  )
+  const count = items.reduce((sum, item) => sum + (item.count ?? 0), 0)
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className={navTriggerClass} data-current={current}>
+        {label}
+        {count ? <span className="tabular text-xs font-medium text-danger">{count}</span> : null}
+        <ChevronDownIcon className="size-3.5" aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-52">
+        {items.map((item) => (
+          <DropdownMenuItem key={item.to} asChild>
+            <Link to={item.to}>
+              {item.label}
+              {item.count ? (
+                <span
+                  className="tabular ml-auto text-xs font-medium text-danger"
+                  aria-label={item.countLabel}
+                >
+                  {item.count}
+                </span>
+              ) : null}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -270,6 +312,33 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
   const unseenNotices = useComplianceNotices(watchesCases).data?.unseen ?? 0
   const communityCount = useCommunityBadge()
   const health = badgeView(useHealthBadge(superAdmin).data)
+  const groupCompliance =
+    tickets ||
+    superAdmin ||
+    hasNasabah(agent) ||
+    canOpenCommunity(agent) ||
+    canManageContent(agent) ||
+    canManageFeatures(agent)
+  const complianceItems: NavItem[] = [
+    {
+      to: '/compliance',
+      label: t('nav.overview'),
+      count: unseenNotices || undefined,
+      countLabel: t('complianceNotices.titleUnseen', { count: unseenNotices }),
+    },
+    {
+      to: '/compliance/cases',
+      label: t('nav.cases'),
+      count: caseAttention || undefined,
+      countLabel: t('nav.caseAttention', { count: caseAttention }),
+    },
+    { to: '/compliance/content', label: t('nav.contentPolicy') },
+    { to: '/compliance/policy', label: t('nav.policy') },
+    { to: '/compliance/legal', label: t('nav.legal') },
+    ...(tradeShare ? [{ to: '/compliance/trade-share' as const, label: t('nav.tradeShare') }] : []),
+    { to: '/compliance/audit', label: t('nav.audit') },
+    { to: '/compliance/evidence', label: t('nav.evidence') },
+  ]
   const [dialog, setDialog] = useState<AccountDialog | null>(null)
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3 lg:px-4">
@@ -312,29 +381,12 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
             }
           />
         ) : null}
-        {compliance ? (
-          <>
-            <NavLink
-              to="/compliance"
-              label={t('nav.overview')}
-              count={unseenNotices || undefined}
-              countLabel={t('complianceNotices.titleUnseen', { count: unseenNotices })}
-            />
-            <NavLink
-              to="/compliance/cases"
-              label={t('nav.cases')}
-              count={caseAttention || undefined}
-              countLabel={t('nav.caseAttention', { count: caseAttention })}
-            />
-            <NavLink to="/compliance/audit" label={t('nav.audit')} />
-            <NavLink to="/compliance/policy" label={t('nav.policy')} />
-            <NavLink to="/compliance/words" label={t('nav.words')} />
-            <NavLink to="/compliance/content" label={t('nav.contentPolicy')} />
-            <NavLink to="/compliance/legal" label={t('nav.legal')} />
-            {tradeShare ? <NavLink to="/compliance/trade-share" label={t('nav.tradeShare')} /> : null}
-            <NavLink to="/compliance/evidence" label={t('nav.evidence')} />
-          </>
+        {compliance && groupCompliance ? (
+          <NavMenu label={t('nav.complianceMenu')} items={complianceItems} />
         ) : null}
+        {compliance && !groupCompliance
+          ? complianceItems.map((item) => <NavLink key={item.to} {...item} />)
+          : null}
         {superAdmin ? (
           <NavLink
             to="/settings"

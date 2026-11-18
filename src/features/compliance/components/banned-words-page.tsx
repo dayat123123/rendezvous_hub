@@ -446,7 +446,7 @@ function WordsTable({ words, onDelete }: { words: BannedWord[]; onDelete: (entry
   )
 }
 
-export function BannedWordsPage() {
+export function BannedWordsPage({ embedded = false }: { embedded?: boolean }) {
   const { t } = useTranslation()
   const label = useActionLabel()
   const list = useBannedWords()
@@ -478,12 +478,19 @@ export function BannedWordsPage() {
     }
   }
 
+  const Heading = embedded ? 'h2' : 'h1'
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 py-5 lg:px-6">
+    <div className={embedded ? undefined : 'h-full overflow-y-auto'}>
+      <div
+        className={
+          embedded ? 'flex flex-col gap-4' : 'mx-auto flex max-w-[1120px] flex-col gap-4 px-4 py-5 lg:px-6'
+        }
+      >
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div className="max-w-2xl min-w-0">
-            <h1 className="text-lg font-semibold">{t('compliance.words.title')}</h1>
+            <Heading className={embedded ? 'text-panel font-semibold' : 'text-lg font-semibold'}>
+              {t('compliance.words.title')}
+            </Heading>
             <p className="text-row text-muted-foreground">{t('compliance.words.subtitle')}</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -506,7 +513,7 @@ export function BannedWordsPage() {
             </Button>
           </div>
         </header>
-        <DraftBanner />
+        {embedded ? null : <DraftBanner />}
         <div className="flex flex-wrap items-center gap-2">
           <ToggleGroup
             type="single"

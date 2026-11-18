@@ -20,6 +20,8 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
     ...actual,
     Link: ({ to, children }: { to: string; children: React.ReactNode }) =>
       createElement('a', { href: to }, children),
+    useRouterState: ({ select }: { select: (state: { location: { pathname: string } }) => unknown }) =>
+      select({ location: { pathname: '/compliance/cases' } }),
   }
 })
 
@@ -166,7 +168,8 @@ describe('TopBar', () => {
     ])
   })
 
-  it('keeps Pengaturan as the rightmost menu, after the compliance menus too', () => {
+  it('groups the compliance pages under one Kepatuhan menu for staff who also have other menus', async () => {
+    const user = userEvent.setup()
     nav.SHOW_SYSTEM_HEALTH_NAV = true
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
       ...monitorFixture,
@@ -176,9 +179,26 @@ describe('TopBar', () => {
 
     const links = navLinks()
     expect(links.at(-1)).toBe('Pengaturan')
-    expect(links.at(-2)).toBe('Bukti')
-    expect(links.indexOf('Berbagi Trade')).toBe(links.indexOf('Dokumen hukum') + 1)
+    expect(links).not.toContain('Kasus')
     expect(links.indexOf('Kesehatan sistem')).toBeLessThan(links.indexOf('Pengaturan'))
+    const menu = screen.getByRole('button', { name: 'Kepatuhan' })
+    expect(menu).toHaveAttribute('data-current', 'true')
+    await user.click(menu)
+    const list = await screen.findByRole('menu')
+    expect(
+      within(list)
+        .getAllByRole('link')
+        .map((item) => item.textContent),
+    ).toEqual([
+      'Ringkasan',
+      'Kasus',
+      'Kebijakan konten',
+      'Tenggat & retensi',
+      'Dokumen hukum',
+      'Berbagi Trade',
+      'Jejak Audit',
+      'Bukti',
+    ])
   })
 
   it('adds Berbagi Trade to the compliance menus only with a trade permission', () => {
@@ -280,11 +300,10 @@ describe('TopBar', () => {
     expect(navLinks()).toEqual([
       'Ringkasan',
       'Kasus',
-      'Jejak Audit',
-      'Kebijakan',
-      'Kata terlarang',
       'Kebijakan konten',
+      'Tenggat & retensi',
       'Dokumen hukum',
+      'Jejak Audit',
       'Bukti',
     ])
   })

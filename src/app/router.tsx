@@ -223,11 +223,9 @@ const compliancePolicyRoute = createRoute({
 const complianceWordsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/compliance/words',
-  beforeLoad: complianceOnly,
-  component: lazyRouteComponent(
-    withStrings(() => import('@/features/compliance/components/banned-words-page'), 'policy'),
-    'BannedWordsPage',
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: '/compliance/content', search: { tab: 'words' } })
+  },
 })
 
 const complianceContentRoute = createRoute({

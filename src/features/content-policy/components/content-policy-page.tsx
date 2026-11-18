@@ -2,6 +2,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import { SectionBoundary } from '@/components/states'
+import { BannedWordsPage } from '@/features/compliance/components/banned-words-page'
 import { DraftBanner } from '@/features/compliance/policy-versions/components/draft-banner'
 import { VersionsTab } from '@/features/compliance/policy-versions/components/versions-tab'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,7 @@ import { TermsTab } from './terms-tab'
 import { TesterTab } from './tester-tab'
 
 const panels: Record<PolicyTab, () => React.ReactNode> = {
+  words: () => <BannedWordsPage embedded />,
   rules: () => <RulesTab />,
   domains: () => <DomainsTab />,
   terms: () => <TermsTab />,
@@ -28,7 +30,7 @@ export function ContentPolicyPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const search: { tab?: PolicyTab } = useSearch({ strict: false })
-  const tab = search.tab ?? 'rules'
+  const tab = search.tab ?? 'words'
   const go = (next: PolicyTab) => void navigate({ to: '/compliance/content', search: { tab: next } })
   return (
     <div className="h-full overflow-y-auto">

@@ -139,6 +139,7 @@ export const id = {
     },
   },
   nav: {
+    complianceMenu: 'Kepatuhan',
     nasabah: 'Akun Nasabah',
     tickets: 'Layanan Nasabah',
     dashboard: 'Dashboard',
@@ -158,7 +159,7 @@ export const id = {
     overview: 'Ringkasan',
     cases: 'Kasus',
     audit: 'Jejak Audit',
-    policy: 'Kebijakan',
+    policy: 'Tenggat & retensi',
     words: 'Kata terlarang',
     caseAttention: '{{count}} kasus perlu perhatian',
     community: 'Komunitas',
@@ -892,7 +893,7 @@ export const id = {
       stale: 'Gagal memperbarui, data mungkin belum terbaru',
       policyBanner:
         '{{count}} kebijakan belum dikonfirmasi Kepatuhan, sehingga nilai usulan yang sedang dipakai.',
-      openPolicy: 'Buka Kebijakan',
+      openPolicy: 'Buka Tenggat & retensi',
       activeComplaints: 'Pengaduan aktif',
       dueSoon: 'Jatuh tempo ≤ 1 hari kerja',
       overdue: 'Lewat tenggat',
@@ -1411,7 +1412,7 @@ export const id = {
       },
     },
     policy: {
-      title: 'Kebijakan',
+      title: 'Tenggat & retensi',
       subtitle: 'Nilai yang wajib dikonfirmasi Kepatuhan. Super Admin tidak bisa mengubahnya.',
       names: {
         complaint_days: 'Tenggat pengaduan',

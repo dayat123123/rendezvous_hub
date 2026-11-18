@@ -340,6 +340,6 @@ describe('content policy', () => {
     await user.click(screen.getByRole('button', { name: 'Uji' }))
     const result = await screen.findByRole('region', { name: 'Hasil uji' })
     expect(within(result).getByText(/tidak cocok dengan 6 kata terlarang dan 2 frasa promosi/)).toBeVisible()
-    expect(within(result).getByText(/tambahkan kata kasar atau porno di menu Kata terlarang/)).toBeVisible()
+    expect(within(result).getByText(/tambahkan kata kasar atau porno di tab Kata terlarang/)).toBeVisible()
   })
 })
