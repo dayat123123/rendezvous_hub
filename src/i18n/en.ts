@@ -118,8 +118,8 @@ export const en: Translation = {
     cs_super_admin: 'Super Admin',
     compliance: 'Compliance',
     community: 'Community',
-    product: 'Features & campaigns',
-    cs_content: 'Service content',
+    product: 'Features & banners',
+    cs_content: 'Help center',
   },
   tradePermissions: {
     trade_share: {
@@ -145,8 +145,8 @@ export const en: Translation = {
     tickets: 'Customer service',
     dashboard: 'Dashboard',
     reports: 'Reports',
-    featuresCampaigns: 'Features & Campaigns',
-    content: 'Service Content',
+    featuresCampaigns: 'Banners & Popups',
+    content: 'Help Center',
     settings: 'Settings',
     attention: '{{count}} tickets need attention',
     account: 'Account',
@@ -1767,13 +1767,14 @@ export const en: Translation = {
     },
   },
   content: {
-    title: 'Service Content',
-    subtitle: 'Help content customers see in the app: customer service chat topics and the help center.',
-    tabsLabel: 'Service Content sections',
-    tabs: { topics: 'Customer service topics', faq: 'Help center' },
+    title: 'Help Center',
+    subtitle:
+      'Help content customers see in the app: topics they pick before a customer service chat and help articles (FAQ).',
+    tabsLabel: 'Help Center sections',
+    tabs: { topics: 'Customer service topics', faq: 'Help articles' },
   },
   faq: {
-    title: 'Help center (FAQ)',
+    title: 'Help articles (FAQ)',
     description:
       'Help articles customers read in the app before contacting customer service. New articles are saved as drafts and appear only after they are published.',
     addArticle: 'Add article',
@@ -1880,11 +1881,9 @@ export const en: Translation = {
     helpfulNo: 'Not helpful',
   },
   featuresCampaigns: {
-    title: 'Features & Campaigns',
+    title: 'Banners & Popups',
     subtitle:
-      'Social features, kill switch, minimum app versions, and banner and popup campaigns for customers.',
-    tabsLabel: 'Features & Campaigns sections',
-    tabs: { features: 'Features & versions', banners: 'Banners & popups', stream: 'Stream tabs' },
+      'Strip banner and promo popup campaigns in the customer app: schedule, platforms, image, button, and view statistics. Features & versions and Stream tabs are in the Community menu.',
   },
   command: {
     placeholder: 'Search tickets, customers, or commands…',
@@ -1897,7 +1896,7 @@ export const en: Translation = {
     preferences: 'Appearance',
     openTicket: 'Open ticket {{number}}',
     goTo: 'Go to {{section}}',
-    featuresCampaignsTab: 'Go to Features & Campaigns › {{tab}}',
+    communityTab: 'Go to Community › {{tab}}',
     tab: '{{tab}} tab',
     setStatus: 'Status: {{status}}',
     toggleTheme: 'Switch theme',
@@ -1993,16 +1992,18 @@ export const en: Translation = {
   community: {
     pageTitle: 'Community',
     pageSubtitle:
-      'Manage official posts, announcements, notifications, and moderation of the community stream.',
+      'Manage official posts, announcements, notifications, moderation of the community stream, and the app features and Stream tabs.',
     noAccess: 'This account has no community permissions yet. Contact a Super Admin.',
     tabsLabel: 'Community menu',
     tabs: {
-      stream: 'Stream',
+      stream: 'Official posts',
       notifications: 'Notifications',
       moderation: 'Moderation',
       rooms: 'Stock rooms',
       instruments: 'Indices',
       accounts: 'Official accounts',
+      features: 'Features & versions',
+      filters: 'Stream tabs',
     },
     metrics: {
       pendingPosts: 'Posts awaiting approval',

@@ -81,7 +81,7 @@ export const isMonitor = (agent: Pick<AgentProfile, 'roles'>) => isSuperAdmin(ag
 export const hasCommunityAccess = (agent: Pick<AgentProfile, 'community_permissions'>) =>
   agent.community_permissions.length > 0
 export const canOpenCommunity = (agent: Pick<AgentProfile, 'roles' | 'community_permissions'>) =>
-  hasCommunityAccess(agent) || isSuperAdmin(agent)
+  hasCommunityAccess(agent) || canManageFeatures(agent)
 export const canViewTickets = (agent: Pick<AgentProfile, 'roles'>) =>
   worksTickets(agent) || isSuperAdmin(agent)
 type TradeAgent = Pick<AgentProfile, 'roles' | 'trade_permissions'>

@@ -98,12 +98,23 @@ describe('router', () => {
     expect((await open('/features?tab=features', agentFixture)).pathname).toBe('/')
   })
 
-  it('redirects the old /app address to Fitur & Kampanye or Pengaturan', async () => {
-    for (const tab of ['features', 'banners'] as const) {
-      const location = await open(`/app?tab=${tab}`, monitorFixture)
-      expect(location.pathname).toBe('/features')
-      expect(location.search).toEqual({ tab })
-    }
+  it('sends the old Fitur & versi and Tab Stream addresses to their new Komunitas tabs', async () => {
+    const features = await open('/features?tab=features', monitorFixture)
+    expect(features.pathname).toBe('/community')
+    expect(features.search).toEqual({ tab: 'features' })
+    const stream = await open('/features?tab=stream', monitorFixture)
+    expect(stream.pathname).toBe('/community')
+    expect(stream.search).toEqual({ tab: 'filters' })
+  }, 30_000)
+
+  it('redirects the old /app address to Komunitas, Banner & Popup, or Pengaturan', async () => {
+    const features = await open('/app?tab=features', monitorFixture)
+    expect(features.pathname).toBe('/community')
+    expect(features.search).toEqual({ tab: 'features' })
+
+    const banners = await open('/app?tab=banners', monitorFixture)
+    expect(banners.pathname).toBe('/features')
+    expect(banners.search).toEqual({})
 
     const bare = await open('/app', monitorFixture)
     expect(bare.pathname).toBe('/features')

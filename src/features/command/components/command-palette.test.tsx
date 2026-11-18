@@ -61,32 +61,33 @@ describe('CommandPalette', () => {
     expect(screen.getByRole('option', { name: 'Buka Kesehatan sistem' })).toBeInTheDocument()
   })
 
-  it('lists Fitur & Kampanye and each of its tabs for Super Admins', async () => {
+  it('lists Banner & Popup and the moved Komunitas tabs for Super Admins', async () => {
     const user = userEvent.setup()
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
 
-    expect(screen.getByRole('option', { name: 'Buka Fitur & Kampanye' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Buka Fitur & Kampanye › Fitur & versi' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Buka Banner & Popup' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Buka Komunitas › Fitur & versi' })).toBeInTheDocument()
     expect(screen.queryByRole('option', { name: /Koneksi aplikasi/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('option', { name: /Aplikasi/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /^Buka Aplikasi/ })).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('option', { name: 'Buka Fitur & Kampanye › Banner & popup' }))
+    await user.click(screen.getByRole('option', { name: 'Buka Komunitas › Tab Stream' }))
 
-    expect(navigate).toHaveBeenCalledWith({ to: '/features', search: { tab: 'banners' } })
+    expect(navigate).toHaveBeenCalledWith({ to: '/community', search: { tab: 'filters' } })
   })
 
-  it('opens Fitur & Kampanye on its default tab', async () => {
+  it('opens Banner & Popup', async () => {
     const user = userEvent.setup()
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
 
-    await user.click(screen.getByRole('option', { name: 'Buka Fitur & Kampanye' }))
+    await user.click(screen.getByRole('option', { name: 'Buka Banner & Popup' }))
 
     expect(navigate).toHaveBeenCalledWith({ to: '/features', search: undefined })
   })
 
-  it('keeps Fitur & Kampanye out of the palette for CS agents', () => {
+  it('keeps Banner & Popup and the app tabs out of the palette for CS agents', () => {
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, agentFixture)
 
-    expect(screen.queryByRole('option', { name: /Fitur & Kampanye/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Banner & Popup/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Fitur & versi/ })).not.toBeInTheDocument()
   })
 })

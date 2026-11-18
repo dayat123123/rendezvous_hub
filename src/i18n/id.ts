@@ -115,8 +115,8 @@ export const id = {
     cs_super_admin: 'Super Admin',
     compliance: 'Kepatuhan',
     community: 'Komunitas',
-    product: 'Fitur & Kampanye',
-    cs_content: 'Konten Layanan',
+    product: 'Fitur & Banner',
+    cs_content: 'Pusat Bantuan',
   },
   tradePermissions: {
     trade_share: {
@@ -144,8 +144,8 @@ export const id = {
     tickets: 'Layanan Nasabah',
     dashboard: 'Dashboard',
     reports: 'Laporan',
-    featuresCampaigns: 'Fitur & Kampanye',
-    content: 'Konten Layanan',
+    featuresCampaigns: 'Banner & Popup',
+    content: 'Pusat Bantuan',
     settings: 'Pengaturan',
     attention: '{{count}} tiket perlu perhatian',
     account: 'Akun',
@@ -1766,13 +1766,14 @@ export const id = {
     },
   },
   content: {
-    title: 'Konten Layanan',
-    subtitle: 'Isi bantuan yang dilihat nasabah di aplikasi: topik chat CS dan pusat bantuan.',
-    tabsLabel: 'Bagian Konten Layanan',
-    tabs: { topics: 'Topik chat CS', faq: 'Pusat Bantuan' },
+    title: 'Pusat Bantuan',
+    subtitle:
+      'Isi bantuan yang dilihat nasabah di aplikasi: topik yang dipilih sebelum chat CS dan artikel bantuan (FAQ).',
+    tabsLabel: 'Bagian Pusat Bantuan',
+    tabs: { topics: 'Topik chat CS', faq: 'Artikel bantuan' },
   },
   faq: {
-    title: 'Pusat Bantuan (FAQ)',
+    title: 'Artikel bantuan (FAQ)',
     description:
       'Artikel bantuan yang dibaca nasabah di aplikasi sebelum menghubungi CS. Artikel baru disimpan sebagai draf dan baru tampil setelah diterbitkan.',
     addArticle: 'Tambah artikel',
@@ -1878,11 +1879,9 @@ export const id = {
     helpfulNo: 'Tidak membantu',
   },
   featuresCampaigns: {
-    title: 'Fitur & Kampanye',
+    title: 'Banner & Popup',
     subtitle:
-      'Fitur sosial, kill switch, versi minimum aplikasi, serta kampanye banner dan popup untuk nasabah.',
-    tabsLabel: 'Bagian Fitur & Kampanye',
-    tabs: { features: 'Fitur & versi', banners: 'Banner & popup', stream: 'Tab Stream' },
+      'Kampanye banner strip dan popup promo di aplikasi nasabah: jadwal, sasaran platform, gambar, tombol, dan statistik tayang. Fitur & versi serta Tab Stream ada di menu Komunitas.',
   },
   command: {
     placeholder: 'Cari tiket, nasabah, atau perintah…',
@@ -1895,7 +1894,7 @@ export const id = {
     preferences: 'Tampilan',
     openTicket: 'Buka tiket {{number}}',
     goTo: 'Buka {{section}}',
-    featuresCampaignsTab: 'Buka Fitur & Kampanye › {{tab}}',
+    communityTab: 'Buka Komunitas › {{tab}}',
     tab: 'Tab {{tab}}',
     setStatus: 'Status: {{status}}',
     toggleTheme: 'Ganti tema',
@@ -1991,16 +1990,19 @@ export const id = {
   },
   community: {
     pageTitle: 'Komunitas',
-    pageSubtitle: 'Kelola postingan resmi, pengumuman, notifikasi, dan moderasi stream komunitas.',
+    pageSubtitle:
+      'Kelola postingan resmi, pengumuman, notifikasi, moderasi stream komunitas, serta fitur dan tab Stream di aplikasi.',
     noAccess: 'Akun ini belum punya izin komunitas. Hubungi Super Admin.',
     tabsLabel: 'Menu komunitas',
     tabs: {
-      stream: 'Stream',
+      stream: 'Postingan resmi',
       notifications: 'Notifikasi',
       moderation: 'Moderasi',
       rooms: 'Room saham',
       instruments: 'Indeks',
       accounts: 'Akun resmi',
+      features: 'Fitur & versi',
+      filters: 'Tab Stream',
     },
     metrics: {
       pendingPosts: 'Postingan menunggu persetujuan',

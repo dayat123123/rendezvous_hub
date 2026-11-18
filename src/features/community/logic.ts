@@ -1,4 +1,4 @@
-import { isSuperAdmin } from '@/features/presence/types'
+import { canManageFeatures, isSuperAdmin } from '@/features/presence/types'
 import { format } from '@/lib/time'
 
 import {
@@ -40,7 +40,8 @@ export function communityPageTabs(agent: {
   community_permissions: string[]
 }): CommunityTab[] {
   const tabs = communityTabsFor(agent.community_permissions)
-  return isSuperAdmin(agent) ? [...tabs, 'analytics'] : tabs
+  const app: CommunityTab[] = canManageFeatures(agent) ? ['features', 'filters'] : []
+  return [...tabs, ...app, ...(isSuperAdmin(agent) ? (['analytics'] as const) : [])]
 }
 
 type Actor = { id: string; perms: Perms; fourEyes: boolean }

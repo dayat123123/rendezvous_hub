@@ -26,6 +26,14 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   return { ...actual, useSearch: () => route.search, useNavigate: () => route.navigate }
 })
 
+vi.mock('@/features/client-config/components/features-section', () => ({
+  FeaturesSection: () => <p>Panel fitur & versi</p>,
+}))
+
+vi.mock('@/features/feed-filters/components/feed-filters-section', () => ({
+  FeedFiltersSection: () => <p>Panel tab Stream</p>,
+}))
+
 vi.mock('@/features/analytics/api', () => ({
   analyticsApi: { community: vi.fn(() => new Promise(() => undefined)) },
 }))
@@ -142,10 +150,11 @@ beforeAll(async () => {
 }, 60_000)
 
 describe('CommunityPage', () => {
-  it('opens Analitik as the only tab for a Super Admin without community permissions', async () => {
+  it('gives a Super Admin without community permissions the app tabs and Analitik', async () => {
+    route.search = { tab: 'analytics' }
     renderWithProviders(<CommunityPage />, monitorFixture)
 
-    expect(tabNames()).toEqual(['Analitik'])
+    expect(tabNames()).toEqual(['Fitur & versi', 'Tab Stream', 'Analitik'])
     expect(screen.getByRole('tab', { name: 'Analitik' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByRole('radio', { name: '30 hari' }, { timeout: 5_000 })).toBeVisible()
     expect(screen.queryByText('Laporan terbuka')).not.toBeInTheDocument()
@@ -159,7 +168,14 @@ describe('CommunityPage', () => {
       community_permissions: ['community.post', 'community.accounts'],
     })
 
-    expect(tabNames()).toEqual(['Stream', 'Notifikasi', 'Akun resmi', 'Analitik'])
+    expect(tabNames()).toEqual([
+      'Postingan resmi',
+      'Notifikasi',
+      'Akun resmi',
+      'Fitur & versi',
+      'Tab Stream',
+      'Analitik',
+    ])
     expect(screen.getByRole('tab', { name: 'Analitik' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByRole('radio', { name: '30 hari' }, { timeout: 5_000 })).toBeVisible()
   })
@@ -180,7 +196,7 @@ describe('CommunityPage', () => {
 
     renderWithProviders(<CommunityPage />, writer)
     expect(tabNames()).not.toContain('Indeks')
-    expect(screen.getByRole('tab', { name: 'Stream' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Postingan resmi' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByText('Belum ada indeks.')).not.toBeInTheDocument()
     expect(instrumentsApi.list).toHaveBeenCalledTimes(1)
   })
@@ -189,10 +205,31 @@ describe('CommunityPage', () => {
     route.search = { tab: 'analytics' }
     renderWithProviders(<CommunityPage />, writer)
 
-    expect(tabNames()).toEqual(['Stream', 'Notifikasi'])
-    expect(screen.getByRole('tab', { name: 'Stream' })).toHaveAttribute('aria-selected', 'true')
+    expect(tabNames()).toEqual(['Postingan resmi', 'Notifikasi'])
+    expect(screen.getByRole('tab', { name: 'Postingan resmi' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Laporan terbuka')).toBeVisible()
     expect(screen.queryByRole('radio', { name: '30 hari' })).not.toBeInTheDocument()
+  })
+})
+
+describe('CommunityPage app tabs', () => {
+  it('shows only Fitur & versi and Tab Stream to the product role, without community metrics', async () => {
+    route.search = { tab: 'filters' }
+    renderWithProviders(<CommunityPage />, { ...agentFixture, roles: ['product'], community_permissions: [] })
+
+    expect(tabNames()).toEqual(['Fitur & versi', 'Tab Stream'])
+    expect(screen.getByRole('tab', { name: 'Tab Stream' })).toHaveAttribute('aria-selected', 'true')
+    expect(await screen.findByText('Panel tab Stream')).toBeVisible()
+    expect(screen.queryByText('Laporan terbuka')).not.toBeInTheDocument()
+    expect(communityApi.overview).not.toHaveBeenCalled()
+  })
+
+  it('keeps the app tabs away from community staff without the product role', () => {
+    route.search = { tab: 'features' }
+    renderWithProviders(<CommunityPage />, writer)
+
+    expect(tabNames()).not.toContain('Fitur & versi')
+    expect(screen.queryByText('Panel fitur & versi')).not.toBeInTheDocument()
   })
 })
 

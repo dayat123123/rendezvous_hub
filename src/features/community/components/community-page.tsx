@@ -19,6 +19,26 @@ import { ModerationTab } from './moderation-tab'
 import { RoomsTab } from './rooms-tab'
 import { StreamTab } from './stream-tab'
 
+const FeaturesSection = lazy(
+  withStrings(
+    () =>
+      import('@/features/client-config/components/features-section').then((module) => ({
+        default: module.FeaturesSection,
+      })),
+    'platform',
+  ),
+)
+
+const FeedFiltersSection = lazy(
+  withStrings(
+    () =>
+      import('@/features/feed-filters/components/feed-filters-section').then((module) => ({
+        default: module.FeedFiltersSection,
+      })),
+    'platform',
+  ),
+)
+
 const AnalyticsTab = lazy(
   withStrings(
     () =>
@@ -126,6 +146,16 @@ export function CommunityPage() {
             <InstrumentsTab onOpenRoom={tabs.includes('rooms') ? openRoom : undefined} />
           ) : null}
           {tab === 'accounts' ? <AccountsTab /> : null}
+          {tab === 'features' ? (
+            <Suspense fallback={<EmptyState title={t('app.loading')} />}>
+              <FeaturesSection />
+            </Suspense>
+          ) : null}
+          {tab === 'filters' ? (
+            <Suspense fallback={<EmptyState title={t('app.loading')} />}>
+              <FeedFiltersSection />
+            </Suspense>
+          ) : null}
           {tab === 'analytics' ? (
             <Suspense fallback={<EmptyState title={t('app.loading')} />}>
               <AnalyticsTab />

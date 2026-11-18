@@ -37,11 +37,19 @@ describe('communityTabsFor', () => {
 })
 
 describe('communityPageTabs', () => {
-  it('adds Analitik only for Super Admins, after the tabs their permissions allow', () => {
-    expect(communityPageTabs({ roles: ['cs_super_admin'], community_permissions: [] })).toEqual(['analytics'])
+  it('adds Fitur & versi and Tab Stream for app managers and Analitik only for Super Admins', () => {
+    expect(communityPageTabs({ roles: ['cs_super_admin'], community_permissions: [] })).toEqual([
+      'features',
+      'filters',
+      'analytics',
+    ])
     expect(
       communityPageTabs({ roles: ['cs_super_admin'], community_permissions: ['community.moderate'] }),
-    ).toEqual(['moderation', 'rooms', 'instruments', 'analytics'])
+    ).toEqual(['moderation', 'rooms', 'instruments', 'features', 'filters', 'analytics'])
+    expect(communityPageTabs({ roles: ['product'], community_permissions: [] })).toEqual([
+      'features',
+      'filters',
+    ])
     expect(communityPageTabs({ roles: ['community'], community_permissions: ['community.post'] })).toEqual([
       'stream',
       'notifications',

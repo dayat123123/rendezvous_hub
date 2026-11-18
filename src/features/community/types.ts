@@ -16,6 +16,8 @@ export const communityTabs = [
   'rooms',
   'instruments',
   'accounts',
+  'features',
+  'filters',
   'analytics',
 ] as const
 export type CommunityTab = (typeof communityTabs)[number]

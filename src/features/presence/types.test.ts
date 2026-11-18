@@ -54,7 +54,7 @@ describe('trade permissions', () => {
 })
 
 describe('canManageFeatures', () => {
-  it('opens Fitur & Kampanye to Super Admins and the product role only', () => {
+  it('opens Banner & Popup to Super Admins and the product role only', () => {
     const roles = [
       ['cs_super_admin'],
       ['product'],

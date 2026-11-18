@@ -90,7 +90,7 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('button', { name: 'Akun CS' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('no longer offers the sections that moved to Fitur & Kampanye', () => {
+  it('no longer offers the sections that moved to Komunitas and Banner & Popup', () => {
     renderWithProviders(<SettingsPage />, ready)
 
     const nav = screen.getByRole('navigation', { name: 'Pengaturan' })

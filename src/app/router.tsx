@@ -45,6 +45,9 @@ const superAdminOnly = ({ context }: { context: RouterContext }) => {
   if (!isSuperAdmin(context.agent)) throw redirect({ to: '/' })
 }
 
+const movedFeaturesTab = (tab: unknown): 'features' | 'filters' | null =>
+  tab === 'features' ? 'features' : tab === 'stream' ? 'filters' : null
+
 const featuresOnly = ({ context }: { context: RouterContext }) => {
   if (!canManageFeatures(context.agent)) throw redirect({ to: '/' })
 }
@@ -136,9 +139,13 @@ const settingsRoute = createRoute({
 const featuresCampaignsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/features',
-  beforeLoad: featuresOnly,
   validateSearch: (search: Record<string, unknown>): { tab?: FeaturesCampaignsTab } =>
     isFeaturesCampaignsTab(search.tab) ? { tab: search.tab } : {},
+  beforeLoad: ({ context, search }) => {
+    featuresOnly({ context })
+    const moved = movedFeaturesTab(search.tab)
+    if (moved) throw redirect({ to: '/community', search: { tab: moved }, replace: true })
+  },
   component: lazyRouteComponent(
     withStrings(() => import('@/features/features-campaigns/components/features-campaigns-page'), 'platform'),
     'FeaturesCampaignsPage',
@@ -164,11 +171,9 @@ const legacyAppRoute = createRoute({
   beforeLoad: ({ context, search }) => {
     superAdminOnly({ context })
     if (search.tab === 'connection') throw redirect({ to: '/settings', replace: true })
-    throw redirect({
-      to: '/features',
-      search: isFeaturesCampaignsTab(search.tab) ? { tab: search.tab } : {},
-      replace: true,
-    })
+    const moved = movedFeaturesTab(search.tab)
+    if (moved) throw redirect({ to: '/community', search: { tab: moved }, replace: true })
+    throw redirect({ to: '/features', replace: true })
   },
 })
 

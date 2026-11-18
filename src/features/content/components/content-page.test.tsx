@@ -34,7 +34,7 @@ describe('ContentPage', () => {
   it('opens the Topik tab for the service content role', () => {
     renderWithProviders(<ContentPage />, content)
 
-    expect(screen.getByRole('heading', { name: 'Konten Layanan', level: 1 })).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'Pusat Bantuan', level: 1 })).toBeVisible()
     expect(screen.getByRole('tab', { name: 'Topik chat CS' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('tabpanel', { name: 'Topik chat CS' })).toHaveTextContent('topics-section')
   })

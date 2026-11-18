@@ -26,7 +26,6 @@ import {
   ShareIcon,
   ShieldCheckIcon,
   ShieldIcon,
-  SlidersHorizontalIcon,
   SquareCheckBigIcon,
   StickyNoteIcon,
   TicketIcon,
@@ -49,7 +48,6 @@ import {
 } from '@/components/ui/overlay'
 import { Kbd } from '@/components/ui/primitives'
 import { useAgent } from '@/features/auth/hooks'
-import { featuresCampaignsTabs, type FeaturesCampaignsTab } from '@/features/features-campaigns/types'
 import { useSetStatus } from '@/features/presence/hooks'
 import {
   agentStatuses,
@@ -118,10 +116,9 @@ function Section({
   )
 }
 
-const featuresCampaignsTabIcons: Record<FeaturesCampaignsTab, Icon> = {
+const appTabIcons: Record<'features' | 'filters', Icon> = {
   features: FlagIcon,
-  banners: PanelTopIcon,
-  stream: RowsIcon,
+  filters: RowsIcon,
 }
 
 type SectionTarget =
@@ -208,7 +205,7 @@ function PaletteBody({
       : []),
     ...(hasNasabah(agent) ? [{ label: t('nav.nasabah'), icon: UsersIcon, to: '/nasabah' as const }] : []),
     ...(canManageFeatures(agent)
-      ? [{ label: t('nav.featuresCampaigns'), icon: SlidersHorizontalIcon, to: '/features' as const }]
+      ? [{ label: t('nav.featuresCampaigns'), icon: PanelTopIcon, to: '/features' as const }]
       : []),
     ...(canManageContent(agent)
       ? [{ label: t('nav.content'), icon: LibraryIcon, to: '/content' as const }]
@@ -254,11 +251,11 @@ function PaletteBody({
       run: () => void navigate({ to: section.to, search: section.search }),
     })),
     ...(canManageFeatures(agent)
-      ? featuresCampaignsTabs.map((tab) => ({
-          id: `nav:/features:${tab}`,
-          label: t('command.featuresCampaignsTab', { tab: t(`featuresCampaigns.tabs.${tab}`) }),
-          icon: featuresCampaignsTabIcons[tab],
-          run: () => void navigate({ to: '/features', search: { tab } }),
+      ? (['features', 'filters'] as const).map((tab) => ({
+          id: `nav:/community:${tab}`,
+          label: t('command.communityTab', { tab: t(`community.tabs.${tab}`) }),
+          icon: appTabIcons[tab],
+          run: () => void navigate({ to: '/community', search: { tab } }),
         }))
       : []),
   ]

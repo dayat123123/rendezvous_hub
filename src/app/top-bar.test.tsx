@@ -77,10 +77,10 @@ describe('TopBar', () => {
     expect(navLinks()).toEqual(['Layanan Nasabah'])
   })
 
-  it('shows only Fitur & Kampanye to the product role, without Settings or ticket menus', () => {
+  it('shows only Banner & Popup to the product role, without Settings or ticket menus', () => {
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, { ...monitorFixture, roles: ['product'] })
 
-    expect(navLinks()).toEqual(['Fitur & Kampanye'])
+    expect(navLinks()).toEqual(['Komunitas', 'Banner & Popup'])
     expect(screen.queryByText('Mode pantau')).not.toBeInTheDocument()
   })
 
@@ -95,8 +95,8 @@ describe('TopBar', () => {
       'Dashboard',
       'Laporan',
       'Komunitas',
-      'Konten Layanan',
-      'Fitur & Kampanye',
+      'Pusat Bantuan',
+      'Banner & Popup',
       'Berbagi Trade',
       'Pengaturan',
     ])
@@ -108,17 +108,17 @@ describe('TopBar', () => {
     expect(screen.queryByRole('link', { name: 'Relay Trade' })).not.toBeInTheDocument()
   })
 
-  it('shows Fitur & Kampanye before Berbagi Trade and Pengaturan to Super Admins only', () => {
+  it('shows Banner & Popup before Berbagi Trade and Pengaturan to Super Admins only', () => {
     const { unmount } = renderWithProviders(<TopBar attention={0} caseAttention={0} />, monitorFixture)
-    expect(screen.getByRole('link', { name: 'Fitur & Kampanye' })).toHaveAttribute('href', '/features')
+    expect(screen.getByRole('link', { name: 'Banner & Popup' })).toHaveAttribute('href', '/features')
     const links = navLinks()
-    expect(links.indexOf('Fitur & Kampanye')).toBe(links.indexOf('Berbagi Trade') - 1)
+    expect(links.indexOf('Banner & Popup')).toBe(links.indexOf('Berbagi Trade') - 1)
     expect(links.indexOf('Berbagi Trade')).toBe(links.indexOf('Pengaturan') - 1)
     unmount()
 
     for (const roles of [['cs_agent'], ['compliance'], ['community']]) {
       const view = renderWithProviders(<TopBar attention={0} caseAttention={0} />, { ...agentFixture, roles })
-      expect(screen.queryByRole('link', { name: 'Fitur & Kampanye' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'Banner & Popup' })).not.toBeInTheDocument()
       view.unmount()
     }
   })
@@ -135,8 +135,8 @@ describe('TopBar', () => {
       'Laporan',
       'Akun Nasabah',
       'Komunitas',
-      'Konten Layanan',
-      'Fitur & Kampanye',
+      'Pusat Bantuan',
+      'Banner & Popup',
       'Berbagi Trade',
       'Pengaturan',
     ])
@@ -160,8 +160,8 @@ describe('TopBar', () => {
       'Dashboard',
       'Laporan',
       'Komunitas',
-      'Konten Layanan',
-      'Fitur & Kampanye',
+      'Pusat Bantuan',
+      'Banner & Popup',
       'Berbagi Trade',
       'Kesehatan sistem',
       'Pengaturan',
@@ -283,13 +283,13 @@ describe('TopBar', () => {
     expect(systemApi.badge).not.toHaveBeenCalled()
   })
 
-  it('shows only Konten Layanan to the service content role', () => {
+  it('shows only Pusat Bantuan to the service content role', () => {
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
       ...agentFixture,
       roles: ['cs_content'],
     })
-    expect(navLinks()).toEqual(['Konten Layanan'])
-    expect(screen.getByRole('link', { name: 'Konten Layanan' })).toHaveAttribute('href', '/content')
+    expect(navLinks()).toEqual(['Pusat Bantuan'])
+    expect(screen.getByRole('link', { name: 'Pusat Bantuan' })).toHaveAttribute('href', '/content')
   })
 
   it('lists Dokumen hukum among the compliance menus', () => {
