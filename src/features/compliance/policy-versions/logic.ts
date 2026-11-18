@@ -47,7 +47,7 @@ export const countDelta = (current: number, draft: number) => {
 
 export type SettingLabel =
   | { kind: 'number'; id: (typeof numberSettings)[number]['id']; percent: boolean }
-  | { kind: 'autoSlow' | 'autoHold' | 'windows' | 'newAccount' }
+  | { kind: 'autoSlow' | 'autoHold' | 'windows' | 'newAccount' | 'rejoinCooldown' }
   | { kind: 'raw' }
 
 export function settingLabel(key: string): SettingLabel {
@@ -62,6 +62,8 @@ export function settingLabel(key: string): SettingLabel {
       return { kind: 'windows' }
     case 'safety.new_account_days':
       return { kind: 'newAccount' }
+    case 'account.rejoin_cooldown_hours':
+      return { kind: 'rejoinCooldown' }
     default:
       return { kind: 'raw' }
   }

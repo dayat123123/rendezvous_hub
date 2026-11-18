@@ -83,6 +83,9 @@ export const useDeletePhrase = () =>
 export const useSetNewAccountDays = () =>
   useRulesMutation((days: number) => contentPolicyApi.setNewAccountDays(days))
 
+export const useSetRejoinCooldownHours = () =>
+  useRulesMutation((hours: number) => contentPolicyApi.setRejoinCooldownHours(hours))
+
 export function useTestContent() {
   return useMutation({
     mutationFn: (args: { text: string; surface: TestSurface }) =>

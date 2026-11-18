@@ -21,6 +21,7 @@ function rules(raw: ContentRules): ContentRules {
     allowlist: raw.allowlist ?? [],
     promo_phrases: raw.promo_phrases ?? [],
     new_account_days: Number(raw.new_account_days ?? 0),
+    rejoin_cooldown_hours: raw.rejoin_cooldown_hours == null ? null : Number(raw.rejoin_cooldown_hours),
   }
 }
 
@@ -62,6 +63,8 @@ export const contentPolicyApi = {
     rules(await policyCall<ContentRules>('compliance_delete_promo_phrase', { p_phrase: phrase })),
   setNewAccountDays: async (days: number) =>
     rules(await policyCall<ContentRules>('compliance_set_new_account_days', { p_days: days })),
+  setRejoinCooldownHours: async (hours: number) =>
+    rules(await policyCall<ContentRules>('compliance_set_rejoin_cooldown_hours', { p_hours: hours })),
   test: async (text: string, surface: TestSurface) => {
     const raw = await rpc<ContentTest>('compliance_test_content', { p_text: text, p_surface: surface })
     return { ...raw, categories: raw.categories ?? [] }

@@ -1296,6 +1296,7 @@ export const en: Translation = {
       client_min_version_set: 'Minimum app version changed',
       content_rule_update: 'Content category action changed',
       content_rule_new_account_days: 'New-account period changed',
+      content_rule_rejoin_cooldown_hours: 'Rejoin wait after account deletion changed',
       blocked_domain_save: 'Blocked domain saved',
       blocked_domain_delete: 'Blocked domain deleted',
       allowed_domain_save: 'Trusted domain saved',

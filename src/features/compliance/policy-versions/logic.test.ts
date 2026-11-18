@@ -78,6 +78,7 @@ describe('setting labels and values', () => {
     expect(settingLabel('manipulation.auto_hold_similar')).toEqual({ kind: 'autoHold' })
     expect(settingLabel('rooms.busy_windows')).toEqual({ kind: 'windows' })
     expect(settingLabel('safety.new_account_days')).toEqual({ kind: 'newAccount' })
+    expect(settingLabel('account.rejoin_cooldown_hours')).toEqual({ kind: 'rejoinCooldown' })
     expect(settingLabel('manipulation.future_knob')).toEqual({ kind: 'raw' })
   })
 

@@ -64,6 +64,16 @@ export const policy = {
     saved_one: 'Masa akun baru menjadi {{count}} hari',
     saved_other: 'Masa akun baru menjadi {{count}} hari',
   },
+  rejoinCooldown: {
+    title: 'Jeda bergabung lagi setelah hapus akun',
+    subtitle:
+      'Setelah menghapus akun komunitas, login yang sama baru bisa membuka komunitas lagi setelah jeda ini. Saat bergabung lagi, akun dimulai sebagai akun baru. Selama jeda, nasabah tetap bisa menghubungi CS lewat pengaduan tamu.',
+    label: 'Jam',
+    hint: '0–720 jam (30 hari). 0 = langsung bisa bergabung lagi. Bawaan 72 jam.',
+    problem: 'Isi angka bulat 0–{{max}}.',
+    saved_one: 'Jeda bergabung lagi menjadi {{count}} jam',
+    saved_other: 'Jeda bergabung lagi menjadi {{count}} jam',
+  },
   domains: {
     title: 'Domain diblokir',
     subtitle:

@@ -82,6 +82,7 @@ export const auditActions = [
   'compliance.ticket_view',
   'compliance.transcript_export',
   'content_rule.new_account_days',
+  'content_rule.rejoin_cooldown_hours',
   'content_rule.update',
   'customer_data.cash_transactions',
   'customer_data.orders',

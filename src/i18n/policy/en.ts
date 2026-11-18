@@ -66,6 +66,16 @@ export const policy: Translated<typeof source> = {
     saved_one: 'New-account period set to {{count}} day',
     saved_other: 'New-account period set to {{count}} days',
   },
+  rejoinCooldown: {
+    title: 'Rejoin wait after account deletion',
+    subtitle:
+      'After a community account is deleted, the same login can open the community again only after this wait. When it rejoins, the account starts as a new account. During the wait, the customer can still contact CS through the guest complaint form.',
+    label: 'Hours',
+    hint: '0–720 hours (30 days). 0 = can rejoin immediately. Default 72 hours.',
+    problem: 'Enter a whole number from 0 to {{max}}.',
+    saved_one: 'Rejoin wait set to {{count}} hour',
+    saved_other: 'Rejoin wait set to {{count}} hours',
+  },
   domains: {
     title: 'Blocked domains',
     subtitle:

@@ -99,6 +99,8 @@ function useKeyText() {
         return t('policy.manipulation.windows')
       case 'newAccount':
         return t('policy.newAccount.title')
+      case 'rejoinCooldown':
+        return t('policy.rejoinCooldown.title')
       case 'raw':
         return key
     }

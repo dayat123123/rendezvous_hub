@@ -13,12 +13,13 @@ import { FieldText } from '@/features/system/components/system-ui'
 import { policyErrorText } from '@/lib/error-text'
 import { stamp } from '@/lib/time'
 
-import { useContentRules, useSetContentRule, useSetNewAccountDays } from '../hooks'
+import { useContentRules, useSetContentRule, useSetNewAccountDays, useSetRejoinCooldownHours } from '../hooks'
 import { sortRules } from '../logic'
 import {
   contentActions,
   contentScopes,
   NEW_ACCOUNT_DAYS_MAX,
+  REJOIN_COOLDOWN_HOURS_MAX,
   type ContentAction,
   type ContentRule,
   type ContentRules,
@@ -93,61 +94,86 @@ function RuleRow({ rule }: { rule: ContentRule }) {
   )
 }
 
-function NewAccountCard({ days }: { days: number }) {
+type NumberSettingProps = {
+  value: number
+  max: number
+  i18nKey: 'newAccount' | 'rejoinCooldown'
+  pending: boolean
+  onSave: (value: number) => Promise<unknown>
+}
+
+function NumberSettingCard({ value: current, max, i18nKey, pending, onSave }: NumberSettingProps) {
   const { t } = useTranslation()
   const id = useId()
-  const save = useSetNewAccountDays()
-  const [text, setText] = useState(String(days))
+  const [text, setText] = useState(String(current))
   const [checked, setChecked] = useState(false)
   const value = Number(text.trim())
-  const valid = /^\d{1,2}$/.test(text.trim()) && value >= 0 && value <= NEW_ACCOUNT_DAYS_MAX
+  const valid = /^\d{1,4}$/.test(text.trim()) && value >= 0 && value <= max
   return (
-    <PolicyCard title={t('policy.newAccount.title')} subtitle={t('policy.newAccount.subtitle')}>
+    <PolicyCard title={t(`policy.${i18nKey}.title`)} subtitle={t(`policy.${i18nKey}.subtitle`)}>
       <form
         className="flex flex-wrap items-start gap-3"
         noValidate
         onSubmit={(event) => {
           event.preventDefault()
           setChecked(true)
-          if (!valid || value === days) return
-          save
-            .mutateAsync(value)
+          if (!valid || value === current) return
+          onSave(value)
             .then(() => {
-              toast.success(t('policy.newAccount.saved', { count: value }))
+              toast.success(t(`policy.${i18nKey}.saved`, { count: value }))
               setChecked(false)
             })
             .catch((error: unknown) => toast.error(policyErrorText(error)))
         }}
       >
         <div className="flex w-40 flex-col gap-1.5">
-          <Label htmlFor={`${id}-days`}>{t('policy.newAccount.label')}</Label>
+          <Label htmlFor={`${id}-value`}>{t(`policy.${i18nKey}.label`)}</Label>
           <Input
-            id={`${id}-days`}
+            id={`${id}-value`}
             inputMode="numeric"
             value={text}
             aria-invalid={checked && !valid ? true : undefined}
-            aria-describedby={`${id}-days-text`}
+            aria-describedby={`${id}-value-text`}
             onChange={(event) => setText(event.target.value)}
           />
         </div>
-        <Button
-          type="submit"
-          size="sm"
-          className="mt-6"
-          disabled={save.isPending || (valid && value === days)}
-        >
-          {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
+        <Button type="submit" size="sm" className="mt-6" disabled={pending || (valid && value === current)}>
+          {pending ? <LoaderCircleIcon className="animate-spin" /> : null}
           {t('app.save')}
         </Button>
         <FieldText
-          id={`${id}-days-text`}
-          error={
-            checked && !valid ? t('policy.newAccount.problem', { max: NEW_ACCOUNT_DAYS_MAX }) : undefined
-          }
-          hint={t('policy.newAccount.hint')}
+          id={`${id}-value-text`}
+          error={checked && !valid ? t(`policy.${i18nKey}.problem`, { max }) : undefined}
+          hint={t(`policy.${i18nKey}.hint`)}
         />
       </form>
     </PolicyCard>
+  )
+}
+
+function NewAccountCard({ days }: { days: number }) {
+  const save = useSetNewAccountDays()
+  return (
+    <NumberSettingCard
+      value={days}
+      max={NEW_ACCOUNT_DAYS_MAX}
+      i18nKey="newAccount"
+      pending={save.isPending}
+      onSave={(value) => save.mutateAsync(value)}
+    />
+  )
+}
+
+function RejoinCooldownCard({ hours }: { hours: number }) {
+  const save = useSetRejoinCooldownHours()
+  return (
+    <NumberSettingCard
+      value={hours}
+      max={REJOIN_COOLDOWN_HOURS_MAX}
+      i18nKey="rejoinCooldown"
+      pending={save.isPending}
+      onSave={(value) => save.mutateAsync(value)}
+    />
   )
 }
 
@@ -179,6 +205,9 @@ function RulesBody({ rules }: { rules: ContentRules }) {
         </ul>
       </PolicyCard>
       <NewAccountCard key={rules.new_account_days} days={rules.new_account_days} />
+      {rules.rejoin_cooldown_hours == null ? null : (
+        <RejoinCooldownCard key={rules.rejoin_cooldown_hours} hours={rules.rejoin_cooldown_hours} />
+      )}
     </>
   )
 }

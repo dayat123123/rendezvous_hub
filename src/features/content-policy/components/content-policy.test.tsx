@@ -26,6 +26,7 @@ vi.mock('../api', () => ({
     addPhrase: vi.fn(),
     deletePhrase: vi.fn(),
     setNewAccountDays: vi.fn(),
+    setRejoinCooldownHours: vi.fn(),
     test: vi.fn(),
     imageThresholds: vi.fn(),
     setImageThresholds: vi.fn(),
@@ -67,6 +68,7 @@ const rules: ContentRules = {
   allowlist: [],
   promo_phrases: [{ phrase: 'grup vip', created_at: '2026-11-03T01:00:00.000Z' }],
   new_account_days: 3,
+  rejoin_cooldown_hours: 72,
 }
 
 const thresholds: ImageThresholds = {
@@ -94,6 +96,37 @@ beforeEach(() => {
 })
 
 describe('content policy', () => {
+  it('saves the rejoin wait after account deletion and rejects out-of-range values', async () => {
+    const user = userEvent.setup()
+    vi.mocked(contentPolicyApi.setRejoinCooldownHours).mockResolvedValue({
+      ...rules,
+      rejoin_cooldown_hours: 24,
+    })
+    renderWith(<RulesTab />)
+
+    const hours = await screen.findByLabelText('Jam')
+    expect(hours).toHaveValue('72')
+    const card = hours.closest('form')!
+    await user.clear(hours)
+    await user.type(hours, '721')
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    expect(within(card).getByText('Isi angka bulat 0–720.')).toBeVisible()
+    expect(contentPolicyApi.setRejoinCooldownHours).not.toHaveBeenCalled()
+
+    await user.clear(hours)
+    await user.type(hours, '24')
+    await user.click(within(card).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(contentPolicyApi.setRejoinCooldownHours).toHaveBeenCalledWith(24))
+    expect(await screen.findByText('Jeda bergabung lagi menjadi 24 jam')).toBeVisible()
+  })
+
+  it('hides the rejoin wait on a server without it', async () => {
+    vi.mocked(contentPolicyApi.rules).mockResolvedValue({ ...rules, rejoin_cooldown_hours: null })
+    renderWith(<RulesTab />)
+    expect(await screen.findByText('Masa akun baru')).toBeVisible()
+    expect(screen.queryByText('Jeda bergabung lagi setelah hapus akun')).toBeNull()
+  })
+
   it('changes a category action and scope', async () => {
     const user = userEvent.setup()
     vi.mocked(contentPolicyApi.setRule).mockResolvedValue(rules)

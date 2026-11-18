@@ -61,6 +61,7 @@ export type ContentRules = {
   allowlist: { term: string; created_at: string }[]
   promo_phrases: { phrase: string; created_at: string }[]
   new_account_days: number
+  rejoin_cooldown_hours: number | null
 }
 
 export type BlockedDraft = {
@@ -215,4 +216,5 @@ export const MAX_BUSY_WINDOWS = 6
 export const NOTE_MAX = 200
 export const TEST_TEXT_MAX = 4000
 export const NEW_ACCOUNT_DAYS_MAX = 30
+export const REJOIN_COOLDOWN_HOURS_MAX = 720
 export const THRESHOLD_NOTE_MAX = 500

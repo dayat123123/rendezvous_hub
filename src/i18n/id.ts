@@ -1294,6 +1294,7 @@ export const id = {
       client_min_version_set: 'Ubah versi minimum aplikasi',
       content_rule_update: 'Ubah aksi kategori konten',
       content_rule_new_account_days: 'Ubah masa akun baru',
+      content_rule_rejoin_cooldown_hours: 'Ubah jeda bergabung lagi setelah hapus akun',
       blocked_domain_save: 'Simpan domain diblokir',
       blocked_domain_delete: 'Hapus domain diblokir',
       allowed_domain_save: 'Simpan domain tepercaya',

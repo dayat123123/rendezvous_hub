@@ -797,6 +797,10 @@ export type Database = {
         Args: { p_days: number }
         Returns: Json
       }
+      compliance_set_rejoin_cooldown_hours: {
+        Args: { p_hours: number }
+        Returns: Json
+      }
       compliance_test_content: {
         Args: { p_surface?: string; p_text: string }
         Returns: Json

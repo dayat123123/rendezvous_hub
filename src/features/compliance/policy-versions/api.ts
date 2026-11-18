@@ -28,6 +28,7 @@ export type PolicyFn =
   | 'compliance_add_promo_phrase'
   | 'compliance_delete_promo_phrase'
   | 'compliance_set_new_account_days'
+  | 'compliance_set_rejoin_cooldown_hours'
   | 'compliance_image_thresholds'
   | 'compliance_set_image_thresholds'
   | 'compliance_manipulation_settings'
