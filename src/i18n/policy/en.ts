@@ -85,7 +85,7 @@ export const policy: Translated<typeof source> = {
       one: 'During the wait the customer cannot open Stream, chat, or CS chat in the app. The app shows the remaining time and a Contact CS button (guest complaint without login).',
       two: 'After the wait the customer comes back as a new, empty account with the New-account period restrictions.',
       three:
-        'Changes apply to every deleted account, counted from its deletion time. Apps that are open recheck within 5 minutes.',
+        'Changes apply to every deleted account, counted from its deletion time. Open apps pick it up when the customer taps Retry (at the earliest 30 seconds after the last rejection) or reopens the app.',
       four: 'The goal is to stop people from deleting the account and reappearing right away, for example to escape reports.',
     },
     label: 'Hours',

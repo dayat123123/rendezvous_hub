@@ -83,7 +83,7 @@ export const policy = {
       one: 'Selama jeda, nasabah tidak bisa membuka Stream, chat, dan chat CS di app. App menampilkan sisa waktunya dan tombol Hubungi CS (pengaduan tamu tanpa login).',
       two: 'Setelah jeda, nasabah masuk lagi sebagai akun baru yang kosong dan kena batasan Masa akun baru.',
       three:
-        'Perubahan berlaku untuk semua akun yang sudah dihapus, dihitung dari waktu hapusnya. App yang sedang terbuka memeriksa ulang paling lama 5 menit.',
+        'Perubahan berlaku untuk semua akun yang sudah dihapus, dihitung dari waktu hapusnya. App yang sedang terbuka ikut berubah saat nasabah menekan Coba lagi (paling cepat 30 detik setelah penolakan terakhir) atau membuka app lagi.',
       four: 'Tujuannya mencegah orang menghapus akun lalu langsung muncul lagi, misalnya untuk menghindari laporan.',
     },
     label: 'Jam',
