@@ -188,8 +188,13 @@ export type BannerDraft = {
   priority: number
 }
 
-export const BANNER_TITLE_MAX = 80
-export const BANNER_BODY_MAX = 300
+export const BANNER_TITLE_MAX = 120
+export const NOTIFICATION_TITLE_VISIBLE = 65
+export const BANNER_BODY_MAX_STRIP = 300
+export const BANNER_BODY_MAX_POPUP = 5000
+
+export const bannerBodyMax = (display: BannerDisplay) =>
+  display === 'strip' ? BANNER_BODY_MAX_STRIP : BANNER_BODY_MAX_POPUP
 export const BANNER_LINK_MAX = 500
 export const BANNER_PRIORITY_MAX = 1000
 export const BANNER_CTA_MAX = 24

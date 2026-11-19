@@ -29,10 +29,11 @@ import { bannerDraft, bannerProblems, type BannerProblems } from '../logic'
 import {
   appPlatforms,
   BANNER_AUDIENCE_DAYS_MAX,
-  BANNER_BODY_MAX,
   BANNER_CTA_MAX,
   BANNER_LINK_MAX,
   BANNER_TITLE_MAX,
+  bannerBodyMax,
+  NOTIFICATION_TITLE_VISIBLE,
   bannerAudiences,
   bannerDisplays,
   bannerFrequencies,
@@ -52,7 +53,7 @@ import { BannerPreview } from './banner-preview'
 
 const optional = (value: string) => (value.trim() === '' ? null : value.trim())
 
-function useProblemText(problems: BannerProblems, schemes: string[]) {
+function useProblemText(problems: BannerProblems, schemes: string[], display: BannerDisplay) {
   const { t } = useTranslation()
   const list =
     schemes.length > 0 ? schemes.map((item) => `${item}://`).join(', ') : t('platform.banners.schemesNone')
@@ -62,7 +63,11 @@ function useProblemText(problems: BannerProblems, schemes: string[]) {
         ? t('platform.banners.problems.titleRequired')
         : t('platform.banners.problems.titleLength', { max: BANNER_TITLE_MAX })
       : undefined,
-    body: problems.body ? t('platform.banners.problems.bodyLength', { max: BANNER_BODY_MAX }) : undefined,
+    body: problems.body
+      ? display === 'strip'
+        ? t('platform.banners.problems.bodyLengthStrip', { max: bannerBodyMax(display) })
+        : t('platform.banners.problems.bodyLength', { max: bannerBodyMax(display) })
+      : undefined,
     link: problems.link
       ? problems.link === 'length'
         ? t('platform.banners.problems.linkLength', { max: BANNER_LINK_MAX })
@@ -159,7 +164,7 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
     priority: priorityText.trim() === '' ? Number.NaN : Number(priorityText.trim()),
   }
   const problems = bannerProblems(current, { startsText, endsText, schemes })
-  const text = useProblemText(checked ? problems : {}, schemes)
+  const text = useProblemText(checked ? problems : {}, schemes, draft.display)
   const field = (name: string, error: string | undefined) => ({
     id: `${id}-${name}`,
     'aria-invalid': error ? true : undefined,
@@ -281,22 +286,26 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
           <FieldText
             id={`${id}-title-text`}
             error={text.title}
-            hint={`${draft.title.trim().length}/${BANNER_TITLE_MAX}`}
+            hint={
+              draft.title.trim().length > NOTIFICATION_TITLE_VISIBLE
+                ? `${draft.title.trim().length}/${BANNER_TITLE_MAX} · ${t('platform.banners.hints.titleLong', { visible: NOTIFICATION_TITLE_VISIBLE })}`
+                : `${draft.title.trim().length}/${BANNER_TITLE_MAX}`
+            }
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`${id}-body`}>{t('platform.banners.fields.body')}</Label>
           <Textarea
             {...field('body', text.body)}
-            rows={3}
-            maxLength={BANNER_BODY_MAX}
+            rows={popup ? 6 : 3}
+            maxLength={bannerBodyMax(draft.display)}
             value={draft.body}
             onChange={(event) => setDraft((value) => ({ ...value, body: event.target.value }))}
           />
           <FieldText
             id={`${id}-body-text`}
             error={text.body}
-            hint={`${draft.body.trim().length}/${BANNER_BODY_MAX}`}
+            hint={`${draft.body.trim().length}/${bannerBodyMax(draft.display)}`}
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_11rem]">

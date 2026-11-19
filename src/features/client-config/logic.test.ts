@@ -95,7 +95,7 @@ describe('banner validation', () => {
       bannerProblems(
         {
           ...bannerDraft(null),
-          title: 'x'.repeat(81),
+          title: 'x'.repeat(121),
           body: 'y'.repeat(301),
           link_url: 'olt.example',
           min_app_version: '3.0',

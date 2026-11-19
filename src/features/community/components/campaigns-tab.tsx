@@ -55,7 +55,7 @@ import {
   type CampaignFilter,
 } from '../logic'
 import { segmentInput, useSegmentText } from '../segments'
-import type { Campaign } from '../types'
+import { CAMPAIGN_BODY_MAX, CAMPAIGN_TITLE_MAX, type Campaign } from '../types'
 import { SegmentFields } from './segment-fields'
 import { AccountAvatar, AccountChip, CampaignStatusText, ReasonDialog } from './shared'
 
@@ -133,7 +133,7 @@ function CampaignComposer({
 
   const errors = {
     account: accountId ? undefined : t('community.errors.accountRequired'),
-    title: title.trim().length < 3 ? t('community.errors.titleLength') : undefined,
+    title: title.trim().length < 3 ? t('community.errors.campaignTitleLength') : undefined,
     body: body.trim().length < 3 ? t('community.errors.notificationBody') : undefined,
     post: link === 'post' && !postId ? t('community.errors.postRequired') : undefined,
     url: link === 'url' && !/^https:\/\/\S+$/.test(url.trim()) ? t('community.errors.urlInvalid') : undefined,
@@ -216,7 +216,7 @@ function CampaignComposer({
                 <Label htmlFor="campaign-title">{t('community.campaignTitle')}</Label>
                 <Input
                   id="campaign-title"
-                  maxLength={80}
+                  maxLength={CAMPAIGN_TITLE_MAX}
                   value={title}
                   aria-invalid={touched && errors.title ? true : undefined}
                   onChange={(event) => setTitle(event.target.value)}
@@ -227,13 +227,15 @@ function CampaignComposer({
                 <Label htmlFor="campaign-body">{t('community.campaignBody')}</Label>
                 <Textarea
                   id="campaign-body"
-                  rows={3}
-                  maxLength={240}
+                  rows={4}
+                  maxLength={CAMPAIGN_BODY_MAX}
                   value={body}
                   aria-invalid={touched && errors.body ? true : undefined}
                   onChange={(event) => setBody(event.target.value)}
                 />
-                <p className="tabular text-right text-xs text-muted-foreground">{body.length}/240</p>
+                <p className="tabular text-right text-xs text-muted-foreground">
+                  {body.length}/{CAMPAIGN_BODY_MAX}
+                </p>
                 {touched ? <FieldError message={errors.body} /> : null}
               </div>
             </div>

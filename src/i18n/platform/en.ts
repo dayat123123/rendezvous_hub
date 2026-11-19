@@ -422,7 +422,7 @@ export const platform: Translated<typeof source> = {
     addTitle: 'Add banner',
     editTitle: 'Edit banner',
     formHint:
-      'Applies the next time the app reads its settings. Dismissals are stored on the device; to show a banner to everyone again, create a new one.',
+      'Applies the next time the app reads its settings. Dismissals and frequency apply per customer account; to show a banner to everyone again, create a new one.',
     fields: {
       display: 'Display',
       title: 'Title',
@@ -452,6 +452,7 @@ export const platform: Translated<typeof source> = {
       linkPlaceholder: 'https://… or olt://…',
       cta: 'When empty, the app uses its default label. Only used when there is a link.',
       image: 'JPEG, PNG, or WebP. Cropped to {{ratio}} and shrunk below 2 MB automatically.',
+      titleLong: 'more than {{visible}} characters may be cut off in phone notifications',
       frequency:
         'How often the popup appears for the same user. Applies per account, also after signing in again or on another device.',
       frequencyStrip:
@@ -486,6 +487,7 @@ export const platform: Translated<typeof source> = {
       titleRequired: 'Enter a title.',
       titleLength: 'Title can be at most {{max}} characters.',
       bodyLength: 'Body can be at most {{max}} characters.',
+      bodyLengthStrip: 'A strip body can be at most {{max}} characters. Use a popup for longer text.',
       linkFormat: 'The link must start with https:// or a deep link scheme like olt://, without spaces.',
       linkScheme: 'This deep link scheme is not allowed yet. Allowed schemes: {{schemes}}.',
       linkLength: 'Link can be at most {{max}} characters.',

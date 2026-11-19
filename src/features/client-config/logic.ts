@@ -3,11 +3,11 @@ import { formatNumber } from '@/lib/time'
 
 import {
   BANNER_AUDIENCE_DAYS_MAX,
-  BANNER_BODY_MAX,
   BANNER_CTA_MAX,
   BANNER_LINK_MAX,
   BANNER_PRIORITY_MAX,
   BANNER_TITLE_MAX,
+  bannerBodyMax,
   KILL_REASON_MAX,
   KILL_REASON_MIN,
   knownFlags,
@@ -90,7 +90,7 @@ export function bannerProblems(
   const title = draft.title.trim()
   if (title === '') problems.title = 'required'
   else if (title.length > BANNER_TITLE_MAX) problems.title = 'length'
-  if (draft.body.trim().length > BANNER_BODY_MAX) problems.body = 'length'
+  if (draft.body.trim().length > bannerBodyMax(draft.display)) problems.body = 'length'
   if (draft.link_url !== null) {
     const problem = linkProblem(draft.link_url, inputs.schemes ?? [])
     if (problem) problems.link = problem

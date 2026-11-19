@@ -251,6 +251,8 @@ export type CommunityOverview = {
 }
 
 export const MAX_POST_BODY = 2000
+export const CAMPAIGN_TITLE_MAX = 120
+export const CAMPAIGN_BODY_MAX = 500
 export const MAX_POST_IMAGES = 4
 export const MAX_AVATAR_BYTES = 2 * 1024 * 1024
 

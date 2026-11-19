@@ -429,7 +429,7 @@ export const platform = {
     addTitle: 'Tambah banner',
     editTitle: 'Ubah banner',
     formHint:
-      'Berlaku saat aplikasi membaca pengaturan berikutnya. Penutupan oleh pengguna disimpan di perangkat; untuk menampilkan ulang ke semua orang, buat banner baru.',
+      'Berlaku saat aplikasi membaca pengaturan berikutnya. Penutupan dan frekuensi tayang berlaku per akun nasabah; untuk menampilkan ulang ke semua orang, buat banner baru.',
     fields: {
       display: 'Tampilan',
       title: 'Judul',
@@ -459,6 +459,7 @@ export const platform = {
       linkPlaceholder: 'https://… atau olt://…',
       cta: 'Bila kosong, aplikasi memakai label bawaan. Hanya dipakai bila ada tautan.',
       image: 'JPEG, PNG, atau WebP. Dipotong {{ratio}} dan dikecilkan otomatis sampai di bawah 2 MB.',
+      titleLong: 'lebih dari {{visible}} karakter bisa terpotong di notifikasi ponsel',
       frequency:
         'Berapa kali popup muncul untuk pengguna yang sama. Berlaku per akun, juga setelah login ulang atau di perangkat lain.',
       frequencyStrip:
@@ -492,6 +493,7 @@ export const platform = {
       titleRequired: 'Judul wajib diisi.',
       titleLength: 'Judul maksimal {{max}} karakter.',
       bodyLength: 'Isi maksimal {{max}} karakter.',
+      bodyLengthStrip: 'Isi strip maksimal {{max}} karakter. Pakai popup untuk isi yang lebih panjang.',
       linkFormat: 'Tautan harus diawali https:// atau skema deep link seperti olt://, tanpa spasi.',
       linkScheme: 'Skema deep link ini belum diizinkan. Skema yang diizinkan: {{schemes}}.',
       linkLength: 'Tautan maksimal {{max}} karakter.',

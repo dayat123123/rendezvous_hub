@@ -504,6 +504,35 @@ describe('BannersSection', () => {
     )
   })
 
+  it('allows long popup text, keeps strips short, and warns when a title may be cut in phone notifications', async () => {
+    const user = userEvent.setup()
+    renderSection()
+    await user.click(await screen.findByRole('button', { name: 'Tambah banner' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Tambah banner' })
+    const title = within(dialog).getByLabelText('Judul')
+    fireEvent.change(title, { target: { value: 'J'.repeat(70) } })
+    expect(
+      within(dialog).getByText('70/120 · lebih dari 65 karakter bisa terpotong di notifikasi ponsel'),
+    ).toBeVisible()
+    expect(title).toHaveAttribute('maxLength', '120')
+
+    const body = within(dialog).getByLabelText('Isi (opsional)')
+    expect(body).toHaveAttribute('maxLength', '300')
+    await user.click(within(dialog).getByRole('radio', { name: 'Popup tengah' }))
+    expect(body).toHaveAttribute('maxLength', '5000')
+    fireEvent.change(body, { target: { value: 'Jadwal pemeliharaan. '.repeat(200).trim() } })
+    expect(within(dialog).getByText('4199/5000')).toBeVisible()
+
+    await user.click(within(dialog).getByRole('radio', { name: 'Strip atas' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    expect(
+      await within(dialog).findByText(
+        'Isi strip maksimal 300 karakter. Pakai popup untuk isi yang lebih panjang.',
+      ),
+    ).toBeVisible()
+    expect(bannersApi.save).not.toHaveBeenCalled()
+  })
+
   it('rejects an unsupported image before cropping', async () => {
     const user = userEvent.setup({ applyAccept: false })
     renderSection()
