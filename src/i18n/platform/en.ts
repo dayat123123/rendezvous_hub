@@ -452,9 +452,10 @@ export const platform: Translated<typeof source> = {
       linkPlaceholder: 'https://… or olt://…',
       cta: 'When empty, the app uses its default label. Only used when there is a link.',
       image: 'JPEG, PNG, or WebP. Cropped to {{ratio}} and shrunk below 2 MB automatically.',
-      frequency: 'How often the popup appears for the same user.',
+      frequency:
+        'How often the popup appears for the same user. Applies per account, also after signing in again or on another device.',
       frequencyStrip:
-        'How often the strip appears for the same user. Once shown, it stays until the app closes; after that it follows this frequency. A strip the user dismissed does not come back on that device.',
+        'How often the strip appears for the same user. Once shown, it stays until the app closes; after that it follows this frequency. Applies per account, also after signing in again or on another device. A strip the user dismissed does not come back for them.',
       audience:
         'New users are counted from the profile creation date. Visitors who are not signed in only see banners for all users.',
       audienceDays: '1–90 days.',
@@ -476,6 +477,8 @@ export const platform: Translated<typeof source> = {
       type: 'The image must be JPEG, PNG, or WebP.',
       tooLarge: 'The original image can be at most 15 MB.',
       cropTitle: 'Crop popup image',
+      reselect:
+        'This image was cropped with another ratio. Choose the image again to crop it with this ratio.',
       cropHint: 'Drag to position, scroll or use the slider to zoom.',
       use: 'Use image',
     },
@@ -513,7 +516,7 @@ export const platform: Translated<typeof source> = {
       summary: '{{impressions}} views · {{clicks}} clicks',
       title: 'Stats for “{{title}}”',
       description:
-        'Views, clicks, and dismissals count at most once per user per day (WIB). CTR = clicks ÷ views. Data is kept for 180 days.',
+        'Views, clicks, and dismissals count at most once per user per day (WIB). CTR = clicks ÷ views. Data is kept for 180 days, except the latest view and dismissal of each user, which are kept while the banner is active so the frequency still applies.',
       days: 'Last 7 days',
       day: 'Date',
     },

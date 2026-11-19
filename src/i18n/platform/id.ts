@@ -459,9 +459,10 @@ export const platform = {
       linkPlaceholder: 'https://… atau olt://…',
       cta: 'Bila kosong, aplikasi memakai label bawaan. Hanya dipakai bila ada tautan.',
       image: 'JPEG, PNG, atau WebP. Dipotong {{ratio}} dan dikecilkan otomatis sampai di bawah 2 MB.',
-      frequency: 'Berapa kali popup muncul untuk pengguna yang sama.',
+      frequency:
+        'Berapa kali popup muncul untuk pengguna yang sama. Berlaku per akun, juga setelah login ulang atau di perangkat lain.',
       frequencyStrip:
-        'Berapa kali strip muncul untuk pengguna yang sama. Sekali muncul, strip tetap tampil sampai aplikasi ditutup; setelah itu mengikuti frekuensi ini. Strip yang ditutup pengguna tidak muncul lagi di perangkatnya.',
+        'Berapa kali strip muncul untuk pengguna yang sama. Sekali muncul, strip tetap tampil sampai aplikasi ditutup; setelah itu mengikuti frekuensi ini. Berlaku per akun, juga setelah login ulang atau di perangkat lain. Strip yang ditutup pengguna tidak muncul lagi untuknya.',
       audience:
         'Pengguna baru dihitung dari tanggal profil dibuat. Pengunjung yang belum login hanya melihat banner untuk semua pengguna.',
       audienceDays: '1–90 hari.',
@@ -483,6 +484,7 @@ export const platform = {
       type: 'Gambar harus JPEG, PNG, atau WebP.',
       tooLarge: 'Gambar asli maksimal 15 MB.',
       cropTitle: 'Potong gambar popup',
+      reselect: 'Gambar ini dipotong dengan rasio lain. Pilih gambar lagi agar dipotong dengan rasio ini.',
       cropHint: 'Geser untuk mengatur posisi, gulir atau pakai slider untuk memperbesar.',
       use: 'Pakai gambar',
     },
@@ -520,7 +522,7 @@ export const platform = {
       summary: '{{impressions}} tayang · {{clicks}} klik',
       title: 'Statistik “{{title}}”',
       description:
-        'Tayang, klik, dan tutup dihitung paling banyak sekali per pengguna per hari (WIB). CTR = klik ÷ tayang. Data disimpan 180 hari.',
+        'Tayang, klik, dan tutup dihitung paling banyak sekali per pengguna per hari (WIB). CTR = klik ÷ tayang. Data disimpan 180 hari, kecuali tayang dan tutup terakhir tiap pengguna yang disimpan selama banner aktif agar frekuensi tetap berlaku.',
       days: '7 hari terakhir',
       day: 'Tanggal',
     },

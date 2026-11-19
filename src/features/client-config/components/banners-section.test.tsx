@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ApiError } from '@/lib/errors'
+import type * as SupabaseModule from '@/lib/supabase'
 import { monitorFixture } from '@/test/fixtures'
 import { renderWithProviders } from '@/test/render'
 import { Toaster } from '@/test/toast'
@@ -10,6 +11,16 @@ import { Toaster } from '@/test/toast'
 import { bannersApi } from '../api'
 import type { AppBanner, BannerNotice, BannerSettings } from '../types'
 import { BannersSection } from './banners-section'
+
+vi.mock('@/lib/supabase', async (importOriginal) => ({
+  ...(await importOriginal<typeof SupabaseModule>()),
+  appEnv: () => ({
+    supabaseUrl: 'http://localhost:8000',
+    publicApiUrl: 'https://api.olt.example',
+    anonKey: 'anon',
+    appEnv: 'development',
+  }),
+}))
 
 vi.mock('../api', () => ({
   bannersApi: {
@@ -63,6 +74,7 @@ function banner(overrides: Partial<AppBanner> = {}): AppBanner {
     display: 'strip',
     image_path: null,
     image_url: null,
+    image_ratio: null,
     cta_label: null,
     frequency: 'once',
     audience: 'all',
@@ -241,6 +253,7 @@ describe('BannersSection', () => {
         level: 'info',
         display: 'strip',
         image_url: null,
+        image_ratio: null,
         cta_label: null,
         frequency: 'once',
         audience: 'all',
@@ -330,6 +343,34 @@ describe('BannersSection', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
     await waitFor(() => expect(bannersApi.save).toHaveBeenCalled())
     expect(bannersApi.save).toHaveBeenLastCalledWith('banner-1', expect.anything(), false)
+  })
+
+  it('keeps the crop ratio of a saved popup image and asks to choose the image again to change it', async () => {
+    const user = userEvent.setup()
+    const square = banner({
+      display: 'popup',
+      image_path: 'img-1.jpg',
+      image_url: 'https://api.olt.example/storage/v1/object/public/app-banners/img-1.jpg',
+      image_ratio: 'square',
+    })
+    vi.mocked(bannersApi.list).mockResolvedValue([square])
+    vi.mocked(bannersApi.save).mockResolvedValueOnce(square)
+    renderSection()
+    await user.click(await screen.findByRole('button', { name: 'Ubah banner Pemeliharaan sistem' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Ubah banner' })
+    expect(within(dialog).getByRole('radio', { name: '1:1' })).toBeChecked()
+    expect(within(dialog).queryByText(/Pilih gambar lagi/)).not.toBeInTheDocument()
+    expect(within(dialog).getByTestId('popup-card').querySelector('img')).toHaveClass('aspect-square')
+
+    await user.click(within(dialog).getByRole('radio', { name: '4:5 (disarankan)' }))
+    expect(within(dialog).getByText(/Pilih gambar lagi agar dipotong dengan rasio ini/)).toBeVisible()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() => expect(bannersApi.save).toHaveBeenCalled())
+    expect(bannersApi.save).toHaveBeenLastCalledWith(
+      'banner-1',
+      expect.objectContaining({ image_url: square.image_url, image_ratio: 'square' }),
+      false,
+    )
   })
 
   it('submits the notification for approval when the four-eyes rule is on', async () => {
@@ -457,6 +498,7 @@ describe('BannersSection', () => {
         audience: 'new_users',
         audience_days: 14,
         image_url: null,
+        image_ratio: null,
       }),
       true,
     )

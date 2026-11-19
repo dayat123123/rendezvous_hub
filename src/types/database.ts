@@ -123,6 +123,7 @@ export type Database = {
           p_ends_at?: string
           p_frequency?: string
           p_id: string
+          p_image_ratio?: string
           p_image_url?: string
           p_level?: string
           p_link_url?: string

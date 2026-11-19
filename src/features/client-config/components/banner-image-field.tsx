@@ -12,7 +12,8 @@ import { cn } from '@/lib/utils'
 import { ratioFrames } from '../logic'
 import { bannerRatios, type BannerRatio } from '../types'
 
-export type BannerImage = { kind: 'keep' } | { kind: 'new'; blob: Blob; preview: string } | { kind: 'remove' }
+export type BannerImage =
+  { kind: 'keep' } | { kind: 'new'; blob: Blob; preview: string; ratio: BannerRatio } | { kind: 'remove' }
 
 export function BannerImageCropper({
   file,
@@ -48,6 +49,7 @@ export function BannerImageCropper({
 export function BannerImageField({
   shown,
   ratio,
+  reselect,
   disabled,
   onRatio,
   onChoose,
@@ -55,6 +57,7 @@ export function BannerImageField({
 }: {
   shown: string | null
   ratio: BannerRatio
+  reselect: boolean
   disabled: boolean
   onRatio: (ratio: BannerRatio) => void
   onChoose: (file: File) => void
@@ -138,6 +141,7 @@ export function BannerImageField({
       <p className="text-xs text-muted-foreground">
         {t('platform.banners.hints.image', { ratio: t(`platform.banners.ratios.${ratio}`) })}
       </p>
+      {reselect ? <p className="text-xs text-warning">{t('platform.banners.image.reselect')}</p> : null}
       <input
         ref={fileInput}
         type="file"

@@ -147,6 +147,7 @@ export type AppBanner = {
   display: BannerDisplay
   image_path: string | null
   image_url: string | null
+  image_ratio: BannerRatio | null
   cta_label: string | null
   frequency: BannerFrequency
   audience: BannerAudience
@@ -173,6 +174,7 @@ export type BannerDraft = {
   level: BannerLevel
   display: BannerDisplay
   image_url: string | null
+  image_ratio: BannerRatio | null
   cta_label: string | null
   frequency: BannerFrequency
   audience: BannerAudience

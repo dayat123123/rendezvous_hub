@@ -112,7 +112,8 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
   const [maxText, setMaxText] = useState(initial.max_app_version ?? '')
   const [priorityText, setPriorityText] = useState(String(initial.priority))
   const [image, setImage] = useState<BannerImage>({ kind: 'keep' })
-  const [ratio, setRatio] = useState<BannerRatio>('portrait')
+  const [ratio, setRatio] = useState<BannerRatio>(initial.image_ratio ?? 'portrait')
+  const [source, setSource] = useState<File | null>(null)
   const [cropping, setCropping] = useState<File | null>(null)
   const [checked, setChecked] = useState(false)
   const popup = draft.display === 'popup'
@@ -137,6 +138,13 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
     link_url: optional(linkText),
     cta_label: optional(ctaText),
     image_url: popup && image.kind === 'keep' ? initial.image_url : null,
+    image_ratio: !popup
+      ? null
+      : image.kind === 'new'
+        ? image.ratio
+        : image.kind === 'keep'
+          ? initial.image_ratio
+          : null,
     frequency: draft.frequency,
     audience_days:
       draft.audience === 'new_users'
@@ -163,9 +171,12 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
       <BannerImageCropper
         file={cropping}
         ratio={ratio}
-        onCancel={() => setCropping(null)}
+        onCancel={() => {
+          setCropping(null)
+          if (current.image_ratio) setRatio(current.image_ratio)
+        }}
         onDone={(blob) => {
-          setImage({ kind: 'new', blob, preview: URL.createObjectURL(blob) })
+          setImage({ kind: 'new', blob, preview: URL.createObjectURL(blob), ratio })
           setCropping(null)
         }}
       />
@@ -242,10 +253,20 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
           <BannerImageField
             shown={shownImage}
             ratio={ratio}
+            reselect={shownImage !== null && image.kind === 'keep' && initial.image_ratio !== ratio}
             disabled={save.isPending}
-            onRatio={setRatio}
-            onChoose={setCropping}
-            onRemove={() => setImage({ kind: 'remove' })}
+            onRatio={(next) => {
+              setRatio(next)
+              if (source && image.kind === 'new') setCropping(source)
+            }}
+            onChoose={(file) => {
+              setSource(file)
+              setCropping(file)
+            }}
+            onRemove={() => {
+              setSource(null)
+              setImage({ kind: 'remove' })
+            }}
           />
         ) : null}
         <div className="flex flex-col gap-1.5">
@@ -505,6 +526,7 @@ function BannerForm({ editing, onClose }: { editing: AppBanner | null; onClose: 
           link={current.link_url}
           cta={current.cta_label}
           image={popup ? shownImage : null}
+          imageRatio={current.image_ratio}
           dismissible={draft.dismissible}
         />
       </div>

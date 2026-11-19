@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
-import type { BannerDisplay, BannerLevel } from '../types'
+import type { BannerDisplay, BannerLevel, BannerRatio } from '../types'
 
 const levelStyles: Record<BannerLevel, { box: string; icon: string }> = {
   info: { box: 'border-info/40 bg-info/10', icon: 'text-info' },
@@ -27,6 +27,7 @@ type PreviewProps = {
   link: string | null
   cta?: string | null
   image?: string | null
+  imageRatio?: BannerRatio | null
   dismissible: boolean
 }
 
@@ -66,7 +67,7 @@ function StripPreview({ level, title, body, link, cta, dismissible }: PreviewPro
   )
 }
 
-function PopupPreview({ title, body, link, cta, image, dismissible }: PreviewProps) {
+function PopupPreview({ title, body, link, cta, image, imageRatio, dismissible }: PreviewProps) {
   const { t } = useTranslation()
   return (
     <figure className="flex flex-col items-center gap-1.5" aria-label={t('platform.banners.preview.title')}>
@@ -98,7 +99,18 @@ function PopupPreview({ title, body, link, cta, image, dismissible }: PreviewPro
             </span>
           ) : null}
           {image ? (
-            <img src={image} alt={t('platform.banners.image.alt')} className="max-h-56 w-full object-cover" />
+            <img
+              src={image}
+              alt={t('platform.banners.image.alt')}
+              className={cn(
+                'w-full object-cover',
+                imageRatio === 'portrait'
+                  ? 'aspect-[4/5]'
+                  : imageRatio === 'square'
+                    ? 'aspect-square'
+                    : 'max-h-56',
+              )}
+            />
           ) : null}
           <div className="flex flex-col gap-1 p-3">
             <p className="text-sm leading-snug font-semibold break-words">
