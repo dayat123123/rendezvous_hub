@@ -20,7 +20,7 @@ export function totp(secret: string, at = Date.now()) {
   const counter = Buffer.alloc(8)
   counter.writeBigUInt64BE(BigInt(Math.floor(at / 30_000)))
   const digest = createHmac('sha1', decodeBase32(secret)).update(counter).digest()
-  const offset = digest[digest.length - 1] & 0x0f
+  const offset = digest.readUInt8(digest.length - 1) & 0x0f
   const code = (digest.readUInt32BE(offset) & 0x7fffffff) % 1_000_000
   return String(code).padStart(6, '0')
 }

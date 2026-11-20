@@ -102,6 +102,8 @@ type NumberSettingProps = {
   i18nKey: 'newAccount' | 'rejoinCooldown'
   settingKey: string
   presets: readonly number[]
+  points: readonly string[]
+  notes?: readonly string[]
   pending: boolean
   onSave: (value: number) => Promise<unknown>
 }
@@ -112,6 +114,8 @@ function NumberSettingCard({
   i18nKey,
   settingKey,
   presets,
+  points,
+  notes = [],
   pending,
   onSave,
 }: NumberSettingProps) {
@@ -131,7 +135,6 @@ function NumberSettingCard({
   }
   const drafted = draftSetting(state.data?.draft?.diff, settingKey)
   const live = drafted ? Number(drafted.from) : current
-  const points = (['one', 'two', 'three', 'four'] as const).map((key) => t(`policy.${i18nKey}.points.${key}`))
   const save = (next: number) =>
     onSave(next)
       .then(() => {
@@ -150,6 +153,11 @@ function NumberSettingCard({
           <li key={point}>{point}</li>
         ))}
       </ul>
+      {notes.map((note) => (
+        <p key={note} className="max-w-3xl text-xs text-muted-foreground">
+          {note}
+        </p>
+      ))}
       <p className="text-row">
         {t('policy.setting.live', { value: amount(live) })}
         {drafted ? (
@@ -220,6 +228,7 @@ function draftSetting(diff: PolicyDiff | undefined, key: string) {
 }
 
 function NewAccountCard({ days }: { days: number }) {
+  const { t } = useTranslation()
   const save = useSetNewAccountDays()
   return (
     <NumberSettingCard
@@ -228,6 +237,18 @@ function NewAccountCard({ days }: { days: number }) {
       i18nKey="newAccount"
       settingKey="safety.new_account_days"
       presets={[0, 1, 3, 7, 14]}
+      points={[
+        t('policy.newAccount.points.images'),
+        t('policy.newAccount.points.links'),
+        t('policy.newAccount.points.messages'),
+        t('policy.newAccount.points.speed'),
+        t('policy.newAccount.points.start'),
+      ]}
+      notes={[
+        t('policy.newAccount.notes.allowed'),
+        t('policy.newAccount.notes.exempt'),
+        t('policy.newAccount.notes.detection'),
+      ]}
       pending={save.isPending}
       onSave={(value) => save.mutateAsync(value)}
     />
@@ -235,6 +256,7 @@ function NewAccountCard({ days }: { days: number }) {
 }
 
 function RejoinCooldownCard({ hours }: { hours: number }) {
+  const { t } = useTranslation()
   const save = useSetRejoinCooldownHours()
   return (
     <NumberSettingCard
@@ -243,6 +265,12 @@ function RejoinCooldownCard({ hours }: { hours: number }) {
       i18nKey="rejoinCooldown"
       settingKey="account.rejoin_cooldown_hours"
       presets={[0, 24, 72, 168, 720]}
+      points={[
+        t('policy.rejoinCooldown.points.one'),
+        t('policy.rejoinCooldown.points.two'),
+        t('policy.rejoinCooldown.points.three'),
+        t('policy.rejoinCooldown.points.four'),
+      ]}
       pending={save.isPending}
       onSave={(value) => save.mutateAsync(value)}
     />

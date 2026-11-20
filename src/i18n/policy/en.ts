@@ -59,12 +59,21 @@ export const policy: Translated<typeof source> = {
   },
   newAccount: {
     title: 'New-account period',
-    subtitle: 'How long a newly registered account is treated as new and restricted.',
+    subtitle:
+      'One number for every restriction on accounts that just signed up or rejoined. During this period a new account:',
     points: {
-      one: 'New accounts cannot attach images.',
-      two: 'New accounts cannot share links other than trusted domains.',
-      three: 'DMs from new accounts to people who do not follow each other always go to Message requests.',
-      four: 'Accounts with trust level 0, including accounts that just rejoined after deletion, always count as new.',
+      images:
+        'Cannot attach images to posts, comments, DMs, groups, or stock rooms, including P/L shares and other image cards from the app.',
+      links: 'Cannot share links other than trusted domains.',
+      messages: 'Sends DMs to people who do not follow each other through Message requests.',
+      speed: 'Gets half the normal speed limit for posts, comments, and messages.',
+      start: 'Counted from sign-up. An account that rejoins after deletion is counted from when it rejoined.',
+    },
+    notes: {
+      allowed: 'Still allowed: text posts, comments, and chat, likes, follows, and CS chat.',
+      exempt: 'CS staff and official accounts are not affected.',
+      detection:
+        'The new-account age on the Anti-manipulation tab and the new-account weight in trending are separate settings. Both are for detection only and do not restrict customers.',
     },
     label: 'Days since sign-up',
     hint: 'Enter 0–30 days.',
@@ -72,9 +81,9 @@ export const policy: Translated<typeof source> = {
     none: '0 days',
     amount_one: '{{count}} day',
     amount_other: '{{count}} days',
-    meaning_zero: 'Meaning: only accounts with trust level 0 are restricted.',
-    meaning_one: 'Meaning: accounts are restricted for the first {{value}} after sign-up.',
-    meaning_other: 'Meaning: accounts are restricted for the first {{value}} after sign-up.',
+    meaning_zero: 'Meaning: new accounts are free right after sign-up, with none of the restrictions above.',
+    meaning_one: 'Meaning: accounts are restricted for the first {{value}} after sign-up or rejoining.',
+    meaning_other: 'Meaning: accounts are restricted for the first {{value}} after sign-up or rejoining.',
     saved_one: 'New-account period set to {{count}} day',
     saved_other: 'New-account period set to {{count}} days',
   },

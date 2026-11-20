@@ -57,12 +57,21 @@ export const policy = {
   },
   newAccount: {
     title: 'Masa akun baru',
-    subtitle: 'Berapa lama akun yang baru daftar diperlakukan sebagai akun baru dan diberi batasan.',
+    subtitle:
+      'Satu angka untuk semua batasan akun yang baru daftar atau baru bergabung lagi. Selama masa ini, akun baru:',
     points: {
-      one: 'Akun baru tidak boleh melampirkan gambar.',
-      two: 'Akun baru tidak boleh membagikan tautan selain domain tepercaya.',
-      three: 'DM akun baru ke orang yang tidak saling mengikuti selalu masuk ke Permintaan pesan.',
-      four: 'Akun dengan tingkat kepercayaan 0, termasuk akun yang baru bergabung lagi setelah dihapus, selalu dianggap baru.',
+      images:
+        'Tidak bisa melampirkan gambar di postingan, komentar, DM, grup, dan room saham, termasuk Share P/L dan kartu bergambar lain dari app.',
+      links: 'Tidak bisa membagikan tautan selain domain tepercaya.',
+      messages: 'Mengirim DM ke orang yang tidak saling mengikuti lewat Permintaan pesan.',
+      speed: 'Mendapat batas kecepatan posting, komentar, dan pesan separuh dari akun biasa.',
+      start: 'Dihitung sejak daftar. Akun yang bergabung lagi setelah dihapus dihitung sejak bergabung lagi.',
+    },
+    notes: {
+      allowed: 'Tetap bisa: postingan, komentar, dan chat berisi teks, suka, ikuti, dan chat CS.',
+      exempt: 'Staf CS dan akun resmi tidak terkena batasan ini.',
+      detection:
+        'Umur akun baru di tab Anti-manipulasi dan bobot akun baru di trending adalah pengaturan terpisah. Keduanya hanya untuk deteksi dan tidak membatasi nasabah.',
     },
     label: 'Hari sejak daftar',
     hint: 'Isi 0–30 hari.',
@@ -70,9 +79,9 @@ export const policy = {
     none: '0 hari',
     amount_one: '{{count}} hari',
     amount_other: '{{count}} hari',
-    meaning_zero: 'Artinya: hanya akun dengan tingkat kepercayaan 0 yang dibatasi.',
-    meaning_one: 'Artinya: akun dibatasi selama {{value}} pertama sejak daftar.',
-    meaning_other: 'Artinya: akun dibatasi selama {{value}} pertama sejak daftar.',
+    meaning_zero: 'Artinya: akun baru langsung bebas sejak daftar, tanpa batasan di atas.',
+    meaning_one: 'Artinya: akun dibatasi selama {{value}} pertama sejak daftar atau bergabung lagi.',
+    meaning_other: 'Artinya: akun dibatasi selama {{value}} pertama sejak daftar atau bergabung lagi.',
     saved_one: 'Masa akun baru menjadi {{count}} hari',
     saved_other: 'Masa akun baru menjadi {{count}} hari',
   },

@@ -208,6 +208,23 @@ describe('content policy', () => {
     ).toBeVisible()
   })
 
+  it('lists everything the new-account period controls, including P/L shares', async () => {
+    const user = userEvent.setup()
+    renderWith(<RulesTab />)
+    const card = (await screen.findByText('Masa akun baru')).closest('section')!
+    expect(within(card).getByText(/termasuk Share P\/L/)).toBeVisible()
+    expect(within(card).getByText(/batas kecepatan posting, komentar, dan pesan separuh/)).toBeVisible()
+    expect(within(card).getByText(/dihitung sejak bergabung lagi/)).toBeVisible()
+    expect(within(card).getByText(/^Tetap bisa:/)).toBeVisible()
+    expect(within(card).getByText('Staf CS dan akun resmi tidak terkena batasan ini.')).toBeVisible()
+    expect(within(card).queryByText(/tingkat kepercayaan 0/)).toBeNull()
+
+    const days = within(card).getByLabelText('Hari sejak daftar')
+    await user.clear(days)
+    await user.type(days, '0')
+    expect(within(card).getByText(/akun baru langsung bebas sejak daftar/)).toBeVisible()
+  })
+
   it('hides the rejoin wait on a server without it', async () => {
     vi.mocked(contentPolicyApi.rules).mockResolvedValue({ ...rules, rejoin_cooldown_hours: null })
     renderWith(<RulesTab />)
