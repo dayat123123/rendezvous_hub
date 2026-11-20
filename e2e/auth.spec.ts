@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import { member } from './support/env'
 import { goOnline, signOut } from './support/staff'
+import { totp } from './support/totp'
 
 test('login email + password tanpa TOTP, password salah ditolak, lalu keluar', async ({ page }) => {
   const nadia = member('Nadia')
@@ -25,4 +26,23 @@ test('login email + password tanpa TOTP, password salah ditolak, lalu keluar', a
   await signOut(page)
   await page.reload()
   await expect(page.getByRole('button', { name: 'Masuk', exact: true })).toBeVisible()
+})
+
+test('Super Admin wajib kode 2FA: kode salah ditolak, kode benar masuk', async ({ page }) => {
+  const sinta = member('Sinta')
+  expect(sinta.totp_secret, 'run make cs-staff after migration 0186').toBeTruthy()
+  await page.goto('/')
+  await page.getByLabel('Email', { exact: true }).fill(sinta.email)
+  await page.getByLabel('Password', { exact: true }).fill(sinta.password)
+  await page.getByRole('button', { name: 'Masuk', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Masukkan kode 2FA' })).toBeVisible()
+
+  await page.getByLabel('Kode 2FA', { exact: true }).fill('000000')
+  await page.getByRole('button', { name: 'Verifikasi', exact: true }).click()
+  await expect(page.getByText('Kode 2FA salah atau sudah kedaluwarsa')).toBeVisible()
+
+  await page.getByLabel('Kode 2FA', { exact: true }).fill(totp(sinta.totp_secret ?? ''))
+  await page.getByRole('button', { name: 'Verifikasi', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Akun', exact: true })).toBeVisible()
+  await signOut(page)
 })

@@ -5,6 +5,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { TooltipProvider } from '@/components/ui/menu'
 import { AppToaster } from '@/components/ui/toaster'
 import { LoginPage } from '@/features/auth/components/login-page'
+import { MfaEnrollPage, MfaVerifyPage } from '@/features/auth/components/mfa-pages'
 import { PasswordPage } from '@/features/auth/components/password-page'
 import { onSignedOut, useAuth } from '@/features/auth/hooks'
 import { usePreferences, watchSystemTheme } from '@/lib/preferences'
@@ -51,6 +52,10 @@ function AuthGate() {
       return <LoginPage reason={phase.reason} idleMinutes={30} />
     case 'password':
       return <PasswordPage />
+    case 'mfaVerify':
+      return <MfaVerifyPage />
+    case 'mfaEnroll':
+      return <MfaEnrollPage />
     case 'ready':
       return (
         <Suspense fallback={<Loading />}>

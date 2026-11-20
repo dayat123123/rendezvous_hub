@@ -135,6 +135,16 @@ export function useResetPassword() {
   })
 }
 
+export function useAccountAction(action: 'unlock' | 'resetMfa') {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      action === 'unlock' ? settingsApi.unlockAccount(id) : settingsApi.resetMfa(id),
+    onSuccess: (agent) => putAccount(client, agent),
+    onError: () => void client.invalidateQueries({ queryKey: settingsKeys.accounts }),
+  })
+}
+
 export function useSaveTopic() {
   const client = useQueryClient()
   return useMutation({

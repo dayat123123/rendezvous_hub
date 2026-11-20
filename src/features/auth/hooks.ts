@@ -10,7 +10,10 @@ import type { AuthPhase, AuthState, SignOutReason } from './types'
 
 type AuthActions = {
   start: () => Promise<void>
+  recheck: () => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
+  verifyMfa: (code: string) => Promise<void>
+  confirmEnrollment: (factorId: string, code: string) => Promise<void>
   changePassword: (password: string) => Promise<void>
   signOut: (reason?: SignOutReason) => Promise<void>
   updateAgent: (agent: AgentProfile) => void
@@ -48,6 +51,13 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => {
       set({ phase, busy: false, error: null })
     } catch (error) {
       const apiError = toApiError(error)
+      if (apiError.code === 'mfa_required') {
+        const step = await authApi.nextStep().catch(() => null)
+        if (step?.kind === 'mfaVerify' || step?.kind === 'mfaEnroll') {
+          set({ phase: step, busy: false, error: null })
+          return
+        }
+      }
       if (apiError.code === 'agent_required') {
         await authApi.signOut().catch(() => undefined)
         set({ phase: { kind: 'signedOut', reason: 'notStaff' }, busy: false, error: null })
@@ -73,6 +83,16 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => {
     })
   }
 
+  const attempt = async (action: () => Promise<void>) => {
+    set({ busy: true, error: null })
+    try {
+      await action()
+      await advance(true)
+    } catch (error) {
+      set({ busy: false, error: toApiError(error) })
+    }
+  }
+
   return {
     phase: { kind: 'checking' },
     busy: false,
@@ -83,25 +103,18 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => {
       await advance(false)
     },
 
-    signIn: async (email, password) => {
-      set({ busy: true, error: null })
-      try {
-        await authApi.signIn(email.trim(), password)
-        await advance(true)
-      } catch (error) {
-        set({ busy: false, error: toApiError(error) })
-      }
+    recheck: async () => {
+      if (get().phase.kind === 'ready') cleanups.forEach((cleanup) => cleanup())
+      await advance(false)
     },
 
-    changePassword: async (password) => {
-      set({ busy: true, error: null })
-      try {
-        await authApi.changePassword(password)
-        await advance(true)
-      } catch (error) {
-        set({ busy: false, error: toApiError(error) })
-      }
-    },
+    signIn: (email, password) => attempt(() => authApi.signIn(email.trim(), password)),
+
+    verifyMfa: (code) => attempt(() => authApi.verifyMfa(code)),
+
+    confirmEnrollment: (factorId, code) => attempt(() => authApi.confirmEnrollment(factorId, code)),
+
+    changePassword: (password) => attempt(() => authApi.changePassword(password)),
 
     signOut: async (reason = 'manual') => {
       const phase = get().phase

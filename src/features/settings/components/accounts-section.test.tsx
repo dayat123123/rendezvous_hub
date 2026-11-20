@@ -21,6 +21,8 @@ vi.mock('../api', async (importOriginal) => {
       ...actual.settingsApi,
       accounts: vi.fn(),
       resetPassword: vi.fn(),
+      unlockAccount: vi.fn(),
+      resetMfa: vi.fn(),
       updateAccount: vi.fn(),
       setCommunityPermissions: vi.fn(),
       setTradePermissions: vi.fn(),
@@ -117,6 +119,61 @@ describe('AccountsSection', () => {
     expect(within(dialog).getByRole('button', { name: 'Disalin' })).toBeInTheDocument()
     await user.click(within(dialog).getByRole('button', { name: 'Selesai' }))
     expect(screen.queryByText('Sementara-12345678')).not.toBeInTheDocument()
+  })
+
+  it('shows a locked account and unlocks it only after confirmation', async () => {
+    const user = userEvent.setup()
+    const locked = { ...nadia, locked_until: '2099-01-01T03:15:00.000Z' }
+    vi.mocked(settingsApi.accounts).mockResolvedValue([sinta, locked, laras])
+    vi.mocked(settingsApi.unlockAccount).mockResolvedValue({ ...nadia, locked_until: null })
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    expect(await screen.findByText(/Terkunci sampai .*10\.15/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Buka kunci Nadia' }))
+    const dialog = screen.getByRole('alertdialog', { name: 'Buka kunci Nadia?' })
+    expect(settingsApi.unlockAccount).not.toHaveBeenCalled()
+    await user.click(within(dialog).getByRole('button', { name: 'Buka kunci' }))
+
+    await waitFor(() => expect(settingsApi.unlockAccount).toHaveBeenCalledWith('nadia'))
+    await waitFor(() => expect(screen.queryByText(/Terkunci sampai/)).not.toBeInTheDocument())
+  })
+
+  it('resets the 2FA of other staff after confirmation, never your own', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsApi.accounts).mockResolvedValue([
+      { ...sinta, totp: true, mfa_required: true },
+      { ...nadia, totp: true },
+      laras,
+    ])
+    vi.mocked(settingsApi.resetMfa).mockResolvedValue({ ...nadia, totp: false })
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    expect(await screen.findByRole('button', { name: 'Reset 2FA Nadia' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reset 2FA Sinta' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Reset 2FA Nadia' }))
+    const dialog = screen.getByRole('alertdialog', { name: 'Reset 2FA Nadia?' })
+    expect(dialog).toHaveTextContent('keluar dari semua perangkat')
+    await user.click(within(dialog).getByRole('button', { name: 'Reset 2FA' }))
+
+    await waitFor(() => expect(settingsApi.resetMfa).toHaveBeenCalledWith('nadia'))
+  })
+
+  it('marks who uses 2FA and who still has to set it up', async () => {
+    vi.mocked(settingsApi.accounts).mockResolvedValue([
+      { ...sinta, totp: true, mfa_required: true },
+      {
+        ...nadia,
+        id: 'adi',
+        display_name: 'Adi',
+        roles: ['cs_super_admin'],
+        totp: false,
+        mfa_required: true,
+      },
+    ])
+    renderWithProviders(<AccountsSection />, monitorFixture)
+
+    expect(await screen.findByText('2FA aktif')).toBeInTheDocument()
+    expect(screen.getByText('Belum daftar 2FA')).toBeInTheDocument()
   })
 
   it('offers customer account access only to CS-role accounts', async () => {

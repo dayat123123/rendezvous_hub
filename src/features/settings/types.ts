@@ -26,6 +26,9 @@ export type StaffAccount = {
   community_permissions: string[]
   trade_permissions: string[]
   created_at: string | null
+  totp?: boolean
+  mfa_required?: boolean
+  locked_until?: string | null
 }
 
 export type AccountDraft = {
@@ -153,7 +156,7 @@ export const settingsGroups = {
   ],
   community: ['community'],
   integration: ['integration', 'appIntegration', 'apiKeys', 'tradeRelay', 'push'],
-  system: ['systemHealth', 'backup', 'alerts'],
+  system: ['security', 'systemHealth', 'backup', 'alerts'],
 } as const
 export type SettingsGroup = keyof typeof settingsGroups
 export type SettingsSection = (typeof settingsGroups)[SettingsGroup][number]

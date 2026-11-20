@@ -104,6 +104,7 @@ export function useHeartbeat() {
         const code = toApiError(error).code
         if (code === 'agent_required') void signOut('notStaff')
         if (code === 'session_revoked') void signOut('expired')
+        if (code === 'mfa_required') void useAuth.getState().recheck()
       } finally {
         running = false
       }

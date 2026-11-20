@@ -1,6 +1,7 @@
 import { expect, type Browser, type Page } from '@playwright/test'
 
 import { member, type StaffName } from './env'
+import { totp } from './totp'
 
 export async function signIn(page: Page, name: StaffName, { online = true }: { online?: boolean } = {}) {
   const person = member(name)
@@ -8,6 +9,10 @@ export async function signIn(page: Page, name: StaffName, { online = true }: { o
   await page.getByLabel('Email', { exact: true }).fill(person.email)
   await page.getByLabel('Password', { exact: true }).fill(person.password)
   await page.getByRole('button', { name: 'Masuk', exact: true }).click()
+  if (person.totp_secret) {
+    await page.getByLabel('Kode 2FA', { exact: true }).fill(totp(person.totp_secret))
+    await page.getByRole('button', { name: 'Verifikasi', exact: true }).click()
+  }
   await expect(page.getByRole('button', { name: 'Akun', exact: true })).toBeVisible()
   if (online && person.roles.includes('cs_agent')) await goOnline(page)
 }

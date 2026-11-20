@@ -111,6 +111,7 @@ export type Database = {
         Returns: Json
       }
       admin_reorder_topics: { Args: { p_codes: string[] }; Returns: Json }
+      admin_reset_agent_mfa: { Args: { p_agent_id: string }; Returns: Json }
       admin_reset_password: { Args: { p_agent_id: string }; Returns: Json }
       admin_save_banner: {
         Args: {
@@ -270,6 +271,7 @@ export type Database = {
       }
       admin_topic_picker: { Args: Record<PropertyKey, never>; Returns: Json }
       admin_topics: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_unlock_agent: { Args: { p_agent_id: string }; Returns: Json }
       admin_update_agent: {
         Args: {
           p_agent_id: string
@@ -297,6 +299,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      agent_security_status: { Args: Record<PropertyKey, never>; Returns: Json }
       agent_send_message: {
         Args: {
           p_attachments?: Json

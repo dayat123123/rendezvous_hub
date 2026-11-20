@@ -39,6 +39,12 @@ export const id = {
     samePassword: 'Password baru harus berbeda dari password sementara.',
     weakPassword: 'Password terlalu lemah, pakai kombinasi yang lebih panjang.',
     staleTicket: 'Tiket sudah berubah. Data terbaru dimuat ulang.',
+    accountLocked:
+      'Akun dikunci sementara karena terlalu banyak password salah. Coba lagi setelah pukul {{time}} WIB, atau minta Super Admin membuka kuncinya.',
+    accountLockedNoTime:
+      'Akun dikunci sementara karena terlalu banyak password salah. Coba lagi nanti, atau minta Super Admin membuka kuncinya.',
+    mfaInvalid: 'Kode 2FA salah atau sudah kedaluwarsa. Masukkan kode terbaru dari aplikasi authenticator.',
+    mfaRequired: 'Masukkan kode 2FA untuk melanjutkan.',
   },
   notificationStats: {
     opened: 'Dibuka',
@@ -81,6 +87,21 @@ export const id = {
     stayIn: 'Tetap masuk',
     emailRequired: 'Isi email',
     passwordRequired: 'Isi password',
+    mfaTitle: 'Masukkan kode 2FA',
+    mfaSubtitle: 'Buka aplikasi authenticator di HP Anda, lalu masukkan 6 digit kode untuk Rendezvous Hub.',
+    mfaCode: 'Kode 2FA',
+    mfaVerify: 'Verifikasi',
+    mfaVerifying: 'Memeriksa…',
+    mfaCodeInvalid: 'Kode harus 6 digit angka',
+    mfaLost: 'HP hilang atau ganti HP? Minta Super Admin lain mereset 2FA Anda di Pengaturan → Akun CS.',
+    enrollTitle: 'Aktifkan 2FA',
+    enrollSubtitle:
+      'Peran Anda wajib memakai 2FA. Pindai kode QR ini dengan aplikasi authenticator di HP (Google Authenticator, Microsoft Authenticator, atau sejenis).',
+    enrollLoading: 'Menyiapkan kode QR…',
+    enrollQrAlt: 'Kode QR untuk aplikasi authenticator',
+    enrollManual: 'Tidak bisa memindai? Masukkan kunci ini secara manual di aplikasi:',
+    enrollCode: 'Kode 6 digit dari aplikasi',
+    enrollConfirm: 'Aktifkan 2FA',
   },
   presence: {
     online: 'Online',
@@ -634,6 +655,19 @@ export const id = {
     resetPasswordTitle: 'Reset password {{name}}?',
     resetPasswordBody:
       'Password lama langsung tidak berlaku. {{name}} mendapat password sementara yang wajib diganti saat login berikutnya.',
+    unlock: 'Buka kunci',
+    unlockTitle: 'Buka kunci {{name}}?',
+    unlockBody:
+      'Hitungan password salah dihapus dan {{name}} bisa langsung masuk lagi. Tindakan ini tercatat di jejak audit.',
+    unlocked: 'Kunci akun {{name}} dibuka',
+    resetMfa: 'Reset 2FA',
+    resetMfaTitle: 'Reset 2FA {{name}}?',
+    resetMfaBody:
+      '{{name}} langsung keluar dari semua perangkat dan harus mendaftarkan 2FA lagi saat masuk berikutnya. Lakukan hanya setelah identitasnya dipastikan, misalnya karena HP hilang. Tindakan ini tercatat di jejak audit.',
+    mfaResetDone: '2FA {{name}} direset',
+    lockedUntil: 'Terkunci sampai {{time}}',
+    mfaOn: '2FA aktif',
+    mfaPending: 'Belum daftar 2FA',
     passwordResetTitle: 'Password direset',
     passwordResetBody: 'Password sementara untuk {{name}} hanya ditampilkan sekali ini.',
     passwordResetSteps:
@@ -821,6 +855,23 @@ export const id = {
     apiKeys: 'API Notifikasi',
     tradeRelay: 'Relay Trade',
     appIntegration: 'Integrasi aplikasi',
+    security: 'Keamanan login',
+    securityDescription:
+      'Kunci akun staf saat password salah berulang kali, dan wajibkan kode 2FA (TOTP) dari aplikasi authenticator untuk peran tertentu.',
+    mfaRoles: 'Wajib 2FA',
+    mfaRolesHint:
+      'Staf dengan peran yang dicentang wajib memasukkan kode dari aplikasi authenticator setiap kali masuk. Yang belum mendaftar diminta memindai kode QR saat masuk berikutnya.',
+    mfaAlways: 'selalu wajib',
+    mfaRolesConfirmTitle: 'Simpan peran wajib 2FA?',
+    mfaRolesConfirmBody:
+      'Staf dengan peran yang baru dicentang langsung diminta mendaftarkan 2FA, termasuk yang sedang masuk. Perubahan tercatat di jejak audit.',
+    loginLock: 'Kunci akun',
+    loginLockHint:
+      'Akun dikunci sementara setelah password salah beberapa kali dalam rentang waktu yang sama dengan lama kunci. Super Admin bisa membuka kunci lebih cepat di Akun CS. Setiap penguncian tercatat di jejak audit.',
+    loginMaxFailures: 'Batas password salah (3–20 kali)',
+    loginLockMinutes: 'Lama kunci (1–1440 menit)',
+    loginLockConfirmTitle: 'Simpan aturan kunci akun?',
+    loginLockConfirmBody: 'Akun dikunci {{minutes}} menit setelah {{count}} kali password salah.',
     systemHealth: 'Kesehatan sistem',
     systemHealthDescription:
       'Peta layanan, status layanan, dan restart otomatis. Data diperbarui otomatis setiap beberapa detik.',

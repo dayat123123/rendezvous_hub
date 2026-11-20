@@ -21,7 +21,14 @@ const auth = vi.hoisted(() => ({
 
 vi.mock('@/lib/supabase', async (importOriginal) => {
   const actual = await importOriginal<typeof SupabaseModule>()
-  return { ...actual, supabase: () => ({ auth }) }
+  return {
+    ...actual,
+    supabase: () => ({ auth }),
+    rpc: (name: string) =>
+      Promise.resolve(
+        name === 'agent_security_status' ? { mfa_required: false, mfa_enrolled: false, aal: 'aal1' } : null,
+      ),
+  }
 })
 
 vi.mock('@/features/presence/api', async (importOriginal) => {

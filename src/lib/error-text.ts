@@ -1,5 +1,6 @@
 import i18n from '@/i18n'
 import { toApiError } from '@/lib/errors'
+import { clock } from '@/lib/time'
 
 const nasabahCodes = [
   'no_access',
@@ -137,6 +138,15 @@ export function errorText(error: unknown): string {
   switch (e.code) {
     case 'invalid_credentials':
       return t('errors.invalidLogin')
+    case 'account_locked':
+      return e.detail && !Number.isNaN(Date.parse(e.detail))
+        ? t('errors.accountLocked', { time: clock(e.detail) })
+        : t('errors.accountLockedNoTime')
+    case 'mfa_verification_failed':
+    case 'mfa_challenge_expired':
+      return t('errors.mfaInvalid')
+    case 'mfa_required':
+      return t('errors.mfaRequired')
     case 'over_request_rate_limit':
     case 'too_many_requests':
     case 'rate_limited':

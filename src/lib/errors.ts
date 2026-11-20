@@ -42,6 +42,8 @@ export function fromPostgrest(error: PostgrestLike, status?: number): ApiError {
 export function toApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error
   if (error instanceof AuthError) {
+    const locked = /^account_locked:(.+)$/.exec(error.message)
+    if (locked) return new ApiError('account_locked', locked[1], error.status)
     return new ApiError(error.code ?? 'auth_failed', error.message, error.status)
   }
   if (error instanceof FunctionsHttpError) return new ApiError('unavailable', undefined, 502)

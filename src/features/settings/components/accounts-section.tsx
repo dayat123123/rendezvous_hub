@@ -3,6 +3,7 @@ import { CheckIcon, CopyIcon, LoaderCircleIcon, ShieldCheckIcon, UserPlusIcon } 
 import { useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { StatusDot } from '@/components/badges'
@@ -44,7 +45,7 @@ import { toApiError } from '@/lib/errors'
 import { stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
-import { useAccounts, useAdminOptions, useResetPassword, useSaveAccount } from '../hooks'
+import { useAccountAction, useAccounts, useAdminOptions, useResetPassword, useSaveAccount } from '../hooks'
 import { coveredBySuperAdmin, pickableRoles, rolesToSave, shownRoles } from '../roles'
 import { isStaffRole, type CreatedAccount, type StaffAccount } from '../types'
 import { PermissionGroup } from './permission-group'
@@ -437,6 +438,80 @@ function ResetPasswordDialog({
   )
 }
 
+type AccountAction = { kind: 'unlock' | 'resetMfa'; account: StaffAccount }
+
+const actionText = {
+  unlock: {
+    title: 'settings.unlockTitle',
+    body: 'settings.unlockBody',
+    confirm: 'settings.unlock',
+    done: 'settings.unlocked',
+  },
+  resetMfa: {
+    title: 'settings.resetMfaTitle',
+    body: 'settings.resetMfaBody',
+    confirm: 'settings.resetMfa',
+    done: 'settings.mfaResetDone',
+  },
+} as const
+
+function AccountActionDialog({ action, onClose }: { action: AccountAction; onClose: () => void }) {
+  const { t } = useTranslation()
+  const mutation = useAccountAction(action.kind)
+  const text = actionText[action.kind]
+  const name = action.account.display_name
+  return (
+    <AlertDialog open onOpenChange={(open) => !open && !mutation.isPending && onClose()}>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogTitle>{t(text.title, { name })}</AlertDialogTitle>
+        <AlertDialogDescription>{t(text.body, { name })}</AlertDialogDescription>
+        {mutation.error ? (
+          <p role="alert" className="text-row text-destructive">
+            {errorText(mutation.error)}
+          </p>
+        ) : null}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <AlertDialogCancel disabled={mutation.isPending}>{t('app.cancel')}</AlertDialogCancel>
+          <Button
+            variant={action.kind === 'resetMfa' ? 'destructive' : 'default'}
+            disabled={mutation.isPending}
+            onClick={() =>
+              mutation.mutate(action.account.id, {
+                onSuccess: () => {
+                  toast.success(t(text.done, { name }))
+                  onClose()
+                },
+              })
+            }
+          >
+            {mutation.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
+            {t(text.confirm)}
+          </Button>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+function SecurityBadges({ account }: { account: StaffAccount }) {
+  const { t } = useTranslation()
+  const lockedUntil = account.locked_until ?? null
+  return (
+    <>
+      {lockedUntil ? (
+        <span className="text-xs text-destructive">
+          {t('settings.lockedUntil', { time: stamp(lockedUntil) })}
+        </span>
+      ) : null}
+      {account.totp ? (
+        <span className="text-xs text-muted-foreground">{t('settings.mfaOn')}</span>
+      ) : account.mfa_required && account.disabled_at === null ? (
+        <span className="text-xs text-warning">{t('settings.mfaPending')}</span>
+      ) : null}
+    </>
+  )
+}
+
 function PasswordDialog({ issued, onClose }: { issued: IssuedPassword | null; onClose: () => void }) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
@@ -520,11 +595,13 @@ function AccountsTable({
   meId,
   onEdit,
   onReset,
+  onAction,
 }: {
   accounts: StaffAccount[]
   meId: string
   onEdit: (account: StaffAccount) => void
   onReset: (account: StaffAccount) => void
+  onAction: (action: AccountAction) => void
 }) {
   const { t } = useTranslation()
   return (
@@ -580,8 +657,31 @@ function AccountsTable({
                   {t(`presence.${account.status}`)}
                 </span>
               )}
+              <span className="flex flex-col">
+                <SecurityBadges account={account} />
+              </span>
             </TableCell>
             <TableCell className="text-right whitespace-nowrap">
+              {account.locked_until ? (
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  aria-label={`${t('settings.unlock')} ${account.display_name}`}
+                  onClick={() => onAction({ kind: 'unlock', account })}
+                >
+                  {t('settings.unlock')}
+                </Button>
+              ) : null}
+              {account.totp && account.id !== meId ? (
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  aria-label={`${t('settings.resetMfa')} ${account.display_name}`}
+                  onClick={() => onAction({ kind: 'resetMfa', account })}
+                >
+                  {t('settings.resetMfa')}
+                </Button>
+              ) : null}
               {account.disabled_at === null && account.id !== meId ? (
                 <Button
                   variant="ghost"
@@ -609,6 +709,7 @@ export function AccountsSection() {
   const accounts = useAccounts()
   const [editing, setEditing] = useState<{ account: StaffAccount | null; key: number } | null>(null)
   const [resetting, setResetting] = useState<StaffAccount | null>(null)
+  const [action, setAction] = useState<AccountAction | null>(null)
   const [issued, setIssued] = useState<IssuedPassword | null>(null)
   const open = (account: StaffAccount | null) => setEditing({ account, key: Date.now() })
   return (
@@ -623,8 +724,23 @@ export function AccountsSection() {
       }
     >
       <QueryContent query={accounts}>
-        {(items) => <AccountsTable accounts={items} meId={me.id} onEdit={open} onReset={setResetting} />}
+        {(items) => (
+          <AccountsTable
+            accounts={items}
+            meId={me.id}
+            onEdit={open}
+            onReset={setResetting}
+            onAction={setAction}
+          />
+        )}
       </QueryContent>
+      {action ? (
+        <AccountActionDialog
+          key={`${action.kind}-${action.account.id}`}
+          action={action}
+          onClose={() => setAction(null)}
+        />
+      ) : null}
       {editing ? (
         <AccountDialog
           key={editing.key}

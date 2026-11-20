@@ -10,6 +10,7 @@ import {
   PaperclipIcon,
   PlugZapIcon,
   RadioTowerIcon,
+  ShieldCheckIcon,
   SirenIcon,
   SlidersHorizontalIcon,
   SmartphoneIcon,
@@ -50,6 +51,7 @@ import { HoursSection } from './hours-section'
 import { IntegrationBadge, IntegrationSection } from './integration-section'
 import { MessagesSection } from './messages-section'
 import { QuickRepliesSection } from './quick-replies-section'
+import { SecuritySection } from './security-section'
 
 const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>> = {
   accounts: UsersIcon,
@@ -67,6 +69,7 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
   apiKeys: KeyRoundIcon,
   tradeRelay: RadioTowerIcon,
   push: BellRingIcon,
+  security: ShieldCheckIcon,
   systemHealth: ActivityIcon,
   backup: DatabaseBackupIcon,
   alerts: SirenIcon,
@@ -88,6 +91,7 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   appIntegration: () => <AppIntegrationSection />,
   apiKeys: () => <IntegrationKeysSection />,
   tradeRelay: () => <RelaySettingsSection />,
+  security: () => <SecuritySection />,
   systemHealth: () => <SystemHealthSection />,
   backup: () => <BackupSection />,
   alerts: () => <AlertsSection />,

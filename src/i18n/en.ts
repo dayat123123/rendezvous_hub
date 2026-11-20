@@ -41,6 +41,12 @@ export const en: Translation = {
     samePassword: 'The new password must differ from the temporary password.',
     weakPassword: 'Password is too weak, use a longer combination.',
     staleTicket: 'The ticket has changed. Reloaded the latest data.',
+    accountLocked:
+      'This account is locked for a while after too many wrong passwords. Try again after {{time}} WIB, or ask a Super Admin to unlock it.',
+    accountLockedNoTime:
+      'This account is locked for a while after too many wrong passwords. Try again later, or ask a Super Admin to unlock it.',
+    mfaInvalid: 'The 2FA code is wrong or expired. Enter the latest code from your authenticator app.',
+    mfaRequired: 'Enter your 2FA code to continue.',
   },
   notificationStats: {
     opened: 'Opened',
@@ -83,6 +89,22 @@ export const en: Translation = {
     stayIn: 'Stay signed in',
     emailRequired: 'Enter your email',
     passwordRequired: 'Enter your password',
+    mfaTitle: 'Enter your 2FA code',
+    mfaSubtitle: 'Open the authenticator app on your phone and enter the 6-digit code for Rendezvous Hub.',
+    mfaCode: '2FA code',
+    mfaVerify: 'Verify',
+    mfaVerifying: 'Checking…',
+    mfaCodeInvalid: 'The code must be 6 digits',
+    mfaLost:
+      'Lost or changed your phone? Ask another Super Admin to reset your 2FA in Settings → CS accounts.',
+    enrollTitle: 'Turn on 2FA',
+    enrollSubtitle:
+      'Your role must use 2FA. Scan this QR code with an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, or similar).',
+    enrollLoading: 'Preparing the QR code…',
+    enrollQrAlt: 'QR code for the authenticator app',
+    enrollManual: 'Cannot scan? Enter this key in the app manually:',
+    enrollCode: '6-digit code from the app',
+    enrollConfirm: 'Turn on 2FA',
   },
   presence: {
     online: 'Online',
@@ -637,6 +659,19 @@ export const en: Translation = {
     resetPasswordTitle: 'Reset the password of {{name}}?',
     resetPasswordBody:
       'The current password stops working immediately. {{name}} gets a temporary password that must be changed at the next sign-in.',
+    unlock: 'Unlock',
+    unlockTitle: 'Unlock {{name}}?',
+    unlockBody:
+      'The wrong-password count is cleared and {{name}} can sign in again right away. This is recorded in the audit trail.',
+    unlocked: 'Unlocked the account of {{name}}',
+    resetMfa: 'Reset 2FA',
+    resetMfaTitle: 'Reset the 2FA of {{name}}?',
+    resetMfaBody:
+      '{{name}} is signed out of every device at once and must set up 2FA again at the next sign-in. Only do this after confirming who they are, for example after a lost phone. This is recorded in the audit trail.',
+    mfaResetDone: 'Reset the 2FA of {{name}}',
+    lockedUntil: 'Locked until {{time}}',
+    mfaOn: '2FA on',
+    mfaPending: '2FA not set up yet',
     passwordResetTitle: 'Password reset',
     passwordResetBody: 'The temporary password for {{name}} is shown only this once.',
     passwordResetSteps:
@@ -822,6 +857,23 @@ export const en: Translation = {
     apiKeys: 'Notification API',
     tradeRelay: 'Trade Relay',
     appIntegration: 'App integration',
+    security: 'Sign-in security',
+    securityDescription:
+      'Lock staff accounts after repeated wrong passwords, and require a 2FA (TOTP) code from an authenticator app for chosen roles.',
+    mfaRoles: 'Require 2FA',
+    mfaRolesHint:
+      'Staff with a checked role must enter a code from their authenticator app at every sign-in. Those not set up yet are asked to scan a QR code at their next sign-in.',
+    mfaAlways: 'always required',
+    mfaRolesConfirmTitle: 'Save the roles that require 2FA?',
+    mfaRolesConfirmBody:
+      'Staff with a newly checked role are asked to set up 2FA right away, including those signed in now. The change is recorded in the audit trail.',
+    loginLock: 'Account lock',
+    loginLockHint:
+      'An account is locked for a while after several wrong passwords within a window as long as the lock itself. Super Admins can unlock it sooner under CS accounts. Every lock is recorded in the audit trail.',
+    loginMaxFailures: 'Wrong passwords allowed (3–20)',
+    loginLockMinutes: 'Lock duration (1–1440 minutes)',
+    loginLockConfirmTitle: 'Save the account lock rule?',
+    loginLockConfirmBody: 'Accounts are locked for {{minutes}} minutes after {{count}} wrong passwords.',
     systemHealth: 'System health',
     systemHealthDescription:
       'Service map, service status, and auto restart. Data refreshes every few seconds.',
