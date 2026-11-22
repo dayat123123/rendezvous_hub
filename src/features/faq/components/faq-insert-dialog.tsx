@@ -16,6 +16,7 @@ import { cn, lengthValid } from '@/lib/utils'
 import { useAgentFaqSearch, useAgentFlagFaq } from '../hooks'
 import { FaqMarkdown } from '../markdown'
 import type { AgentFaqArticle } from '../types'
+import { FaqAttachmentList } from './attachment-list'
 
 function FlagForm({ article, onDone }: { article: AgentFaqArticle; onDone: () => void }) {
   const { t } = useTranslation()
@@ -82,6 +83,7 @@ function ArticlePreview({
       <h3 className="text-sm font-semibold">{article.question}</h3>
       <div className="max-h-64 overflow-y-auto rounded-lg border p-3">
         <FaqMarkdown text={article.answer} />
+        <FaqAttachmentList attachments={article.attachments} />
       </div>
       {article.open_flags > 0 ? (
         <p className="text-xs text-warning">{t('help.faqInsert.openFlags', { count: article.open_flags })}</p>

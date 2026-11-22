@@ -22,6 +22,17 @@ export type FaqCategoryDraft = Omit<FaqCategory, 'id' | 'updated_at' | 'article_
   id: string | null
 }
 
+export const faqAttachmentKinds = ['document', 'image', 'video'] as const
+export type FaqAttachmentKind = (typeof faqAttachmentKinds)[number]
+
+export type FaqAttachment = {
+  path: string
+  name: string
+  kind: FaqAttachmentKind
+  mime: string
+  size: number
+}
+
 export type FaqContent = {
   category_id: string
   question_id: string
@@ -31,6 +42,7 @@ export type FaqContent = {
   keywords: string[]
   topic_code: string | null
   sort_order: number
+  attachments?: FaqAttachment[]
 }
 
 export type FaqArticle = FaqContent & {
@@ -49,7 +61,11 @@ export type FaqArticle = FaqContent & {
   published_at: string | null
 }
 
-export type FaqArticleDraft = FaqContent & { id: string | null; version: number | null }
+export type FaqArticleDraft = FaqContent & {
+  id: string | null
+  version: number | null
+  attachments: FaqAttachment[]
+}
 
 export type FaqOverview = { categories: FaqCategory[]; articles: FaqArticle[] }
 
@@ -68,6 +84,7 @@ export type AgentFaqArticle = {
   question: string
   answer: string
   topic: string | null
+  attachments?: FaqAttachment[]
   updated_at: string
   open_flags: number
 }

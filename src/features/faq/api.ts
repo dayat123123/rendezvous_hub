@@ -3,9 +3,11 @@ import { toApiError } from '@/lib/errors'
 import { appEnv, rpc, supabase } from '@/lib/supabase'
 import { uuid } from '@/lib/utils'
 
+import { FAQ_FILES_BUCKET, FaqAttachmentError, attachmentFormat, attachmentName } from './attachments'
 import type {
   AgentFaqArticle,
   FaqArticle,
+  FaqAttachment,
   FaqArticleDraft,
   FaqCategory,
   FaqCategoryDraft,
@@ -49,6 +51,7 @@ export const faqApi = {
       p_topic_code: draft.topic_code,
       p_sort_order: draft.sort_order,
       p_version: draft.version,
+      p_attachments: draft.attachments.map(({ path, name }) => ({ path, name: name.trim() })),
     }),
   setStatus: (id: string, status: FaqStatus) =>
     rpc<FaqArticle>('admin_faq_set_status', { p_id: id, p_status: status }),
@@ -69,5 +72,24 @@ export const faqApi = {
     const { error } = await supabase().storage.from(FAQ_BUCKET).upload(path, file, { contentType: file.type })
     if (error) throw toApiError(error)
     return `${appEnv().publicApiUrl ?? appEnv().supabaseUrl}/storage/v1/object/public/${FAQ_BUCKET}/${path}`
+  },
+  uploadAttachment: async (original: File): Promise<FaqAttachment> => {
+    const picked = attachmentFormat(original)
+    if (!picked) throw new FaqAttachmentError('type')
+    const file = picked.kind === 'image' ? await fitImage(original, picked.maxBytes) : original
+    const format = attachmentFormat(file) ?? picked
+    if (file.size > format.maxBytes) throw new FaqAttachmentError('size', format.maxBytes)
+    const path = `${uuid()}.${format.extension}`
+    const { error } = await supabase()
+      .storage.from(FAQ_FILES_BUCKET)
+      .upload(path, file, { contentType: format.mime })
+    if (error) throw toApiError(error)
+    return {
+      path,
+      name: attachmentName(original.name),
+      kind: format.kind,
+      mime: format.mime,
+      size: file.size,
+    }
   },
 }

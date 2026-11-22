@@ -18,10 +18,13 @@ import { useTopicConfigs } from '@/features/settings/hooks'
 import { cn } from '@/lib/utils'
 
 import { faqApi } from '../api'
+import { attachmentNameValid } from '../attachments'
 import { useSaveFaqArticle } from '../hooks'
 import { parseKeywords } from '../logic'
 import { FaqMarkdown } from '../markdown'
-import type { FaqArticle, FaqCategory } from '../types'
+import type { FaqArticle, FaqAttachment, FaqCategory } from '../types'
+import { FaqAttachmentList } from './attachment-list'
+import { AttachmentsField } from './attachments-field'
 
 const NO_TOPIC = '-'
 const htmlTag = /<[A-Za-z/!?]/
@@ -82,6 +85,9 @@ export function ArticleDialog({
   const [uploading, setUploading] = useState<'answer_id' | 'answer_en' | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const target = useRef<'answer_id' | 'answer_en'>('answer_id')
+  const [attachments, setAttachments] = useState<FaqAttachment[]>(article?.attachments ?? [])
+  const [attachmentsBusy, setAttachmentsBusy] = useState(false)
+  const [attachmentsChecked, setAttachmentsChecked] = useState(false)
   const form = useForm<ArticleForm>({
     resolver: zodResolver(articleSchema),
     defaultValues: {
@@ -104,7 +110,11 @@ export function ArticleDialog({
   const previewQuestion = preview === 'id' ? questionId : questionEn
   const previewAnswer = preview === 'id' ? answerId : answerEn
 
+  const attachmentsValid = attachments.every((item) => attachmentNameValid(item.name))
+
   const submit = form.handleSubmit(async (values) => {
+    setAttachmentsChecked(true)
+    if (!attachmentsValid || attachmentsBusy) return
     try {
       await save.mutateAsync({
         id: article?.id ?? null,
@@ -117,6 +127,7 @@ export function ArticleDialog({
         answer_en: values.answer_en.trim(),
         keywords: parseKeywords(values.keywords),
         sort_order: Number(values.sort_order),
+        attachments: attachments.map((item) => ({ ...item, name: item.name.trim() })),
       })
       toast.success(article ? t('faq.saved') : t('faq.savedDraft'))
       onClose()
@@ -293,6 +304,13 @@ export function ArticleDialog({
             />
             <FieldMessage error={message(errors.keywords?.message)} hint={t('faq.keywordsHelp')} />
           </div>
+          <AttachmentsField
+            value={attachments}
+            onChange={setAttachments}
+            showErrors={attachmentsChecked}
+            disabled={save.isPending}
+            onBusyChange={setAttachmentsBusy}
+          />
           <section aria-label={t('faq.preview')} className="flex flex-col gap-2 rounded-lg border p-4">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">{t('faq.preview')}</h3>
@@ -316,6 +334,7 @@ export function ArticleDialog({
                 {previewQuestion || t('faq.previewEmpty')}
               </p>
               {previewAnswer ? <FaqMarkdown text={previewAnswer} /> : null}
+              <FaqAttachmentList attachments={attachments} />
             </div>
           </section>
           <FormError error={save.error} />
@@ -323,7 +342,7 @@ export function ArticleDialog({
             <Button type="button" variant="ghost" disabled={save.isPending} onClick={onClose}>
               {t('app.cancel')}
             </Button>
-            <Button type="submit" disabled={save.isPending}>
+            <Button type="submit" disabled={save.isPending || attachmentsBusy}>
               {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
               {article ? t('app.save') : t('faq.saveDraft')}
             </Button>

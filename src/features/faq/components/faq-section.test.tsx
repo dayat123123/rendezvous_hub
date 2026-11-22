@@ -25,6 +25,7 @@ vi.mock('../api', () => ({
     flags: vi.fn(),
     resolveFlags: vi.fn(),
     uploadImage: vi.fn(),
+    uploadAttachment: vi.fn(),
   },
 }))
 
@@ -231,6 +232,124 @@ describe('FaqSection', () => {
       await within(dialog).findByText('Gambar harus diunggah dengan tombol Sisipkan gambar'),
     ).toBeInTheDocument()
     expect(faqApi.saveArticle).not.toHaveBeenCalled()
+  })
+
+  it('attaches PDF and video files, lets staff rename, reorder, and remove them, and saves them', async () => {
+    vi.mocked(faqApi.uploadAttachment).mockImplementation((file: File) =>
+      Promise.resolve(
+        file.type === 'application/pdf'
+          ? {
+              path: '0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e01.pdf',
+              name: file.name,
+              kind: 'document' as const,
+              mime: 'application/pdf',
+              size: 204800,
+            }
+          : {
+              path: '0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e03.mp4',
+              name: file.name,
+              kind: 'video' as const,
+              mime: 'video/mp4',
+              size: 3145728,
+            },
+      ),
+    )
+    vi.mocked(faqApi.saveArticle).mockImplementation((draft) =>
+      Promise.resolve(article({ ...draft, id: 'art-pin', version: 3 })),
+    )
+    const user = setup()
+    await user.click(await screen.findByRole('button', { name: 'Aksi untuk Bagaimana cara mengganti PIN?' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Ubah' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Ubah artikel' })
+    expect(within(dialog).getByRole('heading', { name: 'Lampiran (0/10)' })).toBeInTheDocument()
+
+    await userEvent
+      .setup({ applyAccept: false })
+      .upload(within(dialog).getByTestId('faq-attachment-input'), [
+        new File(['%PDF'], 'formulir.pdf', { type: 'application/pdf' }),
+        new File(['v'], 'panduan.mp4', { type: 'video/mp4' }),
+        new File(['x'], 'setup.exe', { type: 'application/x-msdownload' }),
+      ])
+    expect(
+      await screen.findByText(
+        'setup.exe: format tidak didukung. Pakai PDF, JPEG, PNG, WebP, MP4, WebM, atau MOV.',
+      ),
+    ).toBeInTheDocument()
+    expect(await screen.findByText('2 lampiran diunggah')).toBeInTheDocument()
+    expect(faqApi.uploadAttachment).toHaveBeenCalledTimes(2)
+    expect(within(dialog).getByRole('heading', { name: 'Lampiran (2/10)' })).toBeInTheDocument()
+
+    const preview = within(dialog).getByRole('region', { name: 'Pratinjau di aplikasi' })
+    expect(within(preview).getByRole('link', { name: 'Buka formulir.pdf' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(
+        /\/storage\/v1\/object\/public\/faq-files\/0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e01\.pdf$/,
+      ),
+    )
+    expect(within(preview).getByText('PDF · 200 KB')).toBeInTheDocument()
+
+    const name = within(dialog).getByLabelText('Nama lampiran 1')
+    await user.clear(name)
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    expect(await within(dialog).findByText('Nama lampiran 1–120 karakter')).toBeInTheDocument()
+    expect(faqApi.saveArticle).not.toHaveBeenCalled()
+
+    await user.type(name, 'Formulir ganti rekening')
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Turunkan lampiran Formulir ganti rekening' }),
+    )
+    expect(within(dialog).getByLabelText('Nama lampiran 1')).toHaveValue('panduan.mp4')
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() =>
+      expect(faqApi.saveArticle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'art-pin',
+          attachments: [
+            expect.objectContaining({
+              path: '0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e03.mp4',
+              name: 'panduan.mp4',
+            }),
+            expect.objectContaining({
+              path: '0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e01.pdf',
+              name: 'Formulir ganti rekening',
+            }),
+          ],
+        }),
+      ),
+    )
+  })
+
+  it('keeps existing attachments when editing and removes one on request', async () => {
+    vi.mocked(faqApi.overview).mockResolvedValue({
+      categories: [category],
+      articles: [
+        article({
+          attachments: [
+            {
+              path: '0b6c1a52-3f4e-4c1d-9a7e-2f1b3c4d5e02.png',
+              name: 'Contoh isian',
+              kind: 'image',
+              mime: 'image/png',
+              size: 1024,
+            },
+          ],
+        }),
+      ],
+    })
+    vi.mocked(faqApi.saveArticle).mockImplementation((draft) =>
+      Promise.resolve(article({ ...draft, id: 'art-pin', version: 3 })),
+    )
+    const user = setup()
+    await user.click(await screen.findByRole('button', { name: 'Aksi untuk Bagaimana cara mengganti PIN?' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Ubah' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Ubah artikel' })
+    expect(within(dialog).getByLabelText('Nama lampiran 1')).toHaveValue('Contoh isian')
+    await user.click(within(dialog).getByRole('button', { name: 'Hapus lampiran Contoh isian' }))
+    expect(within(dialog).getByRole('heading', { name: 'Lampiran (0/10)' })).toBeInTheDocument()
+    await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
+    await waitFor(() =>
+      expect(faqApi.saveArticle).toHaveBeenCalledWith(expect.objectContaining({ attachments: [] })),
+    )
   })
 
   it('restores an older version only after confirmation', async () => {
