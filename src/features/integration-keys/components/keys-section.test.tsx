@@ -19,6 +19,7 @@ vi.mock('../api', () => ({
     create: vi.fn(),
     update: vi.fn(),
     revoke: vi.fn(),
+    remove: vi.fn(),
     stats: vi.fn(),
     statsDaily: vi.fn(),
     officialAccounts: vi.fn(),
@@ -228,6 +229,7 @@ describe('IntegrationKeysSection', () => {
     })
     renderSection()
 
+    await user.click(await screen.findByRole('radio', { name: 'Kesehatan sistem' }))
     const card = await screen.findByRole('list', { name: 'API kesehatan sistem' })
     expect(
       within(card).getByText('GET https://api.olt.test/integration/v1/system/health'),
@@ -262,6 +264,7 @@ describe('IntegrationKeysSection', () => {
   })
 
   it('shows a ready example without the anon key and hides broadcasts for a health-only key', async () => {
+    const user = userEvent.setup()
     vi.mocked(integrationKeysApi.list).mockResolvedValue([
       notifyKey,
       { ...notifyKey, id: 'key-4', name: 'monitoring-key', scopes: ['health_read'] },
@@ -271,13 +274,62 @@ describe('IntegrationKeysSection', () => {
     await screen.findByText('monitoring-key')
     expect(screen.getByRole('button', { name: 'Broadcast Sistem notifikasi produksi' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Broadcast monitoring-key' })).not.toBeInTheDocument()
+    expect(screen.getByText(/integration\/v1\/notify\/messages/)).not.toHaveTextContent('apikey')
+    await user.click(screen.getByRole('radio', { name: 'Kesehatan sistem' }))
     expect(
       screen.getByText(
         'curl.exe -sS "https://api.olt.test/integration/v1/system/health" -H "Authorization: Bearer <API_KEY>"',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText(/integration\/v1\/notify\/messages/)).not.toHaveTextContent('apikey')
     expect(screen.queryByText(/apikey:/)).not.toBeInTheDocument()
+  })
+
+  it('separates notification statistics from the system health guide', async () => {
+    const user = userEvent.setup()
+    renderSection()
+
+    const views = await screen.findByRole('region', { name: 'Panduan dan statistik' })
+    expect(within(views).getByRole('radio', { name: 'Notifikasi & bot' })).toBeChecked()
+    expect(await within(views).findByText('Statistik notifikasi & bot')).toBeInTheDocument()
+    expect(within(views).getByText('Contoh pemanggilan API')).toBeInTheDocument()
+    expect(within(views).queryByText('API kesehatan sistem')).not.toBeInTheDocument()
+
+    await user.click(within(views).getByRole('radio', { name: 'Kesehatan sistem' }))
+    expect(within(views).getByText('API kesehatan sistem')).toBeInTheDocument()
+    expect(within(views).getByText(/tidak punya statistik pengiriman/)).toBeInTheDocument()
+    expect(within(views).queryByText('Statistik notifikasi & bot')).not.toBeInTheDocument()
+    expect(within(views).queryByText('Contoh pemanggilan API')).not.toBeInTheDocument()
+  })
+
+  it('deletes a revoked key after confirmation and offers delete only for revoked keys', async () => {
+    const user = userEvent.setup()
+    const revokedKey: IntegrationKey = {
+      ...notifyKey,
+      id: 'key-old',
+      name: 'Key lama',
+      status: 'revoked',
+      revoked_at: '2026-11-20T01:00:00.000Z',
+      revoked_by: { id: 'adi', name: 'Adi' },
+      revoke_reason: 'Sistem lama dimatikan',
+    }
+    vi.mocked(integrationKeysApi.list).mockResolvedValue([notifyKey, revokedKey])
+    vi.mocked(integrationKeysApi.remove).mockResolvedValue({ id: 'key-old', deleted: true })
+    renderSection()
+
+    await screen.findByText('Key lama')
+    expect(screen.queryByRole('button', { name: 'Hapus Sistem notifikasi produksi' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ubah Key lama' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Hapus Key lama' }))
+    const confirm = await screen.findByRole('alertdialog', { name: 'Hapus API key Key lama?' })
+    expect(within(confirm).getByText(/jejak audit tetap tersimpan/)).toBeInTheDocument()
+    await user.click(within(confirm).getByRole('button', { name: 'Batal' }))
+    expect(integrationKeysApi.remove).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Hapus Key lama' }))
+    await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Hapus' }))
+    await waitFor(() => expect(integrationKeysApi.remove).toHaveBeenCalledWith('key-old'))
+    expect(await screen.findByText('API key Key lama dihapus')).toBeInTheDocument()
   })
 
   it('shows no health usage for a key without the health scope', async () => {

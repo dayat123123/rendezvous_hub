@@ -1367,6 +1367,7 @@ export const id = {
       integration_key_create: 'Buat API key integrasi',
       integration_key_update: 'Ubah API key integrasi',
       integration_key_revoke: 'Cabut API key integrasi',
+      integration_key_delete: 'Hapus API key integrasi',
       feature_flag_set: 'Simpan feature flag',
       feature_flag_delete: 'Hapus feature flag',
       banner_save: 'Simpan banner aplikasi',

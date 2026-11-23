@@ -96,6 +96,7 @@ export const auditActions = [
   'holiday.delete',
   'holiday.save',
   'integration.key_create',
+  'integration.key_delete',
   'integration.key_revoke',
   'integration.key_update',
   'kill_switch.set',

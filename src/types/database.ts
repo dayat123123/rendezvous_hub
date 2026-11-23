@@ -908,6 +908,10 @@ export type Database = {
         }
         Returns: Json
       }
+      integration_key_delete: {
+        Args: { p_id: string }
+        Returns: Json
+      }
       integration_key_revoke: {
         Args: { p_id: string; p_reason: string }
         Returns: Json

@@ -78,6 +78,14 @@ export function useUpdateIntegrationKey() {
   })
 }
 
+export function useDeleteIntegrationKey() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: (id: string) => integrationKeysApi.remove(id),
+    onSettled: refresh,
+  })
+}
+
 export function useRevokeIntegrationKey() {
   const refresh = useRefresh()
   return useMutation({

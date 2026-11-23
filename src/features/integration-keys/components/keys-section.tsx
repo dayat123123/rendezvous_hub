@@ -1,4 +1,12 @@
-import { KeyRoundIcon, MegaphoneIcon, PencilIcon, PlusIcon } from 'lucide-react'
+import {
+  ActivityIcon,
+  KeyRoundIcon,
+  LoaderCircleIcon,
+  MegaphoneIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -6,6 +14,14 @@ import { toast } from 'sonner'
 import { CopyButton } from '@/components/copy-button'
 import { ReasonDialog } from '@/components/reason-dialog'
 import { Button } from '@/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/controls'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { QueryContent, SectionFrame, SettingsCard } from '@/features/settings/components/settings-ui'
 import { ToneBadge } from '@/features/system/components/system-ui'
@@ -14,7 +30,12 @@ import { appEnv } from '@/lib/supabase'
 import { formatNumber, stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
-import { useIntegrationKeys, useIntegrationOfficialAccounts, useRevokeIntegrationKey } from '../hooks'
+import {
+  useDeleteIntegrationKey,
+  useIntegrationKeys,
+  useIntegrationOfficialAccounts,
+  useRevokeIntegrationKey,
+} from '../hooks'
 import { curlExample, showsBroadcasts } from '../logic'
 import { REVOKE_REASON_MAX, REVOKE_REASON_MIN, type IntegrationKey, type KeyStatus } from '../types'
 import { BroadcastsDialog } from './broadcasts-dialog'
@@ -32,11 +53,13 @@ function KeyRow({
   item,
   onEdit,
   onRevoke,
+  onDelete,
   onBroadcasts,
 }: {
   item: IntegrationKey
   onEdit: () => void
   onRevoke: () => void
+  onDelete: () => void
   onBroadcasts: () => void
 }) {
   const { t } = useTranslation()
@@ -108,7 +131,18 @@ function KeyRow({
               {t('platform.keys.broadcasts.open')}
             </Button>
           ) : null}
-          {revoked ? null : (
+          {revoked ? (
+            <Button
+              size="xs"
+              variant="ghost"
+              className="text-destructive"
+              aria-label={t('platform.keys.deleteLabel', { name: item.name })}
+              onClick={onDelete}
+            >
+              <Trash2Icon />
+              {t('platform.keys.delete')}
+            </Button>
+          ) : (
             <>
               <Button
                 size="icon-xs"
@@ -139,11 +173,13 @@ function KeysTable({
   keys,
   onEdit,
   onRevoke,
+  onDelete,
   onBroadcasts,
 }: {
   keys: IntegrationKey[]
   onEdit: (key: IntegrationKey) => void
   onRevoke: (key: IntegrationKey) => void
+  onDelete: (key: IntegrationKey) => void
   onBroadcasts: (key: IntegrationKey) => void
 }) {
   const { t } = useTranslation()
@@ -178,6 +214,7 @@ function KeysTable({
             item={item}
             onEdit={() => onEdit(item)}
             onRevoke={() => onRevoke(item)}
+            onDelete={() => onDelete(item)}
             onBroadcasts={() => onBroadcasts(item)}
           />
         ))}
@@ -212,6 +249,89 @@ function HelpCard() {
   )
 }
 
+type View = 'notify' | 'health'
+
+function DeleteKeyDialog({ item, onClose }: { item: IntegrationKey | null; onClose: () => void }) {
+  const { t } = useTranslation()
+  const remove = useDeleteIntegrationKey()
+  const close = () => {
+    if (remove.isPending) return
+    remove.reset()
+    onClose()
+  }
+  return (
+    <AlertDialog open={item !== null} onOpenChange={(next) => !next && close()}>
+      <AlertDialogContent>
+        <AlertDialogTitle>{t('platform.keys.deleteTitle', { name: item?.name ?? '' })}</AlertDialogTitle>
+        <AlertDialogDescription>{t('platform.keys.deleteBody')}</AlertDialogDescription>
+        <div className="flex justify-end gap-2">
+          <AlertDialogCancel disabled={remove.isPending}>{t('app.cancel')}</AlertDialogCancel>
+          <Button
+            variant="destructive"
+            disabled={remove.isPending}
+            onClick={() => {
+              if (!item) return
+              remove
+                .mutateAsync(item.id)
+                .then(() => {
+                  toast.success(t('platform.keys.deleted', { name: item.name }))
+                  onClose()
+                })
+                .catch((error: unknown) => toast.error(platformErrorText(error)))
+            }}
+          >
+            {remove.isPending ? <LoaderCircleIcon className="animate-spin" aria-hidden="true" /> : null}
+            {t('platform.keys.delete')}
+          </Button>
+        </div>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+function UsageViews() {
+  const { t } = useTranslation()
+  const [view, setView] = useState<View>('notify')
+  return (
+    <section aria-label={t('platform.keys.views.label')} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold">{t('platform.keys.views.label')}</h2>
+        <ToggleGroup
+          type="single"
+          value={view}
+          className="self-start"
+          aria-label={t('platform.keys.views.label')}
+          onValueChange={(value) => {
+            if (value === 'notify' || value === 'health') setView(value)
+          }}
+        >
+          <ToggleGroupItem value="notify">
+            <MegaphoneIcon aria-hidden="true" />
+            {t('platform.keys.views.notify')}
+          </ToggleGroupItem>
+          <ToggleGroupItem value="health">
+            <ActivityIcon aria-hidden="true" />
+            {t('platform.keys.views.health')}
+          </ToggleGroupItem>
+        </ToggleGroup>
+        <p className="max-w-3xl text-row text-muted-foreground">
+          {view === 'notify' ? t('platform.keys.views.notifyHint') : t('platform.keys.views.healthHint')}
+        </p>
+      </div>
+      {view === 'notify' ? (
+        <>
+          <KeyStatsCard />
+          <HelpCard />
+        </>
+      ) : (
+        <SettingsCard title={t('platform.keys.health.title')} subtitle={t('platform.keys.health.subtitle')}>
+          <HealthUsage />
+        </SettingsCard>
+      )}
+    </section>
+  )
+}
+
 export function IntegrationKeysSection() {
   const { t } = useTranslation()
   const keys = useIntegrationKeys()
@@ -220,6 +340,7 @@ export function IntegrationKeysSection() {
   const [editing, setEditing] = useState<IntegrationKey | null>(null)
   const [creating, setCreating] = useState(false)
   const [revoking, setRevoking] = useState<IntegrationKey | null>(null)
+  const [deleting, setDeleting] = useState<IntegrationKey | null>(null)
   const [revealed, setRevealed] = useState<Revealed | null>(null)
   const [viewing, setViewing] = useState<IntegrationKey | null>(null)
   const formOpen = creating || editing !== null
@@ -237,15 +358,17 @@ export function IntegrationKeysSection() {
       <SettingsCard title={t('platform.keys.listTitle')} subtitle={t('platform.keys.listHint')}>
         <QueryContent query={keys}>
           {(items) => (
-            <KeysTable keys={items} onEdit={setEditing} onRevoke={setRevoking} onBroadcasts={setViewing} />
+            <KeysTable
+              keys={items}
+              onEdit={setEditing}
+              onRevoke={setRevoking}
+              onDelete={setDeleting}
+              onBroadcasts={setViewing}
+            />
           )}
         </QueryContent>
       </SettingsCard>
-      <KeyStatsCard />
-      <HelpCard />
-      <SettingsCard title={t('platform.keys.health.title')} subtitle={t('platform.keys.health.subtitle')}>
-        <HealthUsage />
-      </SettingsCard>
+      <UsageViews />
       {formOpen ? (
         <KeyDialog
           open
@@ -261,6 +384,7 @@ export function IntegrationKeysSection() {
       ) : null}
       <SecretDialog revealed={revealed} onClose={() => setRevealed(null)} />
       <BroadcastsDialog item={viewing} onClose={() => setViewing(null)} />
+      <DeleteKeyDialog key={deleting?.id ?? 'none'} item={deleting} onClose={() => setDeleting(null)} />
       <ReasonDialog
         key={revoking?.id ?? 'none'}
         open={revoking !== null}

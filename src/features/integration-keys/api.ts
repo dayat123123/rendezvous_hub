@@ -42,6 +42,7 @@ export const integrationKeysApi = {
     ),
   revoke: async (id: string, reason: string) =>
     withoutSecret(await rpc<IntegrationKey>('integration_key_revoke', { p_id: id, p_reason: reason })),
+  remove: (id: string) => rpc<{ id: string; deleted: boolean }>('integration_key_delete', { p_id: id }),
   officialAccounts: () => rpc<AccountRef[]>('integration_official_accounts'),
   statsDaily: async (days: number, keyId: string) =>
     (await rpc<KeyDaily[]>('integration_stats_daily', { p_days: days, p_key_id: keyId })).map((row) => ({

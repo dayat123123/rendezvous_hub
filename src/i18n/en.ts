@@ -1371,6 +1371,7 @@ export const en: Translation = {
       integration_key_create: 'Integration API key created',
       integration_key_update: 'Integration API key changed',
       integration_key_revoke: 'Integration API key revoked',
+      integration_key_delete: 'Integration API key deleted',
       feature_flag_set: 'Feature flag saved',
       feature_flag_delete: 'Feature flag deleted',
       banner_save: 'App banner saved',

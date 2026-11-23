@@ -55,6 +55,7 @@ export type KeyStats = {
   id: string
   name: string
   prefix: string
+  scopes?: KeyScope[]
   status: KeyStatus
   last_used_at: string | null
   received: number

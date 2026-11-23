@@ -49,6 +49,21 @@ export const platform: Translated<typeof source> = {
     asAccount: 'as @{{username}}',
     editLabel: 'Edit {{name}}',
     revoke: 'Revoke',
+    delete: 'Delete',
+    deleteLabel: 'Delete {{name}}',
+    deleteTitle: 'Delete API key {{name}}?',
+    deleteBody:
+      'This key is revoked and can no longer be used. Deleting removes it from the list and statistics. Its audit trail entries are kept. This cannot be undone.',
+    deleted: 'API key {{name}} deleted',
+    views: {
+      label: 'Guides and statistics',
+      notify: 'Notifications & bots',
+      health: 'System health',
+      notifyHint:
+        'Delivery statistics and request examples for keys with notification or bot post scopes. System health keys are not counted here.',
+      healthHint:
+        'Endpoints and request examples for keys with Read system health. These keys send no notifications, so they have no delivery statistics.',
+    },
     revokeLabel: 'Revoke {{name}}',
     revokeTitle: 'Revoke API key {{name}}?',
     revokeBody:
@@ -131,11 +146,11 @@ export const platform: Translated<typeof source> = {
         'Replace <API_KEY> with the oik_ key shown when the key was created; the anon key is not needed. For per-container health, replace /system/health with /system/nodes.',
       privacy:
         'The content matches the Hub, except internal probe addresses, the backup location, and alert channel details (emails, SMTP host, Telegram chat IDs), which are not sent out.',
-      docs: 'Full contract: docs/api/openapi.yaml (System health tag) and docs/integration/README.md',
+      docs: 'Full guide: docs/integration/kesehatan-sistem.md. OpenAPI contract: docs/api/kesehatan-sistem.openapi.yaml',
       secretTitle: 'How to use this key',
     },
     stats: {
-      title: 'Statistics',
+      title: 'Notification & bot statistics',
       subtitle: 'Per WIB day since {{from}}. Choose a key to see its own chart.',
       window: 'Statistics period',
       days_one: '{{count}} day',

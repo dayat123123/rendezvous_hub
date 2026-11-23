@@ -46,6 +46,21 @@ export const platform = {
     asAccount: 'sebagai @{{username}}',
     editLabel: 'Ubah {{name}}',
     revoke: 'Cabut',
+    delete: 'Hapus',
+    deleteLabel: 'Hapus {{name}}',
+    deleteTitle: 'Hapus API key {{name}}?',
+    deleteBody:
+      'Key ini sudah dicabut dan tidak bisa dipakai lagi. Menghapus menghilangkannya dari daftar dan statistik. Catatan di jejak audit tetap tersimpan. Tindakan ini tidak bisa dibatalkan.',
+    deleted: 'API key {{name}} dihapus',
+    views: {
+      label: 'Panduan dan statistik',
+      notify: 'Notifikasi & bot',
+      health: 'Kesehatan sistem',
+      notifyHint:
+        'Statistik pengiriman dan contoh request untuk key dengan izin notifikasi atau postingan bot. Key baca kesehatan sistem tidak dihitung di sini.',
+      healthHint:
+        'Alamat endpoint dan contoh request untuk key dengan izin Baca kesehatan sistem. Key ini tidak mengirim notifikasi, jadi tidak punya statistik pengiriman.',
+    },
     revokeLabel: 'Cabut {{name}}',
     revokeTitle: 'Cabut API key {{name}}?',
     revokeBody:
@@ -128,11 +143,11 @@ export const platform = {
         'Ganti <API_KEY> dengan key berawalan oik_ yang ditampilkan saat key dibuat; anon key tidak diperlukan. Untuk kesehatan per container, ganti /system/health dengan /system/nodes.',
       privacy:
         'Isinya sama dengan Hub, kecuali alamat internal probe, lokasi backup, dan detail kanal alert (email, host SMTP, chat ID Telegram) yang tidak dikirim keluar.',
-      docs: 'Kontrak lengkap: docs/api/openapi.yaml (tag Kesehatan sistem) dan docs/integration/README.md',
+      docs: 'Panduan lengkap: docs/integration/kesehatan-sistem.md. Kontrak OpenAPI: docs/api/kesehatan-sistem.openapi.yaml',
       secretTitle: 'Cara memakai key ini',
     },
     stats: {
-      title: 'Statistik',
+      title: 'Statistik notifikasi & bot',
       subtitle: 'Per hari WIB sejak {{from}}. Pilih key untuk melihat grafiknya sendiri.',
       window: 'Periode statistik',
       days_one: '{{count}} hari',
