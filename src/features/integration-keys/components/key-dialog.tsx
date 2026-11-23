@@ -32,6 +32,7 @@ import { platformErrorText } from '@/lib/error-text'
 import { useCreateIntegrationKey, useUpdateIntegrationKey } from '../hooks'
 import { draftFrom, invalidCidrs, keyProblems, parseCidrs, toggleScope } from '../logic'
 import { keyScopes, KEY_NAME_MAX, MAX_CIDRS, type IntegrationKey, type KeyDraft } from '../types'
+import { HealthUsage } from './health-usage'
 
 export type Revealed = { secret: string; key: IntegrationKey }
 
@@ -347,6 +348,15 @@ function SecretBody({ revealed, onClose }: { revealed: Revealed; onClose: () => 
           <CopyButton text={revealed.secret} />
         </div>
       </div>
+      {revealed.key.scopes.includes('health_read') ? (
+        <section
+          aria-label={t('platform.keys.health.secretTitle')}
+          className="flex flex-col gap-2 rounded-md border p-3"
+        >
+          <h3 className="text-sm font-medium">{t('platform.keys.health.secretTitle')}</h3>
+          <HealthUsage secret={revealed.secret} />
+        </section>
+      ) : null}
       <label className="flex items-start gap-2 text-row">
         <Checkbox className="mt-0.5" checked={saved} onCheckedChange={(value) => setSaved(value === true)} />
         {t('platform.keys.secretAck')}

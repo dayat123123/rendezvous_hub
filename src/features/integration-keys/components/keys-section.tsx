@@ -18,6 +18,7 @@ import { useIntegrationKeys, useIntegrationOfficialAccounts, useRevokeIntegratio
 import { curlExample } from '../logic'
 import { REVOKE_REASON_MAX, REVOKE_REASON_MIN, type IntegrationKey, type KeyStatus } from '../types'
 import { BroadcastsDialog } from './broadcasts-dialog'
+import { HealthUsage } from './health-usage'
 import { KeyDialog, SecretDialog, type Revealed } from './key-dialog'
 import { KeyStatsCard } from './key-stats'
 
@@ -240,6 +241,9 @@ export function IntegrationKeysSection() {
       </SettingsCard>
       <KeyStatsCard />
       <HelpCard />
+      <SettingsCard title={t('platform.keys.health.title')} subtitle={t('platform.keys.health.subtitle')}>
+        <HealthUsage />
+      </SettingsCard>
       {formOpen ? (
         <KeyDialog
           open

@@ -153,6 +153,18 @@ export function deliveryRatio(sent: number, failed: number) {
   return total === 0 ? null : sent / total
 }
 
+export const healthEndpoints = (baseUrl: string) => ({
+  health: `${baseUrl}/integration/v1/system/health`,
+  nodes: `${baseUrl}/integration/v1/system/nodes`,
+})
+
+export const healthCurlExample = (baseUrl: string, secret = '$INTEGRATION_KEY') =>
+  [
+    `curl -sS "${healthEndpoints(baseUrl).health}" \\`,
+    '  -H "apikey: $ANON_KEY" \\',
+    `  -H "Authorization: Bearer ${secret}"`,
+  ].join('\n')
+
 export const curlExample = (baseUrl: string) =>
   [
     `curl -sS -X POST "${baseUrl}/integration/v1/notify/messages" \\`,

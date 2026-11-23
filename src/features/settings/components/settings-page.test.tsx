@@ -82,7 +82,7 @@ describe('SettingsPage', () => {
     expect(groupItems('Integrasi')).toEqual([
       'Integrasi API Nasabah',
       'Integrasi aplikasi',
-      'API Notifikasi',
+      'API Integrasi',
       'Relay Trade',
       'Push notification',
     ])

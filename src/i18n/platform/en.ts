@@ -11,9 +11,9 @@ export const platform: Translated<typeof source> = {
     linux: 'Linux',
   },
   keys: {
-    title: 'Notification API',
+    title: 'Integration API',
     description:
-      'API keys for other services that send push notifications to the app (trades, announcements, info) or post as an official bot. A key is shown only once when created; the server keeps only its hash.',
+      'API keys for other services that send push notifications to the app (trades, announcements, info), post as an official bot, or read system health to show in their own app. A key is shown only once when created; the server keeps only its hash.',
     create: 'Create API key',
     listTitle: 'API keys',
     listHint:
@@ -32,6 +32,7 @@ export const platform: Translated<typeof source> = {
       notify: 'Per-account notifications',
       notify_broadcast: 'Mass notifications',
       bot_post: 'Bot posts',
+      health_read: 'Read system health',
     },
     scopeHints: {
       notify:
@@ -39,6 +40,8 @@ export const platform: Translated<typeof source> = {
       notify_broadcast:
         'One request can notify many users at once: all users, watchers of a stock, or a list of user ids. Per-account notifications is checked automatically.',
       bot_post: 'An automated system posts as one official account, published immediately with a Bot label.',
+      health_read:
+        'Your app reads System health and the Service map (status, alerts, disks, queues, backup, containers). Read only; it cannot acknowledge alerts or change settings.',
     },
     status: { active: 'Active', disabled: 'Disabled', revoked: 'Revoked' },
     anyIp: 'Any IP',
@@ -109,6 +112,22 @@ export const platform: Translated<typeof source> = {
       statuses:
         'Per-message status: queued (in the push queue), no_recipient (account not linked or push turned off, do not retry), duplicate (already received in the last 7 days), invalid (fix the content).',
       docs: 'Full guide: docs/integration/README.md',
+    },
+    health: {
+      title: 'System health API',
+      subtitle:
+        'For internal apps that want to show system health like the Hub does. Create a key with Read system health, then call it from the backend of that app (not from a browser) every 15–30 seconds.',
+      healthLabel: 'System health',
+      healthHint:
+        'Overall status, checks, open alerts and the last 7 days, services, probes, disks, database, queues, cron, backup, and alert channels.',
+      nodesLabel: 'Service map',
+      nodesHint:
+        'Containers per service (status, replicas, restarts, CPU and memory usage), probes, and versions. Refreshed about every 10 seconds.',
+      example: 'Example system health request',
+      privacy:
+        'The content matches the Hub, except internal probe addresses, the backup location, and alert channel details (emails, SMTP host, Telegram chat IDs), which are not sent out.',
+      docs: 'Full contract: docs/api/openapi.yaml (System health tag) and docs/integration/README.md',
+      secretTitle: 'How to use this key',
     },
     stats: {
       title: 'Statistics',

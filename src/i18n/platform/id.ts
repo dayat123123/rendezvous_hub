@@ -8,9 +8,9 @@ export const platform = {
     linux: 'Linux',
   },
   keys: {
-    title: 'API Notifikasi',
+    title: 'API Integrasi',
     description:
-      'API key untuk layanan lain yang mengirim push notifikasi ke aplikasi (transaksi, pengumuman, info) atau memposting sebagai bot resmi. Key hanya ditampilkan sekali saat dibuat; server hanya menyimpan hash-nya.',
+      'API key untuk layanan lain yang mengirim push notifikasi ke aplikasi (transaksi, pengumuman, info), memposting sebagai bot resmi, atau membaca kesehatan sistem untuk ditampilkan di aplikasi sendiri. Key hanya ditampilkan sekali saat dibuat; server hanya menyimpan hash-nya.',
     create: 'Buat API key',
     listTitle: 'API key',
     listHint:
@@ -29,6 +29,7 @@ export const platform = {
       notify: 'Notifikasi per rekening',
       notify_broadcast: 'Notifikasi massal',
       bot_post: 'Postingan bot',
+      health_read: 'Baca kesehatan sistem',
     },
     scopeHints: {
       notify:
@@ -36,6 +37,8 @@ export const platform = {
       notify_broadcast:
         'Satu permintaan bisa mengirim notifikasi ke banyak pengguna sekaligus: semua pengguna, pemantau satu saham, atau daftar user. Izin Notifikasi per rekening ikut dicentang otomatis.',
       bot_post: 'Sistem otomatis memposting atas nama satu akun resmi, langsung terbit dengan label Bot.',
+      health_read:
+        'Aplikasi Anda membaca isi Kesehatan sistem dan Peta layanan (status, alert, disk, antrean, backup, container). Hanya baca; tidak bisa menandai alert atau mengubah pengaturan.',
     },
     status: { active: 'Aktif', disabled: 'Nonaktif', revoked: 'Dicabut' },
     anyIp: 'Semua IP',
@@ -106,6 +109,22 @@ export const platform = {
       statuses:
         'Status per pesan: queued (masuk antrean push), no_recipient (rekening belum tertaut atau push dimatikan, jangan kirim ulang), duplicate (sudah diterima 7 hari terakhir), invalid (perbaiki isinya).',
       docs: 'Panduan lengkap: docs/integration/README.md',
+    },
+    health: {
+      title: 'API kesehatan sistem',
+      subtitle:
+        'Untuk aplikasi internal yang ingin menampilkan kesehatan sistem seperti di Hub. Buat key dengan izin Baca kesehatan sistem, lalu panggil dari backend aplikasi itu (jangan dari browser) setiap 15–30 detik.',
+      healthLabel: 'Kesehatan sistem',
+      healthHint:
+        'Status keseluruhan, pemeriksaan, alert aktif dan 7 hari terakhir, layanan, probe, disk, database, antrean, cron, backup, dan kanal alert.',
+      nodesLabel: 'Peta layanan',
+      nodesHint:
+        'Container per layanan (status, replika, restart, usage CPU dan memori), probe, dan versi. Diperbarui setiap ±10 detik.',
+      example: 'Contoh request kesehatan sistem',
+      privacy:
+        'Isinya sama dengan Hub, kecuali alamat internal probe, lokasi backup, dan detail kanal alert (email, host SMTP, chat ID Telegram) yang tidak dikirim keluar.',
+      docs: 'Kontrak lengkap: docs/api/openapi.yaml (tag Kesehatan sistem) dan docs/integration/README.md',
+      secretTitle: 'Cara memakai key ini',
     },
     stats: {
       title: 'Statistik',

@@ -146,8 +146,9 @@ describe('IntegrationKeysSection', () => {
     const perKey = await screen.findByRole('table', { name: 'Statistik per API key' })
     expect(within(perKey).getByText('180')).toBeInTheDocument()
     expect(screen.getByText('94% berhasil')).toBeInTheDocument()
-    expect(screen.getByText(/integration\/v1\/notify\/messages/)).toBeInTheDocument()
-    expect(screen.getByText(/https:\/\/api\.olt\.test/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/https:\/\/api\.olt\.test\/integration\/v1\/notify\/messages/),
+    ).toBeInTheDocument()
   })
 
   it('validates the form, then shows the new key only once and never caches it', async () => {
@@ -213,6 +214,57 @@ describe('IntegrationKeysSection', () => {
         .map((mutation) => mutation.state.data),
     ])
     expect(cached).not.toContain(SECRET)
+  })
+
+  it('creates a read-only system health key and shows how to call it with the new key', async () => {
+    const user = userEvent.setup()
+    vi.mocked(integrationKeysApi.create).mockResolvedValue({
+      key: { ...notifyKey, id: 'key-3', name: 'Dasbor kantor', scopes: ['health_read'], allowed_cidrs: [] },
+      secret: SECRET,
+    })
+    renderSection()
+
+    const card = await screen.findByRole('list', { name: 'API kesehatan sistem' })
+    expect(
+      within(card).getByText('GET https://api.olt.test/integration/v1/system/health'),
+    ).toBeInTheDocument()
+    expect(within(card).getByText('GET https://api.olt.test/integration/v1/system/nodes')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Buat API key' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Buat API key' })
+    await user.type(within(dialog).getByLabelText('Nama key'), 'Dasbor kantor')
+    await user.click(within(dialog).getByRole('checkbox', { name: /^Notifikasi per rekening/ }))
+    await user.click(within(dialog).getByRole('checkbox', { name: /^Baca kesehatan sistem/ }))
+    expect(within(dialog).getByText(/hanya baca; tidak bisa menandai alert/i)).toBeInTheDocument()
+    await user.click(within(dialog).getByRole('button', { name: 'Buat API key' }))
+
+    await waitFor(() =>
+      expect(integrationKeysApi.create).toHaveBeenCalledWith(
+        expect.objectContaining({ scopes: ['health_read'] }),
+      ),
+    )
+    const secret = await screen.findByRole('dialog', { name: 'API key dibuat' })
+    const usage = within(secret).getByRole('region', { name: 'Cara memakai key ini' })
+    expect(
+      within(usage).getByText('GET https://api.olt.test/integration/v1/system/nodes'),
+    ).toBeInTheDocument()
+    expect(within(usage).getByText(new RegExp(`Authorization: Bearer ${SECRET}`))).toBeInTheDocument()
+    expect(
+      within(usage).getByText(/alamat internal probe, lokasi backup, dan detail kanal alert/),
+    ).toBeInTheDocument()
+  })
+
+  it('shows no health usage for a key without the health scope', async () => {
+    const user = userEvent.setup()
+    vi.mocked(integrationKeysApi.create).mockResolvedValue({ key: notifyKey, secret: SECRET })
+    renderSection()
+
+    await user.click(await screen.findByRole('button', { name: 'Buat API key' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Buat API key' })
+    await user.type(within(dialog).getByLabelText('Nama key'), 'Sistem notifikasi')
+    await user.click(within(dialog).getByRole('button', { name: 'Buat API key' }))
+    const secret = await screen.findByRole('dialog', { name: 'API key dibuat' })
+    expect(within(secret).queryByRole('region', { name: 'Cara memakai key ini' })).not.toBeInTheDocument()
   })
 
   it('requires an official account for bot posts, listed without any community permission', async () => {
