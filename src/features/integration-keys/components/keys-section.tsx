@@ -15,7 +15,7 @@ import { formatNumber, stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
 import { useIntegrationKeys, useIntegrationOfficialAccounts, useRevokeIntegrationKey } from '../hooks'
-import { curlExample } from '../logic'
+import { curlExample, showsBroadcasts } from '../logic'
 import { REVOKE_REASON_MAX, REVOKE_REASON_MIN, type IntegrationKey, type KeyStatus } from '../types'
 import { BroadcastsDialog } from './broadcasts-dialog'
 import { HealthUsage } from './health-usage'
@@ -97,15 +97,17 @@ function KeyRow({
       </TableCell>
       <TableCell className="py-2">
         <div className="flex justify-end gap-1">
-          <Button
-            size="xs"
-            variant="ghost"
-            aria-label={t('platform.keys.broadcasts.openLabel', { name: item.name })}
-            onClick={onBroadcasts}
-          >
-            <MegaphoneIcon />
-            {t('platform.keys.broadcasts.open')}
-          </Button>
+          {showsBroadcasts(item.scopes) ? (
+            <Button
+              size="xs"
+              variant="ghost"
+              aria-label={t('platform.keys.broadcasts.openLabel', { name: item.name })}
+              onClick={onBroadcasts}
+            >
+              <MegaphoneIcon />
+              {t('platform.keys.broadcasts.open')}
+            </Button>
+          ) : null}
           {revoked ? null : (
             <>
               <Button

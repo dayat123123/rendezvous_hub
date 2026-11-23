@@ -100,7 +100,7 @@ export const platform = {
       step1:
         'Buat key dengan izin yang dibutuhkan dan isi IP server sistem pengirim sebagaimana terlihat dari server sosial.',
       step2:
-        'Simpan key sebagai rahasia di sistem pengirim (mis. INTEGRATION_KEY). Header apikey memakai anon key yang sama dengan aplikasi.',
+        'Simpan key sebagai rahasia di sistem pengirim (mis. INTEGRATION_KEY). Cukup kirim header Authorization: Bearer <key>; anon key tidak diperlukan.',
       step3:
         'Kirim maksimal 500 pesan per request. Pakai id event yang stabil agar kiriman ulang dijawab duplicate, bukan push kedua.',
       step4:
@@ -121,6 +121,11 @@ export const platform = {
       nodesHint:
         'Container per layanan (status, replika, restart, usage CPU dan memori), probe, dan versi. Diperbarui setiap ±10 detik.',
       example: 'Contoh request kesehatan sistem',
+      exampleShell: 'Linux / macOS (terminal)',
+      examplePowerShell: 'Windows (PowerShell)',
+      exampleReady: 'API key ini sudah terisi, tinggal salin dan jalankan. Anon key tidak diperlukan.',
+      exampleHint:
+        'Ganti <API_KEY> dengan key berawalan oik_ yang ditampilkan saat key dibuat; anon key tidak diperlukan. Untuk kesehatan per container, ganti /system/health dengan /system/nodes.',
       privacy:
         'Isinya sama dengan Hub, kecuali alamat internal probe, lokasi backup, dan detail kanal alert (email, host SMTP, chat ID Telegram) yang tidak dikirim keluar.',
       docs: 'Kontrak lengkap: docs/api/openapi.yaml (tag Kesehatan sistem) dan docs/integration/README.md',

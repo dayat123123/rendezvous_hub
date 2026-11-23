@@ -158,17 +158,16 @@ export const healthEndpoints = (baseUrl: string) => ({
   nodes: `${baseUrl}/integration/v1/system/nodes`,
 })
 
-export const healthCurlExample = (baseUrl: string, secret = '$INTEGRATION_KEY') =>
-  [
-    `curl -sS "${healthEndpoints(baseUrl).health}" \\`,
-    '  -H "apikey: $ANON_KEY" \\',
-    `  -H "Authorization: Bearer ${secret}"`,
-  ].join('\n')
+export function healthExamples(baseUrl: string, secret = '<API_KEY>') {
+  const args = `"${healthEndpoints(baseUrl).health}" -H "Authorization: Bearer ${secret}"`
+  return { shell: `curl -sS ${args}`, powershell: `curl.exe -sS ${args}` }
+}
+
+export const showsBroadcasts = (scopes: readonly string[]) => scopes.includes('notify')
 
 export const curlExample = (baseUrl: string) =>
   [
     `curl -sS -X POST "${baseUrl}/integration/v1/notify/messages" \\`,
-    '  -H "apikey: $ANON_KEY" \\',
     '  -H "Authorization: Bearer $INTEGRATION_KEY" \\',
     '  -H "Content-Type: application/json" \\',
     '  -H "X-Request-Id: batch-000123" \\',

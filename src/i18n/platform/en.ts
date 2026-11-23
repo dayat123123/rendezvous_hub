@@ -103,7 +103,7 @@ export const platform: Translated<typeof source> = {
       step1:
         'Create a key with the scopes you need and enter the sending system server IPs as the social server sees them.',
       step2:
-        'Store the key as a secret in the sending system (for example INTEGRATION_KEY). The apikey header uses the same anon key as the app.',
+        'Store the key as a secret in the sending system (for example INTEGRATION_KEY). Send only the Authorization: Bearer <key> header; the anon key is not needed.',
       step3:
         'Send up to 500 messages per request. Use a stable event id so a retry is answered with duplicate instead of a second push.',
       step4:
@@ -124,6 +124,11 @@ export const platform: Translated<typeof source> = {
       nodesHint:
         'Containers per service (status, replicas, restarts, CPU and memory usage), probes, and versions. Refreshed about every 10 seconds.',
       example: 'Example system health request',
+      exampleShell: 'Linux / macOS (terminal)',
+      examplePowerShell: 'Windows (PowerShell)',
+      exampleReady: 'This API key is already filled in; copy and run. The anon key is not needed.',
+      exampleHint:
+        'Replace <API_KEY> with the oik_ key shown when the key was created; the anon key is not needed. For per-container health, replace /system/health with /system/nodes.',
       privacy:
         'The content matches the Hub, except internal probe addresses, the backup location, and alert channel details (emails, SMTP host, Telegram chat IDs), which are not sent out.',
       docs: 'Full contract: docs/api/openapi.yaml (System health tag) and docs/integration/README.md',

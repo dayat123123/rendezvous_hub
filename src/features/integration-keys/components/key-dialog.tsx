@@ -28,6 +28,7 @@ import { Textarea } from '@/components/ui/textarea'
 import type { AccountRef } from '@/features/community/types'
 import { FieldText } from '@/features/system/components/system-ui'
 import { platformErrorText } from '@/lib/error-text'
+import { cn } from '@/lib/utils'
 
 import { useCreateIntegrationKey, useUpdateIntegrationKey } from '../hooks'
 import { draftFrom, invalidCidrs, keyProblems, parseCidrs, toggleScope } from '../logic'
@@ -306,7 +307,10 @@ export function SecretDialog({ revealed, onClose }: { revealed: Revealed | null;
   return (
     <Dialog open={revealed !== null}>
       <DialogContent
-        className="sm:max-w-lg"
+        className={cn(
+          '[&>*]:min-w-0',
+          revealed?.key.scopes.includes('health_read') ? 'sm:max-w-2xl' : 'sm:max-w-lg',
+        )}
         onInteractOutside={(event) => event.preventDefault()}
         onEscapeKeyDown={(event) => event.preventDefault()}
       >
@@ -351,7 +355,7 @@ function SecretBody({ revealed, onClose }: { revealed: Revealed; onClose: () => 
       {revealed.key.scopes.includes('health_read') ? (
         <section
           aria-label={t('platform.keys.health.secretTitle')}
-          className="flex flex-col gap-2 rounded-md border p-3"
+          className="flex min-w-0 flex-col gap-2 rounded-md border p-3"
         >
           <h3 className="text-sm font-medium">{t('platform.keys.health.secretTitle')}</h3>
           <HealthUsage secret={revealed.secret} />

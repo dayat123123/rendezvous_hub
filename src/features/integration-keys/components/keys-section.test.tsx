@@ -28,7 +28,11 @@ vi.mock('../api', () => ({
 
 vi.mock('@/lib/supabase', async (importOriginal) => ({
   ...(await importOriginal<typeof SupabaseModule>()),
-  appEnv: () => ({ supabaseUrl: 'http://localhost:8000', publicApiUrl: 'https://api.olt.test' }),
+  appEnv: () => ({
+    supabaseUrl: 'http://localhost:8000',
+    publicApiUrl: 'https://api.olt.test',
+    anonKey: 'anon-test',
+  }),
 }))
 
 const SECRET = 'oik_Zm9vYmFyYmF6cXV4cXV1eGNvcmdlZ3JhdWx0Z2FycGx5d2FsZG8'
@@ -248,10 +252,32 @@ describe('IntegrationKeysSection', () => {
     expect(
       within(usage).getByText('GET https://api.olt.test/integration/v1/system/nodes'),
     ).toBeInTheDocument()
-    expect(within(usage).getByText(new RegExp(`Authorization: Bearer ${SECRET}`))).toBeInTheDocument()
+    const command = `"https://api.olt.test/integration/v1/system/health" -H "Authorization: Bearer ${SECRET}"`
+    expect(within(usage).getByText(`curl -sS ${command}`)).toBeInTheDocument()
+    expect(within(usage).getByText(`curl.exe -sS ${command}`)).toBeInTheDocument()
+    expect(within(usage).getByText(/sudah terisi, tinggal salin/)).toBeInTheDocument()
     expect(
       within(usage).getByText(/alamat internal probe, lokasi backup, dan detail kanal alert/),
     ).toBeInTheDocument()
+  })
+
+  it('shows a ready example without the anon key and hides broadcasts for a health-only key', async () => {
+    vi.mocked(integrationKeysApi.list).mockResolvedValue([
+      notifyKey,
+      { ...notifyKey, id: 'key-4', name: 'monitoring-key', scopes: ['health_read'] },
+    ])
+    renderSection()
+
+    await screen.findByText('monitoring-key')
+    expect(screen.getByRole('button', { name: 'Broadcast Sistem notifikasi produksi' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Broadcast monitoring-key' })).not.toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'curl.exe -sS "https://api.olt.test/integration/v1/system/health" -H "Authorization: Bearer <API_KEY>"',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/integration\/v1\/notify\/messages/)).not.toHaveTextContent('apikey')
+    expect(screen.queryByText(/apikey:/)).not.toBeInTheDocument()
   })
 
   it('shows no health usage for a key without the health scope', async () => {
