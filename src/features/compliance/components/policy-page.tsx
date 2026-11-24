@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { CircleAlertIcon, CircleCheckIcon, LoaderCircleIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -201,6 +202,12 @@ export function CompliancePolicyPage() {
         <header>
           <h1 className="text-lg font-semibold">{t('compliance.policy.title')}</h1>
           <p className="text-row text-muted-foreground">{t('compliance.policy.subtitle')}</p>
+          <Link
+            to="/compliance/retention"
+            className="mt-1 inline-block text-row font-medium underline underline-offset-2"
+          >
+            {t('nav.retention')} →
+          </Link>
         </header>
         {policies.data ? (
           <>

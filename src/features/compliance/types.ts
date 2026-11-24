@@ -118,7 +118,7 @@ export type ActionCount = { action: string; count: number }
 export type AuditPage = { rows: AuditEntry[]; next: AuditCursor | null; actions: ActionCount[] | null }
 export type AuditFilter = { range: DateRange; action: string | null; query: string }
 
-export const policyKeys = ['complaint.days', 'complaint.extension_days', 'retention.chat_years'] as const
+export const policyKeys = ['complaint.days', 'complaint.extension_days'] as const
 export type PolicyKey = (typeof policyKeys)[number]
 
 export type PolicyConfirmation = {

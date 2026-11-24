@@ -79,6 +79,7 @@ type NavTarget =
   | '/compliance/content'
   | '/compliance/legal'
   | '/compliance/evidence'
+  | '/compliance/retention'
   | '/compliance/trade-share'
   | '/nasabah'
   | '/community'
@@ -338,6 +339,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
     ...(tradeShare ? [{ to: '/compliance/trade-share' as const, label: t('nav.tradeShare') }] : []),
     { to: '/compliance/audit', label: t('nav.audit') },
     { to: '/compliance/evidence', label: t('nav.evidence') },
+    { to: '/compliance/retention', label: t('nav.retention') },
   ]
   const [dialog, setDialog] = useState<AccountDialog | null>(null)
   return (
