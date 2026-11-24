@@ -13,6 +13,7 @@ import type { moderation } from './moderation/id'
 import type { platform } from './platform/id'
 import type { policy } from './policy/id'
 import type { replies } from './replies/id'
+import type { retention } from './retention/id'
 import type { trade } from './trade/id'
 
 export const languages = ['id', 'en'] as const
@@ -23,6 +24,7 @@ type Bundles = {
   policy: typeof policy
   moderation: typeof moderation
   evidence: typeof evidence
+  retention: typeof retention
   account: typeof account
   labels: typeof labels
   replies: typeof replies
@@ -54,6 +56,10 @@ const bundleLoaders: { [B in Bundle]: Record<Language, () => Promise<Bundles[B]>
   evidence: {
     id: () => import('./evidence/id').then((module) => module.evidence),
     en: () => import('./evidence/en').then((module) => module.evidence),
+  },
+  retention: {
+    id: () => import('./retention/id').then((module) => module.retention),
+    en: () => import('./retention/en').then((module) => module.retention),
   },
   account: {
     id: () => import('./account/id').then((module) => module.account),

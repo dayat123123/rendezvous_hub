@@ -180,13 +180,14 @@ export const id = {
     overview: 'Ringkasan',
     cases: 'Kasus',
     audit: 'Jejak Audit',
-    policy: 'Tenggat & retensi',
+    policy: 'Tenggat pengaduan',
     words: 'Kata terlarang',
     caseAttention: '{{count}} kasus perlu perhatian',
     community: 'Komunitas',
     communityAttention: '{{count}} perlu tindakan di Komunitas',
     legal: 'Dokumen hukum',
     evidence: 'Bukti',
+    retention: 'Retensi data',
     system: 'Kesehatan sistem',
     analytics: 'Analitik',
     contentPolicy: 'Kebijakan konten',
@@ -580,7 +581,7 @@ export const id = {
       cs_super_admin:
         'Mengelola akun staf, Pengaturan, Dashboard, dan Laporan; memantau tiket. Sudah termasuk Fitur & Banner dan Pusat Bantuan. Tanpa peran CS hanya memantau, tidak membalas.',
       compliance:
-        'Pengaduan, kasus, kebijakan konten, tenggat & retensi, dokumen hukum, jejak audit, dan bukti.',
+        'Pengaduan, kasus, kebijakan konten, tenggat pengaduan, dokumen hukum, jejak audit, bukti, dan retensi data.',
       community: 'Staf Komunitas tanpa peran lain; menunya mengikuti Izin Komunitas.',
       product: 'Komunitas › Fitur & versi dan Tab Stream, serta menu Banner & Popup.',
       cs_content: 'Menu Pusat Bantuan: topik chat CS dan artikel bantuan.',
@@ -973,7 +974,7 @@ export const id = {
       stale: 'Gagal memperbarui, data mungkin belum terbaru',
       policyBanner:
         '{{count}} kebijakan belum dikonfirmasi Kepatuhan, sehingga nilai usulan yang sedang dipakai.',
-      openPolicy: 'Buka Tenggat & retensi',
+      openPolicy: 'Buka Tenggat pengaduan',
       activeComplaints: 'Pengaduan aktif',
       dueSoon: 'Jatuh tempo ≤ 1 hari kerja',
       overdue: 'Lewat tenggat',
@@ -1493,19 +1494,17 @@ export const id = {
       },
     },
     policy: {
-      title: 'Tenggat & retensi',
+      title: 'Tenggat pengaduan',
       subtitle: 'Nilai yang wajib dikonfirmasi Kepatuhan. Super Admin tidak bisa mengubahnya.',
       names: {
         complaint_days: 'Tenggat pengaduan',
         complaint_extension_days: 'Perpanjangan tenggat',
-        retention_chat_years: 'Retensi riwayat chat',
       },
       hints: {
         complaint_days:
           'Hari kerja sejak pengaduan diterima, mengikuti kalender libur WIB. Berlaku untuk pengaduan baru.',
         complaint_extension_days:
           'Hari kerja tambahan, paling banyak satu kali per pengaduan. 0 berarti tidak bisa diperpanjang.',
-        retention_chat_years: 'Lama riwayat chat CS disimpan sejak tiket terakhir ditutup.',
       },
       units: {
         business_days: 'hari kerja',

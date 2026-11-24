@@ -182,13 +182,14 @@ export const en: Translation = {
     overview: 'Overview',
     cases: 'Cases',
     audit: 'Audit trail',
-    policy: 'Deadlines & retention',
+    policy: 'Complaint deadlines',
     words: 'Banned words',
     caseAttention: '{{count}} cases need attention',
     community: 'Community',
     communityAttention: '{{count}} need action in Community',
     legal: 'Legal documents',
     evidence: 'Evidence',
+    retention: 'Data retention',
     system: 'System health',
     analytics: 'Analytics',
     contentPolicy: 'Content policy',
@@ -584,7 +585,7 @@ export const en: Translation = {
       cs_super_admin:
         'Manages staff accounts, Settings, Dashboard, and Reports; monitors tickets. Already includes Features & banners and Help Center. Without the CS role it only monitors and does not reply.',
       compliance:
-        'Complaints, cases, content policy, deadlines & retention, legal documents, audit trail, and evidence.',
+        'Complaints, cases, content policy, complaint deadlines, legal documents, audit trail, evidence, and data retention.',
       community: 'Community staff without any other role; menus follow the Community permissions.',
       product: 'Community › Features & versions and Stream tabs, plus the Banners & Popups menu.',
       cs_content: 'Help Center menu: CS chat topics and help articles.',
@@ -977,7 +978,7 @@ export const en: Translation = {
       stale: 'Refresh failed, data may be out of date',
       policyBanner:
         '{{count}} policies are not confirmed by Compliance yet, so the proposed values are in use.',
-      openPolicy: 'Open Deadlines & retention',
+      openPolicy: 'Open Complaint deadlines',
       activeComplaints: 'Active complaints',
       dueSoon: 'Due within 1 business day',
       overdue: 'Past deadline',
@@ -1498,19 +1499,17 @@ export const en: Translation = {
       },
     },
     policy: {
-      title: 'Deadlines & retention',
+      title: 'Complaint deadlines',
       subtitle: 'Values that Compliance must confirm. Super Admins cannot change them.',
       names: {
         complaint_days: 'Complaint deadline',
         complaint_extension_days: 'Deadline extension',
-        retention_chat_years: 'Chat history retention',
       },
       hints: {
         complaint_days:
           'Business days after a complaint is received, using the WIB holiday calendar. Applies to new complaints.',
         complaint_extension_days:
           'Extra business days, at most once per complaint. 0 means deadlines cannot be extended.',
-        retention_chat_years: 'How long CS chat history is kept after the last ticket closes.',
       },
       units: {
         business_days: 'business days',

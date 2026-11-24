@@ -202,11 +202,12 @@ describe('TopBar', () => {
       'Ringkasan',
       'Kasus',
       'Kebijakan konten',
-      'Tenggat & retensi',
+      'Tenggat pengaduan',
       'Dokumen hukum',
       'Berbagi Trade',
       'Jejak Audit',
       'Bukti',
+      'Retensi data',
     ])
   })
 
@@ -310,10 +311,11 @@ describe('TopBar', () => {
       'Ringkasan',
       'Kasus',
       'Kebijakan konten',
-      'Tenggat & retensi',
+      'Tenggat pengaduan',
       'Dokumen hukum',
       'Jejak Audit',
       'Bukti',
+      'Retensi data',
     ])
   })
 

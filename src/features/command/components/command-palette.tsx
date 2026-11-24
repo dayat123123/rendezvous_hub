@@ -136,6 +136,7 @@ type SectionTarget =
   | '/compliance/content'
   | '/compliance/legal'
   | '/compliance/evidence'
+  | '/compliance/retention'
   | '/compliance/trade-share'
   | '/nasabah'
   | '/system'
@@ -211,7 +212,10 @@ function PaletteBody({
       ? [{ label: t('nav.content'), icon: LibraryIcon, to: '/content' as const }]
       : []),
     ...(superAdmin && !compliance
-      ? [{ label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const }]
+      ? [
+          { label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const },
+          { label: t('nav.retention'), icon: ClockIcon, to: '/compliance/retention' as const },
+        ]
       : []),
     ...(superAdmin ? [{ label: t('nav.system'), icon: ActivityIcon, to: '/system' as const }] : []),
     ...(compliance
@@ -224,6 +228,7 @@ function PaletteBody({
           { label: t('nav.contentPolicy'), icon: ShieldIcon, to: '/compliance/content' as const },
           { label: t('nav.legal'), icon: FileTextIcon, to: '/compliance/legal' as const },
           { label: t('nav.evidence'), icon: FileLockIcon, to: '/compliance/evidence' as const },
+          { label: t('nav.retention'), icon: ClockIcon, to: '/compliance/retention' as const },
         ]
       : []),
     ...(canOpenTradeShare(agent)

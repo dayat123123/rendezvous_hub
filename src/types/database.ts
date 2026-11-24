@@ -1060,6 +1060,35 @@ export type Database = {
         Args: { p_accept: boolean; p_reason?: string; p_transfer_id: string }
         Returns: Json
       }
+      retention_add_hold: {
+        Args: {
+          p_expires_at?: string
+          p_reason: string
+          p_reference?: string
+          p_target: string
+          p_target_type: string
+        }
+        Returns: Json
+      }
+      retention_cancel_change: {
+        Args: { p_id: number; p_note: string }
+        Returns: Json
+      }
+      retention_decide_change: {
+        Args: { p_approve: boolean; p_id: number; p_note?: string }
+        Returns: Json
+      }
+      retention_overview: { Args: Record<PropertyKey, never>; Returns: Json }
+      retention_preview: { Args: Record<PropertyKey, never>; Returns: Json }
+      retention_release_hold: {
+        Args: { p_id: string; p_note: string }
+        Returns: Json
+      }
+      retention_request_change: {
+        Args: { p_key: string; p_reason: string; p_value: number }
+        Returns: Json
+      }
+      retention_run_now: { Args: Record<PropertyKey, never>; Returns: Json }
       room_members: { Args: { p_room_id: string }; Returns: Json }
       save_my_quick_reply: {
         Args: {

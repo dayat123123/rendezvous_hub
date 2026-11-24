@@ -272,6 +272,18 @@ const complianceEvidenceRoute = createRoute({
   ),
 })
 
+const complianceRetentionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compliance/retention',
+  beforeLoad: ({ context }) => {
+    if (!isCompliance(context.agent) && !isSuperAdmin(context.agent)) throw redirect({ to: '/' })
+  },
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/compliance/retention/components/retention-page'), 'retention'),
+    'RetentionPage',
+  ),
+})
+
 const complianceTradeShareRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/compliance/trade-share',
@@ -378,6 +390,7 @@ const routeTree = rootRoute.addChildren([
   complianceContentRoute,
   complianceLegalRoute,
   complianceEvidenceRoute,
+  complianceRetentionRoute,
   complianceTradeShareRoute,
   systemRoute,
   nasabahRoute,
