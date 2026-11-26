@@ -113,7 +113,7 @@ function MapContent({ data, updatedAt }: { data: SystemNodes; updatedAt: number 
       ) : (
         <>
           <MapSummaryPanel summary={summary} host={data.report.host} />
-          <div className="map-canvas overflow-hidden rounded-xl border p-4 lg:p-6">
+          <div className="map-canvas @container overflow-hidden rounded-xl border p-4 lg:p-6">
             <Topology services={services} history={history.series} onOpen={setOpen} />
           </div>
           <Legend />

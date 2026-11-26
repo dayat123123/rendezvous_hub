@@ -17,11 +17,23 @@ import { ServiceCard } from './service-card'
 type Path = { from: string; to: string; tone: NodeTone; d: string }
 
 const laneLayout: Record<MapLane, { area: string; grid: string }> = {
-  edge: { area: 'lg:col-start-1 lg:row-start-1', grid: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-1' },
-  api: { area: 'lg:col-start-2 lg:row-start-1', grid: 'grid-cols-1 sm:grid-cols-2' },
-  data: { area: 'lg:col-start-3 lg:row-start-1', grid: 'grid-cols-1 sm:grid-cols-3 lg:grid-cols-1' },
-  workers: { area: 'lg:col-span-3 lg:row-start-2', grid: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' },
-  ops: { area: 'lg:col-span-3 lg:row-start-3', grid: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' },
+  edge: {
+    area: '@5xl:col-start-1 @5xl:row-start-1',
+    grid: 'grid-cols-1 @xl:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-1',
+  },
+  api: { area: '@5xl:col-start-2 @5xl:row-start-1', grid: 'grid-cols-1 @xl:grid-cols-2' },
+  data: {
+    area: '@5xl:col-start-3 @5xl:row-start-1',
+    grid: 'grid-cols-1 @xl:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-1',
+  },
+  workers: {
+    area: '@5xl:col-span-3 @5xl:row-start-2',
+    grid: 'grid-cols-1 @xl:grid-cols-2 @3xl:grid-cols-3 @6xl:grid-cols-4',
+  },
+  ops: {
+    area: '@5xl:col-span-3 @5xl:row-start-3',
+    grid: 'grid-cols-1 @xl:grid-cols-2 @3xl:grid-cols-3 @6xl:grid-cols-4',
+  },
 }
 
 const laneOrder: MapLane[] = ['edge', 'api', 'data', 'workers', 'ops']
@@ -116,13 +128,13 @@ export function Topology({
       ref={container}
       role="group"
       aria-label={t('system.map.canvasLabel')}
-      className="relative grid gap-x-14 gap-y-8 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_minmax(0,15rem)]"
+      className="relative grid gap-x-8 gap-y-8 @5xl:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_minmax(0,14rem)] @6xl:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_minmax(0,15rem)] @6xl:gap-x-14"
     >
       <svg
         aria-hidden="true"
         width={size.width}
         height={size.height}
-        className="pointer-events-none absolute inset-0 z-0 hidden overflow-visible lg:block"
+        className="pointer-events-none absolute inset-0 z-0 hidden overflow-visible @5xl:block"
       >
         {paths.map((p) => {
           const connected = neighbours !== null && neighbours.has(p.from) && neighbours.has(p.to)

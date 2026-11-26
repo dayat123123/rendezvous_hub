@@ -33,7 +33,7 @@ function HealthRing({ summary }: { summary: MapSummary }) {
   }))
   return (
     <figure
-      className="relative w-fit shrink-0 justify-self-center md:justify-self-start"
+      className="relative w-fit shrink-0 justify-self-center @2xl:justify-self-start"
       aria-label={t('system.map.ringLabel', { healthy: summary.healthy, total: summary.containers })}
     >
       <svg
@@ -72,7 +72,9 @@ function HealthRing({ summary }: { summary: MapSummary }) {
       </svg>
       <figcaption className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="tabular text-metric font-semibold tracking-tight">{share}%</span>
-        <span className="text-label text-muted-foreground uppercase">{t('system.map.healthyShare')}</span>
+        <span className="max-w-20 text-center text-label break-words text-muted-foreground uppercase">
+          {t('system.map.healthyShare')}
+        </span>
       </figcaption>
     </figure>
   )
@@ -81,7 +83,7 @@ function HealthRing({ summary }: { summary: MapSummary }) {
 function Stat({ label, value, tone }: { label: string; value: number; tone?: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dt className="text-xs break-words text-muted-foreground">{label}</dt>
       <dd className={cn('tabular text-lg font-semibold', tone)}>{formatNumber(value)}</dd>
     </div>
   )
@@ -96,68 +98,67 @@ export function MapSummaryPanel({ summary, host }: { summary: MapSummary; host: 
   const memoryRatio =
     summary.memoryBytes !== null && summary.memoryTotal ? summary.memoryBytes / summary.memoryTotal : 0
   return (
-    <section
-      aria-label={t('system.map.title')}
-      className="grid gap-5 rounded-xl border bg-background p-4 md:grid-cols-[auto_minmax(0,1fr)] lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,20rem)] lg:items-center"
-    >
-      <HealthRing summary={summary} />
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-5">
-        <Stat label={t('system.map.summary.containers')} value={summary.containers} />
-        <Stat label={t('system.map.summary.services')} value={summary.services} />
-        <Stat label={t('system.map.summary.healthy')} value={summary.healthy} tone="text-success" />
-        <Stat
-          label={t('system.map.summary.attention')}
-          value={summary.attention}
-          tone={summary.bad > 0 ? 'text-destructive' : summary.warn > 0 ? 'text-warning' : undefined}
-        />
-        <Stat label={t('system.map.summary.off')} value={summary.off} tone="text-muted-foreground" />
-      </dl>
-      {host ? (
-        <div className="flex min-w-0 flex-col gap-3 rounded-lg border bg-subtle p-3 md:col-span-2 lg:col-span-1">
-          <div className="flex min-w-0 items-center gap-2">
-            <ServerIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <span className="truncate text-row font-medium">{host.name}</span>
-          </div>
-          <p className="-mt-2 truncate text-xs text-muted-foreground">
-            {t('system.map.host', {
-              cpus: host.cpus,
-              memory: formatBytes(host.memory_bytes),
-              docker: host.docker_version || '–',
-            })}
-          </p>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-baseline justify-between gap-2 text-xs">
-              <span className="text-muted-foreground">{t('system.map.summary.cpu')}</span>
-              <span className="tabular font-medium">
-                {t('system.map.summary.cpuValue', {
-                  used: formatNumber((summary.cpuPercent ?? 0) / 100, 1),
-                  cores: host.cpus,
-                })}
-              </span>
+    <section aria-label={t('system.map.title')} className="@container rounded-xl border bg-background p-4">
+      <div className="grid gap-5 @2xl:grid-cols-[auto_minmax(0,1fr)] @5xl:grid-cols-[auto_minmax(0,1fr)_minmax(0,20rem)] @5xl:items-center">
+        <HealthRing summary={summary} />
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-3 @md:grid-cols-3 @3xl:grid-cols-5">
+          <Stat label={t('system.map.summary.containers')} value={summary.containers} />
+          <Stat label={t('system.map.summary.services')} value={summary.services} />
+          <Stat label={t('system.map.summary.healthy')} value={summary.healthy} tone="text-success" />
+          <Stat
+            label={t('system.map.summary.attention')}
+            value={summary.attention}
+            tone={summary.bad > 0 ? 'text-destructive' : summary.warn > 0 ? 'text-warning' : undefined}
+          />
+          <Stat label={t('system.map.summary.off')} value={summary.off} tone="text-muted-foreground" />
+        </dl>
+        {host ? (
+          <div className="flex min-w-0 flex-col gap-3 rounded-lg border bg-subtle p-3 @2xl:col-span-2 @5xl:col-span-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <ServerIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span className="truncate text-row font-medium">{host.name}</span>
             </div>
-            <UsageBar
-              ratio={cpuRatio}
-              tone={usageTone(cpuRatio)}
-              label={t('system.map.summary.cpu')}
-              valueText={`${Math.round(cpuRatio * 100)}%`}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-baseline justify-between gap-2 text-xs">
-              <span className="text-muted-foreground">{t('system.map.summary.memory')}</span>
-              <span className="tabular font-medium">
-                {formatBytes(summary.memoryBytes)} / {formatBytes(summary.memoryTotal)}
-              </span>
+            <p className="-mt-2 truncate text-xs text-muted-foreground">
+              {t('system.map.host', {
+                cpus: host.cpus,
+                memory: formatBytes(host.memory_bytes),
+                docker: host.docker_version || '–',
+              })}
+            </p>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-baseline justify-between gap-2 text-xs">
+                <span className="text-muted-foreground">{t('system.map.summary.cpu')}</span>
+                <span className="tabular min-w-0 text-right font-medium break-words">
+                  {t('system.map.summary.cpuValue', {
+                    used: formatNumber((summary.cpuPercent ?? 0) / 100, 1),
+                    cores: host.cpus,
+                  })}
+                </span>
+              </div>
+              <UsageBar
+                ratio={cpuRatio}
+                tone={usageTone(cpuRatio)}
+                label={t('system.map.summary.cpu')}
+                valueText={`${Math.round(cpuRatio * 100)}%`}
+              />
             </div>
-            <UsageBar
-              ratio={memoryRatio}
-              tone={usageTone(memoryRatio)}
-              label={t('system.map.summary.memory')}
-              valueText={`${Math.round(memoryRatio * 100)}%`}
-            />
+            <div className="flex flex-col gap-1">
+              <div className="flex items-baseline justify-between gap-2 text-xs">
+                <span className="text-muted-foreground">{t('system.map.summary.memory')}</span>
+                <span className="tabular min-w-0 text-right font-medium break-words">
+                  {formatBytes(summary.memoryBytes)} / {formatBytes(summary.memoryTotal)}
+                </span>
+              </div>
+              <UsageBar
+                ratio={memoryRatio}
+                tone={usageTone(memoryRatio)}
+                label={t('system.map.summary.memory')}
+                valueText={`${Math.round(memoryRatio * 100)}%`}
+              />
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </section>
   )
 }

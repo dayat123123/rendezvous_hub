@@ -91,6 +91,21 @@ const bundleLoaders: { [B in Bundle]: Record<Language, () => Promise<Bundles[B]>
 
 const wanted = new Set<Bundle>()
 const loadedBundles = new Set<string>()
+const lateBundles = new Set<Bundle>()
+
+const isBundle = (name: string | undefined): name is Bundle =>
+  name !== undefined && Object.hasOwn(bundleLoaders, name)
+
+function loadMissingBundle(key: string) {
+  const bundle = key.split('.')[0]
+  if (!isBundle(bundle) || lateBundles.has(bundle) || loadedBundles.has(`id:${bundle}`)) return
+  lateBundles.add(bundle)
+  logger.warn(`Translation bundle "${bundle}" requested before it was loaded`)
+  loadStrings(bundle).catch((error: unknown) => {
+    lateBundles.delete(bundle)
+    logger.warn(`Translation bundle "${bundle}" failed to load`, error)
+  })
+}
 
 export function storedLanguage(): Language {
   return readLocal('language') === 'en' ? 'en' : 'id'
@@ -102,6 +117,9 @@ void i18n.use(initReactI18next).init({
   fallbackLng: 'id',
   interpolation: { escapeValue: false },
   returnNull: false,
+  saveMissing: true,
+  missingKeyHandler: (_languages, _namespace, key) => loadMissingBundle(key),
+  react: { bindI18nStore: 'added' },
 })
 
 const englishBase = { loaded: false }

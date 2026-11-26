@@ -131,6 +131,7 @@ const settingsRoute = createRoute({
       'labels',
       'help',
       'trade',
+      'system',
     ),
     'SettingsPage',
   ),
@@ -242,7 +243,11 @@ const complianceContentRoute = createRoute({
     return policyTabs.includes(tab as PolicyTab) ? { tab: tab as PolicyTab } : {}
   },
   component: lazyRouteComponent(
-    withStrings(() => import('@/features/content-policy/components/content-policy-page'), 'policy'),
+    withStrings(
+      () => import('@/features/content-policy/components/content-policy-page'),
+      'policy',
+      'account',
+    ),
     'ContentPolicyPage',
   ),
 })
@@ -251,7 +256,10 @@ const complianceLegalRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/compliance/legal',
   beforeLoad: complianceOnly,
-  component: lazyRouteComponent(() => import('@/features/legal/components/legal-page'), 'LegalPage'),
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/legal/components/legal-page'), 'moderation'),
+    'LegalPage',
+  ),
 })
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -374,7 +382,10 @@ const perfRoute = createRoute({
   beforeLoad: () => {
     if (appEnv().appEnv === 'production') throw redirect({ to: '/' })
   },
-  component: lazyRouteComponent(() => import('@/features/perf/perf-page'), 'PerfPage'),
+  component: lazyRouteComponent(
+    withStrings(() => import('@/features/perf/perf-page'), 'labels'),
+    'PerfPage',
+  ),
 })
 
 const routeTree = rootRoute.addChildren([
