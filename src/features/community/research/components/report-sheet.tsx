@@ -9,7 +9,7 @@ import { useAgent } from '@/features/auth/hooks'
 import { PostStatusText } from '../../components/shared'
 import { useCreateReportPost, useResearchReport } from '../hooks'
 import { researchErrorText } from '../logic'
-import type { ReportDetail, ReportRef, ReportWarning } from '../types'
+import type { ReportDetail, ReportRef, ReportWarning, ResearchNotification } from '../types'
 import { DocumentPreview } from './document-preview'
 import { FileOutcome, WarningBadges } from './file-status'
 import { MetricsTables } from './metrics-tables'
@@ -67,6 +67,49 @@ function RefButton({ report, label, onOpen }: { report: ReportRef; label?: strin
   )
 }
 
+function NotificationText({ notification, code }: { notification: ResearchNotification; code: string }) {
+  const { t, stamp } = useReportText()
+  const campaign = notification.campaign
+  const text = (() => {
+    if (notification.skipped === 'replaced') return t('moderation.research.detail.notify.replaced')
+    if (notification.skipped) {
+      return t('moderation.research.detail.notify.skipped', {
+        reason: t(`moderation.research.detail.notify.reasons.${notification.skipped}`),
+      })
+    }
+    if (!campaign) return null
+    const stock = campaign.stock ?? code
+    switch (campaign.status) {
+      case 'scheduled':
+        return t('moderation.research.detail.notify.scheduled', {
+          stock,
+          time: campaign.send_at ? stamp(campaign.send_at) : '',
+        })
+      case 'sending':
+        return t('moderation.research.detail.notify.sending', { stock })
+      case 'sent':
+        return t('moderation.research.detail.notify.sent', {
+          count: campaign.recipients,
+          stock,
+          time: campaign.finished_at ? stamp(campaign.finished_at) : '',
+        })
+      case 'cancelled':
+        return t('moderation.research.detail.notify.cancelled')
+      default:
+        return null
+    }
+  })()
+  if (!text) return null
+  return (
+    <div className="flex flex-col gap-0.5">
+      <p className="text-row">{text}</p>
+      {campaign?.status === 'scheduled' && !notification.skipped ? (
+        <p className="text-xs text-muted-foreground">{t('moderation.research.detail.notify.cancelHint')}</p>
+      ) : null}
+    </div>
+  )
+}
+
 function PostSection({
   report,
   onOpenPost,
@@ -98,6 +141,9 @@ function PostSection({
       ) : (
         <p className="text-row text-muted-foreground">{t('moderation.research.detail.noPost')}</p>
       )}
+      {report.notification ? (
+        <NotificationText notification={report.notification} code={report.entity_code} />
+      ) : null}
       <div className="flex flex-wrap items-center gap-2">
         {post && onOpenPost ? (
           <Button size="sm" variant="outline" onClick={() => onOpenPost(post.id)}>

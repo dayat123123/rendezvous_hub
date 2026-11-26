@@ -1065,7 +1065,11 @@ export type Database = {
       research_report: { Args: { p_id: string }; Returns: Json }
       research_retry: { Args: { p_id: string }; Returns: Json }
       research_save_config: {
-        Args: { p_auto_publish: boolean; p_official_account: string }
+        Args: {
+          p_auto_publish: boolean
+          p_notify_watchers?: boolean
+          p_official_account: string
+        }
         Returns: Json
       }
       research_upload: { Args: { p_documents?: Json; p_object: string }; Returns: Json }

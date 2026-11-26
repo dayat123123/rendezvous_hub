@@ -176,6 +176,24 @@ export const moderationResearch = {
     created: 'Postingan dibuat',
     reviewNote: 'Catatan peninjau: {{note}}',
     postError: 'Gagal terbit: {{error}}',
+    notify: {
+      scheduled: 'Notifikasi ke pemantau ${{stock}} dijadwalkan {{time}}.',
+      cancelHint: 'Bisa dibatalkan di Komunitas → Notifikasi sebelum waktunya.',
+      sending: 'Notifikasi sedang dikirim ke pemantau ${{stock}}.',
+      sent_one: 'Notifikasi terkirim ke {{count}} pemantau ${{stock}} {{time}}.',
+      sent_other: 'Notifikasi terkirim ke {{count}} pemantau ${{stock}} {{time}}.',
+      cancelled: 'Notifikasi ke pemantau dibatalkan.',
+      replaced: 'Notifikasi dibatalkan karena laporan periode yang lebih baru terbit.',
+      skipped: 'Notifikasi tidak dikirim: {{reason}}.',
+      reasons: {
+        disabled: 'notifikasi ke pemantau saham sedang dimatikan',
+        older_period: 'sudah ada laporan periode yang lebih baru',
+        stale: 'periode laporan sudah terlalu lama',
+        revision: 'periode ini sudah pernah dikabarkan',
+        replaced: 'laporan periode yang lebih baru terbit',
+        failed: 'kampanye gagal dibuat, kirim manual lewat Komunitas → Notifikasi',
+      },
+    },
     summaryTitle: 'Ringkasan',
     summaryHint:
       'Teks postingan yang terbit di Stream. Aplikasi versi lama yang belum mengenal kartu riset hanya menampilkan teks ini.',
@@ -272,6 +290,9 @@ export const moderationResearch = {
     changedBy: 'Terakhir diubah {{time}} oleh {{name}}',
     changed: 'Terakhir diubah {{time}}',
     readOnly: 'Hanya Super Admin yang bisa mengubah pengaturan ini.',
+    notify: 'Notifikasi ke pemantau saham',
+    notifyHint:
+      'Saat postingan riset terbit, nasabah yang memantau saham itu menerima notifikasi (lonceng dan push) {{minutes}} menit kemudian. Hanya untuk laporan periode terbaru emiten itu yang periodenya belum lewat {{days}} hari; laporan lama dan revisi tidak dikabarkan ulang. Jadwalnya tampil di Komunitas → Notifikasi dan bisa dibatalkan di sana.',
   },
   errors: {
     invalid_object: 'Lokasi file unggahan tidak valid. Muat ulang halaman lalu coba lagi.',

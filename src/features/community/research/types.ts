@@ -156,6 +156,9 @@ export type ResearchConfig = {
   official_account: AccountRef | null
   official_active: boolean
   auto_publish: boolean
+  notify_watchers?: boolean
+  notify_delay_seconds?: number
+  notify_max_age_days?: number
   updated_by: StaffRef
   updated_at: string
   max_file_bytes: number
@@ -229,6 +232,29 @@ export type ReportDetail = Omit<ReportRef, 'warnings' | 'post'> & {
   files: FileView[]
   documents: ResearchDocument[]
   history: ReportRef[]
+  notification?: ResearchNotification
+}
+
+export const notifySkipCodes = [
+  'disabled',
+  'older_period',
+  'stale',
+  'revision',
+  'replaced',
+  'failed',
+] as const
+export type NotifySkip = (typeof notifySkipCodes)[number]
+
+export type ResearchNotification = {
+  skipped: NotifySkip | null
+  campaign: {
+    id: string
+    status: 'draft' | 'pending' | 'scheduled' | 'sending' | 'sent' | 'rejected' | 'cancelled'
+    send_at: string | null
+    finished_at: string | null
+    recipients: number
+    stock: string | null
+  } | null
 }
 
 export type UploadState = 'waiting' | 'uploading' | 'done' | 'failed'
