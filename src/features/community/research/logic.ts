@@ -2,7 +2,7 @@ import i18n from '@/i18n'
 import { errorText } from '@/lib/error-text'
 import { toApiError } from '@/lib/errors'
 
-import type { BalanceBase, BalanceMetric, FileView, ReportPeriod } from './types'
+import type { BalanceBase, BalanceMetric, FileView, ReportPeriod, ResearchDocument } from './types'
 
 export const ACTIVE_REFRESH_MS = 10_000
 export const IDLE_REFRESH_MS = 60_000
@@ -97,6 +97,37 @@ export function uploadProblem(file: Pick<File, 'name' | 'size'>, maxBytes: numbe
   return null
 }
 
+export const documentExts = ['pdf', 'xlsx'] as const
+export type DocumentExt = (typeof documentExts)[number]
+
+export const DOCUMENT_ACCEPT = documentExts.map((ext) => `.${ext}`).join(',')
+
+const legacyDocumentExts: readonly string[] = ['xls', 'xlsm', 'xlsb', 'doc', 'docx', 'csv', 'ppt', 'pptx']
+
+const extensionOf = (name: string) => /\.([a-z0-9]+)$/i.exec(name.trim())?.[1]?.toLowerCase() ?? ''
+
+export function documentExt(name: string): DocumentExt | null {
+  const ext = extensionOf(name)
+  return (documentExts as readonly string[]).includes(ext) ? (ext as DocumentExt) : null
+}
+
+export const documentPath = (id: string, ext: DocumentExt) => `research/${id}/file.${ext}`
+
+export type DocumentProblem = 'type' | 'other' | 'empty' | 'size'
+
+export function documentProblem(file: Pick<File, 'name' | 'size'>, maxBytes: number): DocumentProblem | null {
+  if (!documentExt(file.name)) return legacyDocumentExts.includes(extensionOf(file.name)) ? 'other' : 'type'
+  if (file.size <= 0) return 'empty'
+  if (file.size > maxBytes) return 'size'
+  return null
+}
+
+export const isActiveDocument = (document: Pick<ResearchDocument, 'status'>) =>
+  document.status === 'queued' || document.status === 'processing'
+
+export const liveDocuments = (documents: Pick<ResearchDocument, 'status'>[]) =>
+  documents.filter((document) => document.status !== 'rejected').length
+
 export const researchErrorCodes = [
   'invalid_object',
   'object_not_found',
@@ -111,6 +142,9 @@ export const researchErrorCodes = [
   'file_too_large',
   'invalid_file_type',
   'upload_forbidden',
+  'too_many_documents',
+  'invalid_document_name',
+  'document_not_found',
 ] as const
 type ResearchErrorCode = (typeof researchErrorCodes)[number]
 
@@ -120,4 +154,13 @@ const isResearchCode = (code: string): code is ResearchErrorCode =>
 export function researchErrorText(error: unknown) {
   const { code } = toApiError(error)
   return isResearchCode(code) ? i18n.t(`moderation.research.errors.${code}`) : errorText(error)
+}
+
+const documentUploadCodes = ['file_too_large', 'invalid_file_type'] as const
+
+export function documentErrorText(error: unknown) {
+  const { code } = toApiError(error)
+  return (documentUploadCodes as readonly string[]).includes(code)
+    ? i18n.t(`moderation.research.documents.errors.${code as (typeof documentUploadCodes)[number]}`)
+    : researchErrorText(error)
 }

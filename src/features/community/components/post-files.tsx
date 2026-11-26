@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,7 +24,7 @@ import {
   type FilesProblem,
   type PostFileExt,
 } from '../post-files'
-import { postFilesApi } from '../post-files-api'
+import { useOpenPostFile } from '../use-open-post-file'
 import type { PostFileDrafts } from '../use-post-file-drafts'
 
 const icons = {
@@ -159,27 +158,6 @@ export function PostFilesField({
       />
     </section>
   )
-}
-
-function useOpenPostFile() {
-  const { t } = useTranslation()
-  return (path: string) => {
-    const target = window.open('about:blank', '_blank')
-    postFilesApi
-      .postFileUrl(path)
-      .then((url) => {
-        if (!target) {
-          window.location.assign(url)
-          return
-        }
-        target.opener = null
-        target.location.href = url
-      })
-      .catch(() => {
-        target?.close()
-        toast.error(t('moderation.postFiles.openFailed'))
-      })
-  }
 }
 
 export function PostFileChips({ files, openable = false }: { files: ChipFile[]; openable?: boolean }) {

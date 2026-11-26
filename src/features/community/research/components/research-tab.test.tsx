@@ -9,7 +9,7 @@ import { renderWithProviders } from '@/test/render'
 import { findToast, Toaster } from '@/test/toast'
 
 import type { CommunityPost, OfficialAccount } from '../../types'
-import type { FileView, FilesPage, ResearchConfig, ReportDetail, ReportRef } from '../types'
+import type { FileView, FilesPage, ResearchConfig, ReportDetail, ReportRef, ResearchDocument } from '../types'
 import { ResearchTab } from './research-tab'
 
 const backend = vi.hoisted(() => ({ rpc: vi.fn(), upload: vi.fn(), bucket: vi.fn() }))
@@ -219,6 +219,7 @@ const detail: ReportDetail = {
   post,
   can_create_post: false,
   files: [done],
+  documents: [],
   history: [
     {
       ...report,
@@ -397,6 +398,13 @@ describe('ResearchTab', () => {
     expect(screen.queryByRole('button', { name: /^Proses ulang file/ })).not.toBeInTheDocument()
     expect(screen.queryByLabelText('File laporan keuangan (.zip)')).not.toBeInTheDocument()
     expect(screen.getByText('Unggah dan proses ulang butuh izin Tulis postingan resmi.')).toBeInTheDocument()
+
+    await userEvent
+      .setup()
+      .click(await screen.findByRole('button', { name: 'Buka laporan BBCA · Kuartal III 2026' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Detail laporan' })
+    await within(sheet).findByRole('region', { name: 'Dokumen sumber' })
+    expect(within(sheet).queryByRole('button', { name: 'Tambah dokumen' })).not.toBeInTheDocument()
   })
 
   it('shows the report details with the exact post text, warnings, figures, files and history', async () => {
@@ -453,6 +461,116 @@ describe('ResearchTab', () => {
     expect(within(sheet).queryByRole('button', { name: 'Buat postingan' })).not.toBeInTheDocument()
     await user.click(within(sheet).getByRole('button', { name: 'Buka di Postingan resmi' }))
     expect(onOpenPost).toHaveBeenCalledWith('cp-1')
+  })
+
+  it('lists source documents, uploads a new one to the post files bucket, and removes one', async () => {
+    const ready: ResearchDocument = {
+      id: 'doc-1',
+      status: 'ready',
+      source: 'api',
+      name: 'BBCA Laporan Keuangan Kuartal III 2026.pdf',
+      path: 'research/0b6a4f1e-2c3d-4e5f-8a9b-0c1d2e3f4a5b/file.pdf',
+      mime: 'application/pdf',
+      size_bytes: 2_500_000,
+      key: { id: 'key-1', name: 'Data laporan OLT', prefix: 'AbCdEfGh' },
+      uploaded_by: null,
+      error_code: null,
+      error_detail: null,
+      received_at: '2026-11-25T02:00:06.000Z',
+      finished_at: '2026-11-25T02:00:08.000Z',
+    }
+    const blocked: ResearchDocument = {
+      ...ready,
+      id: 'doc-2',
+      status: 'rejected',
+      source: 'hub',
+      name: 'Data.xlsx',
+      path: 'research/1b6a4f1e-2c3d-4e5f-8a9b-0c1d2e3f4a5b/file.xlsx',
+      key: null,
+      uploaded_by: { id: 'maya', name: 'Maya' },
+      error_code: 'macro_not_allowed',
+    }
+    const checking: ResearchDocument = {
+      ...ready,
+      id: 'doc-3',
+      status: 'queued',
+      source: 'hub',
+      name: 'Laporan lengkap.pdf',
+      key: null,
+      uploaded_by: { id: 'maya', name: 'Maya' },
+    }
+    const scanning: ResearchDocument = { ...checking, id: 'doc-4', status: 'processing', name: 'Data.xlsx' }
+    const user = userEvent.setup()
+    backend.upload.mockResolvedValue({ data: { path: 'x' }, error: null })
+    serve({
+      research_report: () => ({ ...detail, documents: [ready, blocked] }),
+      research_add_document: () => ({ ...detail, documents: [ready, blocked, checking, scanning] }),
+      research_remove_document: () => ({ ...detail, documents: [blocked, checking, scanning] }),
+    })
+    render(writer)
+
+    await user.click(await screen.findByRole('button', { name: 'Buka laporan BBCA · Kuartal III 2026' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Detail laporan' })
+    const section = await within(sheet).findByRole('region', { name: 'Dokumen sumber' })
+    expect(
+      within(section).getByRole('button', { name: 'BBCA Laporan Keuangan Kuartal III 2026.pdf' }),
+    ).toBeInTheDocument()
+    expect(within(section).getByText('Siap')).toBeInTheDocument()
+    expect(within(section).getByText(/API · Data laporan OLT/)).toBeInTheDocument()
+    expect(within(section).getByText('Ditolak')).toBeInTheDocument()
+    expect(within(section).getByText('File Excel berisi makro.')).toBeInTheDocument()
+
+    await user.type(
+      within(section).getByRole('textbox', { name: 'Nama tampilan dokumen' }),
+      'Laporan lengkap.pdf',
+    )
+    const pdf = new File(['%PDF-1.7'], 'FinancialStatement-2026-III-BBCA.pdf', { type: '' })
+    await user.upload(within(section).getByLabelText('Pilih dokumen sumber'), pdf)
+
+    await waitFor(() => expect(backend.rpc).toHaveBeenCalledWith('research_add_document', expect.anything()))
+    expect(backend.bucket).toHaveBeenCalledWith('post-files')
+    const [path, body, options] = backend.upload.mock.calls[0] as [string, Blob, object]
+    expect(path).toMatch(/^research\/[0-9a-f-]{36}\/file\.pdf$/)
+    expect(body.type).toBe('application/pdf')
+    expect(options).toEqual({ contentType: 'application/pdf', upsert: false })
+    expect(backend.rpc).toHaveBeenCalledWith('research_add_document', {
+      p_report: 'rep-1',
+      p_object: path,
+      p_name: 'Laporan lengkap.pdf',
+    })
+    expect(await findToast('Dokumen diunggah dan sedang diperiksa')).toBeInTheDocument()
+    expect(await within(section).findByText('Menunggu')).toBeInTheDocument()
+    expect(within(section).getByRole('textbox', { name: 'Nama tampilan dokumen' })).toHaveValue('')
+    expect(within(section).getByText(/Sudah 3 dokumen/)).toBeInTheDocument()
+    expect(within(section).getByRole('button', { name: 'Tambah dokumen' })).toBeDisabled()
+
+    await user.click(
+      within(section).getByRole('button', {
+        name: 'Hapus dokumen BBCA Laporan Keuangan Kuartal III 2026.pdf',
+      }),
+    )
+    await waitFor(() =>
+      expect(backend.rpc).toHaveBeenCalledWith('research_remove_document', { p_id: 'doc-1' }),
+    )
+    expect(await findToast('Dokumen dihapus dari laporan dan postingannya')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(
+        within(section).queryByRole('button', { name: 'BBCA Laporan Keuangan Kuartal III 2026.pdf' }),
+      ).not.toBeInTheDocument(),
+    )
+  })
+
+  it('refuses document types the server would not accept before uploading', async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    render(writer)
+
+    await user.click(await screen.findByRole('button', { name: 'Buka laporan BBCA · Kuartal III 2026' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Detail laporan' })
+    const section = await within(sheet).findByRole('region', { name: 'Dokumen sumber' })
+    expect(within(section).getByText('Belum ada dokumen sumber.')).toBeInTheDocument()
+    await user.upload(within(section).getByLabelText('Pilih dokumen sumber'), new File(['x'], 'data.xls'))
+    expect(await within(section).findByRole('alert')).toHaveTextContent('Format ini tidak diterima')
+    expect(backend.upload).not.toHaveBeenCalled()
   })
 
   it('creates a post for a report that has none', async () => {

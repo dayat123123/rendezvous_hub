@@ -4,11 +4,18 @@ import { loadStrings } from '@/i18n'
 import { ApiError } from '@/lib/errors'
 
 import {
+  DOCUMENT_ACCEPT,
   balanceComparison,
   currencySymbol,
+  documentErrorText,
+  documentExt,
+  documentPath,
+  documentProblem,
   entityFilter,
   hasActiveFiles,
+  isActiveDocument,
   isWaitingRetry,
+  liveDocuments,
   objectPath,
   percentChange,
   periodParts,
@@ -137,6 +144,41 @@ describe('uploadProblem', () => {
     expect(uploadProblem({ name: 'instance.xbrl', size: 100 }, max)).toBe('type')
     expect(uploadProblem({ name: 'instance.zip', size: 0 }, max)).toBe('empty')
     expect(uploadProblem({ name: 'instance.zip', size: max + 1 }, max)).toBe('size')
+  })
+})
+
+describe('source documents', () => {
+  const max = 20 * 1024 * 1024
+  it('accepts PDF and XLSX files up to the limit and builds the storage path', () => {
+    expect(documentExt('Laporan BBCA Q3.PDF')).toBe('pdf')
+    expect(documentExt('FinancialStatement-2026-III-BBCA.xlsx')).toBe('xlsx')
+    expect(documentProblem({ name: 'laporan.pdf', size: max }, max)).toBeNull()
+    expect(documentPath('0b6a4f1e-2c3d-4e5f-8a9b-0c1d2e3f4a5b', 'xlsx')).toBe(
+      'research/0b6a4f1e-2c3d-4e5f-8a9b-0c1d2e3f4a5b/file.xlsx',
+    )
+    expect(DOCUMENT_ACCEPT).toBe('.pdf,.xlsx')
+  })
+
+  it('explains other office formats, unknown types, empty files, and files over the limit', () => {
+    expect(documentProblem({ name: 'data.xls', size: 10 }, max)).toBe('other')
+    expect(documentProblem({ name: 'makro.xlsm', size: 10 }, max)).toBe('other')
+    expect(documentProblem({ name: 'foto.png', size: 10 }, max)).toBe('type')
+    expect(documentProblem({ name: 'kosong.pdf', size: 0 }, max)).toBe('empty')
+    expect(documentProblem({ name: 'besar.pdf', size: max + 1 }, max)).toBe('size')
+  })
+
+  it('counts documents that still occupy a slot and spots the ones being checked', () => {
+    const docs = [{ status: 'ready' }, { status: 'rejected' }, { status: 'queued' }] as const
+    expect(liveDocuments([...docs])).toBe(2)
+    expect(docs.map(isActiveDocument)).toEqual([false, false, true])
+    expect(isActiveDocument({ status: 'processing' })).toBe(true)
+  })
+
+  it('explains document upload errors before the shared research messages', () => {
+    expect(documentErrorText(new ApiError('file_too_large'))).toBe('Dokumen lebih dari 20 MB.')
+    expect(documentErrorText(new ApiError('too_many_documents'))).toBe(
+      'Laporan ini sudah punya 3 dokumen sumber. Hapus salah satu dulu.',
+    )
   })
 })
 

@@ -2,7 +2,8 @@ import { ApiError, toApiError } from '@/lib/errors'
 import { rpc, supabase } from '@/lib/supabase'
 import { uuid } from '@/lib/utils'
 
-import { objectPath } from './logic'
+import { POST_FILES_BUCKET, postFileMime } from '../post-files'
+import { documentExt, documentPath, objectPath } from './logic'
 import {
   RESEARCH_BUCKET,
   RESEARCH_PAGE_SIZE,
@@ -30,6 +31,7 @@ function detail(raw: ReportDetail): ReportDetail {
     document: raw.document ?? {},
     warnings: raw.warnings ?? [],
     files: raw.files ?? [],
+    documents: raw.documents ?? [],
     history: raw.history ?? [],
     post: raw.post ? { ...raw.post, attachments: raw.post.attachments ?? [] } : null,
   }
@@ -69,6 +71,23 @@ export const researchApi = {
     return rpc<FileView>('research_upload', { p_object: path })
   },
   retry: (id: string) => rpc<FileView>('research_retry', { p_id: id }),
+  addDocument: async (reportId: string, file: File, name: string | null) => {
+    const ext = documentExt(file.name)
+    if (!ext) throw new ApiError('invalid_file_type', undefined, 415)
+    const path = documentPath(uuid(), ext)
+    const mime = postFileMime(ext)
+    const { error } = await supabase()
+      .storage.from(POST_FILES_BUCKET)
+      .upload(path, new Blob([file], { type: mime }), { contentType: mime, upsert: false })
+    if (error) throw uploadError(error)
+    return detail(
+      await rpc<ReportDetail>('research_add_document', { p_report: reportId, p_object: path, p_name: name }),
+    )
+  },
+  removeDocument: async (id: string) => {
+    const raw = await rpc<ReportDetail | null>('research_remove_document', { p_id: id })
+    return raw ? detail(raw) : null
+  },
   createPost: async (id: string) => detail(await rpc<ReportDetail>('research_create_post', { p_report: id })),
   config: () => rpc<ResearchConfig>('research_config'),
   saveConfig: (account: string | null, autoPublish: boolean) =>

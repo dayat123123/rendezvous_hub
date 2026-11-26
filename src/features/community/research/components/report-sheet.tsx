@@ -14,19 +14,10 @@ import { DocumentPreview } from './document-preview'
 import { FileOutcome, WarningBadges } from './file-status'
 import { MetricsTables } from './metrics-tables'
 import { useReportText } from './report-text'
+import { Section } from './section'
+import { SourceDocuments } from './source-documents'
 
 type Open = (id: string) => void
-
-function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="flex flex-col gap-2 border-b px-5 py-4">
-      <h3 id={id} className="text-sm font-medium">
-        {title}
-      </h3>
-      {children}
-    </section>
-  )
-}
 
 function WarningText({ warning }: { warning: ReportWarning }) {
   const { t, stamp, warningShort, metricName } = useReportText()
@@ -232,6 +223,7 @@ function Detail({
             <p className="text-xs text-muted-foreground">{t('moderation.research.warnings.holdsAuto')}</p>
           </Section>
         ) : null}
+        <SourceDocuments report={report} />
         <Section id="research-preview" title={t('moderation.research.preview.title')}>
           <DocumentPreview document={report.document} summary={report.summary} stock={report.entity_code} />
         </Section>

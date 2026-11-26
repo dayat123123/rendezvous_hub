@@ -3,6 +3,8 @@ import type { AccountRef, CardDocument, CommunityPost, PostStatus, StaffRef } fr
 export const RESEARCH_BUCKET = 'financial-reports'
 export const RESEARCH_MAX_BYTES = 8 * 1024 * 1024
 export const RESEARCH_PAGE_SIZE = 50
+export const RESEARCH_MAX_DOCUMENTS = 3
+export const RESEARCH_DOCUMENT_MAX_BYTES = 20 * 1024 * 1024
 
 export const fileStatuses = ['queued', 'processing', 'done', 'duplicate', 'rejected'] as const
 export type FileStatus = (typeof fileStatuses)[number]
@@ -116,6 +118,40 @@ export type FileView = {
   report: ReportRef | null
 }
 
+export const documentStatuses = ['queued', 'processing', 'ready', 'rejected'] as const
+export type DocumentStatus = (typeof documentStatuses)[number]
+
+export const documentErrorCodes = [
+  'invalid_document',
+  'active_content',
+  'macro_not_allowed',
+  'infected',
+  'checksum_mismatch',
+  'object_missing',
+  'file_too_large',
+  'too_many_attempts',
+  'storage_unavailable',
+  'scanner_unavailable',
+  'store_unavailable',
+] as const
+export type DocumentErrorCode = (typeof documentErrorCodes)[number]
+
+export type ResearchDocument = {
+  id: string
+  status: DocumentStatus
+  source: 'api' | 'hub'
+  name: string | null
+  path: string
+  mime: string
+  size_bytes: number
+  key: { id: string; name: string; prefix: string } | null
+  uploaded_by: StaffRef
+  error_code: string | null
+  error_detail: string | null
+  received_at: string
+  finished_at: string | null
+}
+
 export type ResearchConfig = {
   official_account: AccountRef | null
   official_active: boolean
@@ -191,6 +227,7 @@ export type ReportDetail = Omit<ReportRef, 'warnings' | 'post'> & {
   post: CommunityPost | null
   can_create_post: boolean
   files: FileView[]
+  documents: ResearchDocument[]
   history: ReportRef[]
 }
 
