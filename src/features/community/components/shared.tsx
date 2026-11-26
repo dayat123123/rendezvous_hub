@@ -8,8 +8,9 @@ import { useSignedUrl } from '@/features/conversation/hooks'
 import { appEnv } from '@/lib/supabase'
 import { cn, initials } from '@/lib/utils'
 
+import { isImageAttachment } from '../card-logic'
 import { campaignTone, postTone, staffMediaUrl } from '../logic'
-import type { AccountRef, CampaignStatus, PostAttachment, PostStatus } from '../types'
+import type { AccountRef, CampaignStatus, ImageAttachment, PostAttachment, PostStatus } from '../types'
 
 export { ReasonDialog } from '@/components/reason-dialog'
 
@@ -85,7 +86,7 @@ export function CampaignStatusText({ status }: { status: CampaignStatus }) {
   )
 }
 
-function PostImage({ attachment }: { attachment: PostAttachment }) {
+function PostImage({ attachment }: { attachment: ImageAttachment }) {
   const { t } = useTranslation()
   const url = useSignedUrl(attachment.path)
   if (!url.data) return <Skeleton className="size-20 rounded-md" />
@@ -102,10 +103,11 @@ function PostImage({ attachment }: { attachment: PostAttachment }) {
 }
 
 export function PostImages({ attachments }: { attachments: PostAttachment[] }) {
-  if (attachments.length === 0) return null
+  const images = attachments.filter(isImageAttachment)
+  if (images.length === 0) return null
   return (
     <div className="flex flex-wrap gap-2">
-      {attachments.map((attachment) => (
+      {images.map((attachment) => (
         <PostImage key={attachment.path} attachment={attachment} />
       ))}
     </div>

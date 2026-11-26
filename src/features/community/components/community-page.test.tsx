@@ -34,10 +34,10 @@ vi.mock('@/features/feed-filters/components/feed-filters-section', () => ({
   FeedFiltersSection: () => <p>Panel tab Stream</p>,
 }))
 
-vi.mock('../financial-reports/components/reports-tab', () => ({
-  ReportsTab: ({ onOpenPost }: { onOpenPost?: (id: string) => void }) => (
+vi.mock('../research/components/research-tab', () => ({
+  ResearchTab: ({ onOpenPost }: { onOpenPost?: (id: string) => void }) => (
     <button type="button" disabled={!onOpenPost} onClick={() => onOpenPost?.('cp-1')}>
-      Panel laporan keuangan
+      Panel riset
     </button>
   ),
 }))
@@ -180,7 +180,7 @@ describe('CommunityPage', () => {
       'Postingan resmi',
       'Notifikasi',
       'Akun resmi',
-      'Laporan keuangan',
+      'Riset',
       'Fitur & versi',
       'Tab Stream',
       'Analitik',
@@ -198,7 +198,7 @@ describe('CommunityPage', () => {
       community_permissions: ['community.moderate'],
     })
 
-    expect(tabNames()).toEqual(['Moderasi', 'Room saham', 'Indeks', 'Laporan keuangan'])
+    expect(tabNames()).toEqual(['Moderasi', 'Room saham', 'Indeks', 'Riset'])
     expect(screen.getByRole('tab', { name: 'Indeks' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Belum ada indeks.')).toBeVisible()
     view.unmount()
@@ -214,21 +214,21 @@ describe('CommunityPage', () => {
     route.search = { tab: 'analytics' }
     renderWithProviders(<CommunityPage />, writer)
 
-    expect(tabNames()).toEqual(['Postingan resmi', 'Notifikasi', 'Laporan keuangan'])
+    expect(tabNames()).toEqual(['Postingan resmi', 'Notifikasi', 'Riset'])
     expect(screen.getByRole('tab', { name: 'Postingan resmi' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Laporan terbuka')).toBeVisible()
     expect(screen.queryByRole('radio', { name: '30 hari' })).not.toBeInTheDocument()
   })
 })
 
-describe('CommunityPage Laporan keuangan', () => {
+describe('CommunityPage Riset', () => {
   it('opens for any community permission and jumps to the post in Postingan resmi', async () => {
     const user = userEvent.setup()
-    route.search = { tab: 'reports' }
+    route.search = { tab: 'research' }
     const view = renderWithProviders(<CommunityPage />, writer)
 
-    expect(screen.getByRole('tab', { name: 'Laporan keuangan' })).toHaveAttribute('aria-selected', 'true')
-    await user.click(await screen.findByRole('button', { name: 'Panel laporan keuangan' }))
+    expect(screen.getByRole('tab', { name: 'Riset' })).toHaveAttribute('aria-selected', 'true')
+    await user.click(await screen.findByRole('button', { name: 'Panel riset' }))
     expect(route.navigate).toHaveBeenCalledWith({ to: '/community', search: { tab: 'stream', post: 'cp-1' } })
     view.unmount()
 
@@ -237,8 +237,8 @@ describe('CommunityPage Laporan keuangan', () => {
       roles: ['community'],
       community_permissions: ['community.sanction'],
     })
-    expect(tabNames()).toEqual(['Moderasi', 'Laporan keuangan'])
-    expect(await screen.findByRole('button', { name: 'Panel laporan keuangan' })).toBeDisabled()
+    expect(tabNames()).toEqual(['Moderasi', 'Riset'])
+    expect(await screen.findByRole('button', { name: 'Panel riset' })).toBeDisabled()
   })
 
   it('opens the linked post in Postingan resmi', async () => {

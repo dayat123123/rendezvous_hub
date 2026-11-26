@@ -37,23 +37,23 @@ function Flows({ metrics, currency }: { metrics: ReportMetrics; currency: string
   const amount = (key: string, value: number | undefined) =>
     isPerShare(key) ? perShare(value, currency) : money(value, currency)
   return (
-    <Block id="finreport-flows" title={t('moderation.finreport.metrics.flows')}>
+    <Block id="research-flows" title={t('moderation.research.metrics.flows')}>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('moderation.finreport.metrics.line')}</TableHead>
+            <TableHead>{t('moderation.research.metrics.line')}</TableHead>
             <TableHead className="text-right">
-              {t('moderation.finreport.metrics.ytd', { months: metrics.months })}
+              {t('moderation.research.metrics.ytd', { months: metrics.months })}
             </TableHead>
             <TableHead className="text-right">
-              {t('moderation.finreport.metrics.ytdPrior', { months: metrics.months })}
+              {t('moderation.research.metrics.ytdPrior', { months: metrics.months })}
             </TableHead>
-            <TableHead className="text-right">{t('moderation.finreport.metrics.yoy')}</TableHead>
+            <TableHead className="text-right">{t('moderation.research.metrics.yoy')}</TableHead>
             {quarter ? (
               <>
-                <TableHead className="text-right">{t('moderation.finreport.metrics.quarter')}</TableHead>
-                <TableHead className="text-right">{t('moderation.finreport.metrics.quarterPrior')}</TableHead>
-                <TableHead className="text-right">{t('moderation.finreport.metrics.quarterYoy')}</TableHead>
+                <TableHead className="text-right">{t('moderation.research.metrics.quarter')}</TableHead>
+                <TableHead className="text-right">{t('moderation.research.metrics.quarterPrior')}</TableHead>
+                <TableHead className="text-right">{t('moderation.research.metrics.quarterYoy')}</TableHead>
               </>
             ) : null}
           </TableRow>
@@ -93,22 +93,20 @@ function Balances({ metrics, currency }: { metrics: ReportMetrics; currency: str
   const previous = metrics.balances.some((balance) => balance.previous !== undefined)
   const yearEnd = metrics.balance_base === 'year_end'
   return (
-    <Block id="finreport-balances" title={t('moderation.finreport.metrics.balances')}>
+    <Block id="research-balances" title={t('moderation.research.metrics.balances')}>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('moderation.finreport.metrics.line')}</TableHead>
-            <TableHead className="text-right">{t('moderation.finreport.metrics.end')}</TableHead>
+            <TableHead>{t('moderation.research.metrics.line')}</TableHead>
+            <TableHead className="text-right">{t('moderation.research.metrics.end')}</TableHead>
             <TableHead className="text-right">
-              {yearEnd
-                ? t('moderation.finreport.metrics.yearEnd')
-                : t('moderation.finreport.metrics.yearAgo')}
+              {yearEnd ? t('moderation.research.metrics.yearEnd') : t('moderation.research.metrics.yearAgo')}
             </TableHead>
-            <TableHead className="text-right">{t('moderation.finreport.metrics.change')}</TableHead>
+            <TableHead className="text-right">{t('moderation.research.metrics.change')}</TableHead>
             {previous ? (
               <>
-                <TableHead className="text-right">{t('moderation.finreport.metrics.previous')}</TableHead>
-                <TableHead className="text-right">{t('moderation.finreport.metrics.qoq')}</TableHead>
+                <TableHead className="text-right">{t('moderation.research.metrics.previous')}</TableHead>
+                <TableHead className="text-right">{t('moderation.research.metrics.qoq')}</TableHead>
               </>
             ) : null}
           </TableRow>
@@ -142,7 +140,7 @@ function Balances({ metrics, currency }: { metrics: ReportMetrics; currency: str
         </TableBody>
       </Table>
       {yearEnd ? (
-        <p className="text-xs text-muted-foreground">{t('moderation.finreport.metrics.sinceYearEnd')}</p>
+        <p className="text-xs text-muted-foreground">{t('moderation.research.metrics.sinceYearEnd')}</p>
       ) : null}
     </Block>
   )
@@ -151,14 +149,14 @@ function Balances({ metrics, currency }: { metrics: ReportMetrics; currency: str
 function Ratios({ metrics }: { metrics: ReportMetrics }) {
   const { t, ratio, metricName } = useReportText()
   return (
-    <Block id="finreport-ratios" title={t('moderation.finreport.metrics.ratios')}>
+    <Block id="research-ratios" title={t('moderation.research.metrics.ratios')}>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('moderation.finreport.metrics.line')}</TableHead>
-            <TableHead className="text-right">{t('moderation.finreport.metrics.value')}</TableHead>
-            <TableHead className="text-right">{t('moderation.finreport.metrics.yearAgo')}</TableHead>
-            <TableHead className="text-right">{t('moderation.finreport.metrics.previous')}</TableHead>
+            <TableHead>{t('moderation.research.metrics.line')}</TableHead>
+            <TableHead className="text-right">{t('moderation.research.metrics.value')}</TableHead>
+            <TableHead className="text-right">{t('moderation.research.metrics.yearAgo')}</TableHead>
+            <TableHead className="text-right">{t('moderation.research.metrics.previous')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -183,7 +181,7 @@ function Ratios({ metrics }: { metrics: ReportMetrics }) {
 export function MetricsTables({ metrics, currency }: { metrics: ReportMetrics; currency: string }) {
   const { t } = useReportText()
   if (metrics.flows.length + metrics.balances.length + metrics.ratios.length === 0)
-    return <p className="text-row text-muted-foreground">{t('moderation.finreport.metrics.empty')}</p>
+    return <p className="text-row text-muted-foreground">{t('moderation.research.metrics.empty')}</p>
   return (
     <div className="flex flex-col gap-4">
       {metrics.flows.length > 0 ? <Flows metrics={metrics} currency={currency} /> : null}

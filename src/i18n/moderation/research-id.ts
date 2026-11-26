@@ -1,10 +1,10 @@
-export const moderationFinreport = {
-  title: 'Laporan keuangan',
+export const moderationResearch = {
+  title: 'Riset',
   subtitle:
-    'Ringkasan laporan keuangan emiten dibuat otomatis dari file XBRL bursa (instance.zip), lalu menjadi postingan resmi yang menunggu persetujuan di Postingan resmi. Angka diambil dari XBRL dan dihitung dengan rumus tetap, tanpa AI.',
+    'Ringkasan riset dibuat otomatis, lalu menjadi postingan resmi yang menunggu persetujuan di Postingan resmi dan tampil di aplikasi sebagai kartu riset. Jenis pertama: laporan keuangan emiten dari file XBRL IDX (instance.zip). Angka diambil dari XBRL dan dihitung dengan rumus tetap, tanpa AI.',
   notice: {
     noAccount:
-      'Akun resmi untuk laporan keuangan belum diatur. File tetap diurai, tetapi postingan tidak dibuat sampai Super Admin memilih akun resmi di Pengaturan posting.',
+      'Akun resmi untuk riset belum diatur. File tetap diurai, tetapi postingan tidak dibuat sampai Super Admin memilih akun resmi di Pengaturan posting.',
     inactive:
       'Akun resmi {{name}} nonaktif. File tetap diurai, tetapi postingan tidak dibuat sampai akunnya diaktifkan atau Super Admin memilih akun lain.',
   },
@@ -46,8 +46,12 @@ export const moderationFinreport = {
     duplicate: 'Duplikat',
     rejected: 'Ditolak',
   },
+  kinds: {
+    financial_report: 'Laporan keuangan',
+  },
   cols: {
     report: 'Laporan',
+    kind: 'Jenis',
     source: 'Sumber',
     received: 'Diterima',
     file: 'Status file',
@@ -57,7 +61,7 @@ export const moderationFinreport = {
   },
   list: {
     title: 'File yang diterima',
-    empty: 'Belum ada file laporan keuangan.',
+    empty: 'Belum ada file riset.',
     emptyFiltered: 'Tidak ada file untuk filter ini.',
     shown_one: '{{count}} file ditampilkan',
     shown_other: '{{count}} file ditampilkan',
@@ -155,13 +159,19 @@ export const moderationFinreport = {
     reviewNote: 'Catatan peninjau: {{note}}',
     postError: 'Gagal terbit: {{error}}',
     summaryTitle: 'Ringkasan',
-    summaryHint: 'Teks ini persis yang akan terbit di Stream.',
+    summaryHint:
+      'Teks postingan yang terbit di Stream. Aplikasi versi lama yang belum mengenal kartu riset hanya menampilkan teks ini.',
     warningsTitle: 'Peringatan',
     metricsTitle: 'Angka',
     filesTitle: 'File sumber',
     historyTitle: 'Laporan lain {{code}}',
     historyEmpty: 'Belum ada laporan lain untuk emiten ini.',
     loadFailed: 'Detail laporan gagal dimuat.',
+  },
+  preview: {
+    title: 'Tampilan di aplikasi',
+    hint: 'Perkiraan kartu riset di aplikasi. Tampilan di HP bisa sedikit berbeda.',
+    legacy: 'Laporan ini dibuat sebelum format kartu riset, jadi aplikasi hanya menampilkan teks ringkasan.',
   },
   metrics: {
     flows: 'Laba rugi dan arus kas',
@@ -240,7 +250,7 @@ export const moderationFinreport = {
     on: 'Nyala',
     off: 'Mati',
     save: 'Simpan pengaturan',
-    saved: 'Pengaturan laporan keuangan disimpan',
+    saved: 'Pengaturan riset disimpan',
     changedBy: 'Terakhir diubah {{time}} oleh {{name}}',
     changed: 'Terakhir diubah {{time}}',
     readOnly: 'Hanya Super Admin yang bisa mengubah pengaturan ini.',
@@ -258,6 +268,6 @@ export const moderationFinreport = {
     official_inactive: 'Pilih akun resmi yang aktif.',
     file_too_large: 'File lebih dari 8 MiB.',
     invalid_file_type: 'Storage menolak jenis file ini. Pastikan yang diunggah file .zip.',
-    upload_forbidden: 'Akun ini tidak punya izin mengunggah laporan keuangan.',
+    upload_forbidden: 'Akun ini tidak punya izin mengunggah file riset.',
   },
 }

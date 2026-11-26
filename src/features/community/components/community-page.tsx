@@ -39,8 +39,8 @@ const FeedFiltersSection = lazy(
   ),
 )
 
-const ReportsTab = lazy(() =>
-  import('../financial-reports/components/reports-tab').then((module) => ({ default: module.ReportsTab })),
+const ResearchTab = lazy(() =>
+  import('../research/components/research-tab').then((module) => ({ default: module.ResearchTab })),
 )
 
 const AnalyticsTab = lazy(
@@ -153,9 +153,9 @@ export function CommunityPage() {
             <InstrumentsTab onOpenRoom={tabs.includes('rooms') ? openRoom : undefined} />
           ) : null}
           {tab === 'accounts' ? <AccountsTab /> : null}
-          {tab === 'reports' ? (
+          {tab === 'research' ? (
             <Suspense fallback={<EmptyState title={t('app.loading')} />}>
-              <ReportsTab onOpenPost={tabs.includes('stream') ? openPost : undefined} />
+              <ResearchTab onOpenPost={tabs.includes('stream') ? openPost : undefined} />
             </Suspense>
           ) : null}
           {tab === 'features' ? (

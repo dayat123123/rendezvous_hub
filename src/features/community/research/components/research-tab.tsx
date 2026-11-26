@@ -10,9 +10,9 @@ import { useDebounced } from '@/hooks/use-now'
 import { formatNumber } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
-import { useFinreportConfig, useFinreportFiles } from '../hooks'
+import { useResearchConfig, useResearchFiles } from '../hooks'
 import { entityFilter, hasActiveFiles } from '../logic'
-import { FINREPORT_MAX_BYTES, fileStatuses, type FileStatus, type FinreportConfig } from '../types'
+import { RESEARCH_MAX_BYTES, fileStatuses, type FileStatus, type ResearchConfig } from '../types'
 import { FilesTable } from './files-table'
 import { PostingSettings } from './posting-settings'
 import { ReportSheet } from './report-sheet'
@@ -21,7 +21,7 @@ import { UploadPanel } from './upload-panel'
 
 const ALL = 'all'
 
-function AccountNotice({ config }: { config: FinreportConfig }) {
+function AccountNotice({ config }: { config: ResearchConfig }) {
   const { t } = useReportText()
   const account = config.official_account
   if (account && config.official_active) return null
@@ -29,13 +29,13 @@ function AccountNotice({ config }: { config: FinreportConfig }) {
     <p className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-row text-warning">
       <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
       {account
-        ? t('moderation.finreport.notice.inactive', { name: `@${account.username}` })
-        : t('moderation.finreport.notice.noAccount')}
+        ? t('moderation.research.notice.inactive', { name: `@${account.username}` })
+        : t('moderation.research.notice.noAccount')}
     </p>
   )
 }
 
-export function ReportsTab({ onOpenPost }: { onOpenPost?: (postId: string) => void }) {
+export function ResearchTab({ onOpenPost }: { onOpenPost?: (postId: string) => void }) {
   const { t } = useReportText()
   const agent = useAgent()
   const canPost = agent.community_permissions.includes('community.post')
@@ -43,28 +43,28 @@ export function ReportsTab({ onOpenPost }: { onOpenPost?: (postId: string) => vo
   const [entityText, setEntityText] = useState('')
   const entity = entityFilter(useDebounced(entityText, 300))
   const filter = useMemo(() => ({ status, entity }), [status, entity])
-  const files = useFinreportFiles(filter)
-  const config = useFinreportConfig()
+  const files = useResearchFiles(filter)
+  const config = useResearchConfig()
   const [selected, setSelected] = useState<string | null>(null)
   const items = useMemo(() => files.data?.pages.flatMap((page) => page.items) ?? [], [files.data])
   const counts = files.data?.pages[0]?.counts ?? {}
   const filtered = status !== null || entity !== null
 
   return (
-    <section className="flex flex-col gap-4" aria-label={t('moderation.finreport.title')}>
+    <section className="flex flex-col gap-4" aria-label={t('moderation.research.title')}>
       <header className="min-w-0">
-        <h2 className="text-panel font-semibold">{t('moderation.finreport.title')}</h2>
-        <p className="max-w-3xl text-row text-muted-foreground">{t('moderation.finreport.subtitle')}</p>
+        <h2 className="text-panel font-semibold">{t('moderation.research.title')}</h2>
+        <p className="max-w-3xl text-row text-muted-foreground">{t('moderation.research.subtitle')}</p>
       </header>
       {config.data ? <AccountNotice config={config.data} /> : null}
       {canPost ? (
-        <UploadPanel maxBytes={config.data?.max_file_bytes ?? FINREPORT_MAX_BYTES} />
+        <UploadPanel maxBytes={config.data?.max_file_bytes ?? RESEARCH_MAX_BYTES} />
       ) : (
-        <p className="text-xs text-muted-foreground">{t('moderation.finreport.upload.readOnly')}</p>
+        <p className="text-xs text-muted-foreground">{t('moderation.research.upload.readOnly')}</p>
       )}
-      <section aria-labelledby="finreport-files-title" className="flex flex-col gap-3">
-        <h3 id="finreport-files-title" className="text-sm font-medium">
-          {t('moderation.finreport.list.title')}
+      <section aria-labelledby="research-files-title" className="flex flex-col gap-3">
+        <h3 id="research-files-title" className="text-sm font-medium">
+          {t('moderation.research.list.title')}
         </h3>
         <div className="flex flex-wrap items-center gap-2">
           <ToggleGroup
@@ -73,13 +73,13 @@ export function ReportsTab({ onOpenPost }: { onOpenPost?: (postId: string) => vo
             onValueChange={(value) =>
               setStatus(fileStatuses.includes(value as FileStatus) ? (value as FileStatus) : null)
             }
-            aria-label={t('moderation.finreport.filters.status')}
+            aria-label={t('moderation.research.filters.status')}
           >
-            <ToggleGroupItem value={ALL}>{t('moderation.finreport.filters.all')}</ToggleGroupItem>
+            <ToggleGroupItem value={ALL}>{t('moderation.research.filters.all')}</ToggleGroupItem>
             {fileStatuses.map((item) => (
               <ToggleGroupItem key={item} value={item}>
-                {t('moderation.finreport.filters.count', {
-                  label: t(`moderation.finreport.statuses.${item}`),
+                {t('moderation.research.filters.count', {
+                  label: t(`moderation.research.statuses.${item}`),
                   value: formatNumber(counts[item] ?? 0),
                 })}
               </ToggleGroupItem>
@@ -92,15 +92,15 @@ export function ReportsTab({ onOpenPost }: { onOpenPost?: (postId: string) => vo
               value={entityText}
               maxLength={13}
               onChange={(event) => setEntityText(event.target.value)}
-              placeholder={t('moderation.finreport.filters.entityPlaceholder')}
-              aria-label={t('moderation.finreport.filters.entity')}
+              placeholder={t('moderation.research.filters.entityPlaceholder')}
+              aria-label={t('moderation.research.filters.entity')}
               className="h-8 pl-8 uppercase placeholder:normal-case"
             />
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          {t('moderation.finreport.filters.countsHint')}
-          {hasActiveFiles(items) ? ` ${t('moderation.finreport.list.live')}` : ''}
+          {t('moderation.research.filters.countsHint')}
+          {hasActiveFiles(items) ? ` ${t('moderation.research.list.live')}` : ''}
         </p>
         {files.data ? (
           <div
@@ -111,14 +111,12 @@ export function ReportsTab({ onOpenPost }: { onOpenPost?: (postId: string) => vo
               <FilesTable files={items} canPost={canPost} onOpen={setSelected} />
             ) : (
               <p className="border-y py-6 text-center text-row text-muted-foreground">
-                {filtered
-                  ? t('moderation.finreport.list.emptyFiltered')
-                  : t('moderation.finreport.list.empty')}
+                {filtered ? t('moderation.research.list.emptyFiltered') : t('moderation.research.list.empty')}
               </p>
             )}
             <div className="flex flex-wrap items-center gap-3">
               <span className="tabular text-xs text-muted-foreground" role="status">
-                {t('moderation.finreport.list.shown', { count: items.length })}
+                {t('moderation.research.list.shown', { count: items.length })}
               </span>
               {files.hasNextPage ? (
                 <Button
@@ -128,10 +126,10 @@ export function ReportsTab({ onOpenPost }: { onOpenPost?: (postId: string) => vo
                   onClick={() => void files.fetchNextPage()}
                 >
                   {files.isFetchingNextPage ? <LoaderCircleIcon className="animate-spin" /> : null}
-                  {t('moderation.finreport.list.loadMore')}
+                  {t('moderation.research.list.loadMore')}
                 </Button>
               ) : items.length > 0 ? (
-                <span className="text-xs text-muted-foreground">{t('moderation.finreport.list.end')}</span>
+                <span className="text-xs text-muted-foreground">{t('moderation.research.list.end')}</span>
               ) : null}
             </div>
           </div>

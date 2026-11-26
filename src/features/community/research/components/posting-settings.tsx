@@ -19,9 +19,9 @@ import { FieldText } from '@/features/system/components/system-ui'
 
 import { useOfficialAccounts } from '../../hooks'
 import type { AccountRef } from '../../types'
-import { useFinreportConfig, useSaveFinreportConfig } from '../hooks'
-import { finreportErrorText } from '../logic'
-import type { FinreportConfig } from '../types'
+import { useResearchConfig, useSaveResearchConfig } from '../hooks'
+import { researchErrorText } from '../logic'
+import type { ResearchConfig } from '../types'
 import { useReportText } from './report-text'
 
 const NONE = 'none'
@@ -29,59 +29,59 @@ const NONE = 'none'
 const accountName = (account: AccountRef) =>
   `${account.display_name ?? account.username} (@${account.username})`
 
-function ChangedLine({ config }: { config: FinreportConfig }) {
+function ChangedLine({ config }: { config: ResearchConfig }) {
   const { t, stamp } = useReportText()
   return (
     <p className="text-xs text-muted-foreground">
       {config.updated_by?.name
-        ? t('moderation.finreport.settings.changedBy', {
+        ? t('moderation.research.settings.changedBy', {
             time: stamp(config.updated_at),
             name: config.updated_by.name,
           })
-        : t('moderation.finreport.settings.changed', { time: stamp(config.updated_at) })}
+        : t('moderation.research.settings.changed', { time: stamp(config.updated_at) })}
     </p>
   )
 }
 
-function SettingsView({ config }: { config: FinreportConfig }) {
+function SettingsView({ config }: { config: ResearchConfig }) {
   const { t } = useReportText()
   const account = config.official_account
   return (
     <div className="flex flex-col gap-3">
       <dl className="grid max-w-2xl gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-0.5">
-          <dt className="text-xs text-muted-foreground">{t('moderation.finreport.settings.account')}</dt>
+          <dt className="text-xs text-muted-foreground">{t('moderation.research.settings.account')}</dt>
           <dd className="text-row">
             {account
               ? config.official_active
                 ? accountName(account)
-                : t('moderation.finreport.settings.accountInactive', { name: accountName(account) })
-              : t('moderation.finreport.settings.accountNone')}
+                : t('moderation.research.settings.accountInactive', { name: accountName(account) })
+              : t('moderation.research.settings.accountNone')}
           </dd>
         </div>
         <div className="flex flex-col gap-0.5">
-          <dt className="text-xs text-muted-foreground">{t('moderation.finreport.settings.autoPublish')}</dt>
+          <dt className="text-xs text-muted-foreground">{t('moderation.research.settings.autoPublish')}</dt>
           <dd className="text-row">
             {config.auto_publish
-              ? t('moderation.finreport.settings.on')
-              : t('moderation.finreport.settings.off')}
+              ? t('moderation.research.settings.on')
+              : t('moderation.research.settings.off')}
           </dd>
         </div>
       </dl>
       <p className="max-w-3xl text-xs text-muted-foreground">
-        {t('moderation.finreport.settings.autoPublishHint')}
+        {t('moderation.research.settings.autoPublishHint')}
       </p>
       <ChangedLine config={config} />
-      <p className="text-xs text-muted-foreground">{t('moderation.finreport.settings.readOnly')}</p>
+      <p className="text-xs text-muted-foreground">{t('moderation.research.settings.readOnly')}</p>
     </div>
   )
 }
 
-function SettingsForm({ config }: { config: FinreportConfig }) {
+function SettingsForm({ config }: { config: ResearchConfig }) {
   const { t } = useReportText()
   const id = useId()
   const accounts = useOfficialAccounts()
-  const save = useSaveFinreportConfig()
+  const save = useSaveResearchConfig()
   const [account, setAccount] = useState<string | null>(config.official_account?.id ?? null)
   const [auto, setAuto] = useState(config.auto_publish)
   const active = (accounts.data ?? []).filter((item) => item.disabled_at === null)
@@ -97,14 +97,14 @@ function SettingsForm({ config }: { config: FinreportConfig }) {
         save.mutate(
           { account, autoPublish: auto },
           {
-            onSuccess: () => toast.success(t('moderation.finreport.settings.saved')),
-            onError: (error) => toast.error(finreportErrorText(error)),
+            onSuccess: () => toast.success(t('moderation.research.settings.saved')),
+            onError: (error) => toast.error(researchErrorText(error)),
           },
         )
       }}
     >
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={`${id}-account`}>{t('moderation.finreport.settings.account')}</Label>
+        <Label htmlFor={`${id}-account`}>{t('moderation.research.settings.account')}</Label>
         <Select value={account ?? NONE} onValueChange={(value) => setAccount(value === NONE ? null : value)}>
           <SelectTrigger
             id={`${id}-account`}
@@ -114,10 +114,10 @@ function SettingsForm({ config }: { config: FinreportConfig }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={NONE}>{t('moderation.finreport.settings.accountNone')}</SelectItem>
+            <SelectItem value={NONE}>{t('moderation.research.settings.accountNone')}</SelectItem>
             {kept ? (
               <SelectItem value={kept.id}>
-                {t('moderation.finreport.settings.accountInactive', { name: accountName(kept) })}
+                {t('moderation.research.settings.accountInactive', { name: accountName(kept) })}
               </SelectItem>
             ) : null}
             {active.map((item) => (
@@ -129,27 +129,27 @@ function SettingsForm({ config }: { config: FinreportConfig }) {
         </Select>
         <FieldText
           id={`${id}-account-text`}
-          error={accounts.isError ? t('moderation.finreport.settings.accountsFailed') : undefined}
+          error={accounts.isError ? t('moderation.research.settings.accountsFailed') : undefined}
           hint={
             accounts.isPending
-              ? t('moderation.finreport.settings.accountsLoading')
-              : t('moderation.finreport.settings.accountHint')
+              ? t('moderation.research.settings.accountsLoading')
+              : t('moderation.research.settings.accountHint')
           }
         />
       </div>
       <label className="flex items-start gap-2 text-row">
         <Switch className="mt-0.5" checked={auto} onCheckedChange={setAuto} />
         <span>
-          <span className="block font-medium">{t('moderation.finreport.settings.autoPublish')}</span>
+          <span className="block font-medium">{t('moderation.research.settings.autoPublish')}</span>
           <span className="block text-xs text-muted-foreground">
-            {t('moderation.finreport.settings.autoPublishHint')}
+            {t('moderation.research.settings.autoPublishHint')}
           </span>
         </span>
       </label>
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" size="sm" disabled={!changed || save.isPending}>
           {save.isPending ? <LoaderCircleIcon className="animate-spin" /> : null}
-          {t('moderation.finreport.settings.save')}
+          {t('moderation.research.settings.save')}
         </Button>
         <ChangedLine config={config} />
       </div>
@@ -160,12 +160,12 @@ function SettingsForm({ config }: { config: FinreportConfig }) {
 export function PostingSettings() {
   const { t } = useReportText()
   const agent = useAgent()
-  const config = useFinreportConfig()
+  const config = useResearchConfig()
   const editable = isSuperAdmin(agent)
   return (
     <SettingsCard
-      title={t('moderation.finreport.settings.title')}
-      subtitle={t('moderation.finreport.settings.subtitle')}
+      title={t('moderation.research.settings.title')}
+      subtitle={t('moderation.research.settings.subtitle')}
     >
       <QueryContent query={config}>
         {(data) =>

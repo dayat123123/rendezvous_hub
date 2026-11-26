@@ -107,6 +107,12 @@ describe('router', () => {
     expect(stream.search).toEqual({ tab: 'filters' })
   }, 30_000)
 
+  it('sends the old Laporan keuangan tab address to the Riset tab', async () => {
+    const location = await open('/community?tab=reports', monitorFixture)
+    expect(location.pathname).toBe('/community')
+    expect(location.search).toEqual({ tab: 'research' })
+  })
+
   it('redirects the old /app address to Komunitas, Banner & Popup, or Pengaturan', async () => {
     const features = await open('/app?tab=features', monitorFixture)
     expect(features.pathname).toBe('/community')

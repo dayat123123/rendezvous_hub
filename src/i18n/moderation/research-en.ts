@@ -1,13 +1,13 @@
 import type { Translated } from '../id'
-import type { moderationFinreport as source } from './finreport-id'
+import type { moderationResearch as source } from './research-id'
 
-export const moderationFinreport: Translated<typeof source> = {
-  title: 'Financial reports',
+export const moderationResearch: Translated<typeof source> = {
+  title: 'Research',
   subtitle:
-    'Summaries of listed companies’ financial reports are built automatically from the exchange XBRL file (instance.zip) and become official posts awaiting approval in Official posts. Figures come straight from the XBRL and are computed with fixed formulas, without AI.',
+    'Research summaries are built automatically and become official posts awaiting approval in Official posts, shown in the app as a research card. The first kind is listed companies’ financial reports from the IDX XBRL file (instance.zip). Figures come straight from the XBRL and are computed with fixed formulas, without AI.',
   notice: {
     noAccount:
-      'No official account is set for financial reports. Files are still parsed, but no post is created until a Super Admin picks an official account in Posting settings.',
+      'No official account is set for research. Files are still parsed, but no post is created until a Super Admin picks an official account in Posting settings.',
     inactive:
       'The official account {{name}} is disabled. Files are still parsed, but no post is created until the account is enabled or a Super Admin picks another one.',
   },
@@ -49,8 +49,12 @@ export const moderationFinreport: Translated<typeof source> = {
     duplicate: 'Duplicate',
     rejected: 'Rejected',
   },
+  kinds: {
+    financial_report: 'Financial report',
+  },
   cols: {
     report: 'Report',
+    kind: 'Kind',
     source: 'Source',
     received: 'Received',
     file: 'File status',
@@ -60,7 +64,7 @@ export const moderationFinreport: Translated<typeof source> = {
   },
   list: {
     title: 'Received files',
-    empty: 'No financial report files yet.',
+    empty: 'No research files yet.',
     emptyFiltered: 'No files match this filter.',
     shown_one: '{{count}} file shown',
     shown_other: '{{count}} files shown',
@@ -159,13 +163,20 @@ export const moderationFinreport: Translated<typeof source> = {
     reviewNote: 'Reviewer note: {{note}}',
     postError: 'Publishing failed: {{error}}',
     summaryTitle: 'Summary',
-    summaryHint: 'This is exactly the text that will be published in the Stream.',
+    summaryHint:
+      'The post text published in the Stream. Older app versions that do not know the research card show only this text.',
     warningsTitle: 'Warnings',
     metricsTitle: 'Figures',
     filesTitle: 'Source files',
     historyTitle: 'Other {{code}} reports',
     historyEmpty: 'No other reports for this company yet.',
     loadFailed: 'The report details could not be loaded.',
+  },
+  preview: {
+    title: 'App preview',
+    hint: 'An approximation of the research card in the app. It may look slightly different on a phone.',
+    legacy:
+      'This report was created before the research card format, so the app shows only the summary text.',
   },
   metrics: {
     flows: 'Income and cash flow',
@@ -244,7 +255,7 @@ export const moderationFinreport: Translated<typeof source> = {
     on: 'On',
     off: 'Off',
     save: 'Save settings',
-    saved: 'Financial report settings saved',
+    saved: 'Research settings saved',
     changedBy: 'Last changed {{time}} by {{name}}',
     changed: 'Last changed {{time}}',
     readOnly: 'Only a Super Admin can change these settings.',
@@ -262,6 +273,6 @@ export const moderationFinreport: Translated<typeof source> = {
     official_inactive: 'Pick an active official account.',
     file_too_large: 'The file is larger than 8 MiB.',
     invalid_file_type: 'Storage rejected this file type. Make sure you upload a .zip file.',
-    upload_forbidden: 'This account is not allowed to upload financial reports.',
+    upload_forbidden: 'This account is not allowed to upload research files.',
   },
 }

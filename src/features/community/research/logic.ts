@@ -97,7 +97,7 @@ export function uploadProblem(file: Pick<File, 'name' | 'size'>, maxBytes: numbe
   return null
 }
 
-export const finreportErrorCodes = [
+export const researchErrorCodes = [
   'invalid_object',
   'object_not_found',
   'already_submitted',
@@ -112,12 +112,12 @@ export const finreportErrorCodes = [
   'invalid_file_type',
   'upload_forbidden',
 ] as const
-type FinreportErrorCode = (typeof finreportErrorCodes)[number]
+type ResearchErrorCode = (typeof researchErrorCodes)[number]
 
-const isFinreportCode = (code: string): code is FinreportErrorCode =>
-  (finreportErrorCodes as readonly string[]).includes(code)
+const isResearchCode = (code: string): code is ResearchErrorCode =>
+  (researchErrorCodes as readonly string[]).includes(code)
 
-export function finreportErrorText(error: unknown) {
+export function researchErrorText(error: unknown) {
   const { code } = toApiError(error)
-  return isFinreportCode(code) ? i18n.t(`moderation.finreport.errors.${code}`) : errorText(error)
+  return isResearchCode(code) ? i18n.t(`moderation.research.errors.${code}`) : errorText(error)
 }

@@ -44,7 +44,7 @@ import { BroadcastsDialog } from './broadcasts-dialog'
 import { HealthUsage } from './health-usage'
 import { KeyDialog, SecretDialog, type Revealed } from './key-dialog'
 import { KeyStatsCard } from './key-stats'
-import { ReportUsage } from './report-usage'
+import { ResearchUsage } from './research-usage'
 
 const statusTone: Record<KeyStatus, 'ok' | 'warn' | 'neutral'> = {
   active: 'ok',
@@ -252,7 +252,7 @@ function HelpCard() {
   )
 }
 
-const views = ['notify', 'health', 'reports'] as const
+const views = ['notify', 'health', 'research'] as const
 type View = (typeof views)[number]
 
 function DeleteKeyDialog({ item, onClose }: { item: IntegrationKey | null; onClose: () => void }) {
@@ -317,9 +317,9 @@ function UsageViews() {
             <ActivityIcon aria-hidden="true" />
             {t('platform.keys.views.health')}
           </ToggleGroupItem>
-          <ToggleGroupItem value="reports">
+          <ToggleGroupItem value="research">
             <FileChartColumnIcon aria-hidden="true" />
-            {t('platform.keys.views.reports')}
+            {t('platform.keys.views.research')}
           </ToggleGroupItem>
         </ToggleGroup>
         <p className="max-w-3xl text-row text-muted-foreground">{t(`platform.keys.views.${view}Hint`)}</p>
@@ -335,15 +335,18 @@ function UsageViews() {
           <HealthUsage />
         </SettingsCard>
       ) : null}
-      {view === 'reports' ? (
-        <SettingsCard title={t('platform.keys.reports.title')} subtitle={t('platform.keys.reports.subtitle')}>
-          <ReportUsage />
+      {view === 'research' ? (
+        <SettingsCard
+          title={t('platform.keys.research.title')}
+          subtitle={t('platform.keys.research.subtitle')}
+        >
+          <ResearchUsage />
           <Link
             to="/community"
-            search={{ tab: 'reports' }}
+            search={{ tab: 'research' }}
             className="self-start text-row font-medium text-primary underline underline-offset-4"
           >
-            {t('platform.keys.reports.open')}
+            {t('platform.keys.research.open')}
           </Link>
         </SettingsCard>
       ) : null}

@@ -7,13 +7,13 @@ import {
   balanceComparison,
   currencySymbol,
   entityFilter,
-  finreportErrorText,
   hasActiveFiles,
   isWaitingRetry,
   objectPath,
   percentChange,
   periodParts,
   ratioKind,
+  researchErrorText,
   scaleMoney,
   sourceName,
   uploadProblem,
@@ -140,11 +140,11 @@ describe('uploadProblem', () => {
   })
 })
 
-describe('finreportErrorText', () => {
+describe('researchErrorText', () => {
   it('explains report errors and falls back to the shared messages', () => {
-    expect(finreportErrorText(new ApiError('object_gone'))).toBe(
+    expect(researchErrorText(new ApiError('object_gone'))).toBe(
       'File aslinya sudah dihapus dari storage. Unggah ulang file tersebut.',
     )
-    expect(finreportErrorText(new ApiError('community_forbidden'))).not.toBe('community_forbidden')
+    expect(researchErrorText(new ApiError('community_forbidden'))).not.toBe('community_forbidden')
   })
 })

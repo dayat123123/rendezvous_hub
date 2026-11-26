@@ -1,7 +1,9 @@
-import { moderationFinreport } from './finreport-id'
+import { moderationCard } from './card-id'
+import { moderationResearch } from './research-id'
 
 export const moderation = {
-  finreport: moderationFinreport,
+  card: moderationCard,
+  research: moderationResearch,
   segments: {
     label: 'Segmen penerima',
     options: {

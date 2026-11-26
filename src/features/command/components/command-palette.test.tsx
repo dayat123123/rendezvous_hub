@@ -89,10 +89,10 @@ describe('CommandPalette', () => {
 
     expect(screen.queryByRole('option', { name: /Banner & Popup/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('option', { name: /Fitur & versi/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('option', { name: /Laporan keuangan/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Riset/ })).not.toBeInTheDocument()
   })
 
-  it('opens Laporan keuangan for staff with any community permission', async () => {
+  it('opens Riset for staff with any community permission', async () => {
     const user = userEvent.setup()
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, {
       ...agentFixture,
@@ -100,14 +100,14 @@ describe('CommandPalette', () => {
       community_permissions: ['community.moderate'],
     })
 
-    await user.click(screen.getByRole('option', { name: 'Buka Komunitas › Laporan keuangan' }))
+    await user.click(screen.getByRole('option', { name: 'Buka Komunitas › Riset' }))
 
-    expect(navigate).toHaveBeenCalledWith({ to: '/community', search: { tab: 'reports' } })
+    expect(navigate).toHaveBeenCalledWith({ to: '/community', search: { tab: 'research' } })
   })
 
-  it('keeps Laporan keuangan out of the palette for a Super Admin without community permissions', () => {
+  it('keeps Riset out of the palette for a Super Admin without community permissions', () => {
     renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
 
-    expect(screen.queryByRole('option', { name: /Laporan keuangan/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Riset/ })).not.toBeInTheDocument()
   })
 })

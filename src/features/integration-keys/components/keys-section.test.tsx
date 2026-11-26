@@ -355,40 +355,40 @@ describe('IntegrationKeysSection', () => {
     expect(await screen.findByText('API key Key lama dihapus')).toBeInTheDocument()
   })
 
-  it('shows the financial report guide with both endpoints, the limits, and a link to Komunitas', async () => {
+  it('shows the research guide with both endpoints, the limits, and a link to Komunitas', async () => {
     const user = userEvent.setup()
     renderSection()
 
     const views = await screen.findByRole('region', { name: 'Panduan dan statistik' })
-    await user.click(within(views).getByRole('radio', { name: 'Laporan keuangan' }))
-    expect(within(views).getByText('API laporan keuangan')).toBeInTheDocument()
-    expect(within(views).getByText(/dipantau di Komunitas → Laporan keuangan/)).toBeInTheDocument()
-    const endpoints = within(views).getByRole('list', { name: 'API laporan keuangan' })
+    await user.click(within(views).getByRole('radio', { name: 'Riset' }))
+    expect(within(views).getByText('API riset')).toBeInTheDocument()
+    expect(within(views).getByText(/dipantau di Komunitas → Riset/)).toBeInTheDocument()
+    const endpoints = within(views).getByRole('list', { name: 'API riset' })
     expect(
-      within(endpoints).getByText('POST https://api.olt.test/integration/v1/financial-reports'),
+      within(endpoints).getByText('POST https://api.olt.test/integration/v1/research'),
     ).toBeInTheDocument()
     expect(
-      within(endpoints).getByText('GET https://api.olt.test/integration/v1/financial-reports/{id}'),
+      within(endpoints).getByText('GET https://api.olt.test/integration/v1/research/{id}'),
     ).toBeInTheDocument()
     expect(within(views).getByText('Maksimal 8 MiB per file.')).toBeInTheDocument()
     expect(within(views).getByText('Maksimal 120 file per key per jam.')).toBeInTheDocument()
     expect(within(views).getByText(/Maksimal 2 unggahan diproses bersamaan/)).toBeInTheDocument()
     expect(
       within(views).getByText(
-        'curl.exe -sS -X POST "https://api.olt.test/integration/v1/financial-reports" -H "Authorization: Bearer <API_KEY>" -H "Content-Type: application/zip" --data-binary "@instance.zip"',
+        'curl.exe -sS -X POST "https://api.olt.test/integration/v1/research" -H "Authorization: Bearer <API_KEY>" -H "Content-Type: application/zip" --data-binary "@instance.zip"',
       ),
     ).toBeInTheDocument()
-    expect(within(views).getByRole('link', { name: 'Buka Komunitas → Laporan keuangan' })).toHaveAttribute(
+    expect(within(views).getByRole('link', { name: 'Buka Komunitas → Riset' })).toHaveAttribute(
       'href',
-      '/community?tab=reports',
+      '/community?tab=research',
     )
     expect(within(views).queryByText('Statistik notifikasi & bot')).not.toBeInTheDocument()
   })
 
-  it('creates a financial report key and shows ready upload examples with the new key', async () => {
+  it('creates a research key and shows ready upload examples with the new key', async () => {
     const user = userEvent.setup()
     vi.mocked(integrationKeysApi.create).mockResolvedValue({
-      key: { ...notifyKey, id: 'key-5', name: 'Data laporan OLT', scopes: ['financial_report'] },
+      key: { ...notifyKey, id: 'key-5', name: 'Data laporan OLT', scopes: ['research'] },
       secret: SECRET,
     })
     renderSection()
@@ -397,18 +397,18 @@ describe('IntegrationKeysSection', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Buat API key' })
     await user.type(within(dialog).getByLabelText('Nama key'), 'Data laporan OLT')
     await user.click(within(dialog).getByRole('checkbox', { name: /^Notifikasi per rekening/ }))
-    await user.click(within(dialog).getByRole('checkbox', { name: /^Kirim laporan keuangan/ }))
+    await user.click(within(dialog).getByRole('checkbox', { name: /^Kirim riset/ }))
     expect(within(dialog).getByText(/instance\.zip XBRL dari IDX/)).toBeInTheDocument()
     await user.click(within(dialog).getByRole('button', { name: 'Buat API key' }))
 
     await waitFor(() =>
       expect(integrationKeysApi.create).toHaveBeenCalledWith(
-        expect.objectContaining({ scopes: ['financial_report'] }),
+        expect.objectContaining({ scopes: ['research'] }),
       ),
     )
     const secret = await screen.findByRole('dialog', { name: 'API key dibuat' })
-    const usage = within(secret).getByRole('region', { name: 'Cara mengirim laporan keuangan' })
-    const head = `-sS -X POST "https://api.olt.test/integration/v1/financial-reports" -H "Authorization: Bearer ${SECRET}" -H "Content-Type: application/zip"`
+    const usage = within(secret).getByRole('region', { name: 'Cara mengirim riset' })
+    const head = `-sS -X POST "https://api.olt.test/integration/v1/research" -H "Authorization: Bearer ${SECRET}" -H "Content-Type: application/zip"`
     expect(within(usage).getByText(`curl ${head} --data-binary @instance.zip`)).toBeInTheDocument()
     expect(within(usage).getByText(`curl.exe ${head} --data-binary "@instance.zip"`)).toBeInTheDocument()
     expect(within(usage).getByText(/sudah terisi/)).toBeInTheDocument()

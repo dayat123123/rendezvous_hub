@@ -39,9 +39,9 @@ describe('permission-gated community tabs and queues', () => {
       'moderation',
       'rooms',
       'instruments',
-      'reports',
+      'research',
     ])
-    expect(communityTabsFor(['community.sanction'])).toEqual(['moderation', 'reports'])
+    expect(communityTabsFor(['community.sanction'])).toEqual(['moderation', 'research'])
   })
 
   it('shows each moderation queue only to the permission that can act on it', () => {

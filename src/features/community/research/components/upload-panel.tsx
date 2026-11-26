@@ -8,7 +8,7 @@ import { formatBytes } from '@/lib/time'
 import { cn, uuid } from '@/lib/utils'
 
 import { useUploadReport } from '../hooks'
-import { finreportErrorText, uploadProblem } from '../logic'
+import { researchErrorText, uploadProblem } from '../logic'
 import type { UploadItem } from '../types'
 import { useReportText } from './report-text'
 
@@ -36,7 +36,7 @@ export function UploadPanel({ maxBytes }: { maxBytes: number }) {
 
   const problemText = (file: File) => {
     const problem = uploadProblem(file, maxBytes)
-    return problem ? t(`moderation.finreport.upload.problems.${problem}`, { size: limit }) : null
+    return problem ? t(`moderation.research.upload.problems.${problem}`, { size: limit }) : null
   }
 
   const start = async (files: File[]) => {
@@ -62,10 +62,10 @@ export function UploadPanel({ maxBytes }: { maxBytes: number }) {
         patch(item.id, { state: 'done', file: view })
         accepted += 1
       } catch (error) {
-        patch(item.id, { state: 'failed', error: finreportErrorText(error) })
+        patch(item.id, { state: 'failed', error: researchErrorText(error) })
       }
     }
-    if (accepted > 0) toast.success(t('moderation.finreport.upload.uploaded', { count: accepted }))
+    if (accepted > 0) toast.success(t('moderation.research.upload.uploaded', { count: accepted }))
   }
 
   const pick = (list: FileList | null) => {
@@ -74,9 +74,9 @@ export function UploadPanel({ maxBytes }: { maxBytes: number }) {
   }
 
   return (
-    <section aria-labelledby="finreport-upload-title" className="flex flex-col gap-2">
-      <h3 id="finreport-upload-title" className="text-sm font-medium">
-        {t('moderation.finreport.upload.title')}
+    <section aria-labelledby="research-upload-title" className="flex flex-col gap-2">
+      <h3 id="research-upload-title" className="text-sm font-medium">
+        {t('moderation.research.upload.title')}
       </h3>
       <div
         className={cn(
@@ -97,12 +97,12 @@ export function UploadPanel({ maxBytes }: { maxBytes: number }) {
         <UploadIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden />
         <p className="min-w-0 flex-1 text-row text-muted-foreground">
           {dragging
-            ? t('moderation.finreport.upload.drop')
-            : t('moderation.finreport.upload.hint', { size: limit })}
+            ? t('moderation.research.upload.drop')
+            : t('moderation.research.upload.hint', { size: limit })}
         </p>
         <Button size="sm" variant="outline" disabled={busy} onClick={() => input.current?.click()}>
           {busy ? <LoaderCircleIcon className="animate-spin" /> : <UploadIcon />}
-          {t('moderation.finreport.upload.choose')}
+          {t('moderation.research.upload.choose')}
         </Button>
         <input
           ref={input}
@@ -110,7 +110,7 @@ export function UploadPanel({ maxBytes }: { maxBytes: number }) {
           multiple
           accept=".zip,application/zip"
           className="hidden"
-          aria-label={t('moderation.finreport.upload.input')}
+          aria-label={t('moderation.research.upload.input')}
           onChange={(event) => {
             const files = event.target.files
             pick(files)
@@ -122,16 +122,16 @@ export function UploadPanel({ maxBytes }: { maxBytes: number }) {
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-medium text-muted-foreground">
-              {t('moderation.finreport.upload.results')}
+              {t('moderation.research.upload.results')}
             </span>
             <Button size="xs" variant="ghost" disabled={busy} onClick={() => setItems([])}>
-              {t('moderation.finreport.upload.clear')}
+              {t('moderation.research.upload.clear')}
             </Button>
           </div>
           <ul
             className="flex flex-col border-y"
             aria-live="polite"
-            aria-label={t('moderation.finreport.upload.results')}
+            aria-label={t('moderation.research.upload.results')}
           >
             {items.map((item) => (
               <li
@@ -147,7 +147,7 @@ export function UploadPanel({ maxBytes }: { maxBytes: number }) {
                   {formatBytes(item.size)}
                 </span>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {t(`moderation.finreport.upload.states.${item.state}`)}
+                  {t(`moderation.research.upload.states.${item.state}`)}
                 </span>
               </li>
             ))}

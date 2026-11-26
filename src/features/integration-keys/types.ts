@@ -1,12 +1,6 @@
 import type { AccountRef, StaffRef } from '@/features/community/types'
 
-export const keyScopes = [
-  'notify',
-  'notify_broadcast',
-  'bot_post',
-  'health_read',
-  'financial_report',
-] as const
+export const keyScopes = ['notify', 'notify_broadcast', 'bot_post', 'health_read', 'research'] as const
 export type KeyScope = (typeof keyScopes)[number]
 
 export type KeyStatus = 'active' | 'disabled' | 'revoked'
