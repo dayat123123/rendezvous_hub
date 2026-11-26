@@ -8,6 +8,7 @@ import { LoginPage } from '@/features/auth/components/login-page'
 import { MfaEnrollPage, MfaVerifyPage } from '@/features/auth/components/mfa-pages'
 import { PasswordPage } from '@/features/auth/components/password-page'
 import { onSignedOut, useAuth } from '@/features/auth/hooks'
+import { withStrings } from '@/i18n'
 import { usePreferences, watchSystemTheme } from '@/lib/preferences'
 import { createQueryClient } from '@/lib/query-client'
 import { realtime } from '@/lib/realtime'
@@ -21,8 +22,13 @@ const loadWorkspace = () => import('./workspace')
 
 const Workspace = lazy(() => loadWorkspace().then((module) => ({ default: module.Workspace })))
 
-const DevUiPage = lazy(() =>
-  import('@/features/dev-ui/dev-ui-page').then((module) => ({ default: module.DevUiPage })),
+const DevUiPage = lazy(
+  withStrings(
+    () => import('@/features/dev-ui/dev-ui-page').then((module) => ({ default: module.DevUiPage })),
+    'labels',
+    'replies',
+    'help',
+  ),
 )
 
 function isDevUi() {

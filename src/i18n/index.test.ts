@@ -75,6 +75,31 @@ describe('lazy English translations', () => {
     expect(fresh.default.hasResourceBundle('id', 'translation')).toBe(true)
   })
 
+  it('loads a feature bundle by itself when a screen asks for its strings first', async () => {
+    vi.resetModules()
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const fresh = await import('@/i18n')
+
+    expect(fresh.default.t('system.map.healthyShare')).toBe('system.map.healthyShare')
+
+    await waitFor(() => expect(fresh.default.t('system.map.healthyShare')).toBe('sehat'))
+    expect(fresh.default.t('system.title')).toBe('Kesehatan sistem')
+    expect(fresh.default.options.react?.bindI18nStore).toBe('added')
+  })
+
+  it('ignores missing keys outside the feature bundles', async () => {
+    vi.resetModules()
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const fresh = await import('@/i18n')
+    const translate = fresh.default.t as unknown as (key: string) => string
+
+    expect(translate('app.notAKey')).toBe('app.notAKey')
+    await fresh.loadStrings('help')
+    expect(translate('help.notAKey')).toBe('help.notAKey')
+
+    expect(warn).not.toHaveBeenCalled()
+  })
+
   it('falls back to Indonesian when the English file cannot be loaded', async () => {
     vi.resetModules()
     vi.doMock('@/i18n/en', () => {

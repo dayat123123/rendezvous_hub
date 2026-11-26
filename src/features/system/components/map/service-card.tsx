@@ -54,7 +54,7 @@ export function ServiceCard({
         <Beacon tone={node.tone} className="mt-1" />
         <div className="min-w-0 flex-1">
           <p className="truncate font-mono text-row font-medium">{node.service}</p>
-          {role ? <p className="truncate text-xs text-muted-foreground">{role}</p> : null}
+          {role ? <p className="line-clamp-2 text-xs break-words text-muted-foreground">{role}</p> : null}
         </div>
         <span
           className={cn(
