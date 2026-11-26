@@ -261,6 +261,7 @@ export const moderationFinreport: Translated<typeof source> = {
     post_exists: 'This report already has an active post.',
     official_inactive: 'Pick an active official account.',
     file_too_large: 'The file is larger than 8 MiB.',
+    invalid_file_type: 'Storage rejected this file type. Make sure you upload a .zip file.',
     upload_forbidden: 'This account is not allowed to upload financial reports.',
   },
 }
