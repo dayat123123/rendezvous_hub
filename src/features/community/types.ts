@@ -78,7 +78,12 @@ export type CardAttachment = {
   document: CardDocument
 }
 
-export type PostAttachment = ImageAttachment | CardAttachment
+export type FileAttachment = {
+  type: 'file'
+  file: { bucket?: string; path: string; name: string; mime?: string; size?: number }
+}
+
+export type PostAttachment = ImageAttachment | CardAttachment | FileAttachment
 
 export const postStatuses = [
   'draft',

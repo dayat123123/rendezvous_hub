@@ -21,7 +21,9 @@ import {
 } from '../logic'
 import { findCard, readCardDocument } from '../card-logic'
 import type { CommunityPost } from '../types'
+import { chipFiles } from '../post-files'
 import { CardPreview } from './card-preview'
+import { PostFileChips } from './post-files'
 import { AccountChip, CampaignStatusText, PostImages, PostStatusText, ReasonDialog } from './shared'
 
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
@@ -123,6 +125,7 @@ export function PostDetail({ post, onEdit }: { post: CommunityPost; onEdit: () =
             <p className="text-sm break-words whitespace-pre-wrap">{post.body}</p>
           )}
           <PostImages attachments={post.attachments} />
+          <PostFileChips files={chipFiles(post.attachments)} openable />
         </article>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-b px-5 py-4">
           <Fact label={t('community.pin')}>

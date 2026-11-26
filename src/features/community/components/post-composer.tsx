@@ -28,7 +28,6 @@ import {
   buildCardDocument,
   cardAttachment,
   cardDraftFrom,
-  cardErrorText,
   cardProblems,
   cardStock,
   cardText,
@@ -40,6 +39,7 @@ import {
 } from '../card-logic'
 import { useOfficialAccounts, useReviewPost, useSavePost, useSubmitPost } from '../hooks'
 import { cleanStock, fromJakartaInput, jakartaInput, stockCodePattern } from '../logic'
+import { postErrorText, postFilesPayload, postFilesProblem } from '../post-files'
 import {
   MAX_POST_BODY,
   MAX_POST_IMAGES,
@@ -49,8 +49,10 @@ import {
   type PinScope,
   type PostKind,
 } from '../types'
+import { usePostFileDrafts } from '../use-post-file-drafts'
 import { CardEditor } from './card-editor'
 import { CardPreview } from './card-preview'
+import { PostFileChips, PostFilesField } from './post-files'
 import { PostImages } from './shared'
 
 type Pin = 'none' | PinScope
@@ -88,6 +90,7 @@ export function PostComposer({
     return existing ? cardDraftFrom(existing) : emptyCardDraft()
   })
   const [uploading, setUploading] = useState(false)
+  const docs = usePostFileDrafts(post)
   const [pin, setPin] = useState<Pin>(post?.pin_scope ?? 'none')
   const [stock, setStock] = useState(post?.pin_stock ?? '')
   const [pinUntil, setPinUntil] = useState(jakartaInput(post?.pin_until ?? null))
@@ -126,8 +129,11 @@ export function PostComposer({
   const cardDoc = buildCardDocument(card)
   const stockCode = cardStock(card)
   const legacyText = cardText(cardDoc, stockCode)
+  const filesProblem = postFilesProblem(docs.files, accountId)
   const valid =
-    Object.values(errors).every((value) => value === undefined) && (layout === 'text' || cardValid(problems))
+    Object.values(errors).every((value) => value === undefined) &&
+    (layout === 'text' || cardValid(problems)) &&
+    filesProblem === null
 
   const addImages = async (files: File[]) => {
     if (!accountId) {
@@ -165,7 +171,11 @@ export function PostComposer({
           kind,
           title: kind === 'announcement' ? title.trim() : null,
           body: layout === 'card' ? legacyText : body.trim(),
-          attachments: layout === 'card' ? [...media, cardAttachment(card)] : media,
+          attachments: [
+            ...media,
+            ...postFilesPayload(docs.files),
+            ...(layout === 'card' ? [cardAttachment(card)] : []),
+          ],
           pin_scope: effectivePin === 'none' ? null : effectivePin,
           pin_stock: effectivePin === 'stock' ? cleanStock(stock) : null,
           pin_until: effectivePin === 'none' ? null : fromJakartaInput(pinUntil),
@@ -181,7 +191,7 @@ export function PostComposer({
       )
       onClose(saved)
     } catch (error) {
-      toast.error(cardErrorText(error))
+      toast.error(postErrorText(error))
     }
   }
 
@@ -209,6 +219,8 @@ export function PostComposer({
                 value={accountId || undefined}
                 onValueChange={(value) => {
                   if (media.length > 0 && value !== accountId) setMedia([])
+                  if (docs.files.length > 0 && value !== accountId)
+                    toast.warning(t('moderation.postFiles.accountChanged'))
                   setAccountId(value)
                 }}
               >
@@ -289,6 +301,14 @@ export function PostComposer({
                   </h3>
                   <p className="text-xs text-muted-foreground">{t('moderation.card.preview.hint')}</p>
                   <CardPreview document={cardDoc} stock={stockCode} />
+                  <PostFileChips
+                    files={docs.files.map((file) => ({
+                      key: file.id,
+                      name: file.name.trim(),
+                      ext: file.ext,
+                      size: file.size,
+                    }))}
+                  />
                 </section>
                 <section aria-labelledby="card-legacy-title" className="flex flex-col gap-2">
                   <h3 id="card-legacy-title" className="text-sm font-medium">
@@ -378,6 +398,13 @@ export function PostComposer({
               }}
             />
           </div>
+          <PostFilesField
+            drafts={docs}
+            accountId={accountId}
+            problem={filesProblem}
+            touched={touched}
+            disabled={pending}
+          />
           <fieldset className="flex flex-col gap-2 rounded-lg border p-3">
             <legend className="px-1 text-sm font-medium">{t('community.pin')}</legend>
             <RadioGroup
