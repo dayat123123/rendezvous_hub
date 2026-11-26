@@ -19,6 +19,10 @@ export type NameKey =
   | 'audit_log_days'
   | 'access_log_days'
   | 'rate_limit_events_days'
+  | 'cs_audit_days'
+  | 'notification_events_days'
+  | 'moderation_events_days'
+  | 'cron_history_days'
 
 export const nameKey = (key: RetentionKey) => key.replace('retention.', '') as NameKey
 
