@@ -37,8 +37,10 @@ function detail(raw: ReportDetail): ReportDetail {
 type StorageFailure = { status?: number; statusCode?: string }
 
 function uploadError(error: StorageFailure) {
-  const status = error.status ?? Number(error.statusCode)
+  const code = Number(error.statusCode)
+  const status = code > 0 ? code : error.status
   if (status === 413) return new ApiError('file_too_large', undefined, 413)
+  if (status === 415) return new ApiError('invalid_file_type', undefined, 415)
   if (status === 401 || status === 403) return new ApiError('upload_forbidden', undefined, status)
   return toApiError(error)
 }
@@ -58,7 +60,10 @@ export const finreportApi = {
     const path = objectPath(agentId, uuid())
     const { error } = await supabase()
       .storage.from(FINREPORT_BUCKET)
-      .upload(path, file, { contentType: 'application/zip', upsert: false })
+      .upload(path, new Blob([file], { type: 'application/zip' }), {
+        contentType: 'application/zip',
+        upsert: false,
+      })
     if (error) throw uploadError(error)
     return rpc<FileView>('finreport_upload', { p_object: path })
   },

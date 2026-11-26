@@ -257,6 +257,7 @@ export const moderationFinreport = {
     post_exists: 'Laporan ini sudah punya postingan yang aktif.',
     official_inactive: 'Pilih akun resmi yang aktif.',
     file_too_large: 'File lebih dari 8 MiB.',
+    invalid_file_type: 'Storage menolak jenis file ini. Pastikan yang diunggah file .zip.',
     upload_forbidden: 'Akun ini tidak punya izin mengunggah laporan keuangan.',
   },
 }

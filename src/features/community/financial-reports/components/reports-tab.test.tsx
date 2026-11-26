@@ -242,7 +242,7 @@ function render(agent: AgentProfile, onOpenPost?: (id: string) => void) {
 }
 
 const zip = (name: string, size = 120_000) => {
-  const file = new File(['PK'], name, { type: 'application/zip' })
+  const file = new File(['PK'], name, { type: 'application/x-zip-compressed' })
   Object.defineProperty(file, 'size', { value: size })
   return file
 }
@@ -311,14 +311,17 @@ describe('ReportsTab', () => {
   })
 
   it('uploads zip files to storage, submits them, and reports each result', async () => {
+    const replies = [
+      null,
+      { message: 'Payload too large', status: 413, statusCode: '413' },
+      { message: 'new row violates row-level security policy', status: 400, statusCode: '403' },
+      { message: 'mime type is not supported', status: 400, statusCode: '415' },
+    ]
     const user = userEvent.setup()
-    backend.upload.mockImplementation((path: string, file: File) =>
-      Promise.resolve(
-        file.name === 'gagal.zip'
-          ? { data: null, error: { message: 'Payload too large', status: 413, statusCode: '413' } }
-          : { data: { path }, error: null },
-      ),
-    )
+    backend.upload.mockImplementation((path: string) => {
+      const failure = replies.shift()
+      return Promise.resolve(failure ? { data: null, error: failure } : { data: { path }, error: null })
+    })
     serve({ finreport_upload: () => ({ ...rejected, id: 'file-9', status: 'queued', retryable: false }) })
     render(writer)
 
@@ -327,19 +330,30 @@ describe('ReportsTab', () => {
       good,
       zip('besar.zip', 9 * 1024 * 1024),
       zip('gagal.zip'),
+      zip('ditolak.zip'),
+      zip('tipe.zip'),
     ])
 
     const results = await screen.findByRole('list', { name: 'Hasil unggahan' })
     await waitFor(() => expect(within(results).getByText('Diterima, masuk antrean')).toBeInTheDocument())
     expect(within(results).getByText('Lebih dari 8 MB.')).toBeInTheDocument()
     expect(await within(results).findByText('File lebih dari 8 MiB.')).toBeInTheDocument()
+    expect(
+      await within(results).findByText('Akun ini tidak punya izin mengunggah laporan keuangan.'),
+    ).toBeInTheDocument()
+    expect(
+      await within(results).findByText('Storage menolak jenis file ini. Pastikan yang diunggah file .zip.'),
+    ).toBeInTheDocument()
     expect(await findToast('1 file diterima dan masuk antrean')).toBeInTheDocument()
 
     expect(backend.bucket).toHaveBeenCalledWith('financial-reports')
-    expect(backend.upload).toHaveBeenCalledTimes(2)
-    const [path, body, options] = backend.upload.mock.calls[0] as [string, File, object]
+    expect(backend.upload).toHaveBeenCalledTimes(4)
+    const [path, body, options] = backend.upload.mock.calls[0] as [string, Blob, object]
     expect(path).toMatch(new RegExp(`^hub/${writer.id}/[0-9a-f-]{36}/report\\.zip$`))
-    expect(body).toBe(good)
+    expect(body).toBeInstanceOf(Blob)
+    expect(body.type).toBe('application/zip')
+    expect(body.size).toBe(2)
+    expect(body).not.toBe(good)
     expect(options).toEqual({ contentType: 'application/zip', upsert: false })
     expect(backend.rpc).toHaveBeenCalledWith('finreport_upload', { p_object: path })
     expect(backend.rpc.mock.calls.filter(([name]) => name === 'finreport_upload')).toHaveLength(1)

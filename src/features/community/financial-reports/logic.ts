@@ -109,6 +109,7 @@ export const finreportErrorCodes = [
   'post_exists',
   'official_inactive',
   'file_too_large',
+  'invalid_file_type',
   'upload_forbidden',
 ] as const
 type FinreportErrorCode = (typeof finreportErrorCodes)[number]
