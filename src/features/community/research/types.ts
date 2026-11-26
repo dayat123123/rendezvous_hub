@@ -240,4 +240,5 @@ export type UploadItem = {
   state: UploadState
   error: string | null
   file: FileView | null
+  documents: number
 }

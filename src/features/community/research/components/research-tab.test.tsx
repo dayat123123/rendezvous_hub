@@ -334,8 +334,9 @@ describe('ResearchTab', () => {
     )
   })
 
-  it('uploads zip files to storage, submits them, and reports each result', async () => {
+  it('stages zip files with their documents and uploads them together on Unggah', async () => {
     const replies = [
+      null,
       null,
       { message: 'Payload too large', status: 413, statusCode: '413' },
       { message: 'new row violates row-level security policy', status: 400, statusCode: '403' },
@@ -350,17 +351,27 @@ describe('ResearchTab', () => {
     render(writer)
 
     const good = zip('BBCA Q3 2026.zip')
-    await user.upload(screen.getByLabelText('File laporan keuangan (.zip)'), [
+    const pdf = new File(['%PDF-1.7'], 'BBCA Q3 2026 laporan.pdf', { type: '' })
+    await user.upload(screen.getByLabelText('File laporan (.zip) dan dokumennya (PDF/XLSX)'), [
       good,
       zip('besar.zip', 9 * 1024 * 1024),
       zip('gagal.zip'),
       zip('ditolak.zip'),
       zip('tipe.zip'),
+      pdf,
     ])
+
+    const staged = await screen.findByRole('list', { name: 'Siap diunggah' })
+    expect(within(staged).getByText('Lebih dari 8 MB. File ini tidak ikut diunggah.')).toBeInTheDocument()
+    const target = within(staged).getByRole('combobox', { name: 'Laporan untuk BBCA Q3 2026 laporan.pdf' })
+    expect(within(target).getByRole('option', { selected: true })).toHaveTextContent('BBCA Q3 2026.zip')
+    expect(backend.upload).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Unggah 4 laporan' }))
 
     const results = await screen.findByRole('list', { name: 'Hasil unggahan' })
     await waitFor(() => expect(within(results).getByText('Diterima, masuk antrean')).toBeInTheDocument())
-    expect(within(results).getByText('Lebih dari 8 MB.')).toBeInTheDocument()
+    expect(within(results).getByText(/^Bersama 1 dokumen/)).toBeInTheDocument()
     expect(await within(results).findByText('File lebih dari 8 MiB.')).toBeInTheDocument()
     expect(
       await within(results).findByText('Akun ini tidak punya izin mengunggah file riset.'),
@@ -371,7 +382,8 @@ describe('ResearchTab', () => {
     expect(await findToast('1 file diterima dan masuk antrean')).toBeInTheDocument()
 
     expect(backend.bucket).toHaveBeenCalledWith('financial-reports')
-    expect(backend.upload).toHaveBeenCalledTimes(4)
+    expect(backend.bucket).toHaveBeenCalledWith('post-files')
+    expect(backend.upload).toHaveBeenCalledTimes(5)
     const [path, body, options] = backend.upload.mock.calls[0] as [string, Blob, object]
     expect(path).toMatch(new RegExp(`^hub/${writer.id}/[0-9a-f-]{36}/report\\.zip$`))
     expect(body).toBeInstanceOf(Blob)
@@ -379,8 +391,46 @@ describe('ResearchTab', () => {
     expect(body.size).toBe(2)
     expect(body).not.toBe(good)
     expect(options).toEqual({ contentType: 'application/zip', upsert: false })
-    expect(backend.rpc).toHaveBeenCalledWith('research_upload', { p_object: path })
+    const [docPath, docBody] = backend.upload.mock.calls[1] as [string, Blob, object]
+    expect(docPath).toMatch(/^research\/[0-9a-f-]{36}\/file\.pdf$/)
+    expect(docBody.type).toBe('application/pdf')
+    expect(backend.rpc).toHaveBeenCalledWith('research_upload', {
+      p_object: path,
+      p_documents: [{ object: docPath }],
+    })
     expect(backend.rpc.mock.calls.filter(([name]) => name === 'research_upload')).toHaveLength(1)
+
+    const left = screen.getByRole('list', { name: 'Siap diunggah' })
+    expect(within(left).queryByText('BBCA Q3 2026.zip')).not.toBeInTheDocument()
+    expect(within(left).queryByText('BBCA Q3 2026 laporan.pdf')).not.toBeInTheDocument()
+    expect(within(left).getByText('gagal.zip')).toBeInTheDocument()
+  })
+
+  it('keeps Unggah disabled until every document belongs to a report', async () => {
+    const user = userEvent.setup()
+    render(writer)
+
+    const input = await screen.findByLabelText('File laporan (.zip) dan dokumennya (PDF/XLSX)')
+    await user.upload(input, new File(['%PDF'], 'laporan.pdf'))
+    const staged = await screen.findByRole('list', { name: 'Siap diunggah' })
+    expect(within(staged).getByText('Tambahkan file zip laporannya juga.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Unggah 1 laporan' })).toBeDisabled()
+
+    await user.upload(input, [zip('ADES.zip'), zip('ITMG.zip')])
+    expect(within(staged).getByText('Pilih laporan untuk dokumen ini.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Unggah 2 laporan' })).toBeDisabled()
+
+    await user.selectOptions(
+      within(staged).getByRole('combobox', { name: 'Laporan untuk laporan.pdf' }),
+      'ITMG.zip',
+    )
+    expect(within(staged).getByText(/untuk ITMG\.zip/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Unggah 2 laporan' })).toBeEnabled()
+
+    await user.click(within(staged).getByRole('button', { name: 'Hapus ITMG.zip dari daftar' }))
+    expect(within(staged).queryByText('Pilih laporan untuk dokumen ini.')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Unggah 1 laporan' })).toBeEnabled()
+    expect(backend.upload).not.toHaveBeenCalled()
   })
 
   it('reprocesses a rejected file and hides upload and retry from staff without the post permission', async () => {
@@ -396,7 +446,7 @@ describe('ResearchTab', () => {
     render(moderator)
     await screen.findByRole('table', { name: 'File yang diterima' })
     expect(screen.queryByRole('button', { name: /^Proses ulang file/ })).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('File laporan keuangan (.zip)')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('File laporan (.zip) dan dokumennya (PDF/XLSX)')).not.toBeInTheDocument()
     expect(screen.getByText('Unggah dan proses ulang butuh izin Tulis postingan resmi.')).toBeInTheDocument()
 
     await userEvent
