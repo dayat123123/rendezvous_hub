@@ -16,6 +16,7 @@ export const communityTabs = [
   'rooms',
   'instruments',
   'accounts',
+  'reports',
   'features',
   'filters',
   'analytics',

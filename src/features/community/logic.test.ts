@@ -25,12 +25,13 @@ const pending = { status: 'pending', created_by: { id: 'maya' } }
 
 describe('communityTabsFor', () => {
   it('shows only the tabs a permission set can use', () => {
-    expect(communityTabsFor(['community.post'])).toEqual(['stream', 'notifications'])
-    expect(communityTabsFor(['community.sanction'])).toEqual(['moderation'])
+    expect(communityTabsFor(['community.post'])).toEqual(['stream', 'notifications', 'reports'])
+    expect(communityTabsFor(['community.sanction'])).toEqual(['moderation', 'reports'])
     expect(communityTabsFor(['community.accounts', 'community.publish'])).toEqual([
       'stream',
       'notifications',
       'accounts',
+      'reports',
     ])
     expect(communityTabsFor([])).toEqual([])
   })
@@ -45,7 +46,7 @@ describe('communityPageTabs', () => {
     ])
     expect(
       communityPageTabs({ roles: ['cs_super_admin'], community_permissions: ['community.moderate'] }),
-    ).toEqual(['moderation', 'rooms', 'instruments', 'features', 'filters', 'analytics'])
+    ).toEqual(['moderation', 'rooms', 'instruments', 'reports', 'features', 'filters', 'analytics'])
     expect(communityPageTabs({ roles: ['product'], community_permissions: [] })).toEqual([
       'features',
       'filters',
@@ -53,6 +54,7 @@ describe('communityPageTabs', () => {
     expect(communityPageTabs({ roles: ['community'], community_permissions: ['community.post'] })).toEqual([
       'stream',
       'notifications',
+      'reports',
     ])
     expect(communityPageTabs({ roles: ['cs_agent'], community_permissions: [] })).toEqual([])
   })

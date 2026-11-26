@@ -345,14 +345,16 @@ const communityRoute = createRoute({
   path: '/community',
   validateSearch: (
     search: Record<string, unknown>,
-  ): { tab?: CommunityTab; queue?: ModerationQueue; stock?: string } => {
+  ): { tab?: CommunityTab; queue?: ModerationQueue; stock?: string; post?: string } => {
     const tab = text(search.tab)
     const queue = text(search.queue)
     const stock = text(search.stock)?.trim().replace(/^\$/, '').toUpperCase()
+    const post = text(search.post)
     return {
       tab: communityTabs.includes(tab as CommunityTab) ? (tab as CommunityTab) : undefined,
       queue: moderationQueues.includes(queue as ModerationQueue) ? (queue as ModerationQueue) : undefined,
       stock: stock && stockCodePattern.test(stock) ? stock : undefined,
+      post: post && uuidPattern.test(post) ? post : undefined,
     }
   },
   beforeLoad: ({ context }) => {

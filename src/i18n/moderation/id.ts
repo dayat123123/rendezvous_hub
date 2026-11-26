@@ -1,4 +1,7 @@
+import { moderationFinreport } from './finreport-id'
+
 export const moderation = {
+  finreport: moderationFinreport,
   segments: {
     label: 'Segmen penerima',
     options: {

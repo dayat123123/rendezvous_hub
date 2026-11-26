@@ -89,5 +89,25 @@ describe('CommandPalette', () => {
 
     expect(screen.queryByRole('option', { name: /Banner & Popup/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('option', { name: /Fitur & versi/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Laporan keuangan/ })).not.toBeInTheDocument()
+  })
+
+  it('opens Laporan keuangan for staff with any community permission', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, {
+      ...agentFixture,
+      roles: ['community'],
+      community_permissions: ['community.moderate'],
+    })
+
+    await user.click(screen.getByRole('option', { name: 'Buka Komunitas › Laporan keuangan' }))
+
+    expect(navigate).toHaveBeenCalledWith({ to: '/community', search: { tab: 'reports' } })
+  })
+
+  it('keeps Laporan keuangan out of the palette for a Super Admin without community permissions', () => {
+    renderWithProviders(<CommandPalette onOpenTicket={vi.fn()} />, monitorFixture)
+
+    expect(screen.queryByRole('option', { name: /Laporan keuangan/ })).not.toBeInTheDocument()
   })
 })

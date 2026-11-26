@@ -4,6 +4,8 @@ import {
   broadcastTitle,
   dailySeries,
   deliveryRatio,
+  financialReportEndpoints,
+  financialReportExamples,
   hasActiveBroadcast,
   keyDailySeries,
   keyProblems,
@@ -103,6 +105,29 @@ describe('toggleScope', () => {
   it('drops mass notifications when notify is turned off', () => {
     expect(toggleScope(['notify', 'notify_broadcast', 'bot_post'], 'notify', false)).toEqual(['bot_post'])
     expect(toggleScope(['notify', 'notify_broadcast'], 'notify_broadcast', false)).toEqual(['notify'])
+  })
+
+  it('keeps the financial report scope independent of the others', () => {
+    expect(toggleScope(['notify'], 'financial_report', true)).toEqual(['notify', 'financial_report'])
+    expect(toggleScope(['financial_report', 'health_read'], 'financial_report', false)).toEqual([
+      'health_read',
+    ])
+  })
+})
+
+describe('financialReportExamples', () => {
+  it('builds the send and status endpoints and copyable upload commands', () => {
+    expect(financialReportEndpoints('https://api.olt.test')).toEqual({
+      submit: 'https://api.olt.test/integration/v1/financial-reports',
+      status: 'https://api.olt.test/integration/v1/financial-reports/{id}',
+    })
+    const args =
+      '-sS -X POST "https://api.olt.test/integration/v1/financial-reports" -H "Authorization: Bearer oik_abc" -H "Content-Type: application/zip"'
+    expect(financialReportExamples('https://api.olt.test', 'oik_abc')).toEqual({
+      shell: `curl ${args} --data-binary @instance.zip`,
+      powershell: `curl.exe ${args} --data-binary "@instance.zip"`,
+    })
+    expect(financialReportExamples('https://api.olt.test').shell).toContain('Bearer <API_KEY>')
   })
 })
 

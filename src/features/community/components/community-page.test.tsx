@@ -17,7 +17,7 @@ import { ModerationTab } from './moderation-tab'
 import { StreamTab } from './stream-tab'
 
 const route = vi.hoisted(() => {
-  const search: { tab?: CommunityTab } = {}
+  const search: { tab?: CommunityTab; post?: string } = {}
   return { search, navigate: vi.fn() }
 })
 
@@ -32,6 +32,14 @@ vi.mock('@/features/client-config/components/features-section', () => ({
 
 vi.mock('@/features/feed-filters/components/feed-filters-section', () => ({
   FeedFiltersSection: () => <p>Panel tab Stream</p>,
+}))
+
+vi.mock('../financial-reports/components/reports-tab', () => ({
+  ReportsTab: ({ onOpenPost }: { onOpenPost?: (id: string) => void }) => (
+    <button type="button" disabled={!onOpenPost} onClick={() => onOpenPost?.('cp-1')}>
+      Panel laporan keuangan
+    </button>
+  ),
 }))
 
 vi.mock('@/features/analytics/api', () => ({
@@ -172,6 +180,7 @@ describe('CommunityPage', () => {
       'Postingan resmi',
       'Notifikasi',
       'Akun resmi',
+      'Laporan keuangan',
       'Fitur & versi',
       'Tab Stream',
       'Analitik',
@@ -189,7 +198,7 @@ describe('CommunityPage', () => {
       community_permissions: ['community.moderate'],
     })
 
-    expect(tabNames()).toEqual(['Moderasi', 'Room saham', 'Indeks'])
+    expect(tabNames()).toEqual(['Moderasi', 'Room saham', 'Indeks', 'Laporan keuangan'])
     expect(screen.getByRole('tab', { name: 'Indeks' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Belum ada indeks.')).toBeVisible()
     view.unmount()
@@ -205,10 +214,42 @@ describe('CommunityPage', () => {
     route.search = { tab: 'analytics' }
     renderWithProviders(<CommunityPage />, writer)
 
-    expect(tabNames()).toEqual(['Postingan resmi', 'Notifikasi'])
+    expect(tabNames()).toEqual(['Postingan resmi', 'Notifikasi', 'Laporan keuangan'])
     expect(screen.getByRole('tab', { name: 'Postingan resmi' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Laporan terbuka')).toBeVisible()
     expect(screen.queryByRole('radio', { name: '30 hari' })).not.toBeInTheDocument()
+  })
+})
+
+describe('CommunityPage Laporan keuangan', () => {
+  it('opens for any community permission and jumps to the post in Postingan resmi', async () => {
+    const user = userEvent.setup()
+    route.search = { tab: 'reports' }
+    const view = renderWithProviders(<CommunityPage />, writer)
+
+    expect(screen.getByRole('tab', { name: 'Laporan keuangan' })).toHaveAttribute('aria-selected', 'true')
+    await user.click(await screen.findByRole('button', { name: 'Panel laporan keuangan' }))
+    expect(route.navigate).toHaveBeenCalledWith({ to: '/community', search: { tab: 'stream', post: 'cp-1' } })
+    view.unmount()
+
+    renderWithProviders(<CommunityPage />, {
+      ...agentFixture,
+      roles: ['community'],
+      community_permissions: ['community.sanction'],
+    })
+    expect(tabNames()).toEqual(['Moderasi', 'Laporan keuangan'])
+    expect(await screen.findByRole('button', { name: 'Panel laporan keuangan' })).toBeDisabled()
+  })
+
+  it('opens the linked post in Postingan resmi', async () => {
+    vi.mocked(communityApi.posts).mockResolvedValue([
+      post({ id: 'cp-1', body: 'Ringkasan $BBCA Kuartal III.' }),
+    ])
+    route.search = { tab: 'stream', post: 'cp-1' }
+    renderWithProviders(<CommunityPage />, writer)
+
+    const sheet = await screen.findByRole('dialog', { name: 'Detail postingan resmi' })
+    expect(within(sheet).getByText('Ringkasan $BBCA Kuartal III.')).toBeInTheDocument()
   })
 })
 

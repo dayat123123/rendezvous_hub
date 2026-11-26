@@ -1,3 +1,4 @@
+import type * as RouterModule from '@tanstack/react-router'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -26,6 +27,28 @@ vi.mock('../api', () => ({
     broadcasts: vi.fn(),
   },
 }))
+
+vi.mock('@tanstack/react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof RouterModule>()
+  const { createElement } = await import('react')
+  return {
+    ...actual,
+    Link: ({
+      to,
+      search,
+      children,
+    }: {
+      to: string
+      search?: Record<string, string>
+      children: React.ReactNode
+    }) =>
+      createElement(
+        'a',
+        { href: `${to}${search ? `?${new URLSearchParams(search).toString()}` : ''}` },
+        children,
+      ),
+  }
+})
 
 vi.mock('@/lib/supabase', async (importOriginal) => ({
   ...(await importOriginal<typeof SupabaseModule>()),
@@ -330,6 +353,66 @@ describe('IntegrationKeysSection', () => {
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Hapus' }))
     await waitFor(() => expect(integrationKeysApi.remove).toHaveBeenCalledWith('key-old'))
     expect(await screen.findByText('API key Key lama dihapus')).toBeInTheDocument()
+  })
+
+  it('shows the financial report guide with both endpoints, the limits, and a link to Komunitas', async () => {
+    const user = userEvent.setup()
+    renderSection()
+
+    const views = await screen.findByRole('region', { name: 'Panduan dan statistik' })
+    await user.click(within(views).getByRole('radio', { name: 'Laporan keuangan' }))
+    expect(within(views).getByText('API laporan keuangan')).toBeInTheDocument()
+    expect(within(views).getByText(/dipantau di Komunitas → Laporan keuangan/)).toBeInTheDocument()
+    const endpoints = within(views).getByRole('list', { name: 'API laporan keuangan' })
+    expect(
+      within(endpoints).getByText('POST https://api.olt.test/integration/v1/financial-reports'),
+    ).toBeInTheDocument()
+    expect(
+      within(endpoints).getByText('GET https://api.olt.test/integration/v1/financial-reports/{id}'),
+    ).toBeInTheDocument()
+    expect(within(views).getByText('Maksimal 8 MiB per file.')).toBeInTheDocument()
+    expect(within(views).getByText('Maksimal 120 file per key per jam.')).toBeInTheDocument()
+    expect(within(views).getByText(/Maksimal 2 unggahan diproses bersamaan/)).toBeInTheDocument()
+    expect(
+      within(views).getByText(
+        'curl.exe -sS -X POST "https://api.olt.test/integration/v1/financial-reports" -H "Authorization: Bearer <API_KEY>" -H "Content-Type: application/zip" --data-binary "@instance.zip"',
+      ),
+    ).toBeInTheDocument()
+    expect(within(views).getByRole('link', { name: 'Buka Komunitas → Laporan keuangan' })).toHaveAttribute(
+      'href',
+      '/community?tab=reports',
+    )
+    expect(within(views).queryByText('Statistik notifikasi & bot')).not.toBeInTheDocument()
+  })
+
+  it('creates a financial report key and shows ready upload examples with the new key', async () => {
+    const user = userEvent.setup()
+    vi.mocked(integrationKeysApi.create).mockResolvedValue({
+      key: { ...notifyKey, id: 'key-5', name: 'Data laporan OLT', scopes: ['financial_report'] },
+      secret: SECRET,
+    })
+    renderSection()
+
+    await user.click(await screen.findByRole('button', { name: 'Buat API key' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Buat API key' })
+    await user.type(within(dialog).getByLabelText('Nama key'), 'Data laporan OLT')
+    await user.click(within(dialog).getByRole('checkbox', { name: /^Notifikasi per rekening/ }))
+    await user.click(within(dialog).getByRole('checkbox', { name: /^Kirim laporan keuangan/ }))
+    expect(within(dialog).getByText(/instance\.zip XBRL dari IDX/)).toBeInTheDocument()
+    await user.click(within(dialog).getByRole('button', { name: 'Buat API key' }))
+
+    await waitFor(() =>
+      expect(integrationKeysApi.create).toHaveBeenCalledWith(
+        expect.objectContaining({ scopes: ['financial_report'] }),
+      ),
+    )
+    const secret = await screen.findByRole('dialog', { name: 'API key dibuat' })
+    const usage = within(secret).getByRole('region', { name: 'Cara mengirim laporan keuangan' })
+    const head = `-sS -X POST "https://api.olt.test/integration/v1/financial-reports" -H "Authorization: Bearer ${SECRET}" -H "Content-Type: application/zip"`
+    expect(within(usage).getByText(`curl ${head} --data-binary @instance.zip`)).toBeInTheDocument()
+    expect(within(usage).getByText(`curl.exe ${head} --data-binary "@instance.zip"`)).toBeInTheDocument()
+    expect(within(usage).getByText(/sudah terisi/)).toBeInTheDocument()
+    expect(within(secret).queryByRole('region', { name: 'Cara memakai key ini' })).not.toBeInTheDocument()
   })
 
   it('shows no health usage for a key without the health scope', async () => {
