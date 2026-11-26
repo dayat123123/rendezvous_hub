@@ -1046,6 +1046,10 @@ export type Database = {
         }
         Returns: Json
       }
+      research_add_document: {
+        Args: { p_name?: string; p_object: string; p_report: string }
+        Returns: Json
+      }
       research_config: { Args: Record<PropertyKey, never>; Returns: Json }
       research_create_post: { Args: { p_report: string }; Returns: Json }
       research_files: {
@@ -1057,6 +1061,7 @@ export type Database = {
         }
         Returns: Json
       }
+      research_remove_document: { Args: { p_id: string }; Returns: Json }
       research_report: { Args: { p_id: string }; Returns: Json }
       research_retry: { Args: { p_id: string }; Returns: Json }
       research_save_config: {

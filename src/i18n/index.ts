@@ -14,6 +14,7 @@ import type { platform } from './platform/id'
 import type { policy } from './policy/id'
 import type { replies } from './replies/id'
 import type { retention } from './retention/id'
+import type { system } from './system/id'
 import type { trade } from './trade/id'
 
 export const languages = ['id', 'en'] as const
@@ -30,6 +31,7 @@ type Bundles = {
   replies: typeof replies
   help: typeof help
   trade: typeof trade
+  system: typeof system
 }
 export type Bundle = keyof Bundles
 
@@ -80,6 +82,10 @@ const bundleLoaders: { [B in Bundle]: Record<Language, () => Promise<Bundles[B]>
   trade: {
     id: () => import('./trade/id').then((module) => module.trade),
     en: () => import('./trade/en').then((module) => module.trade),
+  },
+  system: {
+    id: () => import('./system/id').then((module) => module.system),
+    en: () => import('./system/en').then((module) => module.system),
   },
 }
 

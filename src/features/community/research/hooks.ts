@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 
 import { communityKeys } from '../hooks'
 import { researchApi } from './api'
-import { ACTIVE_REFRESH_MS, IDLE_REFRESH_MS, hasActiveFiles } from './logic'
+import { ACTIVE_REFRESH_MS, IDLE_REFRESH_MS, hasActiveFiles, isActiveDocument } from './logic'
 import type { FilesFilter, ReportDetail } from './types'
 
 export const researchKeys = {
@@ -33,6 +33,8 @@ export function useResearchReport(id: string | null) {
     queryFn: () => researchApi.report(id as string),
     enabled: Boolean(id),
     staleTime: 10_000,
+    refetchInterval: (query) =>
+      query.state.data?.documents.some(isActiveDocument) ? ACTIVE_REFRESH_MS : false,
   })
 }
 
@@ -71,6 +73,31 @@ export function useCreateReportPost() {
       void client.invalidateQueries({ queryKey: communityKeys.posts })
       void client.invalidateQueries({ queryKey: communityKeys.overview })
     },
+  })
+}
+
+function useReportChanged() {
+  const client = useQueryClient()
+  return (report: ReportDetail | null) => {
+    if (report) client.setQueryData(researchKeys.report(report.id), report)
+    void client.invalidateQueries({ queryKey: communityKeys.posts })
+  }
+}
+
+export function useAddReportDocument() {
+  const changed = useReportChanged()
+  return useMutation({
+    mutationFn: ({ report, file, name }: { report: string; file: File; name: string | null }) =>
+      researchApi.addDocument(report, file, name),
+    onSuccess: changed,
+  })
+}
+
+export function useRemoveReportDocument() {
+  const changed = useReportChanged()
+  return useMutation({
+    mutationFn: (id: string) => researchApi.removeDocument(id),
+    onSuccess: changed,
   })
 }
 

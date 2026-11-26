@@ -324,7 +324,7 @@ const systemRoute = createRoute({
     return systemTabs.includes(tab as SystemTab) ? { tab: tab as SystemTab } : {}
   },
   component: lazyRouteComponent(
-    withStrings(() => import('@/features/system/components/system-page'), 'trade'),
+    withStrings(() => import('@/features/system/components/system-page'), 'trade', 'system'),
     'SystemPage',
   ),
 })
