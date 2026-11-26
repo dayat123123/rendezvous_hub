@@ -1068,7 +1068,7 @@ export type Database = {
         Args: { p_auto_publish: boolean; p_official_account: string }
         Returns: Json
       }
-      research_upload: { Args: { p_object: string }; Returns: Json }
+      research_upload: { Args: { p_documents?: Json; p_object: string }; Returns: Json }
       resolve_ticket: {
         Args: {
           p_outcome: string

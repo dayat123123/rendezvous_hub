@@ -50,7 +50,8 @@ function useRefreshFiles() {
 export function useUploadReport() {
   const refresh = useRefreshFiles()
   return useMutation({
-    mutationFn: ({ file, agentId }: { file: File; agentId: string }) => researchApi.upload(file, agentId),
+    mutationFn: ({ file, agentId, documents }: { file: File; agentId: string; documents: File[] }) =>
+      researchApi.upload(file, agentId, documents),
     onSuccess: refresh,
   })
 }

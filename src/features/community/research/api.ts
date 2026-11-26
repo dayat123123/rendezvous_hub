@@ -48,6 +48,18 @@ function uploadError(error: StorageFailure) {
   return toApiError(error)
 }
 
+async function uploadDocument(file: File) {
+  const ext = documentExt(file.name)
+  if (!ext) throw new ApiError('invalid_file_type', undefined, 415)
+  const path = documentPath(uuid(), ext)
+  const mime = postFileMime(ext)
+  const { error } = await supabase()
+    .storage.from(POST_FILES_BUCKET)
+    .upload(path, new Blob([file], { type: mime }), { contentType: mime, upsert: false })
+  if (error) throw uploadError(error)
+  return path
+}
+
 export const researchApi = {
   files: async (filter: FilesFilter, before: string | null): Promise<FilesPage> => {
     const raw = await rpc<FilesPage>('research_files', {
@@ -59,7 +71,7 @@ export const researchApi = {
     return { ...raw, items: raw.items ?? [], counts: raw.counts ?? {} }
   },
   report: async (id: string) => detail(await rpc<ReportDetail>('research_report', { p_id: id })),
-  upload: async (file: File, agentId: string) => {
+  upload: async (file: File, agentId: string, documents: File[] = []) => {
     const path = objectPath(agentId, uuid())
     const { error } = await supabase()
       .storage.from(RESEARCH_BUCKET)
@@ -68,18 +80,15 @@ export const researchApi = {
         upsert: false,
       })
     if (error) throw uploadError(error)
-    return rpc<FileView>('research_upload', { p_object: path })
+    const objects: { object: string }[] = []
+    for (const document of documents) {
+      objects.push({ object: await uploadDocument(document) })
+    }
+    return rpc<FileView>('research_upload', { p_object: path, p_documents: objects })
   },
   retry: (id: string) => rpc<FileView>('research_retry', { p_id: id }),
   addDocument: async (reportId: string, file: File, name: string | null) => {
-    const ext = documentExt(file.name)
-    if (!ext) throw new ApiError('invalid_file_type', undefined, 415)
-    const path = documentPath(uuid(), ext)
-    const mime = postFileMime(ext)
-    const { error } = await supabase()
-      .storage.from(POST_FILES_BUCKET)
-      .upload(path, new Blob([file], { type: mime }), { contentType: mime, upsert: false })
-    if (error) throw uploadError(error)
+    const path = await uploadDocument(file)
     return detail(
       await rpc<ReportDetail>('research_add_document', { p_report: reportId, p_object: path, p_name: name }),
     )
