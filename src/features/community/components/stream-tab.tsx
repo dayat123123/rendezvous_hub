@@ -66,14 +66,14 @@ function PostRow({ post, onOpen }: { post: CommunityPost; onOpen: () => void }) 
   )
 }
 
-export function StreamTab() {
+export function StreamTab({ focusPost }: { focusPost?: string }) {
   const { t } = useTranslation()
   const agent = useAgent()
   const posts = useCommunityPosts()
   const canWrite = agent.community_permissions.includes('community.post')
   const canPublish = agent.community_permissions.includes('community.publish')
   const [filter, setFilter] = useState<PostFilter>(canPublish ? 'review' : 'mine')
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string | null>(focusPost ?? null)
   const [editing, setEditing] = useState<CommunityPost | null>(null)
   const [composing, setComposing] = useState(false)
   const rows = posts.data ? filterPosts(posts.data, filter, agent.id) : []

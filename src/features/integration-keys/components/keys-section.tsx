@@ -1,5 +1,7 @@
+import { Link } from '@tanstack/react-router'
 import {
   ActivityIcon,
+  FileChartColumnIcon,
   KeyRoundIcon,
   LoaderCircleIcon,
   MegaphoneIcon,
@@ -42,6 +44,7 @@ import { BroadcastsDialog } from './broadcasts-dialog'
 import { HealthUsage } from './health-usage'
 import { KeyDialog, SecretDialog, type Revealed } from './key-dialog'
 import { KeyStatsCard } from './key-stats'
+import { ReportUsage } from './report-usage'
 
 const statusTone: Record<KeyStatus, 'ok' | 'warn' | 'neutral'> = {
   active: 'ok',
@@ -249,7 +252,8 @@ function HelpCard() {
   )
 }
 
-type View = 'notify' | 'health'
+const views = ['notify', 'health', 'reports'] as const
+type View = (typeof views)[number]
 
 function DeleteKeyDialog({ item, onClose }: { item: IntegrationKey | null; onClose: () => void }) {
   const { t } = useTranslation()
@@ -302,7 +306,7 @@ function UsageViews() {
           className="self-start"
           aria-label={t('platform.keys.views.label')}
           onValueChange={(value) => {
-            if (value === 'notify' || value === 'health') setView(value)
+            if (views.includes(value as View)) setView(value as View)
           }}
         >
           <ToggleGroupItem value="notify">
@@ -313,21 +317,36 @@ function UsageViews() {
             <ActivityIcon aria-hidden="true" />
             {t('platform.keys.views.health')}
           </ToggleGroupItem>
+          <ToggleGroupItem value="reports">
+            <FileChartColumnIcon aria-hidden="true" />
+            {t('platform.keys.views.reports')}
+          </ToggleGroupItem>
         </ToggleGroup>
-        <p className="max-w-3xl text-row text-muted-foreground">
-          {view === 'notify' ? t('platform.keys.views.notifyHint') : t('platform.keys.views.healthHint')}
-        </p>
+        <p className="max-w-3xl text-row text-muted-foreground">{t(`platform.keys.views.${view}Hint`)}</p>
       </div>
       {view === 'notify' ? (
         <>
           <KeyStatsCard />
           <HelpCard />
         </>
-      ) : (
+      ) : null}
+      {view === 'health' ? (
         <SettingsCard title={t('platform.keys.health.title')} subtitle={t('platform.keys.health.subtitle')}>
           <HealthUsage />
         </SettingsCard>
-      )}
+      ) : null}
+      {view === 'reports' ? (
+        <SettingsCard title={t('platform.keys.reports.title')} subtitle={t('platform.keys.reports.subtitle')}>
+          <ReportUsage />
+          <Link
+            to="/community"
+            search={{ tab: 'reports' }}
+            className="self-start text-row font-medium text-primary underline underline-offset-4"
+          >
+            {t('platform.keys.reports.open')}
+          </Link>
+        </SettingsCard>
+      ) : null}
     </section>
   )
 }

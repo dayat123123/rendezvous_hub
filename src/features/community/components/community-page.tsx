@@ -39,6 +39,10 @@ const FeedFiltersSection = lazy(
   ),
 )
 
+const ReportsTab = lazy(() =>
+  import('../financial-reports/components/reports-tab').then((module) => ({ default: module.ReportsTab })),
+)
+
 const AnalyticsTab = lazy(
   withStrings(
     () =>
@@ -53,7 +57,9 @@ export function CommunityPage() {
   const { t } = useTranslation()
   const agent = useAgent()
   const navigate = useNavigate()
-  const search: { tab?: CommunityTab; queue?: ModerationQueue; stock?: string } = useSearch({ strict: false })
+  const search: { tab?: CommunityTab; queue?: ModerationQueue; stock?: string; post?: string } = useSearch({
+    strict: false,
+  })
   const staff = hasCommunity(agent)
   const overview = useCommunityOverview(staff)
   const tabs = communityPageTabs(agent)
@@ -65,6 +71,7 @@ export function CommunityPage() {
   const openQueue = (queue: ModerationQueue) =>
     void navigate({ to: '/community', search: { tab: 'moderation', queue } })
   const openRoom = (stock: string) => void navigate({ to: '/community', search: { tab: 'rooms', stock } })
+  const openPost = (post: string) => void navigate({ to: '/community', search: { tab: 'stream', post } })
 
   return (
     <div className="h-full overflow-y-auto">
@@ -125,7 +132,7 @@ export function CommunityPage() {
           ))}
         </div>
         <div role="tabpanel" id={`community-panel-${tab}`} aria-labelledby={`community-tab-${tab}`}>
-          {tab === 'stream' ? <StreamTab /> : null}
+          {tab === 'stream' ? <StreamTab key={search.post ?? 'none'} focusPost={search.post} /> : null}
           {tab === 'notifications' ? <CampaignsTab /> : null}
           {tab === 'moderation' ? (
             <ModerationTab
@@ -146,6 +153,11 @@ export function CommunityPage() {
             <InstrumentsTab onOpenRoom={tabs.includes('rooms') ? openRoom : undefined} />
           ) : null}
           {tab === 'accounts' ? <AccountsTab /> : null}
+          {tab === 'reports' ? (
+            <Suspense fallback={<EmptyState title={t('app.loading')} />}>
+              <ReportsTab onOpenPost={tabs.includes('stream') ? openPost : undefined} />
+            </Suspense>
+          ) : null}
           {tab === 'features' ? (
             <Suspense fallback={<EmptyState title={t('app.loading')} />}>
               <FeaturesSection />

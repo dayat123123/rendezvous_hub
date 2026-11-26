@@ -163,6 +163,19 @@ export function healthExamples(baseUrl: string, secret = '<API_KEY>') {
   return { shell: `curl -sS ${args}`, powershell: `curl.exe -sS ${args}` }
 }
 
+export const financialReportEndpoints = (baseUrl: string) => ({
+  submit: `${baseUrl}/integration/v1/financial-reports`,
+  status: `${baseUrl}/integration/v1/financial-reports/{id}`,
+})
+
+export function financialReportExamples(baseUrl: string, secret = '<API_KEY>') {
+  const args = `-sS -X POST "${financialReportEndpoints(baseUrl).submit}" -H "Authorization: Bearer ${secret}" -H "Content-Type: application/zip"`
+  return {
+    shell: `curl ${args} --data-binary @instance.zip`,
+    powershell: `curl.exe ${args} --data-binary "@instance.zip"`,
+  }
+}
+
 export const showsBroadcasts = (scopes: readonly string[]) => scopes.includes('notify')
 
 export const curlExample = (baseUrl: string) =>

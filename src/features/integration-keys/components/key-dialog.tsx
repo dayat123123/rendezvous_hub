@@ -34,6 +34,7 @@ import { useCreateIntegrationKey, useUpdateIntegrationKey } from '../hooks'
 import { draftFrom, invalidCidrs, keyProblems, parseCidrs, toggleScope } from '../logic'
 import { keyScopes, KEY_NAME_MAX, MAX_CIDRS, type IntegrationKey, type KeyDraft } from '../types'
 import { HealthUsage } from './health-usage'
+import { ReportUsage } from './report-usage'
 
 export type Revealed = { secret: string; key: IntegrationKey }
 
@@ -309,7 +310,9 @@ export function SecretDialog({ revealed, onClose }: { revealed: Revealed | null;
       <DialogContent
         className={cn(
           '[&>*]:min-w-0',
-          revealed?.key.scopes.includes('health_read') ? 'sm:max-w-2xl' : 'sm:max-w-lg',
+          revealed?.key.scopes.some((scope) => scope === 'health_read' || scope === 'financial_report')
+            ? 'sm:max-w-2xl'
+            : 'sm:max-w-lg',
         )}
         onInteractOutside={(event) => event.preventDefault()}
         onEscapeKeyDown={(event) => event.preventDefault()}
@@ -359,6 +362,15 @@ function SecretBody({ revealed, onClose }: { revealed: Revealed; onClose: () => 
         >
           <h3 className="text-sm font-medium">{t('platform.keys.health.secretTitle')}</h3>
           <HealthUsage secret={revealed.secret} />
+        </section>
+      ) : null}
+      {revealed.key.scopes.includes('financial_report') ? (
+        <section
+          aria-label={t('platform.keys.reports.secretTitle')}
+          className="flex min-w-0 flex-col gap-2 rounded-md border p-3"
+        >
+          <h3 className="text-sm font-medium">{t('platform.keys.reports.secretTitle')}</h3>
+          <ReportUsage secret={revealed.secret} />
         </section>
       ) : null}
       <label className="flex items-start gap-2 text-row">

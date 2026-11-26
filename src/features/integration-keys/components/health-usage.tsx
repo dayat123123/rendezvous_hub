@@ -5,13 +5,23 @@ import { appEnv } from '@/lib/supabase'
 
 import { healthEndpoints, healthExamples } from '../logic'
 
-function Endpoint({ label, hint, url }: { label: string; hint: string; url: string }) {
+export function Endpoint({
+  label,
+  hint,
+  url,
+  method = 'GET',
+}: {
+  label: string
+  hint: string
+  url: string
+  method?: 'GET' | 'POST'
+}) {
   return (
     <li className="flex min-w-0 flex-col gap-1">
       <span className="text-sm font-medium">{label}</span>
       <div className="flex min-w-0 items-start gap-2">
         <code className="min-w-0 flex-1 rounded-md bg-muted px-2 py-1 font-mono text-xs break-all">
-          GET {url}
+          {method} {url}
         </code>
         <CopyButton text={url} size="xs" label={label} />
       </div>
@@ -20,7 +30,7 @@ function Endpoint({ label, hint, url }: { label: string; hint: string; url: stri
   )
 }
 
-function Example({ label, text }: { label: string; text: string }) {
+export function Example({ label, text }: { label: string; text: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <div className="flex flex-wrap items-center justify-between gap-2">

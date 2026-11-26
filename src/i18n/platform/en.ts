@@ -13,7 +13,7 @@ export const platform: Translated<typeof source> = {
   keys: {
     title: 'Integration API',
     description:
-      'API keys for other services that send push notifications to the app (trades, announcements, info), post as an official bot, or read system health to show in their own app. A key is shown only once when created; the server keeps only its hash.',
+      'API keys for other services that send push notifications to the app (trades, announcements, info), post as an official bot, send listed companies’ financial reports, or read system health to show in their own app. A key is shown only once when created; the server keeps only its hash.',
     create: 'Create API key',
     listTitle: 'API keys',
     listHint:
@@ -33,6 +33,7 @@ export const platform: Translated<typeof source> = {
       notify_broadcast: 'Mass notifications',
       bot_post: 'Bot posts',
       health_read: 'Read system health',
+      financial_report: 'Send financial reports',
     },
     scopeHints: {
       notify:
@@ -42,6 +43,8 @@ export const platform: Translated<typeof source> = {
       bot_post: 'An automated system posts as one official account, published immediately with a Bot label.',
       health_read:
         'Your app reads System health and the Service map (status, alerts, disks, queues, backup, containers). Read only; it cannot acknowledge alerts or change settings.',
+      financial_report:
+        'The system sends listed companies’ financial report files (XBRL instance.zip from IDX). The summaries become official posts awaiting approval in Community → Financial reports.',
     },
     status: { active: 'Active', disabled: 'Disabled', revoked: 'Revoked' },
     anyIp: 'Any IP',
@@ -63,6 +66,9 @@ export const platform: Translated<typeof source> = {
         'Delivery statistics and request examples for keys with notification or bot post scopes. System health keys are not counted here.',
       healthHint:
         'Endpoints and request examples for keys with Read system health. These keys send no notifications, so they have no delivery statistics.',
+      reports: 'Financial reports',
+      reportsHint:
+        'Endpoints, limits, and request examples for keys with Send financial reports. Received files, parse results, and their posts are tracked in Community → Financial reports.',
     },
     revokeLabel: 'Revoke {{name}}',
     revokeTitle: 'Revoke API key {{name}}?',
@@ -148,6 +154,29 @@ export const platform: Translated<typeof source> = {
         'The content matches the Hub, except internal probe addresses, the backup location, and alert channel details (emails, SMTP host, Telegram chat IDs), which are not sent out.',
       docs: 'Full guide: docs/integration/kesehatan-sistem.md. OpenAPI contract: docs/api/kesehatan-sistem.openapi.yaml',
       secretTitle: 'How to use this key',
+    },
+    reports: {
+      title: 'Financial reports API',
+      subtitle:
+        'For systems that hold listed companies’ financial report files. Send the IDX instance.zip as is from a backend or a script on a trusted machine (not from a browser). The server answers with a file id whose status you can check.',
+      submitLabel: 'Send a file',
+      submitHint:
+        'The body is the instance.zip file as is with Content-Type: application/zip. The answer holds the file id with status queued; sending the same file again returns the existing id.',
+      statusLabel: 'File status',
+      statusHint:
+        'Replace {id} with the id from the send answer. Status: queued, processing, done, duplicate, or rejected with its reason code.',
+      limitsTitle: 'Limits',
+      limitSize: 'At most 8 MiB per file.',
+      limitHour: 'At most 120 files per key per hour.',
+      limitConcurrent:
+        'At most 2 uploads are processed at a time; others are answered 503 busy with Retry-After. Send one after another.',
+      example: 'Example report upload request',
+      exampleReady: 'This API key is already filled in. Run it from the folder that holds instance.zip.',
+      exampleHint:
+        'Replace <API_KEY> with the oik_ key shown when the key was created, then run it from the folder that holds instance.zip.',
+      docs: 'Full guide: docs/integration/laporan-keuangan.md',
+      open: 'Open Community → Financial reports',
+      secretTitle: 'How to send financial reports',
     },
     stats: {
       title: 'Notification & bot statistics',

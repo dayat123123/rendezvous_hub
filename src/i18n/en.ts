@@ -2101,6 +2101,7 @@ export const en: Translation = {
       accounts: 'Official accounts',
       features: 'Features & versions',
       filters: 'Stream tabs',
+      reports: 'Financial reports',
     },
     metrics: {
       pendingPosts: 'Posts awaiting approval',

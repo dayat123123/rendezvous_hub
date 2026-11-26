@@ -5,6 +5,7 @@ import {
   BanIcon,
   BarChart3Icon,
   ClockIcon,
+  FileChartColumnIcon,
   FileLockIcon,
   FileTextIcon,
   FlagIcon,
@@ -56,6 +57,7 @@ import {
   canOpenTradeShare,
   canOperateRelay,
   canViewTickets,
+  hasCommunityAccess,
   hasNasabah,
   isCompliance,
   isSuperAdmin,
@@ -262,6 +264,16 @@ function PaletteBody({
           icon: appTabIcons[tab],
           run: () => void navigate({ to: '/community', search: { tab } }),
         }))
+      : []),
+    ...(hasCommunityAccess(agent)
+      ? [
+          {
+            id: 'nav:/community:reports',
+            label: t('command.communityTab', { tab: t('community.tabs.reports') }),
+            icon: FileChartColumnIcon,
+            run: () => void navigate({ to: '/community', search: { tab: 'reports' as const } }),
+          },
+        ]
       : []),
   ]
 
