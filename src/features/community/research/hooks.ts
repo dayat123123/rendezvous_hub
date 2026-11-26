@@ -105,8 +105,15 @@ export function useRemoveReportDocument() {
 export function useSaveResearchConfig() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: ({ account, autoPublish }: { account: string | null; autoPublish: boolean }) =>
-      researchApi.saveConfig(account, autoPublish),
+    mutationFn: ({
+      account,
+      autoPublish,
+      notifyWatchers,
+    }: {
+      account: string | null
+      autoPublish: boolean
+      notifyWatchers: boolean
+    }) => researchApi.saveConfig(account, autoPublish, notifyWatchers),
     onSuccess: (config) => {
       client.setQueryData(researchKeys.config, config)
       void client.invalidateQueries({ queryKey: [...researchKeys.all, 'files'] })

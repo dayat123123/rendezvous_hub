@@ -180,6 +180,24 @@ export const moderationResearch: Translated<typeof source> = {
     created: 'Post created',
     reviewNote: 'Reviewer note: {{note}}',
     postError: 'Publishing failed: {{error}}',
+    notify: {
+      scheduled: 'Notification to ${{stock}} watchers scheduled for {{time}}.',
+      cancelHint: 'It can be cancelled in Community → Notifications before then.',
+      sending: 'Sending the notification to ${{stock}} watchers.',
+      sent_one: 'Notification sent to {{count}} ${{stock}} watcher {{time}}.',
+      sent_other: 'Notification sent to {{count}} ${{stock}} watchers {{time}}.',
+      cancelled: 'The notification to watchers was cancelled.',
+      replaced: 'The notification was cancelled because a report for a newer period was published.',
+      skipped: 'No notification sent: {{reason}}.',
+      reasons: {
+        disabled: 'notifying stock watchers is turned off',
+        older_period: 'a report for a newer period already exists',
+        stale: 'the report period is too old',
+        revision: 'this period was already announced',
+        replaced: 'a report for a newer period was published',
+        failed: 'the campaign could not be created, send it manually from Community → Notifications',
+      },
+    },
     summaryTitle: 'Summary',
     summaryHint:
       'The post text published in the Stream. Older app versions that do not know the research card show only this text.',
@@ -277,6 +295,9 @@ export const moderationResearch: Translated<typeof source> = {
     changedBy: 'Last changed {{time}} by {{name}}',
     changed: 'Last changed {{time}}',
     readOnly: 'Only a Super Admin can change these settings.',
+    notify: 'Notify stock watchers',
+    notifyHint:
+      'When a research post is published, customers watching that stock get a notification (bell and push) {{minutes}} minutes later. Only for the latest period of that issuer and periods not older than {{days}} days; older reports and revisions are not announced again. The schedule shows in Community → Notifications and can be cancelled there.',
   },
   errors: {
     invalid_object: 'The upload location is not valid. Reload the page and try again.',

@@ -623,6 +623,45 @@ describe('ResearchTab', () => {
     expect(backend.upload).not.toHaveBeenCalled()
   })
 
+  it('shows whether the watchers of the stock were notified about the post', async () => {
+    const user = userEvent.setup()
+    const sent: ReportDetail = {
+      ...detail,
+      notification: {
+        skipped: null,
+        campaign: {
+          id: 'camp-1',
+          status: 'sent',
+          send_at: '2026-11-25T02:02:05.000Z',
+          finished_at: '2026-11-25T02:02:10.000Z',
+          recipients: 12,
+          stock: 'BBCA',
+        },
+      },
+    }
+    serve({ research_report: () => sent })
+    render(writer)
+
+    await user.click(await screen.findByRole('button', { name: 'Buka laporan BBCA · Kuartal III 2026' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Detail laporan' })
+    const section = await within(sheet).findByRole('region', { name: 'Postingan resmi' })
+    expect(await within(section).findByText(/^Notifikasi terkirim ke 12 pemantau \$BBCA/)).toBeInTheDocument()
+  })
+
+  it('explains why no notification was sent for an older period', async () => {
+    const user = userEvent.setup()
+    serve({
+      research_report: () => ({ ...detail, notification: { skipped: 'older_period', campaign: null } }),
+    })
+    render(writer)
+
+    await user.click(await screen.findByRole('button', { name: 'Buka laporan BBCA · Kuartal III 2026' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Detail laporan' })
+    expect(
+      await within(sheet).findByText('Notifikasi tidak dikirim: sudah ada laporan periode yang lebih baru.'),
+    ).toBeInTheDocument()
+  })
+
   it('creates a post for a report that has none', async () => {
     const user = userEvent.setup()
     const missing: ReportDetail = {
@@ -660,7 +699,8 @@ describe('ResearchTab', () => {
     render(writer)
 
     expect(await screen.findByText('OLT Research (@olt_research)')).toBeInTheDocument()
-    expect(screen.getByText('Nyala')).toBeInTheDocument()
+    expect(screen.getAllByText('Nyala')).toHaveLength(2)
+    expect(screen.getByText(/2 menit kemudian/)).toBeInTheDocument()
     expect(screen.getByText('Hanya Super Admin yang bisa mengubah pengaturan ini.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Simpan pengaturan' })).not.toBeInTheDocument()
     expect(screen.queryByRole('switch')).not.toBeInTheDocument()
@@ -684,8 +724,29 @@ describe('ResearchTab', () => {
       expect(backend.rpc).toHaveBeenCalledWith('research_save_config', {
         p_official_account: 'acc-1',
         p_auto_publish: true,
+        p_notify_watchers: true,
       }),
     )
     expect(await findToast('Pengaturan riset disimpan')).toBeInTheDocument()
+  })
+
+  it('lets a Super Admin turn off notifications to stock watchers', async () => {
+    const user = userEvent.setup()
+    serve({ research_save_config: () => ({ ...config, notify_watchers: false }) })
+    render(superAdmin)
+
+    const toggle = await screen.findByRole('switch', { name: /^Notifikasi ke pemantau saham/ })
+    expect(toggle).toBeChecked()
+    expect(toggle).toHaveAccessibleName(/2 menit kemudian/)
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: 'Simpan pengaturan' }))
+
+    await waitFor(() =>
+      expect(backend.rpc).toHaveBeenCalledWith('research_save_config', {
+        p_official_account: null,
+        p_auto_publish: false,
+        p_notify_watchers: false,
+      }),
+    )
   })
 })

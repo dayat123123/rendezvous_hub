@@ -67,14 +67,33 @@ function SettingsView({ config }: { config: ResearchConfig }) {
               : t('moderation.research.settings.off')}
           </dd>
         </div>
+        <div className="flex flex-col gap-0.5">
+          <dt className="text-xs text-muted-foreground">{t('moderation.research.settings.notify')}</dt>
+          <dd className="text-row">
+            {(config.notify_watchers ?? true)
+              ? t('moderation.research.settings.on')
+              : t('moderation.research.settings.off')}
+          </dd>
+        </div>
       </dl>
       <p className="max-w-3xl text-xs text-muted-foreground">
         {t('moderation.research.settings.autoPublishHint')}
+      </p>
+      <p className="max-w-3xl text-xs text-muted-foreground">
+        <NotifyHint config={config} />
       </p>
       <ChangedLine config={config} />
       <p className="text-xs text-muted-foreground">{t('moderation.research.settings.readOnly')}</p>
     </div>
   )
+}
+
+function NotifyHint({ config }: { config: ResearchConfig }) {
+  const { t } = useReportText()
+  return t('moderation.research.settings.notifyHint', {
+    minutes: Math.max(1, Math.round((config.notify_delay_seconds ?? 120) / 60)),
+    days: config.notify_max_age_days ?? 183,
+  })
 }
 
 function SettingsForm({ config }: { config: ResearchConfig }) {
@@ -84,10 +103,14 @@ function SettingsForm({ config }: { config: ResearchConfig }) {
   const save = useSaveResearchConfig()
   const [account, setAccount] = useState<string | null>(config.official_account?.id ?? null)
   const [auto, setAuto] = useState(config.auto_publish)
+  const [notify, setNotify] = useState(config.notify_watchers ?? true)
   const active = (accounts.data ?? []).filter((item) => item.disabled_at === null)
   const current = config.official_account
   const kept = current && !active.some((item) => item.id === current.id) ? current : null
-  const changed = account !== (current?.id ?? null) || auto !== config.auto_publish
+  const changed =
+    account !== (current?.id ?? null) ||
+    auto !== config.auto_publish ||
+    notify !== (config.notify_watchers ?? true)
 
   return (
     <form
@@ -95,7 +118,7 @@ function SettingsForm({ config }: { config: ResearchConfig }) {
       onSubmit={(event) => {
         event.preventDefault()
         save.mutate(
-          { account, autoPublish: auto },
+          { account, autoPublish: auto, notifyWatchers: notify },
           {
             onSuccess: () => toast.success(t('moderation.research.settings.saved')),
             onError: (error) => toast.error(researchErrorText(error)),
@@ -143,6 +166,15 @@ function SettingsForm({ config }: { config: ResearchConfig }) {
           <span className="block font-medium">{t('moderation.research.settings.autoPublish')}</span>
           <span className="block text-xs text-muted-foreground">
             {t('moderation.research.settings.autoPublishHint')}
+          </span>
+        </span>
+      </label>
+      <label className="flex items-start gap-2 text-row">
+        <Switch className="mt-0.5" checked={notify} onCheckedChange={setNotify} />
+        <span>
+          <span className="block font-medium">{t('moderation.research.settings.notify')}</span>
+          <span className="block text-xs text-muted-foreground">
+            <NotifyHint config={config} />
           </span>
         </span>
       </label>

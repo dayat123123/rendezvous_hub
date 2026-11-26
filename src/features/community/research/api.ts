@@ -99,9 +99,10 @@ export const researchApi = {
   },
   createPost: async (id: string) => detail(await rpc<ReportDetail>('research_create_post', { p_report: id })),
   config: () => rpc<ResearchConfig>('research_config'),
-  saveConfig: (account: string | null, autoPublish: boolean) =>
+  saveConfig: (account: string | null, autoPublish: boolean, notifyWatchers: boolean) =>
     rpc<ResearchConfig>('research_save_config', {
       p_official_account: account,
       p_auto_publish: autoPublish,
+      p_notify_watchers: notifyWatchers,
     }),
 }
