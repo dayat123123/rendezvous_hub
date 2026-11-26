@@ -1,10 +1,12 @@
 import type { Translated } from '../id'
 import { moderationCard } from './card-en'
+import { moderationPostFiles } from './post-files-en'
 import { moderationResearch } from './research-en'
 import type { moderation as source } from './id'
 
 export const moderation: Translated<typeof source> = {
   card: moderationCard,
+  postFiles: moderationPostFiles,
   research: moderationResearch,
   segments: {
     label: 'Audience segment',

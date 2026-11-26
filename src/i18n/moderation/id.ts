@@ -1,8 +1,10 @@
 import { moderationCard } from './card-id'
+import { moderationPostFiles } from './post-files-id'
 import { moderationResearch } from './research-id'
 
 export const moderation = {
   card: moderationCard,
+  postFiles: moderationPostFiles,
   research: moderationResearch,
   segments: {
     label: 'Segmen penerima',

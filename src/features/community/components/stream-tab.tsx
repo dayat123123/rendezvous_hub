@@ -11,8 +11,10 @@ import { stamp } from '@/lib/time'
 import { findCard, isImageAttachment } from '../card-logic'
 import { useCommunityPosts } from '../hooks'
 import { excerpt, filterPosts, postFilters, type PostFilter } from '../logic'
+import { chipFiles } from '../post-files'
 import type { CommunityPost } from '../types'
 import { PostComposer } from './post-composer'
+import { PostFileChips } from './post-files'
 import { PostSheet } from './post-sheet'
 import { AccountChip, PostStatusText } from './shared'
 
@@ -21,12 +23,13 @@ function PostRow({ post, onOpen }: { post: CommunityPost; onOpen: () => void }) 
   const when = post.published_at ?? post.publish_at ?? post.updated_at
   const images = post.attachments.filter(isImageAttachment).length
   const card = findCard(post.attachments)
+  const files = chipFiles(post.attachments)
   return (
-    <li>
+    <li className="border-b">
       <button
         type="button"
         onClick={onOpen}
-        className="flex w-full flex-col gap-1.5 border-b px-1 py-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
+        className="flex w-full flex-col gap-1.5 px-1 py-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
       >
         <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <AccountChip account={post.account} />
@@ -76,6 +79,11 @@ function PostRow({ post, onOpen }: { post: CommunityPost; onOpen: () => void }) 
             .join(' · ')}
         </span>
       </button>
+      {files.length > 0 ? (
+        <div className="max-w-xl px-1 pb-3">
+          <PostFileChips files={files} openable />
+        </div>
+      ) : null}
     </li>
   )
 }
