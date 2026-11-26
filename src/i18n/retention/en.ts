@@ -46,6 +46,10 @@ export const retention: Translated<typeof source> = {
     audit_log_days: 'Admin audit log',
     access_log_days: 'Personal data access log',
     rate_limit_events_days: 'Rate limit records',
+    cs_audit_days: 'Hub audit trail',
+    notification_events_days: 'Notification open records',
+    moderation_events_days: 'Moderation status history',
+    cron_history_days: 'Scheduled job history',
   },
   hints: {
     purge_enabled:
@@ -60,13 +64,20 @@ export const retention: Translated<typeof source> = {
     chat_years:
       "Counted from when the customer's last ticket closed. History is never deleted while a ticket is active.",
     archive_days:
-      'Copies of posts, comments, and messages deleted by users or moderators, kept for regulators.',
+      'Copies of posts, comments, and messages deleted by users or moderators, kept for regulators. When an archive is deleted, its attachments are removed from storage too.',
     evidence_days: 'Quarantined evidence without a legal hold, counted from when it was last captured.',
     deleted_messages_days: 'Chat messages that were deleted are purged permanently after this many days.',
     notifications_days: "Notifications in users' inboxes.",
     audit_log_days: 'Admin actions in the legacy module.',
     access_log_days: 'Who opened customer personal data.',
     rate_limit_events_days: 'Per-user send limit usage records.',
+    cs_audit_days:
+      'The Audit trail and CS chat session history, dropped per month once that month is past the limit.',
+    notification_events_days:
+      'Records of who opened or tapped a notification. They are summed up before deletion so campaign statistics stay intact.',
+    moderation_events_days: 'History of content moderation status changes (visible, held, hidden, removed).',
+    cron_history_days:
+      'A record of every scheduled database job run. Grows by tens of thousands of rows a day.',
   },
   values: {
     on: 'Active',

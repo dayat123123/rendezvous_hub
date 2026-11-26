@@ -18,6 +18,10 @@ export const retentionKeys = [
   'retention.audit_log_days',
   'retention.access_log_days',
   'retention.rate_limit_events_days',
+  'retention.cs_audit_days',
+  'retention.notification_events_days',
+  'retention.moderation_events_days',
+  'retention.cron_history_days',
 ] as const
 export type RetentionKey = (typeof retentionKeys)[number]
 

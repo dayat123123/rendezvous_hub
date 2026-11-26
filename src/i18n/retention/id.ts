@@ -43,6 +43,10 @@ export const retention = {
     audit_log_days: 'Audit log admin',
     access_log_days: 'Log akses data pribadi',
     rate_limit_events_days: 'Catatan rate limit',
+    cs_audit_days: 'Jejak audit Hub',
+    notification_events_days: 'Catatan buka notifikasi',
+    moderation_events_days: 'Riwayat status moderasi',
+    cron_history_days: 'Riwayat job terjadwal',
   },
   hints: {
     purge_enabled:
@@ -57,13 +61,20 @@ export const retention = {
     chat_years:
       'Dihitung sejak tiket terakhir nasabah ditutup. Riwayat tidak dihapus selama ada tiket aktif.',
     archive_days:
-      'Salinan post, komentar, dan pesan yang dihapus pengguna atau moderator untuk keperluan regulator.',
+      'Salinan post, komentar, dan pesan yang dihapus pengguna atau moderator untuk keperluan regulator. Saat arsip dihapus, lampirannya ikut dihapus dari storage.',
     evidence_days: 'Bukti karantina tanpa legal hold, dihitung sejak bukti terakhir direkam.',
     deleted_messages_days: 'Pesan chat yang sudah dihapus dibersihkan permanen setelah sekian hari.',
     notifications_days: 'Notifikasi di kotak notifikasi pengguna.',
     audit_log_days: 'Jejak tindakan admin di modul lama.',
     access_log_days: 'Catatan siapa yang membuka data pribadi nasabah.',
     rate_limit_events_days: 'Catatan pemakaian batas kirim per pengguna.',
+    cs_audit_days: 'Jejak Audit dan riwayat sesi chat CS, dibuang per bulan setelah bulan itu lewat batas.',
+    notification_events_days:
+      'Catatan siapa membuka atau mengetuk notifikasi. Sebelum dihapus, angkanya diringkas sehingga statistik kampanye tetap utuh.',
+    moderation_events_days:
+      'Riwayat perubahan status moderasi konten (tampil, ditahan, disembunyikan, dihapus).',
+    cron_history_days:
+      'Catatan setiap eksekusi job terjadwal di database. Bertambah puluhan ribu baris per hari.',
   },
   values: {
     on: 'Aktif',
