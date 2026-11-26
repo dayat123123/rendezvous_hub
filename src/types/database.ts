@@ -856,24 +856,6 @@ export type Database = {
         Args: { p_language?: string; p_query: string }
         Returns: Json
       }
-      finreport_config: { Args: Record<PropertyKey, never>; Returns: Json }
-      finreport_create_post: { Args: { p_report: string }; Returns: Json }
-      finreport_files: {
-        Args: {
-          p_before?: string
-          p_entity?: string
-          p_limit?: number
-          p_status?: string
-        }
-        Returns: Json
-      }
-      finreport_report: { Args: { p_id: string }; Returns: Json }
-      finreport_retry: { Args: { p_id: string }; Returns: Json }
-      finreport_save_config: {
-        Args: { p_auto_publish: boolean; p_official_account: string }
-        Returns: Json
-      }
-      finreport_upload: { Args: { p_object: string }; Returns: Json }
       flag_ticket: {
         Args: { p_flag: string; p_reason: string; p_ticket_id: string }
         Returns: Json
@@ -1064,6 +1046,24 @@ export type Database = {
         }
         Returns: Json
       }
+      research_config: { Args: Record<PropertyKey, never>; Returns: Json }
+      research_create_post: { Args: { p_report: string }; Returns: Json }
+      research_files: {
+        Args: {
+          p_before?: string
+          p_entity?: string
+          p_limit?: number
+          p_status?: string
+        }
+        Returns: Json
+      }
+      research_report: { Args: { p_id: string }; Returns: Json }
+      research_retry: { Args: { p_id: string }; Returns: Json }
+      research_save_config: {
+        Args: { p_auto_publish: boolean; p_official_account: string }
+        Returns: Json
+      }
+      research_upload: { Args: { p_object: string }; Returns: Json }
       resolve_ticket: {
         Args: {
           p_outcome: string

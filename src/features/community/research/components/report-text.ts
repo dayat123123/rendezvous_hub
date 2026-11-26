@@ -6,11 +6,13 @@ import { currencySymbol, periodParts, ratioKind, scaleMoney, sourceName } from '
 import {
   fileErrorCodes,
   metricKeys,
+  researchKinds,
   warningCodes,
   type FileErrorCode,
   type FileView,
   type MetricKey,
   type ReportRef,
+  type ResearchKind,
   type WarningCode,
 } from '../types'
 
@@ -30,8 +32,8 @@ export function useReportText() {
   const period = (report: Pick<ReportRef, 'period' | 'period_end'>) => {
     const parts = periodParts(report.period, report.period_end)
     return parts.kind === 'annual'
-      ? t('moderation.finreport.period.annual', { year: parts.year })
-      : t('moderation.finreport.period.quarter', {
+      ? t('moderation.research.period.annual', { year: parts.year })
+      : t('moderation.research.period.quarter', {
           roman: parts.roman,
           quarter: parts.quarter,
           year: parts.year,
@@ -44,7 +46,7 @@ export function useReportText() {
   const money = (value: number | undefined, currency: string) => {
     if (value === undefined) return '–'
     const scaled = scaleMoney(value, currency)
-    const unit = scaled.unit ? ` ${t(`moderation.finreport.metrics.units.${scaled.unit}`)}` : ''
+    const unit = scaled.unit ? ` ${t(`moderation.research.metrics.units.${scaled.unit}`)}` : ''
     return signed(
       value,
       `${currencySymbol(currency)}${fixed(Math.abs(scaled.amount), scaled.decimals)}${unit}`,
@@ -78,23 +80,24 @@ export function useReportText() {
   }
 
   const metricName = (key: string) =>
-    among<MetricKey>(metricKeys, key) ? t(`moderation.finreport.metrics.names.${key}`) : key
+    among<MetricKey>(metricKeys, key) ? t(`moderation.research.metrics.names.${key}`) : key
 
   const warningShort = (code: string) =>
-    among<WarningCode>(warningCodes, code) ? t(`moderation.finreport.warnings.short.${code}`) : code
+    among<WarningCode>(warningCodes, code) ? t(`moderation.research.warnings.short.${code}`) : code
+
+  const kind = (code: string) =>
+    among<ResearchKind>(researchKinds, code) ? t(`moderation.research.kinds.${code}`) : code
 
   const fileError = (code: string) =>
-    among<FileErrorCode>(fileErrorCodes, code) ? t(`moderation.finreport.fileErrors.${code}`) : code
+    among<FileErrorCode>(fileErrorCodes, code) ? t(`moderation.research.fileErrors.${code}`) : code
 
   const source = (file: Pick<FileView, 'source' | 'key' | 'uploaded_by'>) => {
     const name = sourceName(file)
     if (file.source === 'api')
       return name
-        ? t('moderation.finreport.sources.api', { name })
-        : t('moderation.finreport.sources.apiUnknown')
-    return name
-      ? t('moderation.finreport.sources.hub', { name })
-      : t('moderation.finreport.sources.hubUnknown')
+        ? t('moderation.research.sources.api', { name })
+        : t('moderation.research.sources.apiUnknown')
+    return name ? t('moderation.research.sources.hub', { name }) : t('moderation.research.sources.hubUnknown')
   }
 
   return {
@@ -108,6 +111,7 @@ export function useReportText() {
     ratio,
     metricName,
     warningShort,
+    kind,
     fileError,
     source,
   }

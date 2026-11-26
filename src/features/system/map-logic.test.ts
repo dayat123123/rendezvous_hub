@@ -151,23 +151,23 @@ describe('visibleEdges', () => {
   })
 })
 
-describe('finreport on the map', () => {
+describe('research on the map', () => {
   it('sits with the API services and links to its gateway, API, storage and antivirus', () => {
     const data = nodes([
       container({ service: 'kong', name: 'olt-social-kong-1' }),
       container({}),
-      container({ service: 'finreport', name: 'olt-social-finreport-1' }),
+      container({ service: 'research', name: 'olt-social-research-1' }),
       container({ service: 'storage', name: 'olt-social-storage-1' }),
       container({ service: 'clamav', name: 'olt-social-clamav-1', health: 'unhealthy' }),
     ])
     const services = buildServices(data)
-    expect(services.find((s) => s.service === 'finreport')?.lane).toBe('api')
-    expect(services.map((s) => s.service)).toEqual(['kong', 'rest', 'storage', 'finreport', 'clamav'])
-    expect(visibleEdges(services).filter((e) => e.from === 'finreport' || e.to === 'finreport')).toEqual([
-      { from: 'kong', to: 'finreport', tone: 'ok' },
-      { from: 'finreport', to: 'rest', tone: 'ok' },
-      { from: 'finreport', to: 'storage', tone: 'ok' },
-      { from: 'finreport', to: 'clamav', tone: 'bad' },
+    expect(services.find((s) => s.service === 'research')?.lane).toBe('api')
+    expect(services.map((s) => s.service)).toEqual(['kong', 'rest', 'storage', 'research', 'clamav'])
+    expect(visibleEdges(services).filter((e) => e.from === 'research' || e.to === 'research')).toEqual([
+      { from: 'kong', to: 'research', tone: 'ok' },
+      { from: 'research', to: 'rest', tone: 'ok' },
+      { from: 'research', to: 'storage', tone: 'ok' },
+      { from: 'research', to: 'clamav', tone: 'bad' },
     ])
   })
 })

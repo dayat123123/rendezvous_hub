@@ -16,7 +16,7 @@ export const communityTabs = [
   'rooms',
   'instruments',
   'accounts',
-  'reports',
+  'research',
   'features',
   'filters',
   'analytics',
@@ -45,7 +45,40 @@ export type OfficialAccount = AccountRef & {
   disabled_at: string | null
 }
 
-export type PostAttachment = { path: string; mime?: string; width?: number | null; height?: number | null }
+export type ImageAttachment = { path: string; mime?: string; width?: number | null; height?: number | null }
+
+export type MetricTrend = 'up' | 'down' | 'flat'
+
+export type CardMetric = { label: string; value: string; change?: string; trend?: MetricTrend }
+
+export type CardBlock =
+  | { type: 'paragraph'; text: string }
+  | { type: 'list'; style: 'numbered' | 'bulleted'; items: string[] }
+  | { type: 'callout'; title: string; text: string }
+  | { type: 'metrics'; metrics: CardMetric[] }
+
+export type CardBlockType = CardBlock['type']
+
+export type CardDocument = {
+  version: 1
+  badge?: string
+  title: string
+  subtitle?: string
+  headline: string
+  disclaimer?: string
+  blocks: CardBlock[]
+}
+
+export type CardAttachment = {
+  type: 'card'
+  source?: 'research' | 'manual'
+  stock_code?: string
+  research_id?: string
+  kind?: string
+  document: CardDocument
+}
+
+export type PostAttachment = ImageAttachment | CardAttachment
 
 export const postStatuses = [
   'draft',

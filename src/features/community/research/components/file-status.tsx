@@ -14,7 +14,7 @@ const statusTone: Record<FileStatus, 'ok' | 'warn' | 'late' | 'neutral'> = {
 
 export function FileStatusBadge({ status }: { status: FileStatus }) {
   const { t } = useReportText()
-  return <ToneBadge tone={statusTone[status]}>{t(`moderation.finreport.statuses.${status}`)}</ToneBadge>
+  return <ToneBadge tone={statusTone[status]}>{t(`moderation.research.statuses.${status}`)}</ToneBadge>
 }
 
 export function FileOutcome({ file }: { file: FileView }) {
@@ -25,7 +25,7 @@ export function FileOutcome({ file }: { file: FileView }) {
       <FileStatusBadge status={file.status} />
       {waiting && file.retry_at ? (
         <span className="text-xs text-warning">
-          {t('moderation.finreport.retryAt', { time: stamp(file.retry_at) })}
+          {t('moderation.research.retryAt', { time: stamp(file.retry_at) })}
         </span>
       ) : null}
       {file.error_code && (file.status === 'rejected' || waiting) ? (
@@ -39,11 +39,11 @@ export function FileOutcome({ file }: { file: FileView }) {
         </span>
       ) : null}
       {file.status === 'duplicate' ? (
-        <span className="text-xs text-muted-foreground">{t('moderation.finreport.list.duplicateOf')}</span>
+        <span className="text-xs text-muted-foreground">{t('moderation.research.list.duplicateOf')}</span>
       ) : null}
       {file.attempts > 1 && file.status !== 'done' ? (
         <span className="tabular text-xs text-muted-foreground">
-          {t('moderation.finreport.attempts', { count: file.attempts })}
+          {t('moderation.research.attempts', { count: file.attempts })}
         </span>
       ) : null}
     </span>
@@ -54,7 +54,7 @@ export function WarningBadges({ codes }: { codes: string[] }) {
   const { t, warningShort } = useReportText()
   if (codes.length === 0) return null
   return (
-    <ul className="flex flex-wrap gap-1" aria-label={t('moderation.finreport.cols.warnings')}>
+    <ul className="flex flex-wrap gap-1" aria-label={t('moderation.research.cols.warnings')}>
       {codes.map((code) => (
         <li key={code}>
           <ToneBadge tone="warn">{warningShort(code)}</ToneBadge>

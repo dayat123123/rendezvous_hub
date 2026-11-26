@@ -10,7 +10,7 @@ export const platform = {
   keys: {
     title: 'API Integrasi',
     description:
-      'API key untuk layanan lain yang mengirim push notifikasi ke aplikasi (transaksi, pengumuman, info), memposting sebagai bot resmi, mengirim laporan keuangan emiten, atau membaca kesehatan sistem untuk ditampilkan di aplikasi sendiri. Key hanya ditampilkan sekali saat dibuat; server hanya menyimpan hash-nya.',
+      'API key untuk layanan lain yang mengirim push notifikasi ke aplikasi (transaksi, pengumuman, info), memposting sebagai bot resmi, mengirim riset (laporan keuangan emiten), atau membaca kesehatan sistem untuk ditampilkan di aplikasi sendiri. Key hanya ditampilkan sekali saat dibuat; server hanya menyimpan hash-nya.',
     create: 'Buat API key',
     listTitle: 'API key',
     listHint:
@@ -30,7 +30,7 @@ export const platform = {
       notify_broadcast: 'Notifikasi massal',
       bot_post: 'Postingan bot',
       health_read: 'Baca kesehatan sistem',
-      financial_report: 'Kirim laporan keuangan',
+      research: 'Kirim riset',
     },
     scopeHints: {
       notify:
@@ -40,8 +40,8 @@ export const platform = {
       bot_post: 'Sistem otomatis memposting atas nama satu akun resmi, langsung terbit dengan label Bot.',
       health_read:
         'Aplikasi Anda membaca isi Kesehatan sistem dan Peta layanan (status, alert, disk, antrean, backup, container). Hanya baca; tidak bisa menandai alert atau mengubah pengaturan.',
-      financial_report:
-        'Sistem mengirim file laporan keuangan emiten (instance.zip XBRL dari IDX). Ringkasannya menjadi postingan resmi yang menunggu persetujuan di Komunitas → Laporan keuangan.',
+      research:
+        'Sistem mengirim bahan riset, saat ini file laporan keuangan emiten (instance.zip XBRL dari IDX). Ringkasannya menjadi postingan resmi yang menunggu persetujuan di Komunitas → Riset.',
     },
     status: { active: 'Aktif', disabled: 'Nonaktif', revoked: 'Dicabut' },
     anyIp: 'Semua IP',
@@ -63,9 +63,9 @@ export const platform = {
         'Statistik pengiriman dan contoh request untuk key dengan izin notifikasi atau postingan bot. Key baca kesehatan sistem tidak dihitung di sini.',
       healthHint:
         'Alamat endpoint dan contoh request untuk key dengan izin Baca kesehatan sistem. Key ini tidak mengirim notifikasi, jadi tidak punya statistik pengiriman.',
-      reports: 'Laporan keuangan',
-      reportsHint:
-        'Alamat endpoint, batas, dan contoh request untuk key dengan izin Kirim laporan keuangan. File yang diterima, hasil urai, dan postingannya dipantau di Komunitas → Laporan keuangan.',
+      research: 'Riset',
+      researchHint:
+        'Alamat endpoint, batas, dan contoh request untuk key dengan izin Kirim riset. File yang diterima, hasil urai, dan postingannya dipantau di Komunitas → Riset.',
     },
     revokeLabel: 'Cabut {{name}}',
     revokeTitle: 'Cabut API key {{name}}?',
@@ -152,10 +152,10 @@ export const platform = {
       docs: 'Panduan lengkap: docs/integration/kesehatan-sistem.md. Kontrak OpenAPI: docs/api/kesehatan-sistem.openapi.yaml',
       secretTitle: 'Cara memakai key ini',
     },
-    reports: {
-      title: 'API laporan keuangan',
+    research: {
+      title: 'API riset',
       subtitle:
-        'Untuk sistem yang punya file laporan keuangan emiten. Kirim instance.zip dari IDX apa adanya dari backend atau skrip di mesin tepercaya (jangan dari browser). Server menjawab id file yang bisa dicek statusnya.',
+        'Untuk sistem yang punya bahan riset. Jenis pertama: file laporan keuangan emiten. Kirim instance.zip dari IDX apa adanya dari backend atau skrip di mesin tepercaya (jangan dari browser). Server menjawab id file yang bisa dicek statusnya.',
       submitLabel: 'Kirim file',
       submitHint:
         'Body berisi file instance.zip apa adanya dengan Content-Type: application/zip. Jawaban berisi id file berstatus queued; kiriman ulang file yang sama dijawab dengan id lama.',
@@ -167,13 +167,13 @@ export const platform = {
       limitHour: 'Maksimal 120 file per key per jam.',
       limitConcurrent:
         'Maksimal 2 unggahan diproses bersamaan; selebihnya dijawab 503 busy dengan Retry-After. Kirim berurutan.',
-      example: 'Contoh request kirim laporan',
+      example: 'Contoh request kirim riset',
       exampleReady: 'API key ini sudah terisi. Jalankan dari folder tempat instance.zip berada.',
       exampleHint:
         'Ganti <API_KEY> dengan key berawalan oik_ yang ditampilkan saat key dibuat, lalu jalankan dari folder tempat instance.zip berada.',
-      docs: 'Panduan lengkap: docs/integration/laporan-keuangan.md',
-      open: 'Buka Komunitas → Laporan keuangan',
-      secretTitle: 'Cara mengirim laporan keuangan',
+      docs: 'Panduan lengkap: docs/integration/riset.md',
+      open: 'Buka Komunitas → Riset',
+      secretTitle: 'Cara mengirim riset',
     },
     stats: {
       title: 'Statistik notifikasi & bot',

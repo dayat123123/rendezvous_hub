@@ -7,9 +7,10 @@ import { Sheet, SheetContent } from '@/components/ui/overlay'
 import { useAgent } from '@/features/auth/hooks'
 
 import { PostStatusText } from '../../components/shared'
-import { useCreateReportPost, useFinreportReport } from '../hooks'
-import { finreportErrorText } from '../logic'
+import { useCreateReportPost, useResearchReport } from '../hooks'
+import { researchErrorText } from '../logic'
 import type { ReportDetail, ReportRef, ReportWarning } from '../types'
+import { DocumentPreview } from './document-preview'
 import { FileOutcome, WarningBadges } from './file-status'
 import { MetricsTables } from './metrics-tables'
 import { useReportText } from './report-text'
@@ -36,11 +37,11 @@ function WarningText({ warning }: { warning: ReportWarning }) {
       case 'missing_lines':
       case 'no_official_account':
       case 'post_rejected':
-        return t(`moderation.finreport.warnings.long.${warning.code}`)
+        return t(`moderation.research.warnings.long.${warning.code}`)
       case 'revision':
         return warning.received_at
-          ? t('moderation.finreport.warnings.long.revision', { time: stamp(warning.received_at) })
-          : t('moderation.finreport.warnings.long.revisionNoTime')
+          ? t('moderation.research.warnings.long.revision', { time: stamp(warning.received_at) })
+          : t('moderation.research.warnings.long.revisionNoTime')
       default:
         return null
     }
@@ -53,12 +54,12 @@ function WarningText({ warning }: { warning: ReportWarning }) {
         {long ? <span className="block text-muted-foreground">{long}</span> : null}
         {warning.lines && warning.lines.length > 0 ? (
           <span className="block text-xs text-muted-foreground">
-            {t('moderation.finreport.warnings.lines', { list: warning.lines.map(metricName).join(', ') })}
+            {t('moderation.research.warnings.lines', { list: warning.lines.map(metricName).join(', ') })}
           </span>
         ) : null}
         {warning.reason ? (
           <span className="block text-xs break-words text-muted-foreground">
-            {t('moderation.finreport.warnings.reason', { reason: warning.reason })}
+            {t('moderation.research.warnings.reason', { reason: warning.reason })}
           </span>
         ) : null}
       </span>
@@ -88,29 +89,29 @@ function PostSection({
   const canPost = agent.community_permissions.includes('community.post')
   const post = report.post
   return (
-    <Section id="finreport-post" title={t('moderation.finreport.detail.postTitle')}>
+    <Section id="research-post" title={t('moderation.research.detail.postTitle')}>
       {post ? (
         <div className="flex flex-col gap-1">
           <PostStatusText status={post.status} />
           {post.review_note ? (
             <p className="text-xs break-words text-muted-foreground">
-              {t('moderation.finreport.detail.reviewNote', { note: post.review_note })}
+              {t('moderation.research.detail.reviewNote', { note: post.review_note })}
             </p>
           ) : null}
           {post.error ? (
             <p className="text-xs break-words text-destructive">
-              {t('moderation.finreport.detail.postError', { error: post.error })}
+              {t('moderation.research.detail.postError', { error: post.error })}
             </p>
           ) : null}
         </div>
       ) : (
-        <p className="text-row text-muted-foreground">{t('moderation.finreport.detail.noPost')}</p>
+        <p className="text-row text-muted-foreground">{t('moderation.research.detail.noPost')}</p>
       )}
       <div className="flex flex-wrap items-center gap-2">
         {post && onOpenPost ? (
           <Button size="sm" variant="outline" onClick={() => onOpenPost(post.id)}>
             <ExternalLinkIcon />
-            {t('moderation.finreport.detail.openPost')}
+            {t('moderation.research.detail.openPost')}
           </Button>
         ) : null}
         {report.can_create_post && canPost ? (
@@ -119,18 +120,18 @@ function PostSection({
             disabled={create.isPending}
             onClick={() =>
               create.mutate(report.id, {
-                onSuccess: () => toast.success(t('moderation.finreport.detail.created')),
-                onError: (error) => toast.error(finreportErrorText(error)),
+                onSuccess: () => toast.success(t('moderation.research.detail.created')),
+                onError: (error) => toast.error(researchErrorText(error)),
               })
             }
           >
             {create.isPending ? <LoaderCircleIcon className="animate-spin" /> : <PlusIcon />}
-            {t('moderation.finreport.detail.createPost')}
+            {t('moderation.research.detail.createPost')}
           </Button>
         ) : null}
       </div>
       {report.can_create_post && canPost ? (
-        <p className="text-xs text-muted-foreground">{t('moderation.finreport.detail.createHint')}</p>
+        <p className="text-xs text-muted-foreground">{t('moderation.research.detail.createHint')}</p>
       ) : null}
     </Section>
   )
@@ -140,11 +141,11 @@ function History({ report, onOpen }: { report: ReportDetail; onOpen: Open }) {
   const { t, period } = useReportText()
   return (
     <Section
-      id="finreport-history"
-      title={t('moderation.finreport.detail.historyTitle', { code: report.entity_code })}
+      id="research-history"
+      title={t('moderation.research.detail.historyTitle', { code: report.entity_code })}
     >
       {report.history.length === 0 ? (
-        <p className="text-row text-muted-foreground">{t('moderation.finreport.detail.historyEmpty')}</p>
+        <p className="text-row text-muted-foreground">{t('moderation.research.detail.historyEmpty')}</p>
       ) : (
         <ul className="flex flex-col">
           {report.history.map((item) => (
@@ -154,7 +155,7 @@ function History({ report, onOpen }: { report: ReportDetail; onOpen: Open }) {
             >
               <RefButton report={item} label={period(item)} onOpen={onOpen} />
               <span className="text-xs text-muted-foreground">
-                {t(`moderation.finreport.audit.${item.audit}`)}
+                {t(`moderation.research.audit.${item.audit}`)}
               </span>
               {item.post ? <PostStatusText status={item.post.status} /> : null}
               <WarningBadges codes={item.warnings} />
@@ -175,12 +176,13 @@ function Detail({
   onOpen: Open
   onOpenPost?: (postId: string) => void
 }) {
-  const { t, stamp, period, source } = useReportText()
+  const { t, stamp, period, source, kind } = useReportText()
   const meta = [
+    kind(report.kind),
     period(report),
-    t(`moderation.finreport.audit.${report.audit}`),
-    report.currency === 'XXX' ? t('moderation.finreport.detail.currencyUnknown') : report.currency,
-    t(`moderation.finreport.templates.${report.template}`),
+    t(`moderation.research.audit.${report.audit}`),
+    report.currency === 'XXX' ? t('moderation.research.detail.currencyUnknown') : report.currency,
+    t(`moderation.research.templates.${report.template}`),
   ]
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -195,24 +197,24 @@ function Detail({
           </p>
         ) : null}
         <p className="text-xs text-muted-foreground">
-          {t('moderation.finreport.detail.received', { time: stamp(report.created_at) })}
+          {t('moderation.research.detail.received', { time: stamp(report.created_at) })}
         </p>
         {report.superseded_by ? (
           <p className="flex flex-wrap items-center gap-x-2 text-xs text-warning">
-            {t('moderation.finreport.detail.superseded')}
+            {t('moderation.research.detail.superseded')}
             <RefButton
               report={report.superseded_by}
-              label={t('moderation.finreport.detail.openNewer')}
+              label={t('moderation.research.detail.openNewer')}
               onOpen={onOpen}
             />
           </p>
         ) : null}
         {report.supersedes ? (
           <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-            {t('moderation.finreport.detail.supersedes')}
+            {t('moderation.research.detail.supersedes')}
             <RefButton
               report={report.supersedes}
-              label={t('moderation.finreport.detail.openOlder')}
+              label={t('moderation.research.detail.openOlder')}
               onOpen={onOpen}
             />
           </p>
@@ -221,25 +223,28 @@ function Detail({
       <div className="min-h-0 flex-1 overflow-y-auto">
         <PostSection report={report} onOpenPost={onOpenPost} />
         {report.warnings.length > 0 ? (
-          <Section id="finreport-warnings" title={t('moderation.finreport.detail.warningsTitle')}>
+          <Section id="research-warnings" title={t('moderation.research.detail.warningsTitle')}>
             <ul className="flex flex-col gap-2">
               {report.warnings.map((warning, index) => (
                 <WarningText key={`${warning.code}-${index}`} warning={warning} />
               ))}
             </ul>
-            <p className="text-xs text-muted-foreground">{t('moderation.finreport.warnings.holdsAuto')}</p>
+            <p className="text-xs text-muted-foreground">{t('moderation.research.warnings.holdsAuto')}</p>
           </Section>
         ) : null}
-        <Section id="finreport-summary" title={t('moderation.finreport.detail.summaryTitle')}>
-          <p className="text-xs text-muted-foreground">{t('moderation.finreport.detail.summaryHint')}</p>
+        <Section id="research-preview" title={t('moderation.research.preview.title')}>
+          <DocumentPreview document={report.document} summary={report.summary} stock={report.entity_code} />
+        </Section>
+        <Section id="research-summary" title={t('moderation.research.detail.summaryTitle')}>
+          <p className="text-xs text-muted-foreground">{t('moderation.research.detail.summaryHint')}</p>
           <p className="rounded-md border bg-subtle p-3 text-sm break-words whitespace-pre-wrap">
             {report.summary}
           </p>
         </Section>
-        <Section id="finreport-metrics" title={t('moderation.finreport.detail.metricsTitle')}>
+        <Section id="research-metrics" title={t('moderation.research.detail.metricsTitle')}>
           <MetricsTables metrics={report.metrics} currency={report.currency} />
         </Section>
-        <Section id="finreport-files" title={t('moderation.finreport.detail.filesTitle')}>
+        <Section id="research-files" title={t('moderation.research.detail.filesTitle')}>
           <ul className="flex flex-col">
             {report.files.map((file) => (
               <li
@@ -270,7 +275,7 @@ function DetailLoader({
   onOpen: Open
   onOpenPost?: (postId: string) => void
 }) {
-  const report = useFinreportReport(id)
+  const report = useResearchReport(id)
   if (report.data) return <Detail report={report.data} onOpen={onOpen} onOpenPost={onOpenPost} />
   return (
     <div className="p-5 pt-12">
@@ -298,7 +303,7 @@ export function ReportSheet({
   return (
     <Sheet open={id !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
-        title={t('moderation.finreport.detail.title')}
+        title={t('moderation.research.detail.title')}
         closeLabel={t('app.close')}
         className="w-[min(760px,100vw)] bg-background"
       >

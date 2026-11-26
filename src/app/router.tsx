@@ -357,8 +357,10 @@ const communityRoute = createRoute({
       post: post && uuidPattern.test(post) ? post : undefined,
     }
   },
-  beforeLoad: ({ context }) => {
+  beforeLoad: ({ context, location }) => {
     if (!canOpenCommunity(context.agent)) throw redirect({ to: '/' })
+    if ((location.search as { tab?: unknown }).tab === 'reports')
+      throw redirect({ to: '/community', search: { tab: 'research' }, replace: true })
   },
   component: lazyRouteComponent(
     withStrings(() => import('@/features/community/components/community-page'), 'moderation'),

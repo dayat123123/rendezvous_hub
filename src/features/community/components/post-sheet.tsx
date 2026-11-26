@@ -19,7 +19,9 @@ import {
   canSubmit,
   reviewBlockedByFourEyes,
 } from '../logic'
+import { findCard, readCardDocument } from '../card-logic'
 import type { CommunityPost } from '../types'
+import { CardPreview } from './card-preview'
 import { AccountChip, CampaignStatusText, PostImages, PostStatusText, ReasonDialog } from './shared'
 
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
@@ -77,6 +79,8 @@ export function PostDetail({ post, onEdit }: { post: CommunityPost; onEdit: () =
   const busy = submit.isPending || review.isPending || cancel.isPending || pin.isPending || remove.isPending
   const run = (action: Promise<unknown>, message: string) =>
     void action.then(() => toast.success(message)).catch((error: unknown) => toast.error(errorText(error)))
+  const card = findCard(post.attachments)
+  const cardDoc = card ? readCardDocument(card.document) : null
   const pinLabel = post.pin_scope
     ? post.pin_scope === 'stock'
       ? t('community.pinnedStock', { code: post.pin_stock })
@@ -98,7 +102,26 @@ export function PostDetail({ post, onEdit }: { post: CommunityPost; onEdit: () =
       <div className="min-h-0 flex-1 overflow-y-auto">
         <article className="flex flex-col gap-3 border-b px-5 py-4">
           {post.title ? <h2 className="text-panel font-semibold">{post.title}</h2> : null}
-          <p className="text-sm break-words whitespace-pre-wrap">{post.body}</p>
+          {cardDoc ? (
+            <>
+              <section aria-labelledby="post-card-title" className="flex flex-col gap-2">
+                <h3 id="post-card-title" className="text-sm font-medium">
+                  {t('moderation.card.preview.title')}
+                </h3>
+                <CardPreview document={cardDoc} stock={card?.stock_code} />
+              </section>
+              <section aria-labelledby="post-card-text" className="flex flex-col gap-1">
+                <h3 id="post-card-text" className="text-xs font-medium text-muted-foreground">
+                  {t('moderation.card.legacyText.title')}
+                </h3>
+                <p className="rounded-md border bg-subtle p-3 text-xs break-words whitespace-pre-wrap">
+                  {post.body}
+                </p>
+              </section>
+            </>
+          ) : (
+            <p className="text-sm break-words whitespace-pre-wrap">{post.body}</p>
+          )}
           <PostImages attachments={post.attachments} />
         </article>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-b px-5 py-4">

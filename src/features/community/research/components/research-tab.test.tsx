@@ -9,8 +9,8 @@ import { renderWithProviders } from '@/test/render'
 import { findToast, Toaster } from '@/test/toast'
 
 import type { CommunityPost, OfficialAccount } from '../../types'
-import type { FileView, FilesPage, FinreportConfig, ReportDetail, ReportRef } from '../types'
-import { ReportsTab } from './reports-tab'
+import type { FileView, FilesPage, ResearchConfig, ReportDetail, ReportRef } from '../types'
+import { ResearchTab } from './research-tab'
 
 const backend = vi.hoisted(() => ({ rpc: vi.fn(), upload: vi.fn(), bucket: vi.fn() }))
 
@@ -64,7 +64,7 @@ const research: OfficialAccount = {
   disabled_at: null,
 }
 
-const config: FinreportConfig = {
+const config: ResearchConfig = {
   official_account: null,
   official_active: false,
   auto_publish: false,
@@ -75,6 +75,7 @@ const config: FinreportConfig = {
 
 const report: ReportRef = {
   id: 'rep-1',
+  kind: 'financial_report',
   entity_code: 'BBCA',
   entity_name: 'PT Bank Central Asia Tbk',
   period: 'Q3',
@@ -189,6 +190,26 @@ const detail: ReportDetail = {
       { key: 'der', value: 0.62 },
     ],
   },
+  document: {
+    version: 1,
+    badge: 'Ringkasan otomatis',
+    title: 'Laporan Keuangan Kuartal III 2026',
+    subtitle: 'PT Bank Central Asia Tbk. · Belum diaudit',
+    headline: 'Laba bersih kuartal III naik 9,0% YoY',
+    disclaimer: 'Diolah otomatis dari laporan keuangan. Bukan rekomendasi investasi.',
+    blocks: [
+      { type: 'paragraph', text: 'BCA membukukan laba bersih Rp15,68 T pada kuartal III 2026.' },
+      {
+        type: 'metrics',
+        metrics: [
+          { label: 'Laba bersih kuartal III', value: 'Rp15,68 T', change: '+9,0% YoY', trend: 'up' },
+          { label: 'ROE disetahunkan', value: '21,3%', change: 'tahun lalu 21,5%', trend: 'down' },
+        ],
+      },
+      { type: 'list', style: 'numbered', items: ['Kredit tumbuh 11,2% YoY.', 'Dana murah naik.'] },
+      { type: 'callout', title: 'Poin utama', text: 'Laba tumbuh di atas kredit.' },
+    ],
+  },
   summary: '$BBCA Kuartal III 2026 (belum diaudit)\nLaba bersih bagian induk Rp45,00 T, naik 12,5% YoY.',
   warnings: [{ code: 'restated', lines: ['net_profit', 'loans'] }],
   created_at: '2026-11-25T02:00:05.000Z',
@@ -217,13 +238,13 @@ function serve(overrides: Partial<Record<string, (args: Args) => unknown>> = {})
     const handler = overrides[name]
     if (handler) return Promise.resolve(handler(args))
     switch (name) {
-      case 'finreport_files':
+      case 'research_files':
         return Promise.resolve(page)
-      case 'finreport_config':
+      case 'research_config':
         return Promise.resolve(config)
       case 'community_accounts':
         return Promise.resolve([research])
-      case 'finreport_report':
+      case 'research_report':
         return Promise.resolve(detail)
       default:
         return Promise.reject(new Error(`unexpected rpc ${name}`))
@@ -234,7 +255,7 @@ function serve(overrides: Partial<Record<string, (args: Args) => unknown>> = {})
 function render(agent: AgentProfile, onOpenPost?: (id: string) => void) {
   return renderWithProviders(
     <>
-      <ReportsTab onOpenPost={onOpenPost} />
+      <ResearchTab onOpenPost={onOpenPost} />
       <Toaster />
     </>,
     agent,
@@ -252,13 +273,15 @@ beforeEach(() => {
   serve()
 })
 
-describe('ReportsTab', () => {
+describe('ResearchTab', () => {
   it('lists received files with their report, source, status, post and warnings', async () => {
     render(writer)
 
     const table = await screen.findByRole('table', { name: 'File yang diterima' })
     const first = within(table).getByRole('row', { name: /BBCA/ })
     expect(within(first).getByText('PT Bank Central Asia Tbk')).toBeInTheDocument()
+    expect(within(table).getByRole('columnheader', { name: 'Jenis' })).toBeInTheDocument()
+    expect(within(first).getByText('Laporan keuangan')).toBeInTheDocument()
     expect(within(first).getByText('Kuartal III 2026 · Belum diaudit')).toBeInTheDocument()
     expect(within(first).getByText('API · Data laporan OLT')).toBeInTheDocument()
     expect(within(first).getByText('Selesai')).toBeInTheDocument()
@@ -280,8 +303,8 @@ describe('ReportsTab', () => {
 
     expect(screen.getByRole('radio', { name: 'Ditolak (1)' })).toBeInTheDocument()
     expect(screen.getByText(/Diperbarui otomatis setiap 10 detik/)).toBeInTheDocument()
-    expect(screen.getByText(/Akun resmi untuk laporan keuangan belum diatur/)).toBeInTheDocument()
-    expect(backend.rpc).toHaveBeenCalledWith('finreport_files', {
+    expect(screen.getByText(/Akun resmi untuk riset belum diatur/)).toBeInTheDocument()
+    expect(backend.rpc).toHaveBeenCalledWith('research_files', {
       p_status: null,
       p_entity: null,
       p_limit: 50,
@@ -297,14 +320,14 @@ describe('ReportsTab', () => {
     await user.click(screen.getByRole('radio', { name: 'Ditolak (1)' }))
     await waitFor(() =>
       expect(backend.rpc).toHaveBeenCalledWith(
-        'finreport_files',
+        'research_files',
         expect.objectContaining({ p_status: 'rejected' }),
       ),
     )
     await user.type(screen.getByRole('searchbox', { name: 'Kode emiten' }), '$bbca')
     await waitFor(() =>
       expect(backend.rpc).toHaveBeenCalledWith(
-        'finreport_files',
+        'research_files',
         expect.objectContaining({ p_status: 'rejected', p_entity: 'BBCA' }),
       ),
     )
@@ -322,7 +345,7 @@ describe('ReportsTab', () => {
       const failure = replies.shift()
       return Promise.resolve(failure ? { data: null, error: failure } : { data: { path }, error: null })
     })
-    serve({ finreport_upload: () => ({ ...rejected, id: 'file-9', status: 'queued', retryable: false }) })
+    serve({ research_upload: () => ({ ...rejected, id: 'file-9', status: 'queued', retryable: false }) })
     render(writer)
 
     const good = zip('BBCA Q3 2026.zip')
@@ -339,7 +362,7 @@ describe('ReportsTab', () => {
     expect(within(results).getByText('Lebih dari 8 MB.')).toBeInTheDocument()
     expect(await within(results).findByText('File lebih dari 8 MiB.')).toBeInTheDocument()
     expect(
-      await within(results).findByText('Akun ini tidak punya izin mengunggah laporan keuangan.'),
+      await within(results).findByText('Akun ini tidak punya izin mengunggah file riset.'),
     ).toBeInTheDocument()
     expect(
       await within(results).findByText('Storage menolak jenis file ini. Pastikan yang diunggah file .zip.'),
@@ -355,17 +378,17 @@ describe('ReportsTab', () => {
     expect(body.size).toBe(2)
     expect(body).not.toBe(good)
     expect(options).toEqual({ contentType: 'application/zip', upsert: false })
-    expect(backend.rpc).toHaveBeenCalledWith('finreport_upload', { p_object: path })
-    expect(backend.rpc.mock.calls.filter(([name]) => name === 'finreport_upload')).toHaveLength(1)
+    expect(backend.rpc).toHaveBeenCalledWith('research_upload', { p_object: path })
+    expect(backend.rpc.mock.calls.filter(([name]) => name === 'research_upload')).toHaveLength(1)
   })
 
   it('reprocesses a rejected file and hides upload and retry from staff without the post permission', async () => {
     const user = userEvent.setup()
-    serve({ finreport_retry: () => ({ ...rejected, status: 'queued', error_code: null, retryable: false }) })
+    serve({ research_retry: () => ({ ...rejected, status: 'queued', error_code: null, retryable: false }) })
     const view = render(writer)
 
     await user.click(await screen.findByRole('button', { name: /^Proses ulang file/ }))
-    await waitFor(() => expect(backend.rpc).toHaveBeenCalledWith('finreport_retry', { p_id: 'file-2' }))
+    await waitFor(() => expect(backend.rpc).toHaveBeenCalledWith('research_retry', { p_id: 'file-2' }))
     expect(await findToast('File masuk antrean lagi')).toBeInTheDocument()
     view.unmount()
 
@@ -383,12 +406,22 @@ describe('ReportsTab', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Buka laporan BBCA · Kuartal III 2026' }))
     const sheet = await screen.findByRole('dialog', { name: 'Detail laporan' })
-    await within(sheet).findByText('PT Bank Central Asia Tbk', { exact: false })
-    expect(backend.rpc).toHaveBeenCalledWith('finreport_report', { p_id: 'rep-1' })
+    await within(sheet).findByRole('heading', { name: /PT Bank Central Asia Tbk/ })
+    expect(backend.rpc).toHaveBeenCalledWith('research_report', { p_id: 'rep-1' })
 
     const summary = within(sheet).getByText(/Laba bersih bagian induk Rp45,00 T/)
     expect(summary).toHaveTextContent('$BBCA Kuartal III 2026 (belum diaudit) Laba bersih')
     expect(summary).toHaveClass('whitespace-pre-wrap')
+    expect(
+      within(sheet).getByText('Laporan keuangan · Kuartal III 2026 · Belum diaudit', { exact: false }),
+    ).toBeInTheDocument()
+
+    const preview = within(sheet).getByRole('region', { name: 'Tampilan di aplikasi' })
+    const card = within(preview).getByRole('article', { name: 'Laporan Keuangan Kuartal III 2026' })
+    expect(within(card).getByText('Ringkasan otomatis')).toBeInTheDocument()
+    expect(within(card).getByText('Laba bersih kuartal III naik 9,0% YoY')).toBeInTheDocument()
+    expect(within(card).getByText('Rp15,68 T')).toBeInTheDocument()
+    expect(within(card).getByText('Poin utama')).toBeInTheDocument()
 
     expect(within(sheet).getByText(/berbeda lebih dari 0,5% dari laporan tahun lalu/)).toBeInTheDocument()
     expect(within(sheet).getByText('Pos: Laba bersih bagian induk, Kredit')).toBeInTheDocument()
@@ -430,7 +463,7 @@ describe('ReportsTab', () => {
       can_create_post: true,
       warnings: [{ code: 'no_official_account' }],
     }
-    serve({ finreport_report: () => missing, finreport_create_post: () => ({ ...detail, warnings: [] }) })
+    serve({ research_report: () => missing, research_create_post: () => ({ ...detail, warnings: [] }) })
     render(writer)
 
     await user.click(await screen.findByRole('button', { name: 'Buka laporan BBCA · Kuartal III 2026' }))
@@ -440,7 +473,7 @@ describe('ReportsTab', () => {
     await user.click(within(sheet).getByRole('button', { name: 'Buat postingan' }))
 
     await waitFor(() =>
-      expect(backend.rpc).toHaveBeenCalledWith('finreport_create_post', { p_report: 'rep-1' }),
+      expect(backend.rpc).toHaveBeenCalledWith('research_create_post', { p_report: 'rep-1' }),
     )
     expect(await findToast('Postingan dibuat')).toBeInTheDocument()
     expect(await within(sheet).findByText('Menunggu persetujuan')).toBeInTheDocument()
@@ -449,7 +482,7 @@ describe('ReportsTab', () => {
 
   it('shows the posting settings read-only to staff who are not Super Admin', async () => {
     serve({
-      finreport_config: () => ({
+      research_config: () => ({
         ...config,
         official_account: research,
         official_active: true,
@@ -469,7 +502,7 @@ describe('ReportsTab', () => {
   it('lets a Super Admin pick the official account and turn on auto-publish', async () => {
     const user = userEvent.setup()
     const saved = { ...config, official_account: research, official_active: true, auto_publish: true }
-    serve({ finreport_save_config: () => saved })
+    serve({ research_save_config: () => saved })
     render(superAdmin)
 
     await user.click(await screen.findByRole('combobox', { name: 'Akun resmi' }))
@@ -480,11 +513,11 @@ describe('ReportsTab', () => {
     await user.click(screen.getByRole('button', { name: 'Simpan pengaturan' }))
 
     await waitFor(() =>
-      expect(backend.rpc).toHaveBeenCalledWith('finreport_save_config', {
+      expect(backend.rpc).toHaveBeenCalledWith('research_save_config', {
         p_official_account: 'acc-1',
         p_auto_publish: true,
       }),
     )
-    expect(await findToast('Pengaturan laporan keuangan disimpan')).toBeInTheDocument()
+    expect(await findToast('Pengaturan riset disimpan')).toBeInTheDocument()
   })
 })

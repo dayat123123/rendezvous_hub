@@ -268,10 +268,10 @@ function PaletteBody({
     ...(hasCommunityAccess(agent)
       ? [
           {
-            id: 'nav:/community:reports',
-            label: t('command.communityTab', { tab: t('community.tabs.reports') }),
+            id: 'nav:/community:research',
+            label: t('command.communityTab', { tab: t('community.tabs.research') }),
             icon: FileChartColumnIcon,
-            run: () => void navigate({ to: '/community', search: { tab: 'reports' as const } }),
+            run: () => void navigate({ to: '/community', search: { tab: 'research' as const } }),
           },
         ]
       : []),

@@ -4,14 +4,14 @@ import { uuid } from '@/lib/utils'
 
 import { objectPath } from './logic'
 import {
-  FINREPORT_BUCKET,
-  FINREPORT_PAGE_SIZE,
+  RESEARCH_BUCKET,
+  RESEARCH_PAGE_SIZE,
   type FileView,
   type FilesFilter,
   type FilesPage,
-  type FinreportConfig,
   type ReportDetail,
   type ReportMetrics,
+  type ResearchConfig,
 } from './types'
 
 function metrics(raw: ReportMetrics | null): ReportMetrics {
@@ -27,6 +27,7 @@ function detail(raw: ReportDetail): ReportDetail {
   return {
     ...raw,
     metrics: metrics(raw.metrics),
+    document: raw.document ?? {},
     warnings: raw.warnings ?? [],
     files: raw.files ?? [],
     history: raw.history ?? [],
@@ -45,34 +46,33 @@ function uploadError(error: StorageFailure) {
   return toApiError(error)
 }
 
-export const finreportApi = {
+export const researchApi = {
   files: async (filter: FilesFilter, before: string | null): Promise<FilesPage> => {
-    const raw = await rpc<FilesPage>('finreport_files', {
+    const raw = await rpc<FilesPage>('research_files', {
       p_status: filter.status,
       p_entity: filter.entity,
-      p_limit: FINREPORT_PAGE_SIZE,
+      p_limit: RESEARCH_PAGE_SIZE,
       p_before: before,
     })
     return { ...raw, items: raw.items ?? [], counts: raw.counts ?? {} }
   },
-  report: async (id: string) => detail(await rpc<ReportDetail>('finreport_report', { p_id: id })),
+  report: async (id: string) => detail(await rpc<ReportDetail>('research_report', { p_id: id })),
   upload: async (file: File, agentId: string) => {
     const path = objectPath(agentId, uuid())
     const { error } = await supabase()
-      .storage.from(FINREPORT_BUCKET)
+      .storage.from(RESEARCH_BUCKET)
       .upload(path, new Blob([file], { type: 'application/zip' }), {
         contentType: 'application/zip',
         upsert: false,
       })
     if (error) throw uploadError(error)
-    return rpc<FileView>('finreport_upload', { p_object: path })
+    return rpc<FileView>('research_upload', { p_object: path })
   },
-  retry: (id: string) => rpc<FileView>('finreport_retry', { p_id: id }),
-  createPost: async (id: string) =>
-    detail(await rpc<ReportDetail>('finreport_create_post', { p_report: id })),
-  config: () => rpc<FinreportConfig>('finreport_config'),
+  retry: (id: string) => rpc<FileView>('research_retry', { p_id: id }),
+  createPost: async (id: string) => detail(await rpc<ReportDetail>('research_create_post', { p_report: id })),
+  config: () => rpc<ResearchConfig>('research_config'),
   saveConfig: (account: string | null, autoPublish: boolean) =>
-    rpc<FinreportConfig>('finreport_save_config', {
+    rpc<ResearchConfig>('research_save_config', {
       p_official_account: account,
       p_auto_publish: autoPublish,
     }),

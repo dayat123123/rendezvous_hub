@@ -1,8 +1,8 @@
-import type { AccountRef, CommunityPost, PostStatus, StaffRef } from '../types'
+import type { AccountRef, CardDocument, CommunityPost, PostStatus, StaffRef } from '../types'
 
-export const FINREPORT_BUCKET = 'financial-reports'
-export const FINREPORT_MAX_BYTES = 8 * 1024 * 1024
-export const FINREPORT_PAGE_SIZE = 50
+export const RESEARCH_BUCKET = 'financial-reports'
+export const RESEARCH_MAX_BYTES = 8 * 1024 * 1024
+export const RESEARCH_PAGE_SIZE = 50
 
 export const fileStatuses = ['queued', 'processing', 'done', 'duplicate', 'rejected'] as const
 export type FileStatus = (typeof fileStatuses)[number]
@@ -79,8 +79,12 @@ export type PostRef = {
   published_at: string | null
 }
 
+export const researchKinds = ['financial_report'] as const
+export type ResearchKind = (typeof researchKinds)[number]
+
 export type ReportRef = {
   id: string
+  kind: string
   entity_code: string
   entity_name: string
   period: ReportPeriod
@@ -112,7 +116,7 @@ export type FileView = {
   report: ReportRef | null
 }
 
-export type FinreportConfig = {
+export type ResearchConfig = {
   official_account: AccountRef | null
   official_active: boolean
   auto_publish: boolean
@@ -124,7 +128,7 @@ export type FinreportConfig = {
 export type FilesPage = {
   items: FileView[]
   next_before: string | null
-  config: FinreportConfig
+  config: ResearchConfig
   counts: Partial<Record<FileStatus, number>>
 }
 
@@ -177,6 +181,7 @@ export type ReportDetail = Omit<ReportRef, 'warnings' | 'post'> & {
   sector: string | null
   subsector: string | null
   metrics: ReportMetrics
+  document: CardDocument | Record<string, never>
   summary: string
   warnings: ReportWarning[]
   created_at: string

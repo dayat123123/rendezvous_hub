@@ -1,9 +1,11 @@
 import type { Translated } from '../id'
-import { moderationFinreport } from './finreport-en'
+import { moderationCard } from './card-en'
+import { moderationResearch } from './research-en'
 import type { moderation as source } from './id'
 
 export const moderation: Translated<typeof source> = {
-  finreport: moderationFinreport,
+  card: moderationCard,
+  research: moderationResearch,
   segments: {
     label: 'Audience segment',
     options: {

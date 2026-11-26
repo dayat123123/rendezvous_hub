@@ -2098,7 +2098,7 @@ export const id = {
       accounts: 'Akun resmi',
       features: 'Fitur & versi',
       filters: 'Tab Stream',
-      reports: 'Laporan keuangan',
+      research: 'Riset',
     },
     metrics: {
       pendingPosts: 'Postingan menunggu persetujuan',

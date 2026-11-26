@@ -30,7 +30,7 @@ import type {
   MediaStatus,
   OfficialAccount,
   PinScope,
-  PostAttachment,
+  ImageAttachment,
   PostDraft,
   ReportAction,
   ReportRow,
@@ -261,7 +261,7 @@ export const communityApi = {
   pinMessage: async (roomId: string, messageId: string | null) =>
     room(await rpc<RoomState>('community_pin_message', { p_room: roomId, p_message: messageId })),
 
-  uploadPostImage: async (accountId: string, original: File): Promise<PostAttachment> => {
+  uploadPostImage: async (accountId: string, original: File): Promise<ImageAttachment> => {
     const file = await fitImage(original, MAX_FILE_BYTES)
     const path = `posts/${accountId}/${uuid()}.${extension[file.type] ?? 'jpg'}`
     const { error } = await supabase()

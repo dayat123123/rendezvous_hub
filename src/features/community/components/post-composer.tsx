@@ -24,6 +24,20 @@ import { errorText } from '@/lib/error-text'
 import { cn } from '@/lib/utils'
 
 import { communityApi } from '../api'
+import {
+  buildCardDocument,
+  cardAttachment,
+  cardDraftFrom,
+  cardErrorText,
+  cardProblems,
+  cardStock,
+  cardText,
+  cardTextCut,
+  cardValid,
+  emptyCardDraft,
+  findCard,
+  isImageAttachment,
+} from '../card-logic'
 import { useOfficialAccounts, useReviewPost, useSavePost, useSubmitPost } from '../hooks'
 import { cleanStock, fromJakartaInput, jakartaInput, stockCodePattern } from '../logic'
 import {
@@ -31,14 +45,17 @@ import {
   MAX_POST_IMAGES,
   STOCK_CODE_INPUT_MAX,
   type CommunityPost,
+  type ImageAttachment,
   type PinScope,
-  type PostAttachment,
   type PostKind,
 } from '../types'
+import { CardEditor } from './card-editor'
+import { CardPreview } from './card-preview'
 import { PostImages } from './shared'
 
 type Pin = 'none' | PinScope
 type When = 'now' | 'later'
+type Layout = 'text' | 'card'
 
 function FieldError({ message }: { message?: string }) {
   return message ? <p className="text-xs text-destructive">{message}</p> : null
@@ -64,7 +81,12 @@ export function PostComposer({
   const [kind, setKind] = useState<PostKind>(post?.kind ?? 'post')
   const [title, setTitle] = useState(post?.title ?? '')
   const [body, setBody] = useState(post?.body ?? '')
-  const [media, setMedia] = useState<PostAttachment[]>(post?.attachments ?? [])
+  const [media, setMedia] = useState<ImageAttachment[]>((post?.attachments ?? []).filter(isImageAttachment))
+  const [layout, setLayout] = useState<Layout>(findCard(post?.attachments ?? []) ? 'card' : 'text')
+  const [card, setCard] = useState(() => {
+    const existing = findCard(post?.attachments ?? [])
+    return existing ? cardDraftFrom(existing) : emptyCardDraft()
+  })
   const [uploading, setUploading] = useState(false)
   const [pin, setPin] = useState<Pin>(post?.pin_scope ?? 'none')
   const [stock, setStock] = useState(post?.pin_stock ?? '')
@@ -86,7 +108,7 @@ export function PostComposer({
         ? t('community.errors.titleLength')
         : undefined,
     body:
-      body.trim().length < 1 || body.trim().length > MAX_POST_BODY
+      layout === 'text' && (body.trim().length < 1 || body.trim().length > MAX_POST_BODY)
         ? t('community.errors.bodyLength', { max: MAX_POST_BODY })
         : undefined,
     stock:
@@ -100,7 +122,12 @@ export function PostComposer({
         ? t('community.errors.scheduleFuture')
         : undefined,
   }
-  const valid = Object.values(errors).every((value) => value === undefined)
+  const problems = cardProblems(card)
+  const cardDoc = buildCardDocument(card)
+  const stockCode = cardStock(card)
+  const legacyText = cardText(cardDoc, stockCode)
+  const valid =
+    Object.values(errors).every((value) => value === undefined) && (layout === 'text' || cardValid(problems))
 
   const addImages = async (files: File[]) => {
     if (!accountId) {
@@ -137,8 +164,8 @@ export function PostComposer({
           account_id: accountId,
           kind,
           title: kind === 'announcement' ? title.trim() : null,
-          body: body.trim(),
-          attachments: media,
+          body: layout === 'card' ? legacyText : body.trim(),
+          attachments: layout === 'card' ? [...media, cardAttachment(card)] : media,
           pin_scope: effectivePin === 'none' ? null : effectivePin,
           pin_stock: effectivePin === 'stock' ? cleanStock(stock) : null,
           pin_until: effectivePin === 'none' ? null : fromJakartaInput(pinUntil),
@@ -154,13 +181,16 @@ export function PostComposer({
       )
       onClose(saved)
     } catch (error) {
-      toast.error(errorText(error))
+      toast.error(cardErrorText(error))
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && !pending && onClose()}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl" closeLabel={t('app.close')}>
+      <DialogContent
+        className={cn('max-h-[92vh] overflow-y-auto', layout === 'card' ? 'sm:max-w-5xl' : 'sm:max-w-2xl')}
+        closeLabel={t('app.close')}
+      >
         <DialogHeader>
           <DialogTitle>{post ? t('community.editPost') : t('community.newPost')}</DialogTitle>
         </DialogHeader>
@@ -231,24 +261,74 @@ export function PostComposer({
               {touched ? <FieldError message={errors.title} /> : null}
             </div>
           ) : null}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="post-body">{t('community.body')}</Label>
-            <Textarea
-              id="post-body"
-              rows={6}
-              maxLength={MAX_POST_BODY}
-              value={body}
-              aria-invalid={touched && errors.body ? true : undefined}
-              onChange={(event) => setBody(event.target.value)}
-            />
-            <div className="flex items-start justify-between gap-3 text-xs text-muted-foreground">
-              <span>{t('community.bodyHint')}</span>
-              <span className="tabular shrink-0">
-                {body.length}/{MAX_POST_BODY}
-              </span>
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="mb-1.5 text-sm font-medium">{t('moderation.card.layout.label')}</legend>
+            <RadioGroup
+              value={layout}
+              onValueChange={(value) => setLayout(value === 'card' ? 'card' : 'text')}
+              className="flex gap-4"
+            >
+              {(['text', 'card'] as const).map((item) => (
+                <label key={item} className="flex items-center gap-2 text-row">
+                  <RadioGroupItem value={item} />
+                  {t(`moderation.card.layout.${item}`)}
+                </label>
+              ))}
+            </RadioGroup>
+            {layout === 'card' ? (
+              <p className="text-xs text-muted-foreground">{t('moderation.card.layout.cardHint')}</p>
+            ) : null}
+          </fieldset>
+          {layout === 'card' ? (
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
+              <CardEditor draft={card} problems={problems} touched={touched} onChange={setCard} />
+              <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:self-start">
+                <section aria-labelledby="card-preview-title" className="flex flex-col gap-2">
+                  <h3 id="card-preview-title" className="text-sm font-medium">
+                    {t('moderation.card.preview.title')}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{t('moderation.card.preview.hint')}</p>
+                  <CardPreview document={cardDoc} stock={stockCode} />
+                </section>
+                <section aria-labelledby="card-legacy-title" className="flex flex-col gap-2">
+                  <h3 id="card-legacy-title" className="text-sm font-medium">
+                    {t('moderation.card.legacyText.title')}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{t('moderation.card.legacyText.hint')}</p>
+                  <p
+                    data-testid="card-legacy-text"
+                    className="max-h-64 overflow-y-auto rounded-md border bg-subtle p-3 text-xs break-words whitespace-pre-wrap"
+                  >
+                    {legacyText}
+                  </p>
+                  {cardTextCut(cardDoc, stockCode) ? (
+                    <p className="text-xs text-warning">
+                      {t('moderation.card.legacyText.cut', { max: MAX_POST_BODY })}
+                    </p>
+                  ) : null}
+                </section>
+              </div>
             </div>
-            {touched ? <FieldError message={errors.body} /> : null}
-          </div>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="post-body">{t('community.body')}</Label>
+              <Textarea
+                id="post-body"
+                rows={6}
+                maxLength={MAX_POST_BODY}
+                value={body}
+                aria-invalid={touched && errors.body ? true : undefined}
+                onChange={(event) => setBody(event.target.value)}
+              />
+              <div className="flex items-start justify-between gap-3 text-xs text-muted-foreground">
+                <span>{t('community.bodyHint')}</span>
+                <span className="tabular shrink-0">
+                  {body.length}/{MAX_POST_BODY}
+                </span>
+              </div>
+              {touched ? <FieldError message={errors.body} /> : null}
+            </div>
+          )}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-medium">{t('community.images')}</span>

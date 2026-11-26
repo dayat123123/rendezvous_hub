@@ -32,7 +32,7 @@ export function communityTabsFor(perms: Perms): CommunityTab[] {
   if (can(perms, 'community.moderate') || can(perms, 'community.sanction')) tabs.push('moderation')
   if (can(perms, 'community.moderate')) tabs.push('rooms', 'instruments')
   if (can(perms, 'community.accounts')) tabs.push('accounts')
-  if (perms.length > 0) tabs.push('reports')
+  if (perms.length > 0) tabs.push('research')
   return tabs
 }
 

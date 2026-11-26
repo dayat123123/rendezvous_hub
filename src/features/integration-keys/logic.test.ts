@@ -4,8 +4,8 @@ import {
   broadcastTitle,
   dailySeries,
   deliveryRatio,
-  financialReportEndpoints,
-  financialReportExamples,
+  researchEndpoints,
+  researchExamples,
   hasActiveBroadcast,
   keyDailySeries,
   keyProblems,
@@ -107,27 +107,25 @@ describe('toggleScope', () => {
     expect(toggleScope(['notify', 'notify_broadcast'], 'notify_broadcast', false)).toEqual(['notify'])
   })
 
-  it('keeps the financial report scope independent of the others', () => {
-    expect(toggleScope(['notify'], 'financial_report', true)).toEqual(['notify', 'financial_report'])
-    expect(toggleScope(['financial_report', 'health_read'], 'financial_report', false)).toEqual([
-      'health_read',
-    ])
+  it('keeps the research scope independent of the others', () => {
+    expect(toggleScope(['notify'], 'research', true)).toEqual(['notify', 'research'])
+    expect(toggleScope(['research', 'health_read'], 'research', false)).toEqual(['health_read'])
   })
 })
 
-describe('financialReportExamples', () => {
+describe('researchExamples', () => {
   it('builds the send and status endpoints and copyable upload commands', () => {
-    expect(financialReportEndpoints('https://api.olt.test')).toEqual({
-      submit: 'https://api.olt.test/integration/v1/financial-reports',
-      status: 'https://api.olt.test/integration/v1/financial-reports/{id}',
+    expect(researchEndpoints('https://api.olt.test')).toEqual({
+      submit: 'https://api.olt.test/integration/v1/research',
+      status: 'https://api.olt.test/integration/v1/research/{id}',
     })
     const args =
-      '-sS -X POST "https://api.olt.test/integration/v1/financial-reports" -H "Authorization: Bearer oik_abc" -H "Content-Type: application/zip"'
-    expect(financialReportExamples('https://api.olt.test', 'oik_abc')).toEqual({
+      '-sS -X POST "https://api.olt.test/integration/v1/research" -H "Authorization: Bearer oik_abc" -H "Content-Type: application/zip"'
+    expect(researchExamples('https://api.olt.test', 'oik_abc')).toEqual({
       shell: `curl ${args} --data-binary @instance.zip`,
       powershell: `curl.exe ${args} --data-binary "@instance.zip"`,
     })
-    expect(financialReportExamples('https://api.olt.test').shell).toContain('Bearer <API_KEY>')
+    expect(researchExamples('https://api.olt.test').shell).toContain('Bearer <API_KEY>')
   })
 })
 

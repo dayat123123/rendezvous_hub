@@ -8,6 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/controls'
 import { useAgent } from '@/features/auth/hooks'
 import { stamp } from '@/lib/time'
 
+import { findCard, isImageAttachment } from '../card-logic'
 import { useCommunityPosts } from '../hooks'
 import { excerpt, filterPosts, postFilters, type PostFilter } from '../logic'
 import type { CommunityPost } from '../types'
@@ -18,6 +19,8 @@ import { AccountChip, PostStatusText } from './shared'
 function PostRow({ post, onOpen }: { post: CommunityPost; onOpen: () => void }) {
   const { t } = useTranslation()
   const when = post.published_at ?? post.publish_at ?? post.updated_at
+  const images = post.attachments.filter(isImageAttachment).length
+  const card = findCard(post.attachments)
   return (
     <li>
       <button
@@ -42,10 +45,23 @@ function PostRow({ post, onOpen }: { post: CommunityPost; onOpen: () => void }) 
               aria-label={t('community.pinned')}
             />
           ) : null}
-          <span className="min-w-0 text-row">
-            {post.title ? <span className="font-medium">{post.title} · </span> : null}
-            {excerpt(post.body)}
-          </span>
+          {card ? (
+            <span className="flex min-w-0 flex-col gap-0.5 text-row">
+              <span className="flex flex-wrap items-center gap-1.5">
+                <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                  {t('moderation.card.tag')}
+                </span>
+                {card.stock_code ? <span className="font-mono text-xs">${card.stock_code}</span> : null}
+                <span className="font-medium">{post.title ?? card.document.title}</span>
+              </span>
+              <span className="text-muted-foreground">{excerpt(card.document.headline)}</span>
+            </span>
+          ) : (
+            <span className="min-w-0 text-row">
+              {post.title ? <span className="font-medium">{post.title} · </span> : null}
+              {excerpt(post.body)}
+            </span>
+          )}
         </span>
         <span className="text-xs text-muted-foreground">
           {[
@@ -53,9 +69,7 @@ function PostRow({ post, onOpen }: { post: CommunityPost; onOpen: () => void }) 
             post.status === 'scheduled' && post.publish_at
               ? t('community.scheduledAt', { time: stamp(post.publish_at) })
               : stamp(when),
-            post.attachments.length > 0
-              ? t('community.imageCount', { count: post.attachments.length })
-              : null,
+            images > 0 ? t('community.imageCount', { count: images }) : null,
             post.notify ? t('community.withNotification') : null,
           ]
             .filter(Boolean)
