@@ -26,6 +26,7 @@ const nasabahCodes = [
   'links_client_only',
   'invalid_csadmin_url',
   'invalid_csadmin_client_id',
+  'invalid_csadmin_audience',
 ] as const
 
 type NasabahCode = (typeof nasabahCodes)[number]

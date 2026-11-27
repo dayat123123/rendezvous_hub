@@ -8,6 +8,7 @@ import {
   placeholders,
   readHours,
   validClientId,
+  validCsadminAudience,
   validCsadminUrl,
   validDay,
 } from './logic'
@@ -80,6 +81,9 @@ describe('csAdmin integration', () => {
     expect(validClientId('web-cs.prod_1')).toBe(true)
     expect(validClientId('web cs')).toBe(false)
     expect(validClientId('a'.repeat(51))).toBe(false)
+    expect(validCsadminAudience('csAdminOD')).toBe(true)
+    expect(validCsadminAudience('cs admin')).toBe(false)
+    expect(validCsadminAudience('')).toBe(false)
   })
 
   it('builds the integration block for the CS Admin service config', () => {

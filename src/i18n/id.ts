@@ -932,6 +932,10 @@ export const id = {
     csadminClientIdHint: 'Harus sama dengan client_id di config CS Admin service.',
     csadminClientIdRequired: 'Client id wajib diisi',
     csadminClientIdInvalid: 'Client id 1–50 karakter: huruf, angka, titik, _, atau -',
+    csadminAudience: 'Audience',
+    csadminAudienceHint:
+      'Nama service CS Admin yang dituju, mis. csAdminEL atau csAdminOD. Kosong = csAdminEL.',
+    csadminAudienceInvalid: 'Audience 1–50 karakter: huruf, angka, titik, _, atau -',
     testConnection: 'Tes koneksi',
     saveActivate: 'Simpan & aktifkan',
     integrationConfirmTitle: 'Simpan dan aktifkan integrasi API Nasabah?',
@@ -949,7 +953,7 @@ export const id = {
     testResult: {
       ok: 'Terhubung. API Nasabah menerbitkan token integrasi ({{ms}} ms).',
       refused:
-        'API Nasabah menolak kunci integrasi. Pastikan client_id dan public_key di config CS Admin service sama dengan blok di bawah, lalu restart service-nya.',
+        'API Nasabah menolak kunci integrasi. Pastikan client_id dan public_key di config CS Admin service sama dengan blok di bawah, lalu restart service-nya. Cek juga Audience: harus sama dengan nama service CS Admin yang dipakai, mis. csAdminEL atau csAdminOD.',
       ip_not_allowed:
         'API Nasabah menolak IP server ini. Tambahkan IP server web CS ke allowed_ips di config CS Admin service.',
       disabled:
@@ -1824,6 +1828,7 @@ export const id = {
       invalid_csadmin_url:
         'Alamat API Nasabah harus diawali http:// atau https://, tanpa spasi, login, atau query.',
       invalid_csadmin_client_id: 'Client id 1–50 karakter: huruf, angka, titik, _, atau -.',
+      invalid_csadmin_audience: 'Audience 1–50 karakter: huruf, angka, titik, _, atau -.',
       integration_refused:
         'API Nasabah menolak kunci integrasi. Super Admin bisa memeriksanya di Pengaturan → Integrasi API Nasabah.',
       upstream_unavailable: 'API Nasabah tidak bisa dihubungi.',

@@ -142,9 +142,9 @@ export const settingsApi = {
     rpc<Holiday[]>('admin_save_holiday', { p_day: holiday.day, p_name: holiday.name, p_kind: holiday.kind }),
   deleteHoliday: (day: string) => rpc<Holiday[]>('admin_delete_holiday', { p_day: day }),
   integration: () => gatewayRequest<IntegrationStatus>('GET', '/integration'),
-  testIntegration: (url: string, clientId: string) =>
-    gatewayRequest<IntegrationCheck>('POST', '/integration/test', {}, { url, client_id: clientId }),
-  saveIntegration: (url: string, clientId: string) =>
-    gatewayRequest<IntegrationSave>('PUT', '/integration', {}, { url, client_id: clientId }),
+  testIntegration: (url: string, clientId: string, audience: string) =>
+    gatewayRequest<IntegrationCheck>('POST', '/integration/test', {}, { url, client_id: clientId, audience }),
+  saveIntegration: (url: string, clientId: string, audience: string) =>
+    gatewayRequest<IntegrationSave>('PUT', '/integration', {}, { url, client_id: clientId, audience }),
   clearIntegration: () => gatewayRequest<IntegrationStatus>('DELETE', '/integration'),
 }

@@ -177,11 +177,18 @@ export const isSettingsSection = (value: unknown): value is SettingsSection =>
 export type IntegrationStatus = {
   url: string
   client_id: string
+  audience: string
   configured: boolean
   connected_at: string | null
   connected_by: string | null
   public_key: string
   key_configured: boolean
+}
+
+export type IntegrationInput = {
+  url: string
+  clientId: string
+  audience: string
 }
 
 export type IntegrationResult =

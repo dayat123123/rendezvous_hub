@@ -52,6 +52,10 @@ export const validCsadminUrl = (url: string) => url.length <= 200 && csadminUrlP
 
 export const validClientId = (clientId: string) => clientIdPattern.test(clientId)
 
+export const defaultCsadminAudience = 'csAdminEL'
+
+export const validCsadminAudience = (audience: string) => clientIdPattern.test(audience)
+
 export function csadminConfigBlock(clientId: string, publicKey: string) {
   return [
     '#INTEGRATION (web CS gateway)',

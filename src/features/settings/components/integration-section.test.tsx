@@ -36,6 +36,7 @@ vi.mock('../api', async (importOriginal) => {
 const notSet: IntegrationStatus = {
   url: '',
   client_id: '',
+  audience: 'csAdminEL',
   configured: false,
   connected_at: null,
   connected_by: null,
@@ -77,10 +78,12 @@ describe('IntegrationSection', () => {
     expect(screen.getByLabelText('Alamat API Nasabah')).toBeDisabled()
     expect(screen.getByLabelText('Client id')).toHaveValue('')
     expect(screen.getByLabelText('Client id')).toBeDisabled()
+    expect(screen.getByLabelText('Audience')).toHaveValue('csAdminEL')
+    expect(screen.getByLabelText('Audience')).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'Simpan & aktifkan' })).not.toBeInTheDocument()
     expect(screen.getByText(/Menu Akun Nasabah belum tampil untuk CS/)).toBeVisible()
     expect(screen.getByLabelText('Kunci integrasi').textContent).toContain('client_id       = <client id>')
-    expect(document.body.textContent).not.toMatch(/csAdminEL|docker\/\.env/)
+    expect(document.body.textContent).not.toMatch(/docker\/\.env/)
   })
 
   it('requires both fields before testing or saving', async () => {
@@ -115,7 +118,11 @@ describe('IntegrationSection', () => {
     expect(settingsApi.saveIntegration).not.toHaveBeenCalled()
     await confirmSave(user)
 
-    expect(settingsApi.saveIntegration).toHaveBeenCalledWith('http://10.0.0.5:9001/csAdmin', 'web-cs')
+    expect(settingsApi.saveIntegration).toHaveBeenCalledWith(
+      'http://10.0.0.5:9001/csAdmin',
+      'web-cs',
+      'csAdminEL',
+    )
     expect(await screen.findByRole('status')).toHaveTextContent(
       'Belum disimpan. API Nasabah menolak kunci integrasi. Pastikan client_id dan public_key di config CS Admin service',
     )
@@ -162,11 +169,47 @@ describe('IntegrationSection', () => {
     await user.type(screen.getByLabelText('Client id'), 'web-cs.prod')
     await user.click(screen.getByRole('button', { name: 'Tes koneksi' }))
 
-    expect(settingsApi.testIntegration).toHaveBeenCalledWith('http://10.0.0.5:8080', 'web-cs.prod')
+    expect(settingsApi.testIntegration).toHaveBeenCalledWith(
+      'http://10.0.0.5:8080',
+      'web-cs.prod',
+      'csAdminEL',
+    )
     expect(await screen.findByRole('status')).toHaveTextContent(
       'Terhubung. API Nasabah menerbitkan token integrasi',
     )
     expect(settingsApi.saveIntegration).not.toHaveBeenCalled()
+  })
+
+  it('sends the typed audience and rejects an invalid one', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsApi.integration).mockResolvedValue(active)
+    vi.mocked(settingsApi.saveIntegration).mockResolvedValue({
+      saved: true,
+      check: { result: 'ok', status: 200, duration_ms: 30 },
+      status: { ...active, audience: 'csAdminOD' },
+    })
+    renderWithProviders(<IntegrationSection />, monitorFixture)
+
+    await unlock(user)
+    const audience = screen.getByLabelText('Audience')
+    await user.clear(audience)
+    await user.type(audience, 'cs admin')
+    await user.click(screen.getByRole('button', { name: 'Tes koneksi' }))
+    expect(screen.getByText('Audience 1–50 karakter: huruf, angka, titik, _, atau -')).toBeVisible()
+    expect(settingsApi.testIntegration).not.toHaveBeenCalled()
+
+    await user.clear(audience)
+    await user.type(audience, ' csAdminOD ')
+    await user.click(screen.getByRole('button', { name: 'Simpan & aktifkan' }))
+    await confirmSave(user)
+    await waitFor(() =>
+      expect(settingsApi.saveIntegration).toHaveBeenCalledWith(
+        'http://10.0.0.5:9001/csAdmin',
+        'web-cs',
+        'csAdminOD',
+      ),
+    )
+    await waitFor(() => expect(screen.getByLabelText('Audience')).toHaveValue('csAdminOD'))
   })
 
   it('restores the saved values when editing is cancelled', async () => {
@@ -183,12 +226,15 @@ describe('IntegrationSection', () => {
     await user.type(url, 'http://10.0.0.9:9001')
     await user.clear(screen.getByLabelText('Client id'))
     await user.type(screen.getByLabelText('Client id'), 'other')
+    await user.clear(screen.getByLabelText('Audience'))
+    await user.type(screen.getByLabelText('Audience'), 'csAdminOD')
     expect(screen.getByLabelText('Kunci integrasi').textContent).toContain('client_id       = other')
 
     await user.click(screen.getByRole('button', { name: 'Batal' }))
     expect(url).toHaveValue('http://10.0.0.5:9001/csAdmin')
     expect(url).toBeDisabled()
     expect(screen.getByLabelText('Client id')).toHaveValue('web-cs')
+    expect(screen.getByLabelText('Audience')).toHaveValue('csAdminEL')
     expect(screen.getByLabelText('Kunci integrasi').textContent).toContain('client_id       = web-cs')
     expect(screen.getByRole('button', { name: 'Ubah Alamat dan client id' })).toHaveFocus()
 
@@ -226,7 +272,7 @@ describe('IntegrationSection', () => {
     await user.click(screen.getByRole('button', { name: 'Simpan & aktifkan' }))
     await confirmSave(user)
     await waitFor(() =>
-      expect(settingsApi.saveIntegration).toHaveBeenCalledWith('http://10.0.0.9:9001', 'web-cs'),
+      expect(settingsApi.saveIntegration).toHaveBeenCalledWith('http://10.0.0.9:9001', 'web-cs', 'csAdminEL'),
     )
     await waitFor(() => expect(screen.getByLabelText('Alamat API Nasabah')).toBeDisabled())
   })
