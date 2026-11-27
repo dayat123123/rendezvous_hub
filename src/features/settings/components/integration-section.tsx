@@ -66,10 +66,14 @@ function ConnectionCard({
   status,
   clientId,
   onClientId,
+  audience,
+  onAudience,
 }: {
   status: IntegrationStatus
   clientId: string
   onClientId: (value: string) => void
+  audience: string
+  onAudience: (value: string) => void
 }) {
   const { t } = useTranslation()
   const test = useTestIntegration()
@@ -77,7 +81,6 @@ function ConnectionCard({
   const clear = useClearIntegration()
   const lock = useLockedEdit()
   const [url, setUrl] = useState(status.url)
-  const [audience, setAudience] = useState(status.audience || defaultCsadminAudience)
   const [touched, setTouched] = useState(false)
   const [result, setResult] = useState<{ check: IntegrationCheck; saved: boolean | null } | null>(null)
   const [confirming, setConfirming] = useState(false)
@@ -121,7 +124,7 @@ function ConnectionCard({
         onReset={() => {
           setUrl(status.url)
           onClientId(status.client_id)
-          setAudience(savedAudience)
+          onAudience(savedAudience)
           setTouched(false)
           setResult(null)
         }}
@@ -130,7 +133,11 @@ function ConnectionCard({
             .mutateAsync({ url: typedUrl, clientId: typedClient, audience: typedAudience })
             .then((saved) => {
               setResult({ check: saved.check, saved: saved.saved })
-              if (saved.saved) toast.success(t('settings.integrationSaved'))
+              if (saved.saved) {
+                onClientId(saved.status.client_id)
+                onAudience(saved.status.audience || defaultCsadminAudience)
+                toast.success(t('settings.integrationSaved'))
+              }
               return saved.saved
             })
         }
@@ -233,7 +240,7 @@ function ConnectionCard({
               placeholder={defaultCsadminAudience}
               value={audience}
               aria-invalid={touched && audienceProblem ? true : undefined}
-              onChange={(event) => edit(() => setAudience(event.target.value))}
+              onChange={(event) => edit(() => onAudience(event.target.value))}
             />
             <FieldMessage
               error={touched && audienceProblem ? t('settings.csadminAudienceInvalid') : undefined}
@@ -264,7 +271,7 @@ function ConnectionCard({
               setConfirming(false)
               setUrl(next.url)
               onClientId(next.client_id)
-              setAudience(next.audience || defaultCsadminAudience)
+              onAudience(next.audience || defaultCsadminAudience)
               setResult(null)
               setTouched(false)
               toast.success(t('settings.disconnected'))
@@ -278,7 +285,15 @@ function ConnectionCard({
   )
 }
 
-function KeyCard({ status, clientId }: { status: IntegrationStatus; clientId: string }) {
+function KeyCard({
+  status,
+  clientId,
+  audience,
+}: {
+  status: IntegrationStatus
+  clientId: string
+  audience: string
+}) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   if (!status.key_configured) {
@@ -288,7 +303,11 @@ function KeyCard({ status, clientId }: { status: IntegrationStatus; clientId: st
       </SettingsCard>
     )
   }
-  const block = csadminConfigBlock(clientId.trim() || t('settings.clientIdUnknown'), status.public_key)
+  const block = csadminConfigBlock(
+    clientId.trim() || t('settings.clientIdUnknown'),
+    audience.trim() || defaultCsadminAudience,
+    status.public_key,
+  )
   return (
     <SettingsCard title={t('settings.integrationKey')} subtitle={t('settings.integrationKeyHint')}>
       <pre
@@ -318,6 +337,7 @@ function KeyCard({ status, clientId }: { status: IntegrationStatus; clientId: st
 
 function IntegrationContent({ status }: { status: IntegrationStatus }) {
   const [clientId, setClientId] = useState(status.client_id)
+  const [audience, setAudience] = useState(status.audience || defaultCsadminAudience)
   return (
     <div className="flex flex-col gap-4">
       <ConnectionCard
@@ -325,8 +345,10 @@ function IntegrationContent({ status }: { status: IntegrationStatus }) {
         status={status}
         clientId={clientId}
         onClientId={setClientId}
+        audience={audience}
+        onAudience={setAudience}
       />
-      <KeyCard status={status} clientId={clientId} />
+      <KeyCard status={status} clientId={clientId} audience={audience} />
     </div>
   )
 }

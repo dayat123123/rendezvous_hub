@@ -87,11 +87,12 @@ describe('csAdmin integration', () => {
   })
 
   it('builds the integration block for the CS Admin service config', () => {
-    expect(csadminConfigBlock('web-cs', 'MCowBQYDK2VwAyEA')).toBe(
+    expect(csadminConfigBlock('web-cs', 'csAdminEL', 'MCowBQYDK2VwAyEA')).toBe(
       [
         '#INTEGRATION (web CS gateway)',
         'integration {',
         '        client_id       = web-cs',
+        '        audience        = csAdminEL',
         '        public_key      = MCowBQYDK2VwAyEA',
         '        #DURATION IN MINUTES (1-60)',
         '        duration_token_minutes = 15',

@@ -933,8 +933,7 @@ export const id = {
     csadminClientIdRequired: 'Client id wajib diisi',
     csadminClientIdInvalid: 'Client id 1–50 karakter: huruf, angka, titik, _, atau -',
     csadminAudience: 'Audience',
-    csadminAudienceHint:
-      'Nama service CS Admin yang dituju, mis. csAdminEL atau csAdminOD. Kosong = csAdminEL.',
+    csadminAudienceHint: 'Harus sama dengan audience di config CS Admin service. Kosong = csAdminEL.',
     csadminAudienceInvalid: 'Audience 1–50 karakter: huruf, angka, titik, _, atau -',
     testConnection: 'Tes koneksi',
     saveActivate: 'Simpan & aktifkan',
@@ -953,7 +952,7 @@ export const id = {
     testResult: {
       ok: 'Terhubung. API Nasabah menerbitkan token integrasi ({{ms}} ms).',
       refused:
-        'API Nasabah menolak kunci integrasi. Pastikan client_id dan public_key di config CS Admin service sama dengan blok di bawah, lalu restart service-nya. Cek juga Audience: harus sama dengan nama service CS Admin yang dipakai, mis. csAdminEL atau csAdminOD.',
+        'API Nasabah menolak kunci integrasi. Pastikan client_id, audience, dan public_key di config CS Admin service sama dengan blok di bawah, lalu restart service-nya.',
       ip_not_allowed:
         'API Nasabah menolak IP server ini. Tambahkan IP server web CS ke allowed_ips di config CS Admin service.',
       disabled:
