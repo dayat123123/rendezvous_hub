@@ -83,6 +83,7 @@ describe('IntegrationSection', () => {
     expect(screen.queryByRole('button', { name: 'Simpan & aktifkan' })).not.toBeInTheDocument()
     expect(screen.getByText(/Menu Akun Nasabah belum tampil untuk CS/)).toBeVisible()
     expect(screen.getByLabelText('Kunci integrasi').textContent).toContain('client_id       = <client id>')
+    expect(screen.getByLabelText('Kunci integrasi').textContent).toContain('audience        = csAdminEL')
     expect(document.body.textContent).not.toMatch(/docker\/\.env/)
   })
 
@@ -124,7 +125,7 @@ describe('IntegrationSection', () => {
       'csAdminEL',
     )
     expect(await screen.findByRole('status')).toHaveTextContent(
-      'Belum disimpan. API Nasabah menolak kunci integrasi. Pastikan client_id dan public_key di config CS Admin service',
+      'Belum disimpan. API Nasabah menolak kunci integrasi. Pastikan client_id, audience, dan public_key di config CS Admin service',
     )
     expect(screen.getByText('Belum diatur')).toBeVisible()
     expect(screen.getByLabelText('Alamat API Nasabah')).toBeEnabled()
@@ -200,6 +201,7 @@ describe('IntegrationSection', () => {
 
     await user.clear(audience)
     await user.type(audience, ' csAdminOD ')
+    expect(screen.getByLabelText('Kunci integrasi').textContent).toContain('audience        = csAdminOD')
     await user.click(screen.getByRole('button', { name: 'Simpan & aktifkan' }))
     await confirmSave(user)
     await waitFor(() =>

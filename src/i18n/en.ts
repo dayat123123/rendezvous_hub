@@ -935,8 +935,7 @@ export const en: Translation = {
     csadminClientIdRequired: 'Enter the client id',
     csadminClientIdInvalid: 'Client id: 1–50 letters, digits, dots, _, or -',
     csadminAudience: 'Audience',
-    csadminAudienceHint:
-      'Name of the target CS Admin service, e.g. csAdminEL or csAdminOD. Empty = csAdminEL.',
+    csadminAudienceHint: 'Must match audience in the CS Admin service config. Empty = csAdminEL.',
     csadminAudienceInvalid: 'Audience: 1–50 letters, digits, dots, _, or -',
     testConnection: 'Test connection',
     saveActivate: 'Save & activate',
@@ -956,7 +955,7 @@ export const en: Translation = {
     testResult: {
       ok: 'Connected. The Customer API issued an integration token ({{ms}} ms).',
       refused:
-        'The Customer API refused the integration key. Make sure client_id and public_key in the CS Admin service config match the block below, then restart the service. Also check Audience: it must match the name of the CS Admin service in use, e.g. csAdminEL or csAdminOD.',
+        'The Customer API refused the integration key. Make sure client_id, audience, and public_key in the CS Admin service config match the block below, then restart the service.',
       ip_not_allowed:
         'The Customer API refused this server IP. Add the web CS server IP to allowed_ips in the CS Admin service config.',
       disabled:

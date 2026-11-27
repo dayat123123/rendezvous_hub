@@ -56,11 +56,12 @@ export const defaultCsadminAudience = 'csAdminEL'
 
 export const validCsadminAudience = (audience: string) => clientIdPattern.test(audience)
 
-export function csadminConfigBlock(clientId: string, publicKey: string) {
+export function csadminConfigBlock(clientId: string, audience: string, publicKey: string) {
   return [
     '#INTEGRATION (web CS gateway)',
     'integration {',
     `        client_id       = ${clientId}`,
+    `        audience        = ${audience}`,
     `        public_key      = ${publicKey}`,
     '        #DURATION IN MINUTES (1-60)',
     '        duration_token_minutes = 15',
