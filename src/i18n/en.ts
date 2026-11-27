@@ -64,7 +64,7 @@ export const en: Translation = {
   },
   auth: {
     loginTitle: 'Sign in to Rendezvous Hub',
-    loginSubtitle: 'For OLT agents and Super Admins only. Access from the office network only.',
+    loginSubtitle: 'For OLT agents and Super Admins only.',
     email: 'Email',
     password: 'Password',
     showPassword: 'Show password',

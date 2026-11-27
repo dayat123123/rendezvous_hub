@@ -2,7 +2,7 @@
   "name": "rendezvous-hub",
   "private": true,
   "version": "0.1.0",
-  "description": "Rendezvous Hub: web CS, Super Admin, Kepatuhan, dan Komunitas OLT (React + TypeScript). Produksi hanya dari LAN kantor atau VPN.",
+  "description": "Rendezvous Hub: web CS, Super Admin, Kepatuhan, dan Komunitas OLT (React + TypeScript). Akses produksi dapat dibatasi ke LAN kantor atau VPN.",
   "type": "module",
   "engines": {
     "node": ">=24.12.0"
