@@ -15,7 +15,13 @@ import { stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
 import { useClearIntegration, useIntegrationStatus, useSaveIntegration, useTestIntegration } from '../hooks'
-import { csadminConfigBlock, validClientId, validCsadminUrl } from '../logic'
+import {
+  csadminConfigBlock,
+  defaultCsadminAudience,
+  validClientId,
+  validCsadminAudience,
+  validCsadminUrl,
+} from '../logic'
 import type { IntegrationCheck, IntegrationStatus } from '../types'
 import { FieldMessage, QueryContent, SectionFrame, SettingsCard } from './settings-ui'
 import { copyText } from '@/lib/clipboard'
@@ -71,14 +77,22 @@ function ConnectionCard({
   const clear = useClearIntegration()
   const lock = useLockedEdit()
   const [url, setUrl] = useState(status.url)
+  const [audience, setAudience] = useState(status.audience || defaultCsadminAudience)
   const [touched, setTouched] = useState(false)
   const [result, setResult] = useState<{ check: IntegrationCheck; saved: boolean | null } | null>(null)
   const [confirming, setConfirming] = useState(false)
   const typedUrl = tidyUrl(url)
   const typedClient = clientId.trim()
+  const typedAudience = audience.trim() || defaultCsadminAudience
+  const savedAudience = status.audience || defaultCsadminAudience
   const urlProblem = typedUrl === '' ? 'required' : validCsadminUrl(typedUrl) ? null : 'invalid'
   const clientProblem = typedClient === '' ? 'required' : validClientId(typedClient) ? null : 'invalid'
-  const unchanged = status.configured && typedUrl === status.url && typedClient === status.client_id
+  const audienceProblem = validCsadminAudience(typedAudience) ? null : 'invalid'
+  const unchanged =
+    status.configured &&
+    typedUrl === status.url &&
+    typedClient === status.client_id &&
+    typedAudience === savedAudience
   const busy = test.isPending || save.isPending || clear.isPending
   const edit = (apply: () => void) => {
     apply()
@@ -86,7 +100,7 @@ function ConnectionCard({
   }
   const valid = () => {
     setTouched(true)
-    return !urlProblem && !clientProblem
+    return !urlProblem && !clientProblem && !audienceProblem
   }
 
   return (
@@ -107,15 +121,18 @@ function ConnectionCard({
         onReset={() => {
           setUrl(status.url)
           onClientId(status.client_id)
+          setAudience(savedAudience)
           setTouched(false)
           setResult(null)
         }}
         onSave={() =>
-          save.mutateAsync({ url: typedUrl, clientId: typedClient }).then((saved) => {
-            setResult({ check: saved.check, saved: saved.saved })
-            if (saved.saved) toast.success(t('settings.integrationSaved'))
-            return saved.saved
-          })
+          save
+            .mutateAsync({ url: typedUrl, clientId: typedClient, audience: typedAudience })
+            .then((saved) => {
+              setResult({ check: saved.check, saved: saved.saved })
+              if (saved.saved) toast.success(t('settings.integrationSaved'))
+              return saved.saved
+            })
         }
         onError={(error) => toast.error(errorText(error))}
         actions={
@@ -128,7 +145,7 @@ function ConnectionCard({
               onClick={() => {
                 if (!valid()) return
                 test.mutate(
-                  { url: typedUrl, clientId: typedClient },
+                  { url: typedUrl, clientId: typedClient, audience: typedAudience },
                   {
                     onSuccess: (check) => setResult({ check, saved: null }),
                     onError: (error) => toast.error(errorText(error)),
@@ -154,8 +171,8 @@ function ConnectionCard({
           </>
         }
       >
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
-          <div className="flex flex-col gap-1.5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_13rem_13rem]">
+          <div className="flex flex-col gap-1.5 sm:col-span-2 xl:col-span-1">
             <Label htmlFor="csadmin-url">{t('settings.csadminUrl')}</Label>
             <Input
               id="csadmin-url"
@@ -206,6 +223,23 @@ function ConnectionCard({
               hint={t('settings.csadminClientIdHint')}
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="csadmin-audience">{t('settings.csadminAudience')}</Label>
+            <Input
+              id="csadmin-audience"
+              autoComplete="off"
+              spellCheck={false}
+              maxLength={50}
+              placeholder={defaultCsadminAudience}
+              value={audience}
+              aria-invalid={touched && audienceProblem ? true : undefined}
+              onChange={(event) => edit(() => setAudience(event.target.value))}
+            />
+            <FieldMessage
+              error={touched && audienceProblem ? t('settings.csadminAudienceInvalid') : undefined}
+              hint={t('settings.csadminAudienceHint')}
+            />
+          </div>
         </div>
         <p className={cn('text-xs', status.configured ? 'text-muted-foreground' : 'text-warning')}>
           {status.configured
@@ -230,6 +264,7 @@ function ConnectionCard({
               setConfirming(false)
               setUrl(next.url)
               onClientId(next.client_id)
+              setAudience(next.audience || defaultCsadminAudience)
               setResult(null)
               setTouched(false)
               toast.success(t('settings.disconnected'))
@@ -286,7 +321,7 @@ function IntegrationContent({ status }: { status: IntegrationStatus }) {
   return (
     <div className="flex flex-col gap-4">
       <ConnectionCard
-        key={`${status.url}|${status.client_id}|${String(status.configured)}`}
+        key={`${status.url}|${status.client_id}|${status.audience}|${String(status.configured)}`}
         status={status}
         clientId={clientId}
         onClientId={setClientId}

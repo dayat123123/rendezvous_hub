@@ -934,6 +934,10 @@ export const en: Translation = {
     csadminClientIdHint: 'Must match client_id in the CS Admin service config.',
     csadminClientIdRequired: 'Enter the client id',
     csadminClientIdInvalid: 'Client id: 1–50 letters, digits, dots, _, or -',
+    csadminAudience: 'Audience',
+    csadminAudienceHint:
+      'Name of the target CS Admin service, e.g. csAdminEL or csAdminOD. Empty = csAdminEL.',
+    csadminAudienceInvalid: 'Audience: 1–50 letters, digits, dots, _, or -',
     testConnection: 'Test connection',
     saveActivate: 'Save & activate',
     integrationConfirmTitle: 'Save and activate the Customer API integration?',
@@ -952,7 +956,7 @@ export const en: Translation = {
     testResult: {
       ok: 'Connected. The Customer API issued an integration token ({{ms}} ms).',
       refused:
-        'The Customer API refused the integration key. Make sure client_id and public_key in the CS Admin service config match the block below, then restart the service.',
+        'The Customer API refused the integration key. Make sure client_id and public_key in the CS Admin service config match the block below, then restart the service. Also check Audience: it must match the name of the CS Admin service in use, e.g. csAdminEL or csAdminOD.',
       ip_not_allowed:
         'The Customer API refused this server IP. Add the web CS server IP to allowed_ips in the CS Admin service config.',
       disabled:
@@ -1827,6 +1831,7 @@ export const en: Translation = {
       invalid_csadmin_url:
         'The Customer API address must start with http:// or https:// and have no spaces, login, or query.',
       invalid_csadmin_client_id: 'Client id: 1–50 letters, digits, dots, _, or -.',
+      invalid_csadmin_audience: 'Audience: 1–50 letters, digits, dots, _, or -.',
       integration_refused:
         'The Customer API refused the integration key. A Super Admin can check it in Settings → Customer API integration.',
       upstream_unavailable: 'The Customer API cannot be reached.',

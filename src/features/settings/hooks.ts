@@ -15,6 +15,7 @@ import type {
   AttachmentKindRule,
   AttachmentPolicyKind,
   Holiday,
+  IntegrationInput,
   QuickReplyConfig,
   SettingEntry,
   StaffAccount,
@@ -283,16 +284,16 @@ export function useIntegrationStatus() {
 
 export function useTestIntegration() {
   return useMutation({
-    mutationFn: ({ url, clientId }: { url: string; clientId: string }) =>
-      settingsApi.testIntegration(url, clientId),
+    mutationFn: ({ url, clientId, audience }: IntegrationInput) =>
+      settingsApi.testIntegration(url, clientId, audience),
   })
 }
 
 export function useSaveIntegration() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: ({ url, clientId }: { url: string; clientId: string }) =>
-      settingsApi.saveIntegration(url, clientId),
+    mutationFn: ({ url, clientId, audience }: IntegrationInput) =>
+      settingsApi.saveIntegration(url, clientId, audience),
     onSuccess: (result) => {
       client.setQueryData(settingsKeys.integration, result.status)
       if (result.saved) void client.invalidateQueries({ queryKey: nasabahKeys.me })
