@@ -147,7 +147,7 @@ make cs-console-react                        # dev; Windows: .\make.ps1 cs-conso
 make up PROFILE=single CS=1                  # produksi satu server; Windows: .\make.ps1 up -Profile single -Cs
 ```
 
-- Produksi butuh `CS_CONSOLE_DOMAIN` di `docker/.env` monorepo; `VPN_SOURCE_RANGES` opsional (kosong = semua IP).
+- Produksi butuh `CS_CONSOLE_DOMAIN` di `docker/.env` monorepo; `VPN_SOURCE_RANGES` opsional (kosong = hanya IP privat: LAN kantor dan VPN).
 - Server produksi menyimpan clone repo ini di `$HOME/rendezvous_hub`, dipasang oleh `scripts/server-install.sh` monorepo dengan deploy key tersendiri. Bila lokasinya berbeda, isi `HUB_DIR` di `docker/.env`.
 - Update: `git pull` di repo ini, lalu `make up PROFILE=single CS=1` di monorepo (image dibangun ulang).
 - Profil cluster memakai `${REGISTRY}/olt-social/cs-console:0.1.1` dari registry.
@@ -183,7 +183,7 @@ public/         favicon, robots.txt, theme.js, suara notifikasi
 
 ## Keamanan
 
-- **Pembatasan jaringan opsional.** Di produksi Hub dan API agen berada di satu domain (`CS_CONSOLE_DOMAIN`). Bila `VPN_SOURCE_RANGES` diisi, domain itu hanya menerima IP tersebut (Traefik ipAllowList di monorepo); bila kosong, Hub terbuka dari internet dan perlindungannya tinggal login, 2FA, kunci akun, dan rate limit. Aktifkan 2FA untuk semua peran bila Hub dibuka.
+- **Hanya jaringan internal.** Di produksi Hub dan API agen berada di satu domain (`CS_CONSOLE_DOMAIN`), yang hanya menerima LAN kantor dan VPN (Traefik ipAllowList di monorepo): IP di `VPN_SOURCE_RANGES` bila diisi, atau semua IP privat bila kosong. Dari internet selalu 403.
 - Header nginx: CSP ketat (`script-src 'self'`, `connect-src` hanya origin API), HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy`, COOP/CORP, `X-Robots-Tag: noindex`. Hanya GET/HEAD.
 - Container non-root (uid 101), filesystem read-only + tmpfs, `cap_drop: ALL`, batas CPU/memori/pids, healthcheck `/healthz`.
 - Password sementara wajib diganti saat login pertama dan setelah reset. Sesi GoTrue per tab (`sessionStorage` dengan kunci per tab), jadi beberapa akun bisa dibuka di tab berbeda pada satu browser. Logout otomatis setelah tidak aktif; cache, draf, dan data yang ditampilkan dibersihkan saat keluar.
