@@ -933,7 +933,7 @@ export const id = {
     csadminClientIdRequired: 'Client id wajib diisi',
     csadminClientIdInvalid: 'Client id 1–50 karakter: huruf, angka, titik, _, atau -',
     csadminAudience: 'Audience',
-    csadminAudienceHint: 'Harus sama dengan audience di config CS Admin service. Kosong = csAdminEL.',
+    csadminAudienceHint: 'Harus sama dengan audience di config CS Admin service. Kosong = csAdmin.',
     csadminAudienceInvalid: 'Audience 1–50 karakter: huruf, angka, titik, _, atau -',
     testConnection: 'Tes koneksi',
     saveActivate: 'Simpan & aktifkan',

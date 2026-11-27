@@ -935,7 +935,7 @@ export const en: Translation = {
     csadminClientIdRequired: 'Enter the client id',
     csadminClientIdInvalid: 'Client id: 1–50 letters, digits, dots, _, or -',
     csadminAudience: 'Audience',
-    csadminAudienceHint: 'Must match audience in the CS Admin service config. Empty = csAdminEL.',
+    csadminAudienceHint: 'Must match audience in the CS Admin service config. Empty = csAdmin.',
     csadminAudienceInvalid: 'Audience: 1–50 letters, digits, dots, _, or -',
     testConnection: 'Test connection',
     saveActivate: 'Save & activate',
