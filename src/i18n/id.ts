@@ -62,7 +62,7 @@ export const id = {
   },
   auth: {
     loginTitle: 'Masuk ke Rendezvous Hub',
-    loginSubtitle: 'Khusus CS dan Super Admin OLT. Akses hanya dari jaringan kantor.',
+    loginSubtitle: 'Khusus CS dan Super Admin OLT.',
     email: 'Email',
     password: 'Password',
     showPassword: 'Tampilkan password',
