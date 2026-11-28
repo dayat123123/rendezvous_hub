@@ -153,7 +153,7 @@ describe('popup banner rules', () => {
   })
 
   it('parses and validates deep link schemes', () => {
-    expect(parseSchemes(' OLT://, mitra  olt ')).toEqual(['mitra', 'olt'])
+    expect(parseSchemes(' OLT://, mitra  olt ')).toEqual(['olt', 'mitra'])
     expect(schemeProblem(['olt', 'https'], ['http', 'https'], 5)).toBe('forbidden')
     expect(schemeProblem(['9olt'], [], 5)).toBe('format')
     expect(schemeProblem(['a', 'b', 'c', 'd', 'e', 'f'], [], 5)).toBe('count')

@@ -1,3 +1,5 @@
+import { useNavigate } from '@tanstack/react-router'
+import { ArrowRightIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -5,10 +7,11 @@ import { toast } from 'sonner'
 import { Dot } from '@/components/badges'
 import { CopyButton } from '@/components/copy-button'
 import { LockedForm } from '@/components/locked-form'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/controls'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/controls'
-import { Textarea } from '@/components/ui/textarea'
+import { downloadCount } from '@/features/app-identity/logic'
 import {
   FieldMessage,
   QueryContent,
@@ -21,15 +24,8 @@ import { formatNumber, stamp } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
 import { useSaveShareLinks, useShareLinks } from '../hooks'
-import {
-  configFromDraft,
-  draftFromConfig,
-  draftProblems,
-  exampleCode,
-  sameConfig,
-  type DraftProblem,
-} from '../logic'
-import type { ShareLinksDraft, ShareLinksField, ShareLinksStatus } from '../types'
+import { draftFromConfig, draftProblems, exampleCode, sameSettings, settingsFromDraft } from '../logic'
+import type { ShareLinksDraft, ShareLinksStatus } from '../types'
 
 export function ShareLinksBadge({ ready }: { ready: boolean }) {
   const { t } = useTranslation()
@@ -46,89 +42,25 @@ export function ShareLinksBadge({ ready }: { ready: boolean }) {
   )
 }
 
-function TextField({
-  id,
+function ToggleRow({
   label,
-  value,
-  onChange,
   hint,
-  problem,
-  touched,
-  placeholder,
-  maxLength,
-  inputMode,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-  hint?: string
-  problem?: DraftProblem
-  touched: boolean
-  placeholder?: string
-  maxLength: number
-  inputMode?: 'url' | 'text'
-}) {
-  const { t } = useTranslation()
-  const error =
-    touched && problem ? t(`settings.share.errors.${problem.code}`, { line: problem.line }) : undefined
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        autoComplete="off"
-        spellCheck={false}
-        inputMode={inputMode}
-        maxLength={maxLength}
-        placeholder={placeholder}
-        value={value}
-        aria-invalid={error ? true : undefined}
-        onChange={(event) => onChange(event.target.value)}
-      />
-      <FieldMessage error={error} hint={hint} />
-    </div>
-  )
-}
-
-function ListField({
-  id,
-  label,
-  value,
+  checked,
   onChange,
-  hint,
-  problem,
-  touched,
-  placeholder,
 }: {
-  id: string
   label: string
-  value: string
-  onChange: (value: string) => void
   hint: string
-  problem?: DraftProblem
-  touched: boolean
-  placeholder: string
+  checked: boolean
+  onChange: (value: boolean) => void
 }) {
-  const { t } = useTranslation()
-  const error =
-    touched && problem ? t(`settings.share.errors.${problem.code}`, { line: problem.line }) : undefined
   return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Textarea
-        id={id}
-        rows={3}
-        spellCheck={false}
-        autoComplete="off"
-        className="font-mono text-xs"
-        placeholder={placeholder}
-        value={value}
-        aria-invalid={error ? true : undefined}
-        onChange={(event) => onChange(event.target.value)}
-      />
-      <FieldMessage error={error} hint={hint} />
-    </div>
+    <label className="flex items-start gap-2 text-sm">
+      <Switch checked={checked} aria-label={label} onCheckedChange={onChange} />
+      <span className="flex flex-col">
+        <span className="font-medium">{label}</span>
+        <span className="text-xs text-muted-foreground">{hint}</span>
+      </span>
+    </label>
   )
 }
 
@@ -138,27 +70,20 @@ function ShareLinksForm({ status }: { status: ShareLinksStatus }) {
   const lock = useLockedEdit()
   const [draft, setDraft] = useState<ShareLinksDraft>(() => draftFromConfig(status.config))
   const [touched, setTouched] = useState(false)
-  const problems = draftProblems(draft)
-  const valid = Object.keys(problems).length === 0
-  const next = configFromDraft(draft)
-  const unchanged = valid && sameConfig(next, status.config)
+  const problem = draftProblems(draft).baseUrl
+  const next = settingsFromDraft(draft)
+  const unchanged = !problem && sameSettings(next, status.config)
+  const error = touched && problem ? t(`settings.share.errors.${problem.code}`) : undefined
   const set =
     <K extends keyof ShareLinksDraft>(key: K) =>
     (value: ShareLinksDraft[K]) =>
       setDraft((current) => ({ ...current, [key]: value }))
-  const field = (key: ShareLinksField) => ({
-    id: `share-${key}`,
-    value: draft[key],
-    onChange: set(key),
-    problem: problems[key],
-    touched,
-  })
 
   return (
     <LockedForm
       lock={lock}
       name={t('settings.shareLinks')}
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-4"
       autoComplete="off"
       confirmTitle={t('settings.share.confirmTitle')}
       confirmBody={t(draft.enabled ? 'settings.share.confirmOn' : 'settings.share.confirmOff')}
@@ -167,7 +92,7 @@ function ShareLinksForm({ status }: { status: ShareLinksStatus }) {
       canSave={!save.isPending && !unchanged}
       onCheck={() => {
         setTouched(true)
-        return valid
+        return !problem
       }}
       onReset={() => {
         setDraft(draftFromConfig(status.config))
@@ -181,7 +106,7 @@ function ShareLinksForm({ status }: { status: ShareLinksStatus }) {
           return true
         })
       }
-      onError={(error) => toast.error(errorText(error))}
+      onError={(failure) => toast.error(errorText(failure))}
       status={
         status.updated_at ? (
           <p className="text-xs text-muted-foreground">
@@ -192,107 +117,64 @@ function ShareLinksForm({ status }: { status: ShareLinksStatus }) {
         ) : null
       }
     >
-      <SettingsCard title={t('settings.share.linkCard')} subtitle={t('settings.share.linkCardHint')}>
-        <div className="flex flex-col gap-4">
-          <label className="flex items-start gap-2 text-sm">
-            <Switch
-              checked={draft.enabled}
-              aria-label={t('settings.share.enabled')}
-              onCheckedChange={set('enabled')}
-            />
-            <span className="flex flex-col">
-              <span className="font-medium">{t('settings.share.enabled')}</span>
-              <span className="text-xs text-muted-foreground">{t('settings.share.enabledHint')}</span>
-            </span>
-          </label>
-          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_10rem]">
-            <TextField
-              {...field('baseUrl')}
-              label={t('settings.share.baseUrl')}
-              hint={t('settings.share.baseUrlHint')}
-              placeholder="https://share.perusahaan.co.id"
-              maxLength={200}
-              inputMode="url"
-            />
-            <TextField
-              {...field('appName')}
-              label={t('settings.share.appName')}
-              hint={t('settings.share.appNameHint')}
-              maxLength={40}
-            />
-            <TextField
-              {...field('appScheme')}
-              label={t('settings.share.appScheme')}
-              hint={t('settings.share.appSchemeHint')}
-              placeholder="olt"
-              maxLength={31}
-            />
-          </div>
-          <label className="flex items-start gap-2 text-sm">
-            <Switch
-              checked={draft.preview}
-              aria-label={t('settings.share.preview')}
-              onCheckedChange={set('preview')}
-            />
-            <span className="flex flex-col">
-              <span className="font-medium">{t('settings.share.preview')}</span>
-              <span className="text-xs text-muted-foreground">{t('settings.share.previewHint')}</span>
-            </span>
-          </label>
-        </div>
-      </SettingsCard>
-      <SettingsCard title={t('settings.share.appsCard')} subtitle={t('settings.share.appsCardHint')}>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <ListField
-            {...field('android')}
-            label={t('settings.share.android')}
-            hint={t('settings.share.androidHint')}
-            placeholder="co.perusahaan.app AB:CD:…:EF"
-          />
-          <ListField
-            {...field('ios')}
-            label={t('settings.share.ios')}
-            hint={t('settings.share.iosHint')}
-            placeholder="ABCDE12345.co.perusahaan.app"
-          />
-        </div>
-      </SettingsCard>
-      <SettingsCard
-        title={t('settings.share.downloadsCard')}
-        subtitle={t('settings.share.downloadsCardHint')}
-      >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <TextField
-            {...field('androidStore')}
-            label={t('settings.share.androidStore')}
-            placeholder="https://play.google.com/store/apps/details?id=…"
-            maxLength={300}
-            inputMode="url"
-          />
-          <TextField
-            {...field('iosStore')}
-            label={t('settings.share.iosStore')}
-            placeholder="https://apps.apple.com/…"
-            maxLength={300}
-            inputMode="url"
-          />
-          <TextField
-            {...field('windowsDownload')}
-            label={t('settings.share.windowsDownload')}
-            placeholder="https://…"
-            maxLength={300}
-            inputMode="url"
-          />
-          <TextField
-            {...field('macDownload')}
-            label={t('settings.share.macDownload')}
-            placeholder="https://…"
-            maxLength={300}
-            inputMode="url"
-          />
-        </div>
-      </SettingsCard>
+      <ToggleRow
+        label={t('settings.share.enabled')}
+        hint={t('settings.share.enabledHint')}
+        checked={draft.enabled}
+        onChange={set('enabled')}
+      />
+      <div className="flex max-w-2xl flex-col gap-1.5">
+        <Label htmlFor="share-baseUrl">{t('settings.share.baseUrl')}</Label>
+        <Input
+          id="share-baseUrl"
+          autoComplete="off"
+          spellCheck={false}
+          inputMode="url"
+          maxLength={200}
+          placeholder="https://share.perusahaan.co.id"
+          value={draft.baseUrl}
+          aria-invalid={error ? true : undefined}
+          onChange={(event) => set('baseUrl')(event.target.value)}
+        />
+        <FieldMessage error={error} hint={t('settings.share.baseUrlHint')} />
+      </div>
+      <ToggleRow
+        label={t('settings.share.preview')}
+        hint={t('settings.share.previewHint')}
+        checked={draft.preview}
+        onChange={set('preview')}
+      />
     </LockedForm>
+  )
+}
+
+function IdentityCard({ status }: { status: ShareLinksStatus }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const config = status.config
+  return (
+    <SettingsCard title={t('settings.share.identityCard')} subtitle={t('settings.share.identityCardHint')}>
+      <p className="text-row">
+        {t('settings.share.identitySummary', {
+          name: config.app_name,
+          scheme: config.app_scheme ? `${config.app_scheme}://` : t('settings.share.noScheme'),
+          android: config.android.length,
+          ios: config.ios_app_ids.length,
+          downloads: downloadCount(config),
+        })}
+      </p>
+      <div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => void navigate({ to: '/settings', search: { section: 'appIntegration' } })}
+        >
+          {t('settings.share.editIdentity')}
+          <ArrowRightIcon />
+        </Button>
+      </div>
+    </SettingsCard>
   )
 }
 
@@ -308,7 +190,8 @@ function CheckRow({ label, url }: { label: string; url: string }) {
 
 function StatusCard({ status }: { status: ShareLinksStatus }) {
   const { t } = useTranslation()
-  const base = status.config.base_url
+  const config = status.config
+  const base = config.base_url
   return (
     <SettingsCard title={t('settings.share.statusCard')}>
       <p className="text-row">
@@ -320,14 +203,16 @@ function StatusCard({ status }: { status: ShareLinksStatus }) {
       {base ? (
         <div className="flex flex-col gap-2">
           <CheckRow label={t('settings.share.example')} url={`${base}/p/${exampleCode}`} />
-          <CheckRow
-            label={t('settings.share.appExample')}
-            url={`${status.config.app_scheme}://p/${exampleCode}`}
-          />
-          {status.config.android.length > 0 ? (
+          {config.app_scheme ? (
+            <CheckRow
+              label={t('settings.share.appExample')}
+              url={`${config.app_scheme}://p/${exampleCode}`}
+            />
+          ) : null}
+          {config.android.length > 0 ? (
             <CheckRow label="assetlinks.json" url={`${base}/.well-known/assetlinks.json`} />
           ) : null}
-          {status.config.ios_app_ids.length > 0 ? (
+          {config.ios_app_ids.length > 0 ? (
             <CheckRow
               label="apple-app-site-association"
               url={`${base}/.well-known/apple-app-site-association`}
@@ -354,7 +239,10 @@ export function ShareLinksSection() {
       <QueryContent query={query}>
         {(status) => (
           <div className="flex flex-col gap-5">
-            <ShareLinksForm key={status.version} status={status} />
+            <SettingsCard title={t('settings.share.linkCard')} subtitle={t('settings.share.linkCardHint')}>
+              <ShareLinksForm key={status.version} status={status} />
+            </SettingsCard>
+            <IdentityCard status={status} />
             <StatusCard status={status} />
           </div>
         )}

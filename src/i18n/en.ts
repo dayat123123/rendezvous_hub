@@ -861,7 +861,7 @@ export const en: Translation = {
     shareLinks: 'Share links',
     share: {
       description:
-        'Public links for sharing posts outside the app (WhatsApp, Telegram, email, browser). On phones with the app installed the link opens the app directly; otherwise a preview page shows open-in-app and download buttons.',
+        'Public links for sharing posts outside the app (WhatsApp, Telegram, email, browser). On devices with the app installed the link opens the app directly; otherwise a preview page shows open-in-app and download buttons.',
       ready: 'Active',
       notReady: 'Not active',
       linkCard: 'Links',
@@ -872,30 +872,16 @@ export const en: Translation = {
       baseUrl: 'Link domain',
       baseUrlHint:
         'Public address without a path, the same as SHARE_DOMAIN (or PROXY_DOMAIN) on the server, e.g. https://share.company.com. For LAN testing: http://192.168.0.235:8000.',
-      appName: 'App name',
-      appNameHint: 'Shown in the page title and buttons, e.g. OLT.',
-      appScheme: 'App scheme',
-      appSchemeHint:
-        'The Open in app button uses <scheme>://p/<code>. The Windows and Mac apps must register this scheme.',
       preview: 'Show post content in previews',
       previewHint:
         'Author name, a text excerpt, and the first image appear on the page and in WhatsApp/Telegram cards. Deleted or hidden posts are never shown. When off, the page only has open-in-app and download buttons.',
-      appsCard: 'Apps that open the links',
-      appsCardHint:
-        'Android and iOS use these to verify that the app may open this domain directly. Needs an HTTPS domain reachable from the internet.',
-      android: 'Android (App Links)',
-      androidHint:
-        'One app per line: package name, then SHA-256 fingerprints (1–5, space separated). Use the App signing key fingerprint from Play Console → App integrity; add the upload/debug fingerprint for test builds.',
-      ios: 'iOS & Mac (Universal Links)',
-      iosHint:
-        'One App ID per line: Team ID (10 characters), a dot, then the bundle ID, for the iOS and Mac apps. The apps also need Associated Domains applinks:<domain>.',
-      downloadsCard: 'Download links',
-      downloadsCardHint:
-        'Download buttons on the preview page for people without the app. Leave empty if not available yet.',
-      androidStore: 'Google Play',
-      iosStore: 'App Store',
-      windowsDownload: 'Windows',
-      macDownload: 'Mac',
+      identityCard: 'App',
+      identityCardHint:
+        'Name, scheme, Android/iOS/Mac apps, and download links are set once in App integration and also used by banners and popups.',
+      identitySummary:
+        'Name {{name}} · scheme {{scheme}} · Android {{android}} · iOS & Mac {{ios}} · download links {{downloads}}',
+      noScheme: 'none (the Open in app button is hidden)',
+      editIdentity: 'Edit in App integration',
       statusCard: 'Status',
       codes: '{{total}} posts have a link, {{week}} created in the last 7 days.',
       example: 'Example link',
@@ -911,8 +897,33 @@ export const en: Translation = {
       errors: {
         baseUrlRequired: 'Set the link domain before enabling',
         baseUrlInvalid: 'Must be http:// or https:// followed by a host (and port), without a path',
+      },
+    },
+    identity: {
+      title: 'App identity',
+      subtitle:
+        'Shared OLT app data: the share link pages, App Links/Universal Links verification, and download buttons. The app scheme is set in the App schemes card above.',
+      appName: 'App name',
+      appNameHint: 'Shown in the share page title and buttons, e.g. OLT.',
+      android: 'Android (App Links)',
+      androidHint:
+        'One app per line: package name, then SHA-256 fingerprints (1–5, space separated). Use the App signing key fingerprint from Play Console → App integrity; add the upload/debug fingerprint for test builds.',
+      ios: 'iOS & Mac (Universal Links)',
+      iosHint:
+        'One App ID per line: Team ID (10 characters), a dot, then the bundle ID, for the iOS and Mac apps. The apps also need Associated Domains applinks:<domain>.',
+      downloads: 'Download links',
+      downloadsHint:
+        'Download buttons on the preview page for people without the app. Leave empty if not available yet.',
+      androidStore: 'Google Play',
+      iosStore: 'App Store',
+      windowsDownload: 'Windows',
+      macDownload: 'Mac',
+      confirmTitle: 'Save the app identity?',
+      confirmBody:
+        'The App Links/Universal Links verification files and the download buttons on share pages use this data right away.',
+      saved: 'App identity saved',
+      errors: {
         appNameInvalid: 'App name 1–40 characters, without < or >',
-        appSchemeInvalid: 'Scheme of 2–31 lowercase letters/digits, not http, https, or a system scheme',
         httpsInvalid: 'Must start with https://, without spaces',
         android: {
           tooMany: 'At most 5 Android apps',
@@ -921,7 +932,7 @@ export const en: Translation = {
           fingerprintCount: 'Line {{line}}: add 1–5 SHA-256 fingerprints after the package name',
         },
         ios: {
-          tooMany: 'At most 5 iOS App IDs',
+          tooMany: 'At most 5 App IDs',
           appId: 'Line {{line}}: App ID must be TEAMID.bundle.id, e.g. ABCDE12345.com.company.app',
         },
       },

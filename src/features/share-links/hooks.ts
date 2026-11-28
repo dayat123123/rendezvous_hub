@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { shareLinksApi } from './api'
-import type { ShareLinksConfig } from './types'
+import type { ShareLinksSettings } from './types'
 
 export const shareLinksKeys = { status: ['admin', 'share-links'] as const }
 
@@ -12,7 +12,7 @@ export function useShareLinks() {
 export function useSaveShareLinks() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: (config: ShareLinksConfig) => shareLinksApi.save(config),
+    mutationFn: (settings: ShareLinksSettings) => shareLinksApi.save(settings),
     onSuccess: (status) => client.setQueryData(shareLinksKeys.status, status),
   })
 }

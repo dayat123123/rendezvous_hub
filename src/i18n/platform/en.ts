@@ -640,7 +640,7 @@ export const platform: Translated<typeof source> = {
   },
   appIntegration: {
     description:
-      'Data to hand to the OLT app team and the OLT login status. This page is read-only; nothing can be changed here.',
+      'Data for the OLT app team, the shared app identity (scheme, Android/iOS/Mac, download links), and the OLT login status. Connection data and login status are read-only.',
     connection: 'App connection data',
     connectionHint:
       'Give these to the OLT app team. The anon key is public by design (it ships inside the app), not a secret; database rules limit what it can do.',
@@ -688,21 +688,25 @@ export const platform: Translated<typeof source> = {
     keyHelp:
       'OLT keys are replaced on the server: update docker/secrets/olt_jwks and run make up. This is deliberately not possible from the Hub, because anyone who can replace the key can mint tokens on behalf of customers.',
     schemes: {
-      title: 'App deep link schemes',
+      title: 'App schemes',
       subtitle:
-        'Link prefixes that open a page inside the OLT app from a banner or popup, e.g. olt://promo/year-end opens the promo page in the app instead of the browser. Fill in the schemes the OLT app registers (usually set once by the IT team). When empty, banner links can only be https://. Web schemes and dangerous schemes (javascript, data, file, intent, content) are always rejected.',
+        'Link prefixes that open the OLT app, e.g. olt://promo/year-end from a banner or popup. The first scheme is the main one: the Open in app button on share links uses it (olt://p/<code>). Fill in the schemes the OLT app registers (usually set once by the IT team). When empty, banner links can only be https:// and share pages have no Open in app button. Web schemes and dangerous schemes (javascript, data, file, intent, content) are always rejected.',
       label: 'Allowed schemes',
-      hint: 'Write only the scheme name without ://, separated by commas, at most {{max}}. Starts with a letter; only lowercase letters, digits, +, dot, or -, at most 32 characters.',
+      hint: 'Write only the scheme name without ://, separated by commas, at most {{max}}. The first one is the main scheme and must be the scheme the OLT app registers (currently olt). Starts with a letter; only lowercase letters, digits, +, dot, or -, at most 32 characters.',
       none: 'No schemes yet',
       empty: 'No deep link schemes yet. Banner and popup links can only be https://.',
-      current: 'Banners and popups may link to https:// and {{schemes}}.',
-      saved: 'Deep link schemes saved',
+      current: 'Main scheme {{main}}. Banners and popups may link to https:// and {{schemes}}.',
+      saved: 'App schemes saved',
       changed: 'Changed {{time}} by {{name}}',
-      confirmTitle: 'Save the app deep link schemes?',
+      confirmTitle: 'Save the app schemes?',
       confirmBody:
         'Banners and popups can only link to https:// or {{schemes}}. Active banners that use a removed scheme stay visible, but without their link and button.',
       confirmEmpty:
         'Banner and popup links can only be https://. Active banners that use a deep link stay visible, but without their link and button.',
+      mainChanged:
+        'Warning: the main scheme changes from {{from}} to {{to}}. The Open in app button on share links will use {{to}}, but the OLT app only opens through the scheme it registers (currently olt). Change it only after an OLT app release with the new scheme.',
+      mainRemoved:
+        'Warning: the main scheme {{from}} is removed, so share link pages no longer show the Open in app button.',
       problems: {
         count: 'At most {{max}} schemes.',
         format:

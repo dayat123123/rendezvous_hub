@@ -859,7 +859,7 @@ export const id = {
     shareLinks: 'Tautan berbagi',
     share: {
       description:
-        'Tautan publik untuk membagikan postingan ke luar aplikasi (WhatsApp, Telegram, email, browser). Di HP yang sudah memasang aplikasi, tautan langsung membuka aplikasi. Selain itu tampil halaman pratinjau dengan tombol buka aplikasi dan tombol unduh.',
+        'Tautan publik untuk membagikan postingan ke luar aplikasi (WhatsApp, Telegram, email, browser). Di perangkat yang sudah memasang aplikasi, tautan langsung membuka aplikasi. Selain itu tampil halaman pratinjau dengan tombol buka aplikasi dan tombol unduh.',
       ready: 'Aktif',
       notReady: 'Belum aktif',
       linkCard: 'Tautan',
@@ -870,30 +870,16 @@ export const id = {
       baseUrl: 'Domain tautan',
       baseUrlHint:
         'Alamat publik tanpa path, sama dengan SHARE_DOMAIN (atau PROXY_DOMAIN) di server, mis. https://share.perusahaan.co.id. Untuk uji di LAN: http://192.168.0.235:8000.',
-      appName: 'Nama aplikasi',
-      appNameHint: 'Tampil di judul halaman dan tombol, mis. OLT.',
-      appScheme: 'Skema aplikasi',
-      appSchemeHint:
-        'Tombol Buka di aplikasi memakai <skema>://p/<kode>. App Windows dan Mac harus mendaftarkan skema ini.',
       preview: 'Tampilkan isi postingan di pratinjau',
       previewHint:
         'Nama penulis, cuplikan teks, dan gambar pertama tampil di halaman dan kartu WhatsApp/Telegram. Postingan yang dihapus atau disembunyikan tidak pernah ditampilkan. Bila dimatikan, halaman hanya berisi tombol buka aplikasi dan unduh.',
-      appsCard: 'Aplikasi yang membuka tautan',
-      appsCardHint:
-        'Dipakai Android dan iOS untuk memverifikasi bahwa aplikasi boleh membuka tautan domain ini secara langsung. Perlu domain HTTPS yang bisa dijangkau dari internet.',
-      android: 'Android (App Links)',
-      androidHint:
-        'Satu aplikasi per baris: package name lalu fingerprint SHA-256 (1–5, dipisah spasi). Ambil fingerprint App signing key di Play Console → Integritas aplikasi; tambahkan fingerprint upload/debug untuk build uji.',
-      ios: 'iOS & Mac (Universal Links)',
-      iosHint:
-        'Satu App ID per baris: Team ID (10 karakter) titik bundle ID, untuk app iOS dan app Mac. Aplikasinya juga perlu Associated Domains applinks:<domain>.',
-      downloadsCard: 'Tautan unduh',
-      downloadsCardHint:
-        'Tombol unduh di halaman pratinjau untuk yang belum memasang aplikasi. Kosongkan bila belum ada.',
-      androidStore: 'Google Play',
-      iosStore: 'App Store',
-      windowsDownload: 'Windows',
-      macDownload: 'Mac',
+      identityCard: 'Aplikasi',
+      identityCardHint:
+        'Nama, skema, aplikasi Android/iOS/Mac, dan tautan unduh diatur sekali di Integrasi aplikasi, lalu dipakai juga oleh banner dan popup.',
+      identitySummary:
+        'Nama {{name}} · skema {{scheme}} · Android {{android}} · iOS & Mac {{ios}} · tautan unduh {{downloads}}',
+      noScheme: 'belum ada (tombol Buka di aplikasi tidak tampil)',
+      editIdentity: 'Atur di Integrasi aplikasi',
       statusCard: 'Status',
       codes: '{{total}} postingan sudah punya tautan, {{week}} dibuat 7 hari terakhir.',
       example: 'Contoh tautan',
@@ -910,8 +896,33 @@ export const id = {
       errors: {
         baseUrlRequired: 'Isi domain tautan sebelum mengaktifkan',
         baseUrlInvalid: 'Harus http:// atau https:// diikuti host (dan port), tanpa path',
+      },
+    },
+    identity: {
+      title: 'Identitas aplikasi',
+      subtitle:
+        'Data aplikasi OLT yang dipakai bersama: halaman tautan berbagi, verifikasi App Links/Universal Links, dan tombol unduh. Skema aplikasi diatur di kartu Skema aplikasi di atas.',
+      appName: 'Nama aplikasi',
+      appNameHint: 'Tampil di judul halaman tautan berbagi dan tombol, mis. OLT.',
+      android: 'Android (App Links)',
+      androidHint:
+        'Satu aplikasi per baris: package name lalu fingerprint SHA-256 (1–5, dipisah spasi). Ambil fingerprint App signing key di Play Console → Integritas aplikasi; tambahkan fingerprint upload/debug untuk build uji.',
+      ios: 'iOS & Mac (Universal Links)',
+      iosHint:
+        'Satu App ID per baris: Team ID (10 karakter) titik bundle ID, untuk app iOS dan app Mac. Aplikasinya juga perlu Associated Domains applinks:<domain>.',
+      downloads: 'Tautan unduh',
+      downloadsHint:
+        'Tombol unduh di halaman pratinjau untuk yang belum memasang aplikasi. Kosongkan bila belum ada.',
+      androidStore: 'Google Play',
+      iosStore: 'App Store',
+      windowsDownload: 'Windows',
+      macDownload: 'Mac',
+      confirmTitle: 'Simpan identitas aplikasi?',
+      confirmBody:
+        'File verifikasi App Links/Universal Links dan tombol unduh di halaman tautan berbagi langsung memakai data ini.',
+      saved: 'Identitas aplikasi disimpan',
+      errors: {
         appNameInvalid: 'Nama aplikasi 1–40 karakter, tanpa < atau >',
-        appSchemeInvalid: 'Skema 2–31 huruf kecil/angka, bukan http, https, atau skema sistem',
         httpsInvalid: 'Harus diawali https://, tanpa spasi',
         android: {
           tooMany: 'Maksimal 5 aplikasi Android',
@@ -921,7 +932,7 @@ export const id = {
           fingerprintCount: 'Baris {{line}}: isi 1–5 fingerprint SHA-256 setelah package name',
         },
         ios: {
-          tooMany: 'Maksimal 5 App ID iOS',
+          tooMany: 'Maksimal 5 App ID',
           appId: 'Baris {{line}}: App ID harus TEAMID.bundle.id, mis. ABCDE12345.co.perusahaan.app',
         },
       },
