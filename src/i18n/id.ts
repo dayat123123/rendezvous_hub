@@ -874,7 +874,7 @@ export const id = {
       appNameHint: 'Tampil di judul halaman dan tombol, mis. OLT.',
       appScheme: 'Skema aplikasi',
       appSchemeHint:
-        'Tombol Buka di aplikasi memakai <skema>://p/<kode>. Installer Windows harus mendaftarkan skema ini.',
+        'Tombol Buka di aplikasi memakai <skema>://p/<kode>. App Windows dan Mac harus mendaftarkan skema ini.',
       preview: 'Tampilkan isi postingan di pratinjau',
       previewHint:
         'Nama penulis, cuplikan teks, dan gambar pertama tampil di halaman dan kartu WhatsApp/Telegram. Postingan yang dihapus atau disembunyikan tidak pernah ditampilkan. Bila dimatikan, halaman hanya berisi tombol buka aplikasi dan unduh.',
@@ -884,15 +884,16 @@ export const id = {
       android: 'Android (App Links)',
       androidHint:
         'Satu aplikasi per baris: package name lalu fingerprint SHA-256 (1–5, dipisah spasi). Ambil fingerprint App signing key di Play Console → Integritas aplikasi; tambahkan fingerprint upload/debug untuk build uji.',
-      ios: 'iOS (Universal Links)',
+      ios: 'iOS & Mac (Universal Links)',
       iosHint:
-        'Satu App ID per baris: Team ID (10 karakter) titik bundle ID. Aplikasi iOS juga perlu Associated Domains applinks:<domain>.',
+        'Satu App ID per baris: Team ID (10 karakter) titik bundle ID, untuk app iOS dan app Mac. Aplikasinya juga perlu Associated Domains applinks:<domain>.',
       downloadsCard: 'Tautan unduh',
       downloadsCardHint:
         'Tombol unduh di halaman pratinjau untuk yang belum memasang aplikasi. Kosongkan bila belum ada.',
       androidStore: 'Google Play',
       iosStore: 'App Store',
       windowsDownload: 'Windows',
+      macDownload: 'Mac',
       statusCard: 'Status',
       codes: '{{total}} postingan sudah punya tautan, {{week}} dibuat 7 hari terakhir.',
       example: 'Contoh tautan',
