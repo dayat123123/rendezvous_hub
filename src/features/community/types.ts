@@ -356,7 +356,8 @@ export type MediaPage = { items: MediaReview[]; next_cursor: number | null; pend
 
 export const alertStatuses = ['open', 'reviewed', 'dismissed'] as const
 export type AlertStatus = (typeof alertStatuses)[number]
-export type AlertKind = 'mention_spike' | 'new_account_concentration' | 'coordinated_posts'
+export type AlertKind =
+  'mention_spike' | 'new_account_concentration' | 'coordinated_posts' | 'one_sided_sentiment'
 
 export type ManipulationAlert = {
   id: string
@@ -372,6 +373,19 @@ export type ManipulationAlert = {
   reviewed_at: string | null
   review_note: string | null
   released_posts?: number
+}
+
+export type ManipulationAccount = {
+  user_id: string
+  username: string
+  display_name: string
+  created_at: string
+  new_account: boolean
+  alerts: number
+  stocks: string[]
+  last_alert_at: string
+  banned: boolean
+  deleted: boolean
 }
 
 export const appealStatuses = ['pending', 'accepted', 'rejected'] as const

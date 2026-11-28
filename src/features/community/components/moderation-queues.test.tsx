@@ -36,6 +36,7 @@ vi.mock('../api', () => ({
     decideMedia: vi.fn(),
     mediaImage: vi.fn(),
     alerts: vi.fn(),
+    alertAccounts: vi.fn(),
     reviewAlert: vi.fn(),
     appeals: vi.fn(),
     decideAppeal: vi.fn(),
@@ -201,6 +202,7 @@ beforeEach(() => {
   vi.mocked(communityApi.media).mockResolvedValue({ items: [review], next_cursor: null, pending: 1 })
   vi.mocked(communityApi.mediaImage).mockResolvedValue(new Blob(['x'], { type: 'image/jpeg' }))
   vi.mocked(communityApi.alerts).mockResolvedValue([])
+  vi.mocked(communityApi.alertAccounts).mockResolvedValue([])
   vi.mocked(communityApi.appeals).mockResolvedValue([appeal])
   vi.mocked(communityApi.user).mockResolvedValue(profile)
   vi.mocked(communityApi.editHistory).mockResolvedValue([])
@@ -551,5 +553,56 @@ describe('opening content by id', () => {
     expect(communityApi.content).toHaveBeenCalledWith('post', 'post-b')
     const sheet = await screen.findByRole('dialog', { name: 'Detail konten' })
     expect(await within(sheet).findByText('Isi postingan B')).toBeVisible()
+  })
+
+  it('shows a one-sided sentiment alert and the accounts that keep appearing', async () => {
+    const user = userEvent.setup()
+    const alert: ManipulationAlert = {
+      id: 'alert-2',
+      stock: 'ZQBL',
+      kind: 'one_sided_sentiment',
+      score: 0.94,
+      evidence: {
+        direction: 'bullish',
+        labeled: 17,
+        authors: 16,
+        hourly_average: 0.5,
+        post_ids: ['post-a'],
+        author_ids: ['user-a', 'user-b'],
+      },
+      status: 'open',
+      auto_actions: {},
+      detected_at: '2026-11-28T02:00:00.000Z',
+      last_detected_at: '2026-11-28T02:10:00.000Z',
+      reviewed_by: null,
+      reviewed_at: null,
+      review_note: null,
+    }
+    vi.mocked(communityApi.alerts).mockResolvedValue([alert])
+    vi.mocked(communityApi.alertAccounts).mockResolvedValue([
+      {
+        user_id: 'user-1',
+        username: 'ani',
+        display_name: 'Ani Saham',
+        created_at: '2026-11-27T00:00:00.000Z',
+        new_account: true,
+        alerts: 3,
+        stocks: ['ZQBL', 'ZQBR'],
+        last_alert_at: '2026-11-28T02:10:00.000Z',
+        banned: false,
+        deleted: false,
+      },
+    ])
+    render(<ModerationTab queue="alerts" />)
+
+    expect(await screen.findByText('Sentimen seragam (pompom)')).toBeVisible()
+    expect(screen.getByText('94% searah')).toBeVisible()
+    expect(screen.getByText('Bullish')).toBeVisible()
+    expect(screen.getByText(/2 akun terkait/)).toBeVisible()
+    expect(await screen.findByText(/3 alert · \$ZQBL, \$ZQBR · terakhir .* · akun baru/)).toBeVisible()
+    expect(communityApi.alertAccounts).toHaveBeenCalledWith(30)
+
+    await user.click(screen.getByRole('button', { name: 'Buka akun @ani' }))
+    expect(communityApi.user).toHaveBeenCalledWith('user-1')
   })
 })

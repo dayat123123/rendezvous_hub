@@ -45,6 +45,7 @@ export const communityKeys = {
   held: ['community', 'held'] as const,
   media: (status: MediaStatus) => ['community', 'media', status] as const,
   alerts: (status: AlertStatus, stock: string | null) => ['community', 'alerts', status, stock] as const,
+  alertAccounts: (days: number) => ['community', 'alerts', 'accounts', days] as const,
   appeals: (status: AppealStatus) => ['community', 'appeals', status] as const,
   room: (code: string) => ['community', 'room', code] as const,
   edits: (type: string, id: string) => ['community', 'edits', type, id] as const,
@@ -267,6 +268,15 @@ export function useManipulationAlerts(status: AlertStatus, stock: string | null)
   return useQuery({
     queryKey: communityKeys.alerts(status, stock),
     queryFn: () => communityApi.alerts(status, stock),
+    placeholderData: (previous) => previous,
+    ...live,
+  })
+}
+
+export function useAlertAccounts(days: number) {
+  return useQuery({
+    queryKey: communityKeys.alertAccounts(days),
+    queryFn: () => communityApi.alertAccounts(days),
     placeholderData: (previous) => previous,
     ...live,
   })
