@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { useBannerSettings, useClientConfig, useSetLinkSchemes } from '@/features/client-config/hooks'
 import { parseSchemes, schemeProblem } from '@/features/client-config/logic'
 import type { BannerSettings } from '@/features/client-config/types'
+import { AppIdentityCard } from '@/features/app-identity/components/app-identity-card'
 import { AccountLimitCard } from '@/features/settings/components/account-limit-card'
 import { QueryContent, SectionFrame, SettingsCard } from '@/features/settings/components/settings-ui'
 import { FieldText } from '@/features/system/components/system-ui'
@@ -170,11 +171,21 @@ function SchemesForm({ settings }: { settings: BannerSettings }) {
       className="flex max-w-xl flex-col gap-1.5"
       footerClassName="mt-1.5"
       confirmTitle={t('platform.appIntegration.schemes.confirmTitle')}
-      confirmBody={
+      confirmBody={[
         schemes.length > 0
           ? t('platform.appIntegration.schemes.confirmBody', { schemes: list })
-          : t('platform.appIntegration.schemes.confirmEmpty')
-      }
+          : t('platform.appIntegration.schemes.confirmEmpty'),
+        schemes[0] !== saved[0] && saved[0]
+          ? schemes[0]
+            ? t('platform.appIntegration.schemes.mainChanged', {
+                from: `${saved[0]}://`,
+                to: `${schemes[0]}://`,
+              })
+            : t('platform.appIntegration.schemes.mainRemoved', { from: `${saved[0]}://` })
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       saving={save.isPending}
       canSave={schemes.join(',') !== saved.join(',')}
       onCheck={() => {
@@ -223,6 +234,7 @@ function SchemesForm({ settings }: { settings: BannerSettings }) {
             : saved.length === 0
               ? t('platform.appIntegration.schemes.empty')
               : t('platform.appIntegration.schemes.current', {
+                  main: `${saved[0]}://`,
                   schemes: saved.map((item) => `${item}://`).join(', '),
                 })
         }
@@ -377,6 +389,7 @@ export function AppIntegrationSection() {
       <div className="flex flex-col gap-4">
         <ConnectionCard />
         <SchemesCard />
+        <AppIdentityCard />
         <QueryContent query={overview}>{(data) => <LoginCard data={data} />}</QueryContent>
         <AccountLimitCard />
       </div>

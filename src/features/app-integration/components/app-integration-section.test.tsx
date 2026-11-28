@@ -27,6 +27,29 @@ vi.mock('@/lib/supabase', async (importOriginal) => ({
 
 vi.mock('../api', () => ({ appIntegrationApi: { overview: vi.fn() } }))
 
+vi.mock('@/features/app-identity/api', () => ({
+  appIdentityApi: {
+    status: vi.fn(() =>
+      Promise.resolve({
+        identity: {
+          app_name: 'OLT',
+          android: [],
+          ios_app_ids: [],
+          android_store_url: '',
+          ios_store_url: '',
+          windows_download_url: '',
+          macos_download_url: '',
+        },
+        app_scheme: 'olt',
+        version: 1,
+        updated_at: null,
+        updated_by: null,
+      }),
+    ),
+    save: vi.fn(),
+  },
+}))
+
 vi.mock('@/features/client-config/api', async (importOriginal) => {
   const actual = await importOriginal<typeof ClientConfigApiModule>()
   return {
@@ -184,16 +207,20 @@ describe('AppIntegrationSection', () => {
     const user = userEvent.setup()
     renderWithProviders(<AppIntegrationSection />, monitorFixture)
 
-    expect(await screen.findByRole('heading', { name: 'Skema deep link aplikasi' })).toBeVisible()
-    expect(screen.getByText(/olt:\/\/promo\/akhir-tahun membuka halaman promo di aplikasi/)).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'Skema aplikasi' })).toBeVisible()
+    expect(
+      screen.getByText(/Skema pertama adalah skema utama: dipakai tombol Buka di aplikasi/),
+    ).toBeVisible()
     expect(screen.getByText(/Bila kosong, tautan banner hanya boleh https:\/\//)).toBeVisible()
     const input = await screen.findByLabelText('Skema yang diizinkan')
     expect(input).toHaveValue('olt')
     expect(input).toBeDisabled()
-    expect(screen.getByText('Banner dan popup boleh memakai tautan https:// dan olt://.')).toBeVisible()
+    expect(
+      screen.getByText('Skema utama olt://. Banner dan popup boleh memakai tautan https:// dan olt://.'),
+    ).toBeVisible()
     expect(screen.getByText(/Diubah .* oleh Sinta/)).toBeVisible()
 
-    await user.click(screen.getByRole('button', { name: 'Ubah Skema deep link aplikasi' }))
+    await user.click(screen.getByRole('button', { name: 'Ubah Skema aplikasi' }))
     expect(input).toBeEnabled()
     expect(input).toHaveFocus()
     await user.type(input, ', mitra')
@@ -205,10 +232,10 @@ describe('AppIntegrationSection', () => {
 
   it('rejects forbidden schemes and saves the list only after confirmation', async () => {
     const user = userEvent.setup()
-    vi.mocked(bannersApi.setLinkSchemes).mockResolvedValue(schemes({ deep_link_schemes: ['mitra', 'olt'] }))
+    vi.mocked(bannersApi.setLinkSchemes).mockResolvedValue(schemes({ deep_link_schemes: ['olt', 'mitra'] }))
     renderWithProviders(<AppIntegrationSection />, monitorFixture)
 
-    await user.click(await screen.findByRole('button', { name: 'Ubah Skema deep link aplikasi' }))
+    await user.click(await screen.findByRole('button', { name: 'Ubah Skema aplikasi' }))
     const input = screen.getByLabelText('Skema yang diizinkan')
     await user.clear(input)
     await user.type(input, 'olt, vbscript')
@@ -224,15 +251,41 @@ describe('AppIntegrationSection', () => {
     await user.clear(input)
     await user.type(input, 'olt, Mitra://')
     await user.click(screen.getByRole('button', { name: 'Simpan' }))
-    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema deep link aplikasi?' })
-    expect(dialog).toHaveTextContent('https:// atau mitra://, olt://')
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema aplikasi?' })
+    expect(dialog).toHaveTextContent('https:// atau olt://, mitra://')
     expect(dialog).toHaveTextContent('tetap tampil, tetapi tanpa tautan dan tombol')
     expect(bannersApi.setLinkSchemes).not.toHaveBeenCalled()
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
 
-    await waitFor(() => expect(bannersApi.setLinkSchemes).toHaveBeenCalledWith(['mitra', 'olt']))
-    expect(await screen.findByLabelText('Skema yang diizinkan')).toHaveValue('mitra, olt')
+    await waitFor(() => expect(bannersApi.setLinkSchemes).toHaveBeenCalledWith(['olt', 'mitra']))
+    expect(await screen.findByLabelText('Skema yang diizinkan')).toHaveValue('olt, mitra')
     expect(screen.getByLabelText('Skema yang diizinkan')).toBeDisabled()
+  })
+
+  it('warns when the main scheme changes, since the OLT app only registers olt', async () => {
+    const user = userEvent.setup()
+    vi.mocked(bannersApi.setLinkSchemes).mockResolvedValue(schemes({ deep_link_schemes: ['mitra', 'olt'] }))
+    renderWithProviders(<AppIntegrationSection />, monitorFixture)
+
+    await user.click(await screen.findByRole('button', { name: 'Ubah Skema aplikasi' }))
+    const input = screen.getByLabelText('Skema yang diizinkan')
+    await user.clear(input)
+    await user.type(input, 'mitra, olt')
+    await user.click(screen.getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema aplikasi?' })
+    expect(dialog).toHaveTextContent('skema utama berubah dari olt:// ke mitra://')
+    expect(dialog).toHaveTextContent('setelah aplikasi OLT dengan skema baru dirilis')
+  })
+
+  it('does not warn when only extra schemes are added after the main one', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AppIntegrationSection />, monitorFixture)
+
+    await user.click(await screen.findByRole('button', { name: 'Ubah Skema aplikasi' }))
+    await user.type(screen.getByLabelText('Skema yang diizinkan'), ', mitra')
+    await user.click(screen.getByRole('button', { name: 'Simpan' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema aplikasi?' })
+    expect(dialog).not.toHaveTextContent('skema utama berubah')
   })
 
   it('allows clearing every scheme so banners only link to https', async () => {
@@ -240,10 +293,10 @@ describe('AppIntegrationSection', () => {
     vi.mocked(bannersApi.setLinkSchemes).mockResolvedValue(schemes({ deep_link_schemes: [] }))
     renderWithProviders(<AppIntegrationSection />, monitorFixture)
 
-    await user.click(await screen.findByRole('button', { name: 'Ubah Skema deep link aplikasi' }))
+    await user.click(await screen.findByRole('button', { name: 'Ubah Skema aplikasi' }))
     await user.clear(screen.getByLabelText('Skema yang diizinkan'))
     await user.click(screen.getByRole('button', { name: 'Simpan' }))
-    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema deep link aplikasi?' })
+    const dialog = await screen.findByRole('alertdialog', { name: 'Simpan skema aplikasi?' })
     expect(dialog).toHaveTextContent('Tautan banner dan popup hanya boleh https://')
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
 

@@ -167,6 +167,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_save_app_identity: { Args: { p_identity: Json }; Returns: Json }
       admin_save_share_links: { Args: { p_config: Json }; Returns: Json }
       admin_save_ticket_label: {
         Args: {
@@ -348,6 +349,7 @@ export type Database = {
         Args: { p_bot_token?: string; p_chat_ids: string[]; p_enabled: boolean }
         Returns: Json
       }
+      app_identity: { Args: Record<PropertyKey, never>; Returns: Json }
       app_integration_overview: {
         Args: Record<PropertyKey, never>
         Returns: Json

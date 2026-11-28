@@ -1,3 +1,4 @@
+import type * as RouterModule from '@tanstack/react-router'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -9,6 +10,13 @@ import type * as ApiModule from '../api'
 import { shareLinksApi } from '../api'
 import type { ShareLinksStatus } from '../types'
 import { ShareLinksSection } from './share-links-section'
+
+const navigate = vi.fn()
+
+vi.mock('@tanstack/react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof RouterModule>()
+  return { ...actual, useNavigate: () => navigate }
+})
 
 vi.mock('../api', async (importOriginal) => {
   const actual = await importOriginal<typeof ApiModule>()
@@ -46,6 +54,7 @@ const on: ShareLinksStatus = {
     enabled: true,
     base_url: 'https://share.olt.test',
     android: [{ package: 'co.olt.app', sha256: [print] }],
+    macos_download_url: 'https://unduh.olt.test/OLT.dmg',
   },
   ready: true,
   version: 2,
@@ -65,31 +74,36 @@ async function unlock(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe('ShareLinksSection', () => {
-  it('starts inactive with locked fields and asks for a domain', async () => {
+  it('starts inactive with only the share fields and points to App integration for the rest', async () => {
+    const user = userEvent.setup()
     renderWithProviders(<ShareLinksSection />, monitorFixture)
 
     expect(await screen.findByText('Belum aktif')).toBeVisible()
     expect(screen.getByLabelText('Domain tautan')).toBeDisabled()
-    expect(screen.getByLabelText('Skema aplikasi')).toHaveValue('olt')
+    expect(screen.queryByLabelText('Skema aplikasi')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Android (App Links)')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/Nama OLT · skema olt:\/\/ · Android 0 · iOS & Mac 0 · tautan unduh 0/),
+    ).toBeVisible()
     expect(screen.getByText('Domain tautan belum diisi.')).toBeVisible()
-    expect(screen.getByLabelText('Mac')).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Atur di Integrasi aplikasi' }))
+    expect(navigate).toHaveBeenCalledWith({ to: '/settings', search: { section: 'appIntegration' } })
   })
 
-  it('refuses to enable without a domain and shows the Android line that is wrong', async () => {
+  it('refuses to enable without a domain', async () => {
     const user = userEvent.setup()
     renderWithProviders(<ShareLinksSection />, monitorFixture)
     await unlock(user)
 
     await user.click(screen.getByRole('switch', { name: 'Aktifkan tautan berbagi' }))
-    await user.type(screen.getByLabelText('Android (App Links)'), `co.olt.app ${print}{enter}olt AB`)
     await user.click(screen.getByRole('button', { name: 'Simpan' }))
 
     expect(await screen.findByText('Isi domain tautan sebelum mengaktifkan')).toBeVisible()
-    expect(screen.getByText(/Baris 2: package name tidak valid/)).toBeVisible()
     expect(shareLinksApi.save).not.toHaveBeenCalled()
   })
 
-  it('saves the normalized config after confirmation', async () => {
+  it('saves only enabled, domain, and preview after confirmation', async () => {
     vi.mocked(shareLinksApi.save).mockResolvedValue(on)
     const user = userEvent.setup()
     renderWithProviders(<ShareLinksSection />, monitorFixture)
@@ -97,21 +111,16 @@ describe('ShareLinksSection', () => {
 
     await user.click(screen.getByRole('switch', { name: 'Aktifkan tautan berbagi' }))
     await user.type(screen.getByLabelText('Domain tautan'), 'https://share.olt.test/')
-    await user.type(screen.getByLabelText('Android (App Links)'), `co.olt.app ${'ab'.repeat(32)}`)
-    await user.type(screen.getByLabelText('Mac'), 'https://unduh.olt.test/OLT.dmg')
     await user.click(screen.getByRole('button', { name: 'Simpan' }))
     const dialog = await screen.findByRole('alertdialog', { name: 'Simpan pengaturan tautan berbagi?' })
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
 
     await waitFor(() =>
-      expect(shareLinksApi.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          enabled: true,
-          base_url: 'https://share.olt.test',
-          android: [{ package: 'co.olt.app', sha256: [print] }],
-          macos_download_url: 'https://unduh.olt.test/OLT.dmg',
-        }),
-      ),
+      expect(shareLinksApi.save).toHaveBeenCalledWith({
+        enabled: true,
+        base_url: 'https://share.olt.test',
+        preview: true,
+      }),
     )
   })
 
@@ -120,10 +129,19 @@ describe('ShareLinksSection', () => {
     renderWithProviders(<ShareLinksSection />, monitorFixture)
 
     expect(await screen.findByText('Aktif')).toBeVisible()
+    expect(screen.getByText(/Android 1 · iOS & Mac 0 · tautan unduh 1/)).toBeVisible()
     expect(screen.getByText('https://share.olt.test/p/Ab12Cd34Ef')).toBeVisible()
     expect(screen.getByText('olt://p/Ab12Cd34Ef')).toBeVisible()
     expect(screen.getByText('https://share.olt.test/.well-known/assetlinks.json')).toBeVisible()
     expect(screen.queryByText(/apple-app-site-association$/)).not.toBeInTheDocument()
     expect(screen.getByText(/postingan sudah punya tautan, 40 dibuat/)).toBeVisible()
+  })
+
+  it('without an app scheme the app link example is hidden', async () => {
+    vi.mocked(shareLinksApi.status).mockResolvedValue({ ...on, config: { ...on.config, app_scheme: '' } })
+    renderWithProviders(<ShareLinksSection />, monitorFixture)
+
+    expect(await screen.findByText(/skema belum ada \(tombol Buka di aplikasi tidak tampil\)/)).toBeVisible()
+    expect(screen.queryByText(/:\/\/p\/Ab12Cd34Ef$/)).toBeNull()
   })
 })

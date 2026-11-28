@@ -646,7 +646,7 @@ export const platform = {
   },
   appIntegration: {
     description:
-      'Data yang diserahkan ke tim aplikasi OLT dan status login OLT. Halaman ini hanya-baca; tidak ada yang bisa diubah dari sini.',
+      'Data untuk tim aplikasi OLT, identitas aplikasi yang dipakai bersama (skema, Android/iOS/Mac, tautan unduh), dan status login OLT. Data koneksi dan status login hanya-baca.',
     connection: 'Data koneksi aplikasi',
     connectionHint:
       'Berikan ke tim aplikasi OLT. Anon key memang publik (tertanam di aplikasi), bukan rahasia; aksesnya dibatasi aturan database.',
@@ -695,21 +695,25 @@ export const platform = {
     keyHelp:
       'Kunci OLT diganti lewat server: perbarui docker/secrets/olt_jwks lalu jalankan make up. Sengaja tidak bisa dari Hub, karena siapa pun yang bisa mengganti kunci bisa membuat token atas nama nasabah.',
     schemes: {
-      title: 'Skema deep link aplikasi',
+      title: 'Skema aplikasi',
       subtitle:
-        'Awalan tautan yang membuka halaman di dalam aplikasi OLT dari banner atau popup, mis. olt://promo/akhir-tahun membuka halaman promo di aplikasi, bukan di browser. Isi sesuai skema yang didaftarkan aplikasi OLT (biasanya cukup sekali oleh tim IT). Bila kosong, tautan banner hanya boleh https://. Skema web dan skema berbahaya (javascript, data, file, intent, content) selalu ditolak.',
+        'Awalan tautan yang membuka aplikasi OLT, mis. olt://promo/akhir-tahun dari banner atau popup. Skema pertama adalah skema utama: dipakai tombol Buka di aplikasi pada tautan berbagi (olt://p/<kode>). Isi sesuai skema yang didaftarkan aplikasi OLT (biasanya cukup sekali oleh tim IT). Bila kosong, tautan banner hanya boleh https:// dan halaman tautan berbagi tanpa tombol Buka di aplikasi. Skema web dan skema berbahaya (javascript, data, file, intent, content) selalu ditolak.',
       label: 'Skema yang diizinkan',
-      hint: 'Tulis nama skemanya saja tanpa ://, pisahkan dengan koma, maksimal {{max}}. Diawali huruf; hanya huruf kecil, angka, +, titik, atau -, maksimal 32 karakter.',
+      hint: 'Tulis nama skemanya saja tanpa ://, pisahkan dengan koma, maksimal {{max}}. Yang pertama menjadi skema utama dan harus skema yang didaftarkan aplikasi OLT (saat ini olt). Diawali huruf; hanya huruf kecil, angka, +, titik, atau -, maksimal 32 karakter.',
       none: 'Belum ada skema',
       empty: 'Belum ada skema deep link. Tautan banner dan popup hanya boleh https://.',
-      current: 'Banner dan popup boleh memakai tautan https:// dan {{schemes}}.',
-      saved: 'Skema deep link disimpan',
+      current: 'Skema utama {{main}}. Banner dan popup boleh memakai tautan https:// dan {{schemes}}.',
+      saved: 'Skema aplikasi disimpan',
       changed: 'Diubah {{time}} oleh {{name}}',
-      confirmTitle: 'Simpan skema deep link aplikasi?',
+      confirmTitle: 'Simpan skema aplikasi?',
       confirmBody:
         'Banner dan popup hanya boleh bertaut ke https:// atau {{schemes}}. Banner aktif yang memakai skema yang dihapus tetap tampil, tetapi tanpa tautan dan tombol.',
       confirmEmpty:
         'Tautan banner dan popup hanya boleh https://. Banner aktif yang memakai deep link tetap tampil, tetapi tanpa tautan dan tombol.',
+      mainChanged:
+        'Perhatian: skema utama berubah dari {{from}} ke {{to}}. Tombol Buka di aplikasi pada tautan berbagi akan memakai {{to}}, padahal aplikasi OLT hanya bisa dibuka lewat skema yang didaftarkannya (saat ini olt). Ubah hanya setelah aplikasi OLT dengan skema baru dirilis.',
+      mainRemoved:
+        'Perhatian: skema utama {{from}} dihapus, jadi halaman tautan berbagi tidak lagi menampilkan tombol Buka di aplikasi.',
       problems: {
         count: 'Maksimal {{max}} skema.',
         format:

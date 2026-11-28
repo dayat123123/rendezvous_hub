@@ -1,17 +1,10 @@
-export type ShareAndroidApp = { package: string; sha256: string[] }
+import type { AppIdentity } from '@/features/app-identity/types'
 
-export type ShareLinksConfig = {
+export type ShareLinksConfig = AppIdentity & {
   enabled: boolean
   base_url: string
   preview: boolean
-  app_name: string
   app_scheme: string
-  android: ShareAndroidApp[]
-  ios_app_ids: string[]
-  android_store_url: string
-  ios_store_url: string
-  windows_download_url: string
-  macos_download_url: string
 }
 
 export type ShareLinksStatus = {
@@ -24,20 +17,6 @@ export type ShareLinksStatus = {
   codes_7d: number
 }
 
-export type ShareLinksDraft = {
-  enabled: boolean
-  baseUrl: string
-  preview: boolean
-  appName: string
-  appScheme: string
-  android: string
-  ios: string
-  androidStore: string
-  iosStore: string
-  windowsDownload: string
-  macDownload: string
-}
+export type ShareLinksSettings = { enabled: boolean; base_url: string; preview: boolean }
 
-export type ShareLinksField = Exclude<keyof ShareLinksDraft, 'enabled' | 'preview'>
-
-export const shareLinksLimits = { apps: 5, fingerprints: 5, appName: 40 } as const
+export type ShareLinksDraft = { enabled: boolean; baseUrl: string; preview: boolean }

@@ -183,7 +183,7 @@ export function parseSchemes(text: string) {
         )
         .filter(Boolean),
     ),
-  ].sort()
+  ]
 }
 
 export function schemeProblem(schemes: string[], forbidden: string[], max: number) {
