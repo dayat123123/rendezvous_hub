@@ -856,6 +856,75 @@ export const id = {
     apiKeys: 'API Integrasi',
     tradeRelay: 'Relay Trade',
     appIntegration: 'Integrasi aplikasi',
+    shareLinks: 'Tautan berbagi',
+    share: {
+      description:
+        'Tautan publik untuk membagikan postingan ke luar aplikasi (WhatsApp, Telegram, email, browser). Di HP yang sudah memasang aplikasi, tautan langsung membuka aplikasi. Selain itu tampil halaman pratinjau dengan tombol buka aplikasi dan tombol unduh.',
+      ready: 'Aktif',
+      notReady: 'Belum aktif',
+      linkCard: 'Tautan',
+      linkCardHint:
+        'Menu Salin tautan di aplikasi hanya muncul bila tautan aktif dan domain sudah diisi. Setiap perubahan tercatat di jejak audit.',
+      enabled: 'Aktifkan tautan berbagi',
+      enabledHint: 'Bila dimatikan, tautan yang sudah dibagikan menampilkan halaman "Tautan tidak tersedia".',
+      baseUrl: 'Domain tautan',
+      baseUrlHint:
+        'Alamat publik tanpa path, sama dengan SHARE_DOMAIN (atau PROXY_DOMAIN) di server, mis. https://share.perusahaan.co.id. Untuk uji di LAN: http://192.168.0.235:8000.',
+      appName: 'Nama aplikasi',
+      appNameHint: 'Tampil di judul halaman dan tombol, mis. OLT.',
+      appScheme: 'Skema aplikasi',
+      appSchemeHint:
+        'Tombol Buka di aplikasi memakai <skema>://p/<kode>. Installer Windows harus mendaftarkan skema ini.',
+      preview: 'Tampilkan isi postingan di pratinjau',
+      previewHint:
+        'Nama penulis, cuplikan teks, dan gambar pertama tampil di halaman dan kartu WhatsApp/Telegram. Postingan yang dihapus atau disembunyikan tidak pernah ditampilkan. Bila dimatikan, halaman hanya berisi tombol buka aplikasi dan unduh.',
+      appsCard: 'Aplikasi yang membuka tautan',
+      appsCardHint:
+        'Dipakai Android dan iOS untuk memverifikasi bahwa aplikasi boleh membuka tautan domain ini secara langsung. Perlu domain HTTPS yang bisa dijangkau dari internet.',
+      android: 'Android (App Links)',
+      androidHint:
+        'Satu aplikasi per baris: package name lalu fingerprint SHA-256 (1–5, dipisah spasi). Ambil fingerprint App signing key di Play Console → Integritas aplikasi; tambahkan fingerprint upload/debug untuk build uji.',
+      ios: 'iOS (Universal Links)',
+      iosHint:
+        'Satu App ID per baris: Team ID (10 karakter) titik bundle ID. Aplikasi iOS juga perlu Associated Domains applinks:<domain>.',
+      downloadsCard: 'Tautan unduh',
+      downloadsCardHint:
+        'Tombol unduh di halaman pratinjau untuk yang belum memasang aplikasi. Kosongkan bila belum ada.',
+      androidStore: 'Google Play',
+      iosStore: 'App Store',
+      windowsDownload: 'Windows',
+      statusCard: 'Status',
+      codes: '{{total}} postingan sudah punya tautan, {{week}} dibuat 7 hari terakhir.',
+      example: 'Contoh tautan',
+      appExample: 'Contoh tautan aplikasi',
+      noBaseUrl: 'Domain tautan belum diisi.',
+      httpsNote:
+        'App Links dan Universal Links hanya bisa diverifikasi lewat HTTPS publik. Di LAN (http), uji lewat halaman pratinjau dan tombol Buka di aplikasi.',
+      confirmTitle: 'Simpan pengaturan tautan berbagi?',
+      confirmOn:
+        'Pengguna aplikasi bisa menyalin dan membagikan tautan postingan, dan halaman pratinjau melayani tautan itu.',
+      confirmOff:
+        'Menu Salin tautan hilang dari aplikasi dan tautan yang sudah dibagikan tidak lagi menampilkan postingan.',
+      saved: 'Pengaturan tautan berbagi disimpan',
+      errors: {
+        baseUrlRequired: 'Isi domain tautan sebelum mengaktifkan',
+        baseUrlInvalid: 'Harus http:// atau https:// diikuti host (dan port), tanpa path',
+        appNameInvalid: 'Nama aplikasi 1–40 karakter, tanpa < atau >',
+        appSchemeInvalid: 'Skema 2–31 huruf kecil/angka, bukan http, https, atau skema sistem',
+        httpsInvalid: 'Harus diawali https://, tanpa spasi',
+        android: {
+          tooMany: 'Maksimal 5 aplikasi Android',
+          package: 'Baris {{line}}: package name tidak valid, mis. co.perusahaan.app',
+          fingerprint:
+            'Baris {{line}}: fingerprint harus 32 pasang heksadesimal (boleh dengan atau tanpa titik dua)',
+          fingerprintCount: 'Baris {{line}}: isi 1–5 fingerprint SHA-256 setelah package name',
+        },
+        ios: {
+          tooMany: 'Maksimal 5 App ID iOS',
+          appId: 'Baris {{line}}: App ID harus TEAMID.bundle.id, mis. ABCDE12345.co.perusahaan.app',
+        },
+      },
+    },
     security: 'Keamanan login',
     securityDescription:
       'Kunci akun staf saat password salah berulang kali, dan wajibkan kode 2FA (TOTP) dari aplikasi authenticator untuk peran tertentu.',
