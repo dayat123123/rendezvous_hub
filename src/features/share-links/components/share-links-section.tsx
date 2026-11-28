@@ -261,7 +261,7 @@ function ShareLinksForm({ status }: { status: ShareLinksStatus }) {
         title={t('settings.share.downloadsCard')}
         subtitle={t('settings.share.downloadsCardHint')}
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <TextField
             {...field('androidStore')}
             label={t('settings.share.androidStore')}
@@ -279,6 +279,13 @@ function ShareLinksForm({ status }: { status: ShareLinksStatus }) {
           <TextField
             {...field('windowsDownload')}
             label={t('settings.share.windowsDownload')}
+            placeholder="https://…"
+            maxLength={300}
+            inputMode="url"
+          />
+          <TextField
+            {...field('macDownload')}
+            label={t('settings.share.macDownload')}
             placeholder="https://…"
             maxLength={300}
             inputMode="url"

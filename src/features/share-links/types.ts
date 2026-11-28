@@ -11,6 +11,7 @@ export type ShareLinksConfig = {
   android_store_url: string
   ios_store_url: string
   windows_download_url: string
+  macos_download_url: string
 }
 
 export type ShareLinksStatus = {
@@ -34,6 +35,7 @@ export type ShareLinksDraft = {
   androidStore: string
   iosStore: string
   windowsDownload: string
+  macDownload: string
 }
 
 export type ShareLinksField = Exclude<keyof ShareLinksDraft, 'enabled' | 'preview'>

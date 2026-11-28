@@ -105,6 +105,7 @@ export function draftFromConfig(config: ShareLinksConfig): ShareLinksDraft {
     androidStore: config.android_store_url,
     iosStore: config.ios_store_url,
     windowsDownload: config.windows_download_url,
+    macDownload: config.macos_download_url,
   }
 }
 
@@ -133,7 +134,7 @@ export function draftProblems(draft: ShareLinksDraft): Partial<Record<ShareLinks
   if (!android.ok) problems.android = { code: `android.${android.problem}`, line: android.line }
   const ios = parseIos(draft.ios)
   if (!ios.ok) problems.ios = { code: `ios.${ios.problem}`, line: ios.line }
-  for (const field of ['androidStore', 'iosStore', 'windowsDownload'] as const) {
+  for (const field of ['androidStore', 'iosStore', 'windowsDownload', 'macDownload'] as const) {
     if (!validHttps(draft[field].trim())) problems[field] = { code: 'httpsInvalid' }
   }
   return problems
@@ -153,6 +154,7 @@ export function configFromDraft(draft: ShareLinksDraft): ShareLinksConfig {
     android_store_url: draft.androidStore.trim(),
     ios_store_url: draft.iosStore.trim(),
     windows_download_url: draft.windowsDownload.trim(),
+    macos_download_url: draft.macDownload.trim(),
   }
 }
 
@@ -173,6 +175,7 @@ export function normalizeStatus(raw: Partial<ShareLinksStatus> | null): ShareLin
       android_store_url: c.android_store_url ?? '',
       ios_store_url: c.ios_store_url ?? '',
       windows_download_url: c.windows_download_url ?? '',
+      macos_download_url: c.macos_download_url ?? '',
     },
     ready: raw?.ready === true,
     version: raw?.version ?? 0,

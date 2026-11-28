@@ -876,7 +876,7 @@ export const en: Translation = {
       appNameHint: 'Shown in the page title and buttons, e.g. OLT.',
       appScheme: 'App scheme',
       appSchemeHint:
-        'The Open in app button uses <scheme>://p/<code>. The Windows installer must register this scheme.',
+        'The Open in app button uses <scheme>://p/<code>. The Windows and Mac apps must register this scheme.',
       preview: 'Show post content in previews',
       previewHint:
         'Author name, a text excerpt, and the first image appear on the page and in WhatsApp/Telegram cards. Deleted or hidden posts are never shown. When off, the page only has open-in-app and download buttons.',
@@ -886,15 +886,16 @@ export const en: Translation = {
       android: 'Android (App Links)',
       androidHint:
         'One app per line: package name, then SHA-256 fingerprints (1–5, space separated). Use the App signing key fingerprint from Play Console → App integrity; add the upload/debug fingerprint for test builds.',
-      ios: 'iOS (Universal Links)',
+      ios: 'iOS & Mac (Universal Links)',
       iosHint:
-        'One App ID per line: Team ID (10 characters), a dot, then the bundle ID. The iOS app also needs Associated Domains applinks:<domain>.',
+        'One App ID per line: Team ID (10 characters), a dot, then the bundle ID, for the iOS and Mac apps. The apps also need Associated Domains applinks:<domain>.',
       downloadsCard: 'Download links',
       downloadsCardHint:
         'Download buttons on the preview page for people without the app. Leave empty if not available yet.',
       androidStore: 'Google Play',
       iosStore: 'App Store',
       windowsDownload: 'Windows',
+      macDownload: 'Mac',
       statusCard: 'Status',
       codes: '{{total}} posts have a link, {{week}} created in the last 7 days.',
       example: 'Example link',

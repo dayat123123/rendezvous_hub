@@ -29,6 +29,7 @@ const off: ShareLinksStatus = {
     android_store_url: '',
     ios_store_url: '',
     windows_download_url: '',
+    macos_download_url: '',
   },
   ready: false,
   version: 1,
@@ -71,6 +72,7 @@ describe('ShareLinksSection', () => {
     expect(screen.getByLabelText('Domain tautan')).toBeDisabled()
     expect(screen.getByLabelText('Skema aplikasi')).toHaveValue('olt')
     expect(screen.getByText('Domain tautan belum diisi.')).toBeVisible()
+    expect(screen.getByLabelText('Mac')).toBeDisabled()
   })
 
   it('refuses to enable without a domain and shows the Android line that is wrong', async () => {
@@ -96,6 +98,7 @@ describe('ShareLinksSection', () => {
     await user.click(screen.getByRole('switch', { name: 'Aktifkan tautan berbagi' }))
     await user.type(screen.getByLabelText('Domain tautan'), 'https://share.olt.test/')
     await user.type(screen.getByLabelText('Android (App Links)'), `co.olt.app ${'ab'.repeat(32)}`)
+    await user.type(screen.getByLabelText('Mac'), 'https://unduh.olt.test/OLT.dmg')
     await user.click(screen.getByRole('button', { name: 'Simpan' }))
     const dialog = await screen.findByRole('alertdialog', { name: 'Simpan pengaturan tautan berbagi?' })
     await user.click(within(dialog).getByRole('button', { name: 'Simpan' }))
@@ -106,6 +109,7 @@ describe('ShareLinksSection', () => {
           enabled: true,
           base_url: 'https://share.olt.test',
           android: [{ package: 'co.olt.app', sha256: [print] }],
+          macos_download_url: 'https://unduh.olt.test/OLT.dmg',
         }),
       ),
     )

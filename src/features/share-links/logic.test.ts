@@ -27,6 +27,7 @@ const config: ShareLinksConfig = {
   android_store_url: 'https://play.google.com/store/apps/details?id=co.olt.app',
   ios_store_url: '',
   windows_download_url: '',
+  macos_download_url: '',
 }
 
 describe('share links logic', () => {
