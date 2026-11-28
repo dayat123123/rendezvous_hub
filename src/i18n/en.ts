@@ -858,6 +858,73 @@ export const en: Translation = {
     apiKeys: 'Integration API',
     tradeRelay: 'Trade Relay',
     appIntegration: 'App integration',
+    shareLinks: 'Share links',
+    share: {
+      description:
+        'Public links for sharing posts outside the app (WhatsApp, Telegram, email, browser). On phones with the app installed the link opens the app directly; otherwise a preview page shows open-in-app and download buttons.',
+      ready: 'Active',
+      notReady: 'Not active',
+      linkCard: 'Links',
+      linkCardHint:
+        'The Copy link menu in the app appears only when links are active and the domain is set. Every change is recorded in the audit trail.',
+      enabled: 'Enable share links',
+      enabledHint: 'When off, links already shared show a "Link not available" page.',
+      baseUrl: 'Link domain',
+      baseUrlHint:
+        'Public address without a path, the same as SHARE_DOMAIN (or PROXY_DOMAIN) on the server, e.g. https://share.company.com. For LAN testing: http://192.168.0.235:8000.',
+      appName: 'App name',
+      appNameHint: 'Shown in the page title and buttons, e.g. OLT.',
+      appScheme: 'App scheme',
+      appSchemeHint:
+        'The Open in app button uses <scheme>://p/<code>. The Windows installer must register this scheme.',
+      preview: 'Show post content in previews',
+      previewHint:
+        'Author name, a text excerpt, and the first image appear on the page and in WhatsApp/Telegram cards. Deleted or hidden posts are never shown. When off, the page only has open-in-app and download buttons.',
+      appsCard: 'Apps that open the links',
+      appsCardHint:
+        'Android and iOS use these to verify that the app may open this domain directly. Needs an HTTPS domain reachable from the internet.',
+      android: 'Android (App Links)',
+      androidHint:
+        'One app per line: package name, then SHA-256 fingerprints (1–5, space separated). Use the App signing key fingerprint from Play Console → App integrity; add the upload/debug fingerprint for test builds.',
+      ios: 'iOS (Universal Links)',
+      iosHint:
+        'One App ID per line: Team ID (10 characters), a dot, then the bundle ID. The iOS app also needs Associated Domains applinks:<domain>.',
+      downloadsCard: 'Download links',
+      downloadsCardHint:
+        'Download buttons on the preview page for people without the app. Leave empty if not available yet.',
+      androidStore: 'Google Play',
+      iosStore: 'App Store',
+      windowsDownload: 'Windows',
+      statusCard: 'Status',
+      codes: '{{total}} posts have a link, {{week}} created in the last 7 days.',
+      example: 'Example link',
+      appExample: 'Example app link',
+      noBaseUrl: 'The link domain is not set.',
+      httpsNote:
+        'App Links and Universal Links can only be verified over public HTTPS. On the LAN (http), test with the preview page and the Open in app button.',
+      confirmTitle: 'Save share link settings?',
+      confirmOn: 'App users can copy and share post links, and the preview page serves them.',
+      confirmOff:
+        'The Copy link menu disappears from the app and links already shared no longer show the post.',
+      saved: 'Share link settings saved',
+      errors: {
+        baseUrlRequired: 'Set the link domain before enabling',
+        baseUrlInvalid: 'Must be http:// or https:// followed by a host (and port), without a path',
+        appNameInvalid: 'App name 1–40 characters, without < or >',
+        appSchemeInvalid: 'Scheme of 2–31 lowercase letters/digits, not http, https, or a system scheme',
+        httpsInvalid: 'Must start with https://, without spaces',
+        android: {
+          tooMany: 'At most 5 Android apps',
+          package: 'Line {{line}}: invalid package name, e.g. com.company.app',
+          fingerprint: 'Line {{line}}: a fingerprint is 32 hex pairs (with or without colons)',
+          fingerprintCount: 'Line {{line}}: add 1–5 SHA-256 fingerprints after the package name',
+        },
+        ios: {
+          tooMany: 'At most 5 iOS App IDs',
+          appId: 'Line {{line}}: App ID must be TEAMID.bundle.id, e.g. ABCDE12345.com.company.app',
+        },
+      },
+    },
     security: 'Sign-in security',
     securityDescription:
       'Lock staff accounts after repeated wrong passwords, and require a 2FA (TOTP) code from an authenticator app for chosen roles.',

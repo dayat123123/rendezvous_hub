@@ -155,7 +155,7 @@ export const settingsGroups = {
     'survey',
   ],
   community: ['community'],
-  integration: ['integration', 'appIntegration', 'apiKeys', 'tradeRelay', 'push'],
+  integration: ['integration', 'appIntegration', 'shareLinks', 'apiKeys', 'tradeRelay', 'push'],
   system: ['security', 'systemHealth', 'backup', 'alerts'],
 } as const
 export type SettingsGroup = keyof typeof settingsGroups

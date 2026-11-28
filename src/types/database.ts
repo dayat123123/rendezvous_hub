@@ -167,6 +167,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_save_share_links: { Args: { p_config: Json }; Returns: Json }
       admin_save_ticket_label: {
         Args: {
           p_active: boolean
@@ -1159,6 +1160,7 @@ export type Database = {
         Args: { p_priority: string; p_ticket_id: string; p_version?: number }
         Returns: Json
       }
+      share_links: { Args: Record<PropertyKey, never>; Returns: Json }
       supervisor_overview: { Args: Record<PropertyKey, never>; Returns: Json }
       support_home: { Args: Record<PropertyKey, never>; Returns: Json }
       system_health: { Args: Record<PropertyKey, never>; Returns: Json }

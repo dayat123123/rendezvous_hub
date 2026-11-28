@@ -4,6 +4,7 @@ import {
   CalendarClockIcon,
   DatabaseBackupIcon,
   KeyRoundIcon,
+  Link2Icon,
   MegaphoneIcon,
   MessageSquareTextIcon,
   MessagesSquareIcon,
@@ -30,6 +31,7 @@ import { LabelsSection } from '@/features/labels/components/labels-section'
 import { PushSection } from '@/features/push/components/push-section'
 import { PushInactiveBadge } from '@/features/push/components/push-state'
 import { IncidentsSection } from '@/features/incidents/components/incidents-section'
+import { ShareLinksSection } from '@/features/share-links/components/share-links-section'
 import { SurveySection } from '@/features/survey/components/survey-section'
 import { RelaySettingsSection } from '@/features/trade-share/relay/components/relay-settings-section'
 import { cn } from '@/lib/utils'
@@ -66,6 +68,7 @@ const icons: Record<SettingsSection, React.ComponentType<{ className?: string }>
   community: MegaphoneIcon,
   integration: PlugZapIcon,
   appIntegration: SmartphoneIcon,
+  shareLinks: Link2Icon,
   apiKeys: KeyRoundIcon,
   tradeRelay: RadioTowerIcon,
   push: BellRingIcon,
@@ -89,6 +92,7 @@ const content: Record<SettingsSection, () => React.ReactNode> = {
   push: () => <PushSection />,
   integration: () => <IntegrationSection />,
   appIntegration: () => <AppIntegrationSection />,
+  shareLinks: () => <ShareLinksSection />,
   apiKeys: () => <IntegrationKeysSection />,
   tradeRelay: () => <RelaySettingsSection />,
   security: () => <SecuritySection />,
