@@ -1,12 +1,15 @@
 import { rpc } from '@/lib/supabase'
+import type { DateRange } from '@/features/reports/types'
 import type { Json } from '@/types/database'
 
 import { normalizeStats, normalizeStatus } from './logic'
-import type { ShareLinkStats, ShareLinksSettings, ShareLinksStatus, StatsRange } from './types'
+import type { ShareLinkStats, ShareLinksSettings, ShareLinksStatus } from './types'
 
 export const shareLinksApi = {
-  stats: async (days: StatsRange) =>
-    normalizeStats(await rpc<Partial<ShareLinkStats>>('share_link_stats', { p_days: days })),
+  stats: async (range: DateRange) =>
+    normalizeStats(
+      await rpc<Partial<ShareLinkStats>>('share_link_stats_range', { p_from: range.from, p_to: range.to }),
+    ),
   status: async () => normalizeStatus(await rpc<Partial<ShareLinksStatus>>('share_links')),
   save: async (settings: ShareLinksSettings) =>
     normalizeStatus(

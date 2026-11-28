@@ -1,18 +1,17 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { MetricStrip } from '@/components/metric-strip'
 import { SeriesChart } from '@/components/series-chart'
 import { EmptyState } from '@/components/states'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/controls'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { QueryContent, SettingsCard } from '@/features/settings/components/settings-ui'
+import type { DateRange } from '@/features/reports/types'
+import { QueryContent } from '@/features/settings/components/settings-ui'
 import { chartColors } from '@/lib/chart'
 import { formatNumber } from '@/lib/time'
 
-import { useShareLinkStats } from '../hooks'
+import { useShareLinkStatsRange } from '../hooks'
 import { downloadTotal, hasStats } from '../logic'
-import { type ShareLinkStats, statsRanges, type StatsRange } from '../types'
+import type { ShareLinkStats } from '../types'
 
 function StatsReport({ stats }: { stats: ShareLinkStats }) {
   const { t } = useTranslation()
@@ -109,30 +108,7 @@ function StatsReport({ stats }: { stats: ShareLinkStats }) {
   )
 }
 
-export function ShareStatsCard() {
-  const { t } = useTranslation()
-  const [days, setDays] = useState<StatsRange>(30)
-  const query = useShareLinkStats(days)
-  return (
-    <SettingsCard title={t('settings.share.stats.title')} subtitle={t('settings.share.stats.subtitle')}>
-      <div>
-        <ToggleGroup
-          type="single"
-          value={String(days)}
-          aria-label={t('settings.share.stats.rangeLabel')}
-          onValueChange={(value) => {
-            const next = statsRanges.find((item) => String(item) === value)
-            if (next) setDays(next)
-          }}
-        >
-          {statsRanges.map((item) => (
-            <ToggleGroupItem key={item} value={String(item)}>
-              {t('settings.share.stats.range', { count: item })}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
-      <QueryContent query={query}>{(stats) => <StatsReport stats={stats} />}</QueryContent>
-    </SettingsCard>
-  )
+export function ShareStatsPanel({ range }: { range: DateRange }) {
+  const query = useShareLinkStatsRange(range)
+  return <QueryContent query={query}>{(stats) => <StatsReport stats={stats} />}</QueryContent>
 }

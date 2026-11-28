@@ -1167,6 +1167,7 @@ export type Database = {
         Returns: Json
       }
       share_link_stats: { Args: { p_days?: number }; Returns: Json }
+      share_link_stats_range: { Args: { p_from?: string; p_to?: string }; Returns: Json }
       share_links: { Args: Record<PropertyKey, never>; Returns: Json }
       supervisor_overview: { Args: Record<PropertyKey, never>; Returns: Json }
       support_home: { Args: Record<PropertyKey, never>; Returns: Json }
