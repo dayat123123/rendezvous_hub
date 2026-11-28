@@ -370,7 +370,9 @@ export function ModerationTab({
           {current === 'reports' ? <ReportsQueue onUser={openUser} onContent={setContent} /> : null}
           {current === 'held' ? <HeldQueue onUser={openUser} onContent={setContent} /> : null}
           {current === 'media' ? <MediaQueue onUser={openUser} onContent={setContent} /> : null}
-          {current === 'alerts' ? <AlertsQueue onOpenRoom={onOpenRoom} onContent={setContent} /> : null}
+          {current === 'alerts' ? (
+            <AlertsQueue onOpenRoom={onOpenRoom} onContent={setContent} onUser={openUser} />
+          ) : null}
           {current === 'appeals' ? <AppealsQueue onUser={openUser} /> : null}
         </div>
         <FindUser onUser={openUser} />

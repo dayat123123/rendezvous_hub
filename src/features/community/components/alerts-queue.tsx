@@ -13,7 +13,7 @@ import { useDebounced } from '@/hooks/use-now'
 import { moderationErrorText } from '@/lib/error-text'
 import { formatNumber, stamp } from '@/lib/time'
 
-import { useManipulationAlerts, useReviewAlert } from '../hooks'
+import { useAlertAccounts, useManipulationAlerts, useReviewAlert } from '../hooks'
 import { cleanStock, evidenceIds, evidenceNumber, evidenceText, stockCodePattern } from '../logic'
 import {
   alertStatuses,
@@ -53,6 +53,8 @@ function Evidence({
   }
   const sample = evidenceText(e, 'sample')
   const posts = evidenceIds(e, 'post_ids')
+  const accounts = evidenceIds(e, 'author_ids')
+  const direction = evidenceText(e, 'direction')
   return (
     <div className="flex flex-col gap-2">
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
@@ -83,6 +85,21 @@ function Evidence({
             <Fact label={t('moderation.alerts.evidence.similarPosts')} value={formatNumber(posts.length)} />
           </>
         ) : null}
+        {alert.kind === 'one_sided_sentiment' ? (
+          <>
+            <Fact
+              label={t('moderation.alerts.evidence.direction')}
+              value={
+                direction === 'bullish' || direction === 'bearish'
+                  ? t(`moderation.alerts.evidence.directions.${direction}`)
+                  : '–'
+              }
+            />
+            <Fact label={t('moderation.alerts.evidence.labeled')} value={num('labeled')} />
+            <Fact label={t('moderation.alerts.evidence.oneWayAuthors')} value={num('authors')} />
+            <Fact label={t('moderation.alerts.evidence.hourlyAverage')} value={num('hourly_average', 2)} />
+          </>
+        ) : null}
         {evidenceText(e, 'window_end') ? (
           <Fact
             label={t('moderation.alerts.evidence.windowEnd')}
@@ -104,6 +121,9 @@ function Evidence({
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             {t('moderation.alerts.evidence.postIds', { count: posts.length })}
+            {accounts.length > 0 ? (
+              <span>· {t('moderation.alerts.evidence.accountIds', { count: accounts.length })}</span>
+            ) : null}
             <CopyButton
               text={posts.join('\n')}
               size="xs"
@@ -126,7 +146,8 @@ function Evidence({
 }
 
 function scoreText(alert: ManipulationAlert) {
-  if (alert.kind === 'new_account_concentration') return `${formatNumber(Math.round(alert.score * 100))}%`
+  if (alert.kind === 'new_account_concentration' || alert.kind === 'one_sided_sentiment')
+    return `${formatNumber(Math.round(alert.score * 100))}%`
   if (alert.kind === 'mention_spike') return `×${formatNumber(alert.score, 1)}`
   return formatNumber(alert.score)
 }
@@ -206,12 +227,73 @@ function AlertItem({
   )
 }
 
+const ACCOUNT_DAYS = 30
+
+function RepeatAccounts({ onUser }: { onUser: (id: string) => void }) {
+  const { t } = useTranslation()
+  const accounts = useAlertAccounts(ACCOUNT_DAYS)
+  return (
+    <section className="flex flex-col gap-2 pt-2" aria-labelledby="alert-accounts-title">
+      <div>
+        <h3 id="alert-accounts-title" className="text-row font-semibold">
+          {t('moderation.alerts.accounts.title')}
+        </h3>
+        <p className="max-w-3xl text-xs text-muted-foreground">{t('moderation.alerts.accounts.hint')}</p>
+      </div>
+      {accounts.isError ? (
+        <ErrorState error={accounts.error} onRetry={() => void accounts.refetch()} />
+      ) : !accounts.data ? (
+        <ListSkeleton rows={2} />
+      ) : accounts.data.length === 0 ? (
+        <EmptyState className="border-y" title={t('moderation.alerts.accounts.empty')} />
+      ) : (
+        <ul className="border-t">
+          {accounts.data.map((account) => (
+            <li
+              key={account.user_id}
+              className="flex flex-wrap items-center justify-between gap-2 border-b py-2"
+            >
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-row">
+                  {account.display_name} <span className="text-muted-foreground">@{account.username}</span>
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {[
+                    t('moderation.alerts.accounts.alerts', { count: account.alerts }),
+                    account.stocks.map((stock) => `$${stock}`).join(', '),
+                    t('moderation.alerts.accounts.last', { time: stamp(account.last_alert_at) }),
+                    account.new_account ? t('moderation.alerts.accounts.newAccount') : null,
+                    account.banned ? t('moderation.alerts.accounts.banned') : null,
+                    account.deleted ? t('moderation.alerts.accounts.deleted') : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              </div>
+              <Button
+                size="xs"
+                variant="outline"
+                aria-label={t('moderation.alerts.accounts.open', { username: account.username })}
+                onClick={() => onUser(account.user_id)}
+              >
+                {t('moderation.alerts.accounts.openButton')}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 export function AlertsQueue({
   onOpenRoom,
   onContent,
+  onUser,
 }: {
   onOpenRoom?: (stock: string) => void
   onContent: (target: ContentTarget) => void
+  onUser: (id: string) => void
 }) {
   const { t } = useTranslation()
   const [status, setStatus] = useState<AlertStatus>('open')
@@ -276,6 +358,7 @@ export function AlertsQueue({
           ))}
         </ul>
       )}
+      <RepeatAccounts onUser={onUser} />
       <ReasonDialog
         key={acting ? `${acting.alert.id}-${acting.status}` : 'none'}
         open={acting !== null}

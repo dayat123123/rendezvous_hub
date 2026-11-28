@@ -25,6 +25,7 @@ import type {
   HeldContent,
   HeldDecision,
   HeldTarget,
+  ManipulationAccount,
   ManipulationAlert,
   MediaPage,
   MediaStatus,
@@ -229,6 +230,8 @@ export const communityApi = {
       p_stock: stock,
       p_limit: 200,
     }),
+  alertAccounts: (days: number) =>
+    rpc<ManipulationAccount[]>('community_manipulation_accounts', { p_days: days, p_min_alerts: 2 }),
   reviewAlert: (id: string, status: 'reviewed' | 'dismissed', note: string) =>
     rpc<ManipulationAlert>('community_manipulation_review', { p_id: id, p_status: status, p_note: note }),
   appeals: (status: AppealStatus) => rpc<Appeal[]>('community_appeals', { p_status: status, p_limit: 200 }),

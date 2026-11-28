@@ -102,7 +102,14 @@ export type ContentTest = {
 
 export type ManipulationSettings = Record<string, unknown>
 
-export const manipulationGroups = ['spike', 'newAccounts', 'coordinated', 'auto', 'busy'] as const
+export const manipulationGroups = [
+  'spike',
+  'newAccounts',
+  'coordinated',
+  'sentiment',
+  'auto',
+  'busy',
+] as const
 export type ManipulationGroup = (typeof manipulationGroups)[number]
 
 export type NumberSettingId =
@@ -115,6 +122,10 @@ export type NumberSettingId =
   | 'similarity'
   | 'similarAuthors'
   | 'similarWindow'
+  | 'sentimentShare'
+  | 'sentimentMin'
+  | 'sentimentAuthors'
+  | 'sentimentFactor'
   | 'autoSlowSeconds'
   | 'autoSlowMinutes'
   | 'busySlow'
@@ -189,6 +200,39 @@ export const numberSettings: NumberSetting[] = [
     min: 5,
     max: 1440,
     integer: true,
+  },
+  {
+    key: 'manipulation.sentiment_share',
+    id: 'sentimentShare',
+    group: 'sentiment',
+    min: 0.5,
+    max: 1,
+    integer: false,
+    percent: true,
+  },
+  {
+    key: 'manipulation.sentiment_min_mentions',
+    id: 'sentimentMin',
+    group: 'sentiment',
+    min: 1,
+    max: 100000,
+    integer: true,
+  },
+  {
+    key: 'manipulation.sentiment_min_authors',
+    id: 'sentimentAuthors',
+    group: 'sentiment',
+    min: 2,
+    max: 1000,
+    integer: true,
+  },
+  {
+    key: 'manipulation.sentiment_spike_factor',
+    id: 'sentimentFactor',
+    group: 'sentiment',
+    min: 1,
+    max: 100,
+    integer: false,
   },
   {
     key: 'manipulation.auto_slow_mode_seconds',
