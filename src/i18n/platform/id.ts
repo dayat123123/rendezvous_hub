@@ -524,7 +524,7 @@ export const platform = {
       link: 'https://… atau deep link aplikasi. Skema yang diizinkan: {{schemes}}. Super Admin mengatur skema di Pengaturan → Integrasi → Integrasi aplikasi.',
       linkNoSchemes:
         'Hanya https://…; belum ada skema deep link yang diizinkan. Super Admin mengatur skema di Pengaturan → Integrasi → Integrasi aplikasi.',
-      linkPlaceholder: 'https://… atau olt://…',
+      linkPlaceholder: 'https://… atau rendezvous-olt://…',
       cta: 'Bila kosong, aplikasi memakai label bawaan. Hanya dipakai bila ada tautan.',
       image: 'JPEG, PNG, atau WebP. Dipotong {{ratio}} dan dikecilkan otomatis sampai di bawah 2 MB.',
       titleLong: 'lebih dari {{visible}} karakter bisa terpotong di notifikasi ponsel',
@@ -562,7 +562,8 @@ export const platform = {
       titleLength: 'Judul maksimal {{max}} karakter.',
       bodyLength: 'Isi maksimal {{max}} karakter.',
       bodyLengthStrip: 'Isi strip maksimal {{max}} karakter. Pakai popup untuk isi yang lebih panjang.',
-      linkFormat: 'Tautan harus diawali https:// atau skema deep link seperti olt://, tanpa spasi.',
+      linkFormat:
+        'Tautan harus diawali https:// atau skema deep link seperti rendezvous-olt://, tanpa spasi.',
       linkScheme: 'Skema deep link ini belum diizinkan. Skema yang diizinkan: {{schemes}}.',
       linkLength: 'Tautan maksimal {{max}} karakter.',
       ctaLength: 'Label tombol maksimal {{max}} karakter.',
@@ -697,7 +698,7 @@ export const platform = {
     schemes: {
       title: 'Skema aplikasi',
       subtitle:
-        'Awalan tautan yang membuka aplikasi OLT, mis. olt://promo/akhir-tahun dari banner atau popup. Skema pertama adalah skema utama: dipakai tombol Buka di aplikasi pada tautan berbagi (olt://p/<kode>). Isi sesuai skema yang didaftarkan aplikasi OLT (biasanya cukup sekali oleh tim IT). Bila kosong, tautan banner hanya boleh https:// dan halaman tautan berbagi tanpa tombol Buka di aplikasi. Skema web dan skema berbahaya (javascript, data, file, intent, content) selalu ditolak.',
+        'Awalan tautan yang membuka aplikasi OLT, mis. rendezvous-olt://promo/akhir-tahun dari banner atau popup. Skema pertama adalah skema utama: dipakai tombol Buka di aplikasi pada tautan berbagi (rendezvous-olt://p/<kode>). Isi sesuai skema yang didaftarkan aplikasi OLT (biasanya cukup sekali oleh tim IT). Bila kosong, tautan banner hanya boleh https:// dan halaman tautan berbagi tanpa tombol Buka di aplikasi. Skema web dan skema berbahaya (javascript, data, file, intent, content) selalu ditolak.',
       label: 'Skema yang diizinkan',
       hint: 'Tulis nama skemanya saja tanpa ://, pisahkan dengan koma, maksimal {{max}}. Yang pertama menjadi skema utama dan harus skema yang didaftarkan aplikasi OLT (saat ini olt). Diawali huruf; hanya huruf kecil, angka, +, titik, atau -, maksimal 32 karakter.',
       none: 'Belum ada skema',

@@ -159,4 +159,11 @@ describe('popup banner rules', () => {
     expect(schemeProblem(['a', 'b', 'c', 'd', 'e', 'f'], [], 5)).toBe('count')
     expect(schemeProblem(['olt'], ['https'], 5)).toBeUndefined()
   })
+
+  it('accepts the hyphenated rendezvous-olt scheme', () => {
+    expect(parseSchemes(' Rendezvous-OLT://, mitra ')).toEqual(['rendezvous-olt', 'mitra'])
+    expect(schemeProblem(['rendezvous-olt'], ['http', 'https'], 5)).toBeUndefined()
+    expect(linkProblem('rendezvous-olt://p/Ab12Cd34Ef', ['rendezvous-olt'])).toBeUndefined()
+    expect(linkProblem('olt://promo', ['rendezvous-olt'])).toBe('scheme')
+  })
 })

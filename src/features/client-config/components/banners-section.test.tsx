@@ -187,7 +187,7 @@ describe('BannersSection', () => {
     expect(within(dialog).getByText('Judul wajib diisi.')).toBeVisible()
     expect(
       within(dialog).getByText(
-        'Tautan harus diawali https:// atau skema deep link seperti olt://, tanpa spasi.',
+        'Tautan harus diawali https:// atau skema deep link seperti rendezvous-olt://, tanpa spasi.',
       ),
     ).toBeVisible()
     expect(

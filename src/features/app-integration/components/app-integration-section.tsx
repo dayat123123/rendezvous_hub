@@ -219,7 +219,7 @@ function SchemesForm({ settings }: { settings: BannerSettings }) {
         id={`${id}-schemes`}
         autoComplete="off"
         spellCheck={false}
-        placeholder={lock.editing ? 'olt' : t('platform.appIntegration.schemes.none')}
+        placeholder={lock.editing ? 'rendezvous-olt' : t('platform.appIntegration.schemes.none')}
         aria-invalid={error ? true : undefined}
         aria-describedby={`${id}-schemes-text`}
         value={text}
