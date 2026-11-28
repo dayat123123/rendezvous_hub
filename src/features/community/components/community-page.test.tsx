@@ -178,9 +178,9 @@ describe('CommunityPage', () => {
 
     expect(tabNames()).toEqual([
       'Postingan resmi',
+      'Riset',
       'Notifikasi',
       'Akun resmi',
-      'Riset',
       'Fitur & versi',
       'Tab Stream',
       'Analitik',
@@ -198,7 +198,7 @@ describe('CommunityPage', () => {
       community_permissions: ['community.moderate'],
     })
 
-    expect(tabNames()).toEqual(['Moderasi', 'Room saham', 'Indeks', 'Riset'])
+    expect(tabNames()).toEqual(['Riset', 'Moderasi', 'Room saham', 'Indeks'])
     expect(screen.getByRole('tab', { name: 'Indeks' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Belum ada indeks.')).toBeVisible()
     view.unmount()
@@ -214,7 +214,7 @@ describe('CommunityPage', () => {
     route.search = { tab: 'analytics' }
     renderWithProviders(<CommunityPage />, writer)
 
-    expect(tabNames()).toEqual(['Postingan resmi', 'Notifikasi', 'Riset'])
+    expect(tabNames()).toEqual(['Postingan resmi', 'Riset', 'Notifikasi'])
     expect(screen.getByRole('tab', { name: 'Postingan resmi' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Laporan terbuka')).toBeVisible()
     expect(screen.queryByRole('radio', { name: '30 hari' })).not.toBeInTheDocument()
@@ -237,7 +237,7 @@ describe('CommunityPage Riset', () => {
       roles: ['community'],
       community_permissions: ['community.sanction'],
     })
-    expect(tabNames()).toEqual(['Moderasi', 'Riset'])
+    expect(tabNames()).toEqual(['Riset', 'Moderasi'])
     expect(await screen.findByRole('button', { name: 'Panel riset' })).toBeDisabled()
   })
 

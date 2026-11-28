@@ -9,6 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/controls'
 import { Skeleton } from '@/components/ui/primitives'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { rangeLabel } from '@/features/reports/range'
+import { ShareStatsPanel } from '@/features/share-links/components/share-stats-card'
 import type { DateRange } from '@/features/reports/types'
 import { chartColors } from '@/lib/chart'
 import { formatDay, formatNumber, formatPercent, stamp } from '@/lib/time'
@@ -366,6 +367,13 @@ export function AnalyticsTab() {
           <EmptyState title={t('app.loading')} />
         </div>
       )}
+      <Section
+        id="analytics-share-links"
+        title={t('settings.share.stats.sectionTitle')}
+        hint={t('settings.share.stats.subtitle')}
+      >
+        <ShareStatsPanel range={range} />
+      </Section>
     </div>
   )
 }

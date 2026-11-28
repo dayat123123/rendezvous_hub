@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -129,10 +130,13 @@ function NavLink({
 
 type NavItem = { to: NavTarget; label: string; count?: number; countLabel?: string }
 
+type NavGroup = { label: string; items: NavItem[] }
+
 const navTriggerClass =
   'relative inline-flex h-12 shrink-0 items-center gap-1.5 px-2 text-row whitespace-nowrap text-muted-foreground transition-colors outline-none after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset data-[current=true]:font-medium data-[current=true]:text-foreground data-[current=true]:after:bg-foreground'
 
-function NavMenu({ label, items }: { label: string; items: NavItem[] }) {
+function NavMenu({ label, groups }: { label: string; groups: NavGroup[] }) {
+  const items = groups.flatMap((group) => group.items)
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const current = items.some((item) =>
     item.to === '/compliance'
@@ -148,20 +152,28 @@ function NavMenu({ label, items }: { label: string; items: NavItem[] }) {
         <ChevronDownIcon className="size-3.5" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-52">
-        {items.map((item) => (
-          <DropdownMenuItem key={item.to} asChild>
-            <Link to={item.to}>
-              {item.label}
-              {item.count ? (
-                <span
-                  className="tabular ml-auto text-xs font-medium text-danger"
-                  aria-label={item.countLabel}
-                >
-                  {item.count}
-                </span>
-              ) : null}
-            </Link>
-          </DropdownMenuItem>
+        {groups.map((group, index) => (
+          <DropdownMenuGroup key={group.label}>
+            {index > 0 ? <DropdownMenuSeparator /> : null}
+            <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+              {group.label}
+            </DropdownMenuLabel>
+            {group.items.map((item) => (
+              <DropdownMenuItem key={item.to} asChild>
+                <Link to={item.to}>
+                  {item.label}
+                  {item.count ? (
+                    <span
+                      className="tabular ml-auto text-xs font-medium text-danger"
+                      aria-label={item.countLabel}
+                    >
+                      {item.count}
+                    </span>
+                  ) : null}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
@@ -320,27 +332,43 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
     canOpenCommunity(agent) ||
     canManageContent(agent) ||
     canManageFeatures(agent)
-  const complianceItems: NavItem[] = [
+  const complianceGroups: NavGroup[] = [
     {
-      to: '/compliance',
-      label: t('nav.overview'),
-      count: unseenNotices || undefined,
-      countLabel: t('complianceNotices.titleUnseen', { count: unseenNotices }),
+      label: t('nav.complianceGroups.complaints'),
+      items: [
+        {
+          to: '/compliance',
+          label: t('nav.overview'),
+          count: unseenNotices || undefined,
+          countLabel: t('complianceNotices.titleUnseen', { count: unseenNotices }),
+        },
+        {
+          to: '/compliance/cases',
+          label: t('nav.cases'),
+          count: caseAttention || undefined,
+          countLabel: t('nav.caseAttention', { count: caseAttention }),
+        },
+        { to: '/compliance/policy', label: t('nav.policy') },
+      ],
     },
     {
-      to: '/compliance/cases',
-      label: t('nav.cases'),
-      count: caseAttention || undefined,
-      countLabel: t('nav.caseAttention', { count: caseAttention }),
+      label: t('nav.complianceGroups.rules'),
+      items: [
+        { to: '/compliance/content', label: t('nav.contentPolicy') },
+        { to: '/compliance/legal', label: t('nav.legal') },
+        { to: '/compliance/retention', label: t('nav.retention') },
+        ...(tradeShare ? [{ to: '/compliance/trade-share' as const, label: t('nav.tradeShare') }] : []),
+      ],
     },
-    { to: '/compliance/content', label: t('nav.contentPolicy') },
-    { to: '/compliance/policy', label: t('nav.policy') },
-    { to: '/compliance/legal', label: t('nav.legal') },
-    ...(tradeShare ? [{ to: '/compliance/trade-share' as const, label: t('nav.tradeShare') }] : []),
-    { to: '/compliance/audit', label: t('nav.audit') },
-    { to: '/compliance/evidence', label: t('nav.evidence') },
-    { to: '/compliance/retention', label: t('nav.retention') },
+    {
+      label: t('nav.complianceGroups.records'),
+      items: [
+        { to: '/compliance/audit', label: t('nav.audit') },
+        { to: '/compliance/evidence', label: t('nav.evidence') },
+      ],
+    },
   ]
+  const complianceItems = complianceGroups.flatMap((group) => group.items)
   const [dialog, setDialog] = useState<AccountDialog | null>(null)
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b bg-background px-3 lg:px-4">
@@ -384,7 +412,7 @@ export function TopBar({ attention, caseAttention }: { attention: number; caseAt
           />
         ) : null}
         {compliance && groupCompliance ? (
-          <NavMenu label={t('nav.complianceMenu')} items={complianceItems} />
+          <NavMenu label={t('nav.complianceMenu')} groups={complianceGroups} />
         ) : null}
         {compliance && !groupCompliance
           ? complianceItems.map((item) => <NavLink key={item.to} {...item} />)

@@ -23,6 +23,20 @@ export const communityTabs = [
 ] as const
 export type CommunityTab = (typeof communityTabs)[number]
 
+export const communityTabGroups = {
+  content: ['stream', 'research', 'notifications', 'accounts'],
+  safety: ['moderation', 'rooms'],
+  app: ['instruments', 'features', 'filters'],
+  insight: ['analytics'],
+} as const satisfies Record<string, readonly CommunityTab[]>
+export type CommunityTabGroup = keyof typeof communityTabGroups
+export const communityTabGroupOrder: readonly CommunityTabGroup[] = ['content', 'safety', 'app', 'insight']
+
+export const communityTabGroup = (tab: CommunityTab): CommunityTabGroup =>
+  communityTabGroupOrder.find((group) =>
+    (communityTabGroups[group] as readonly CommunityTab[]).includes(tab),
+  ) ?? 'content'
+
 export type AccountRef = {
   id: string
   username: string

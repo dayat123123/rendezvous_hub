@@ -163,6 +163,7 @@ export const en: Translation = {
   },
   nav: {
     complianceMenu: 'Compliance',
+    complianceGroups: { complaints: 'Customer complaints', rules: 'Rules', records: 'Records & evidence' },
     nasabah: 'Customer accounts',
     tickets: 'Customer service',
     dashboard: 'Dashboard',
@@ -900,10 +901,12 @@ export const en: Translation = {
       },
       stats: {
         title: 'Statistics',
+        sectionTitle: 'Share links',
         subtitle:
           'Daily counts (WIB) from the link page and the app. No IP addresses or visitor data are stored. New numbers arrive within about 30 seconds.',
-        rangeLabel: 'Statistics range',
-        range: '{{count}} days',
+        moved:
+          'Share link statistics now live in Community → Analytics, next to the other community analytics.',
+        openAnalytics: 'Open Analytics',
         empty: 'Nobody opened a share link in this range yet.',
         views: 'Views',
         previewsCaption: '+{{count}} WhatsApp, Telegram, and bot previews',
@@ -2199,6 +2202,7 @@ export const en: Translation = {
       'Manage official posts, announcements, notifications, moderation of the community stream, and the app features and Stream tabs.',
     noAccess: 'This account has no community permissions yet. Contact a Super Admin.',
     tabsLabel: 'Community menu',
+    tabGroups: { content: 'Content', safety: 'Oversight', app: 'App', insight: 'Insights' },
     tabs: {
       stream: 'Official posts',
       notifications: 'Notifications',

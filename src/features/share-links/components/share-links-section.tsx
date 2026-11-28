@@ -26,7 +26,6 @@ import { cn } from '@/lib/utils'
 import { useSaveShareLinks, useShareLinks } from '../hooks'
 import { draftFromConfig, draftProblems, exampleCode, sameSettings, settingsFromDraft } from '../logic'
 import type { ShareLinksDraft, ShareLinksStatus } from '../types'
-import { ShareStatsCard } from './share-stats-card'
 
 export function ShareLinksBadge({ ready }: { ready: boolean }) {
   const { t } = useTranslation()
@@ -228,6 +227,26 @@ function StatusCard({ status }: { status: ShareLinksStatus }) {
   )
 }
 
+function StatsLinkCard() {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  return (
+    <SettingsCard title={t('settings.share.stats.title')} subtitle={t('settings.share.stats.moved')}>
+      <div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => void navigate({ to: '/community', search: { tab: 'analytics' } })}
+        >
+          {t('settings.share.stats.openAnalytics')}
+          <ArrowRightIcon />
+        </Button>
+      </div>
+    </SettingsCard>
+  )
+}
+
 export function ShareLinksSection() {
   const { t } = useTranslation()
   const query = useShareLinks()
@@ -245,7 +264,7 @@ export function ShareLinksSection() {
             </SettingsCard>
             <IdentityCard status={status} />
             <StatusCard status={status} />
-            <ShareStatsCard />
+            <StatsLinkCard />
           </div>
         )}
       </QueryContent>

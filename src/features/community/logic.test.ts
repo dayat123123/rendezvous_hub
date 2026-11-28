@@ -46,15 +46,15 @@ describe('communityPageTabs', () => {
     ])
     expect(
       communityPageTabs({ roles: ['cs_super_admin'], community_permissions: ['community.moderate'] }),
-    ).toEqual(['moderation', 'rooms', 'instruments', 'research', 'features', 'filters', 'analytics'])
+    ).toEqual(['research', 'moderation', 'rooms', 'instruments', 'features', 'filters', 'analytics'])
     expect(communityPageTabs({ roles: ['product'], community_permissions: [] })).toEqual([
       'features',
       'filters',
     ])
     expect(communityPageTabs({ roles: ['community'], community_permissions: ['community.post'] })).toEqual([
       'stream',
-      'notifications',
       'research',
+      'notifications',
     ])
     expect(communityPageTabs({ roles: ['cs_agent'], community_permissions: [] })).toEqual([])
   })

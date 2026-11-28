@@ -11,8 +11,8 @@ import { cn } from '@/lib/utils'
 
 import { useCommunityOverview } from '../hooks'
 import { InstrumentsTab } from '../instruments/instruments-tab'
-import { communityPageTabs, hasCommunity } from '../logic'
-import type { CommunityTab, ModerationQueue } from '../types'
+import { communityPageTabs, groupCommunityTabs, hasCommunity } from '../logic'
+import { communityTabGroup, type CommunityTab, type ModerationQueue } from '../types'
 import { AccountsTab } from './accounts-tab'
 import { CampaignsTab } from './campaigns-tab'
 import { ModerationTab } from './moderation-tab'
@@ -64,6 +64,7 @@ export function CommunityPage() {
   const overview = useCommunityOverview(staff)
   const tabs = communityPageTabs(agent)
   const tab = search.tab && tabs.includes(search.tab) ? search.tab : tabs[0]
+  const groups = groupCommunityTabs(tabs).length > 1
   const data = overview.data
 
   if (!tab) return <EmptyState className="h-full" title={t('community.noAccess')} />
@@ -80,7 +81,7 @@ export function CommunityPage() {
           <h1 className="text-lg font-semibold">{t('community.pageTitle')}</h1>
           <p className="text-row text-muted-foreground">{t('community.pageSubtitle')}</p>
         </header>
-        {staff && tab !== 'analytics' ? (
+        {staff && ['content', 'safety'].includes(communityTabGroup(tab)) ? (
           <MetricStrip
             className="md:grid-cols-4 xl:grid-cols-4"
             metrics={[
@@ -109,26 +110,39 @@ export function CommunityPage() {
         <div
           role="tablist"
           aria-label={t('community.tabsLabel')}
-          className="flex gap-4 overflow-x-auto border-b"
+          className="flex items-center gap-4 overflow-x-auto border-b"
         >
-          {tabs.map((item) => (
-            <button
-              key={item}
-              id={`community-tab-${item}`}
-              type="button"
-              role="tab"
-              aria-selected={tab === item}
-              aria-controls={`community-panel-${item}`}
-              onClick={() => void navigate({ to: '/community', search: { tab: item } })}
-              className={cn(
-                'relative inline-flex h-10 shrink-0 items-center text-row whitespace-nowrap transition-colors outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset',
-                tab === item
-                  ? 'font-medium text-foreground after:bg-foreground'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
+          {groupCommunityTabs(tabs).map((entry, index) => (
+            <div
+              key={entry.group}
+              role="presentation"
+              className={cn('flex shrink-0 items-center gap-4', index > 0 && 'border-l pl-4')}
             >
-              {item === 'analytics' ? t('nav.analytics') : t(`community.tabs.${item}`)}
-            </button>
+              {groups ? (
+                <span aria-hidden="true" className="text-xs whitespace-nowrap text-muted-foreground">
+                  {t(`community.tabGroups.${entry.group}`)}
+                </span>
+              ) : null}
+              {entry.tabs.map((item) => (
+                <button
+                  key={item}
+                  id={`community-tab-${item}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === item}
+                  aria-controls={`community-panel-${item}`}
+                  onClick={() => void navigate({ to: '/community', search: { tab: item } })}
+                  className={cn(
+                    'relative inline-flex h-10 shrink-0 items-center text-row whitespace-nowrap transition-colors outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset',
+                    tab === item
+                      ? 'font-medium text-foreground after:bg-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {item === 'analytics' ? t('nav.analytics') : t(`community.tabs.${item}`)}
+                </button>
+              ))}
+            </div>
           ))}
         </div>
         <div role="tabpanel" id={`community-panel-${tab}`} aria-labelledby={`community-tab-${tab}`}>

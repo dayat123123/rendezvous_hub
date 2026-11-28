@@ -17,10 +17,6 @@ export type ShareLinksStatus = {
   codes_7d: number
 }
 
-export const statsRanges = [7, 30, 90] as const
-
-export type StatsRange = (typeof statsRanges)[number]
-
 export type ShareStatsTotals = {
   views: number
   previews: number
