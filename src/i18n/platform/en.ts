@@ -517,7 +517,7 @@ export const platform: Translated<typeof source> = {
       link: 'https://… or an app deep link. Allowed schemes: {{schemes}}. Super Admins manage schemes in Settings → Integrations → App integration.',
       linkNoSchemes:
         'https://… only; no deep link schemes are allowed yet. Super Admins manage schemes in Settings → Integrations → App integration.',
-      linkPlaceholder: 'https://… or olt://…',
+      linkPlaceholder: 'https://… or rendezvous-olt://…',
       cta: 'When empty, the app uses its default label. Only used when there is a link.',
       image: 'JPEG, PNG, or WebP. Cropped to {{ratio}} and shrunk below 2 MB automatically.',
       titleLong: 'more than {{visible}} characters may be cut off in phone notifications',
@@ -556,7 +556,8 @@ export const platform: Translated<typeof source> = {
       titleLength: 'Title can be at most {{max}} characters.',
       bodyLength: 'Body can be at most {{max}} characters.',
       bodyLengthStrip: 'A strip body can be at most {{max}} characters. Use a popup for longer text.',
-      linkFormat: 'The link must start with https:// or a deep link scheme like olt://, without spaces.',
+      linkFormat:
+        'The link must start with https:// or a deep link scheme like rendezvous-olt://, without spaces.',
       linkScheme: 'This deep link scheme is not allowed yet. Allowed schemes: {{schemes}}.',
       linkLength: 'Link can be at most {{max}} characters.',
       ctaLength: 'Button label can be at most {{max}} characters.',
@@ -690,7 +691,7 @@ export const platform: Translated<typeof source> = {
     schemes: {
       title: 'App schemes',
       subtitle:
-        'Link prefixes that open the OLT app, e.g. olt://promo/year-end from a banner or popup. The first scheme is the main one: the Open in app button on share links uses it (olt://p/<code>). Fill in the schemes the OLT app registers (usually set once by the IT team). When empty, banner links can only be https:// and share pages have no Open in app button. Web schemes and dangerous schemes (javascript, data, file, intent, content) are always rejected.',
+        'Link prefixes that open the OLT app, e.g. rendezvous-olt://promo/year-end from a banner or popup. The first scheme is the main one: the Open in app button on share links uses it (rendezvous-olt://p/<code>). Fill in the schemes the OLT app registers (usually set once by the IT team). When empty, banner links can only be https:// and share pages have no Open in app button. Web schemes and dangerous schemes (javascript, data, file, intent, content) are always rejected.',
       label: 'Allowed schemes',
       hint: 'Write only the scheme name without ://, separated by commas, at most {{max}}. The first one is the main scheme and must be the scheme the OLT app registers (currently olt). Starts with a letter; only lowercase letters, digits, +, dot, or -, at most 32 characters.',
       none: 'No schemes yet',
