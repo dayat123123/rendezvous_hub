@@ -201,14 +201,17 @@ describe('TopBar', () => {
     ).toEqual([
       'Ringkasan',
       'Kasus',
-      'Kebijakan konten',
       'Tenggat pengaduan',
+      'Kebijakan konten',
       'Dokumen hukum',
+      'Retensi data',
       'Berbagi Trade',
       'Jejak Audit',
       'Bukti',
-      'Retensi data',
     ])
+    expect(within(list).getByText('Pengaduan nasabah')).toBeVisible()
+    expect(within(list).getByText('Aturan')).toBeVisible()
+    expect(within(list).getByText('Catatan & bukti')).toBeVisible()
   })
 
   it('adds Berbagi Trade to the compliance menus only with a trade permission', () => {
@@ -218,7 +221,7 @@ describe('TopBar', () => {
       trade_permissions: ['trade_share.review'],
     })
     const links = navLinks()
-    expect(links.indexOf('Berbagi Trade')).toBe(links.indexOf('Dokumen hukum') + 1)
+    expect(links.indexOf('Berbagi Trade')).toBe(links.indexOf('Retensi data') + 1)
     unmount()
 
     renderWithProviders(<TopBar attention={0} caseAttention={0} />, {
@@ -310,12 +313,12 @@ describe('TopBar', () => {
     expect(navLinks()).toEqual([
       'Ringkasan',
       'Kasus',
-      'Kebijakan konten',
       'Tenggat pengaduan',
+      'Kebijakan konten',
       'Dokumen hukum',
+      'Retensi data',
       'Jejak Audit',
       'Bukti',
-      'Retensi data',
     ])
   })
 

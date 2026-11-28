@@ -12,6 +12,9 @@ import {
   type CommunityPermission,
   type CommunityPost,
   type CommunityTab,
+  type CommunityTabGroup,
+  communityTabGroupOrder,
+  communityTabGroups,
   type CommunityUser,
   type HeldContent,
   type HeldDecision,
@@ -40,9 +43,25 @@ export function communityPageTabs(agent: {
   roles: string[]
   community_permissions: string[]
 }): CommunityTab[] {
-  const tabs = communityTabsFor(agent.community_permissions)
-  const app: CommunityTab[] = canManageFeatures(agent) ? ['features', 'filters'] : []
-  return [...tabs, ...app, ...(isSuperAdmin(agent) ? (['analytics'] as const) : [])]
+  const allowed = new Set<CommunityTab>([
+    ...communityTabsFor(agent.community_permissions),
+    ...(canManageFeatures(agent) ? (['features', 'filters'] as const) : []),
+    ...(isSuperAdmin(agent) ? (['analytics'] as const) : []),
+  ])
+  return communityTabGroupOrder.flatMap((group) =>
+    communityTabGroups[group].filter((tab) => allowed.has(tab)),
+  )
+}
+
+export function groupCommunityTabs(
+  tabs: readonly CommunityTab[],
+): { group: CommunityTabGroup; tabs: CommunityTab[] }[] {
+  return communityTabGroupOrder
+    .map((group) => ({
+      group,
+      tabs: communityTabGroups[group].filter((tab) => tabs.includes(tab)),
+    }))
+    .filter((entry) => entry.tabs.length > 0)
 }
 
 type Actor = { id: string; perms: Perms; fourEyes: boolean }

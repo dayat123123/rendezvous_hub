@@ -161,6 +161,7 @@ export const id = {
   },
   nav: {
     complianceMenu: 'Kepatuhan',
+    complianceGroups: { complaints: 'Pengaduan nasabah', rules: 'Aturan', records: 'Catatan & bukti' },
     nasabah: 'Akun Nasabah',
     tickets: 'Layanan Nasabah',
     dashboard: 'Dashboard',
@@ -899,10 +900,12 @@ export const id = {
       },
       stats: {
         title: 'Statistik',
+        sectionTitle: 'Tautan berbagi',
         subtitle:
           'Hitungan per hari (WIB) dari halaman tautan dan aplikasi. Tidak ada IP atau data pengunjung yang disimpan. Angka terbaru masuk dalam sekitar 30 detik.',
-        rangeLabel: 'Rentang statistik',
-        range: '{{count}} hari',
+        moved:
+          'Statistik tautan berbagi kini ada di Komunitas → Analitik, bersama analitik komunitas lainnya.',
+        openAnalytics: 'Buka Analitik',
         empty: 'Belum ada yang membuka tautan berbagi di rentang ini.',
         views: 'Dilihat',
         previewsCaption: '+{{count}} pratinjau WhatsApp, Telegram, dan bot',
@@ -2198,6 +2201,7 @@ export const id = {
       'Kelola postingan resmi, pengumuman, notifikasi, moderasi stream komunitas, serta fitur dan tab Stream di aplikasi.',
     noAccess: 'Akun ini belum punya izin komunitas. Hubungi Super Admin.',
     tabsLabel: 'Menu komunitas',
+    tabGroups: { content: 'Konten', safety: 'Pengawasan', app: 'Aplikasi', insight: 'Analitik' },
     tabs: {
       stream: 'Postingan resmi',
       notifications: 'Notifikasi',
