@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils'
 import { useSaveShareLinks, useShareLinks } from '../hooks'
 import { draftFromConfig, draftProblems, exampleCode, sameSettings, settingsFromDraft } from '../logic'
 import type { ShareLinksDraft, ShareLinksStatus } from '../types'
+import { ShareStatsCard } from './share-stats-card'
 
 export function ShareLinksBadge({ ready }: { ready: boolean }) {
   const { t } = useTranslation()
@@ -244,6 +245,7 @@ export function ShareLinksSection() {
             </SettingsCard>
             <IdentityCard status={status} />
             <StatusCard status={status} />
+            <ShareStatsCard />
           </div>
         )}
       </QueryContent>

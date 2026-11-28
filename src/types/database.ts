@@ -442,6 +442,10 @@ export type Database = {
         Returns: Json
       }
       community_instruments: { Args: Record<PropertyKey, never>; Returns: Json }
+      community_manipulation_accounts: {
+        Args: { p_days?: number; p_min_alerts?: number }
+        Returns: Json
+      }
       community_manipulation_alerts: {
         Args: { p_limit?: number; p_status?: string; p_stock?: string }
         Returns: Json
@@ -1162,6 +1166,7 @@ export type Database = {
         Args: { p_priority: string; p_ticket_id: string; p_version?: number }
         Returns: Json
       }
+      share_link_stats: { Args: { p_days?: number }; Returns: Json }
       share_links: { Args: Record<PropertyKey, never>; Returns: Json }
       supervisor_overview: { Args: Record<PropertyKey, never>; Returns: Json }
       support_home: { Args: Record<PropertyKey, never>; Returns: Json }

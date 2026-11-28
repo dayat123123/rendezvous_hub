@@ -1,6 +1,15 @@
 import { normalizeIdentity } from '@/features/app-identity/logic'
 
-import type { ShareLinksConfig, ShareLinksDraft, ShareLinksSettings, ShareLinksStatus } from './types'
+import type {
+  ShareLinkStats,
+  ShareLinksConfig,
+  ShareLinksDraft,
+  ShareLinksSettings,
+  ShareLinksStatus,
+  ShareStatsDay,
+  ShareStatsPost,
+  ShareStatsTotals,
+} from './types'
 
 export const exampleCode = 'Ab12Cd34Ef'
 
@@ -47,3 +56,56 @@ export function normalizeStatus(raw: Partial<ShareLinksStatus> | null): ShareLin
     codes_7d: raw?.codes_7d ?? 0,
   }
 }
+
+const count = (value: unknown) =>
+  typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0
+
+export function normalizeStats(raw: Partial<ShareLinkStats> | null): ShareLinkStats {
+  const t: Partial<ShareStatsTotals> = raw?.totals ?? {}
+  return {
+    days: raw?.days ?? 30,
+    from: raw?.from ?? null,
+    to: raw?.to ?? null,
+    totals: {
+      views: count(t.views),
+      previews: count(t.previews),
+      opens: count(t.opens),
+      app_opens: count(t.app_opens),
+      android: count(t.android),
+      ios: count(t.ios),
+      windows: count(t.windows),
+      mac: count(t.mac),
+      posts: count(t.posts),
+    },
+    daily: (raw?.daily ?? []).map((d: Partial<ShareStatsDay>) => ({
+      day: d.day ?? '',
+      views: count(d.views),
+      opens: count(d.opens),
+      app_opens: count(d.app_opens),
+      downloads: count(d.downloads),
+    })),
+    top: (raw?.top ?? []).map((p: Partial<ShareStatsPost>) => ({
+      code: p.code ?? null,
+      post_id: p.post_id ?? '',
+      author_username: p.author_username ?? '',
+      author_name: p.author_name ?? p.author_username ?? '',
+      body: p.body ?? '',
+      available: p.available === true,
+      views: count(p.views),
+      previews: count(p.previews),
+      opens: count(p.opens),
+      app_opens: count(p.app_opens),
+      downloads: count(p.downloads),
+    })),
+  }
+}
+
+export const downloadTotal = (t: ShareStatsTotals) => t.android + t.ios + t.windows + t.mac
+
+export const hasStats = (stats: ShareLinkStats) =>
+  stats.totals.views +
+    stats.totals.previews +
+    stats.totals.opens +
+    stats.totals.app_opens +
+    downloadTotal(stats.totals) >
+  0

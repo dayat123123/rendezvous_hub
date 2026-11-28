@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest'
 import {
   draftFromConfig,
   draftProblems,
+  downloadTotal,
+  hasStats,
+  normalizeStats,
   normalizeStatus,
   sameSettings,
   settingsFromDraft,
@@ -46,5 +49,18 @@ describe('share links logic', () => {
     expect(status.config.android).toEqual([])
     expect(sameSettings(settingsFromDraft(draftFromConfig(status.config)), status.config)).toBe(true)
     expect(normalizeStatus(null).config.app_scheme).toBe('')
+  })
+
+  it('reads statistics defensively and adds up downloads', () => {
+    const empty = normalizeStats(null)
+    expect(empty.totals.views).toBe(0)
+    expect(hasStats(empty)).toBe(false)
+    const stats = normalizeStats({
+      totals: { views: 3, android: 1, ios: -2, windows: 2, mac: 'x' } as never,
+      top: [{ post_id: 'p1', author_username: 'ani' } as never],
+    })
+    expect(downloadTotal(stats.totals)).toBe(3)
+    expect(stats.top[0]).toMatchObject({ author_name: 'ani', available: false, views: 0, code: null })
+    expect(hasStats(stats)).toBe(true)
   })
 })
